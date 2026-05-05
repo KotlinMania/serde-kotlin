@@ -45,21 +45,9 @@ kotlin {
             xcf.add(this)
         }
     }
-    macosX64 {
-        binaries.framework {
-            baseName = "Serde"
-            xcf.add(this)
-        }
-    }
     linuxX64()
     mingwX64()
     iosArm64 {
-        binaries.framework {
-            baseName = "Serde"
-            xcf.add(this)
-        }
-    }
-    iosX64 {
         binaries.framework {
             baseName = "Serde"
             xcf.add(this)
@@ -126,7 +114,6 @@ rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
     resolution("qs", "6.15.1")
     resolution("socket.io-parser", "4.2.6")
 }
-
 
 mavenPublishing {
     publishToMavenCentral()
