@@ -1,0 +1,1374 @@
+{
+  "source_root": "tmp/serde",
+  "target_root": "src/commonMain/kotlin/io/github/kotlinmania/serde",
+  "source_lang": "rust",
+  "target_lang": "kotlin",
+  "agents_md": "AGENTS.md",
+  "tasks": [
+    {
+      "source_path": "serde_derive/src/internals/attr.rs",
+      "source_qualified": "internals.attr",
+      "target_path": "serde_derive/src/internals/Attr.kt",
+      "dependent_count": 9,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/enum.rs",
+      "source_qualified": "transparent.enum",
+      "target_path": "test_suite/tests/ui/transparent/Enum.kt",
+      "dependent_count": 3,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/struct_.rs",
+      "source_qualified": "de.struct_",
+      "target_path": "serde_derive/src/de/Struct.kt",
+      "dependent_count": 3,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/enum_untagged.rs",
+      "source_qualified": "de.enum_untagged",
+      "target_path": "serde_derive/src/de/EnumUntagged.kt",
+      "dependent_count": 3,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/private/size_hint.rs",
+      "source_qualified": "private.size_hint",
+      "target_path": "serde_core/src/private/SizeHint.kt",
+      "dependent_count": 3,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/ser/fmt.rs",
+      "source_qualified": "ser.fmt",
+      "target_path": "serde_core/src/ser/Fmt.kt",
+      "dependent_count": 3,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/bound.rs",
+      "source_qualified": "serde_derive.bound",
+      "target_path": "serde_derive/src/Bound.kt",
+      "dependent_count": 2,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unknown-attribute/field.rs",
+      "source_qualified": "unknown-attribute.field",
+      "target_path": "test_suite/tests/ui/unknown-attribute/Field.kt",
+      "dependent_count": 2,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/ser.rs",
+      "source_qualified": "serde_derive.ser",
+      "target_path": "serde_derive/src/Ser.kt",
+      "dependent_count": 2,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/name.rs",
+      "source_qualified": "internals.name",
+      "target_path": "serde_derive/src/internals/Name.kt",
+      "dependent_count": 2,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/tuple.rs",
+      "source_qualified": "de.tuple",
+      "target_path": "serde_derive/src/de/Tuple.kt",
+      "dependent_count": 2,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/identifier.rs",
+      "source_qualified": "de.identifier",
+      "target_path": "serde_derive/src/de/Identifier.kt",
+      "dependent_count": 2,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unknown-attribute/variant.rs",
+      "source_qualified": "unknown-attribute.variant",
+      "target_path": "test_suite/tests/ui/unknown-attribute/Variant.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unknown-attribute/container.rs",
+      "source_qualified": "unknown-attribute.container",
+      "target_path": "test_suite/tests/ui/unknown-attribute/Container.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/type-attribute/try_from.rs",
+      "source_qualified": "type-attribute.try_from",
+      "target_path": "test_suite/tests/ui/type-attribute/TryFrom.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/respan.rs",
+      "source_qualified": "internals.respan",
+      "target_path": "serde_derive/src/internals/Respan.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/de/ignored_any.rs",
+      "source_qualified": "de.ignored_any",
+      "target_path": "serde_core/src/de/IgnoredAny.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/ctxt.rs",
+      "source_qualified": "internals.ctxt",
+      "target_path": "serde_derive/src/internals/Ctxt.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/fragment.rs",
+      "source_qualified": "serde_derive.fragment",
+      "target_path": "serde_derive/src/Fragment.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/enum_internally.rs",
+      "source_qualified": "de.enum_internally",
+      "target_path": "serde_derive/src/de/EnumInternally.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/enum_externally.rs",
+      "source_qualified": "de.enum_externally",
+      "target_path": "serde_derive/src/de/EnumExternally.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/enum_adjacently.rs",
+      "source_qualified": "de.enum_adjacently",
+      "target_path": "serde_derive/src/de/EnumAdjacently.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/ser/impossible.rs",
+      "source_qualified": "ser.impossible",
+      "target_path": "serde_core/src/ser/Impossible.kt",
+      "dependent_count": 1,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/enum.rs",
+      "source_qualified": "default-attribute.enum",
+      "target_path": "test_suite/tests/ui/default-attribute/Enum.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/build.rs",
+      "source_qualified": "serde_derive.build",
+      "target_path": "serde_derive/Build.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de.rs",
+      "source_qualified": "serde_derive.de",
+      "target_path": "serde_derive/src/de/De.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/enum_.rs",
+      "source_qualified": "de.enum_",
+      "target_path": "serde_derive/src/de/Enum.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/ser/impls.rs",
+      "source_qualified": "ser.impls",
+      "target_path": "serde_core/src/ser/Impls.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/private/string.rs",
+      "source_qualified": "private.string",
+      "target_path": "serde_core/src/private/String.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/private/seed.rs",
+      "source_qualified": "private.seed",
+      "target_path": "serde_core/src/private/Seed.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/private/doc.rs",
+      "source_qualified": "private.doc",
+      "target_path": "serde_core/src/private/Doc.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/macros.rs",
+      "source_qualified": "serde_core.macros",
+      "target_path": "serde_core/src/Macros.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/de/unit.rs",
+      "source_qualified": "de.unit",
+      "target_path": "serde_derive/src/de/Unit.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/deprecated.rs",
+      "source_qualified": "serde_derive.deprecated",
+      "target_path": "serde_derive/src/Deprecated.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/dummy.rs",
+      "source_qualified": "serde_derive.dummy",
+      "target_path": "serde_derive/src/Dummy.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/format.rs",
+      "source_qualified": "serde_core.format",
+      "target_path": "serde_core/src/Format.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/ast.rs",
+      "source_qualified": "internals.ast",
+      "target_path": "serde_derive/src/internals/Ast.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/de/value.rs",
+      "source_qualified": "de.value",
+      "target_path": "serde_core/src/de/Value.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/case.rs",
+      "source_qualified": "internals.case",
+      "target_path": "serde_derive/src/internals/Case.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/check.rs",
+      "source_qualified": "internals.check",
+      "target_path": "serde_derive/src/internals/Check.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/de/impls.rs",
+      "source_qualified": "de.impls",
+      "target_path": "serde_core/src/de/Impls.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/receiver.rs",
+      "source_qualified": "internals.receiver",
+      "target_path": "serde_derive/src/internals/Receiver.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/crate_root.rs",
+      "source_qualified": "serde_core.crate_root",
+      "target_path": "serde_core/src/CrateRoot.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/internals/symbol.rs",
+      "source_qualified": "internals.symbol",
+      "target_path": "serde_derive/src/internals/Symbol.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/pretend.rs",
+      "source_qualified": "serde_derive.pretend",
+      "target_path": "serde_derive/src/Pretend.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/build.rs",
+      "source_qualified": "serde_core.build",
+      "target_path": "serde_core/Build.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive/src/this.rs",
+      "source_qualified": "serde_derive.this",
+      "target_path": "serde_derive/src/This.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_derive_internals/build.rs",
+      "source_qualified": "serde_derive_internals.build",
+      "target_path": "serde_derive_internals/Build.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/no_std/src/main.rs",
+      "source_qualified": "no_std.main",
+      "target_path": "test_suite/no_std/src/Main.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/compiletest.rs",
+      "source_qualified": "tests.compiletest",
+      "target_path": "test_suite/tests/Compiletest.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression.rs",
+      "source_qualified": "tests.regression",
+      "target_path": "test_suite/tests/regression/Regression.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue1904.rs",
+      "source_qualified": "regression.issue1904",
+      "target_path": "test_suite/tests/regression/Issue1904.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2371.rs",
+      "source_qualified": "regression.issue2371",
+      "target_path": "test_suite/tests/regression/Issue2371.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2409.rs",
+      "source_qualified": "regression.issue2409",
+      "target_path": "test_suite/tests/regression/Issue2409.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2415.rs",
+      "source_qualified": "regression.issue2415",
+      "target_path": "test_suite/tests/regression/Issue2415.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2565.rs",
+      "source_qualified": "regression.issue2565",
+      "target_path": "test_suite/tests/regression/Issue2565.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2792.rs",
+      "source_qualified": "regression.issue2792",
+      "target_path": "test_suite/tests/regression/Issue2792.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2844.rs",
+      "source_qualified": "regression.issue2844",
+      "target_path": "test_suite/tests/regression/Issue2844.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/regression/issue2846.rs",
+      "source_qualified": "regression.issue2846",
+      "target_path": "test_suite/tests/regression/Issue2846.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_annotations.rs",
+      "source_qualified": "tests.test_annotations",
+      "target_path": "test_suite/tests/TestAnnotations.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_borrow.rs",
+      "source_qualified": "tests.test_borrow",
+      "target_path": "test_suite/tests/TestBorrow.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_de.rs",
+      "source_qualified": "tests.test_de",
+      "target_path": "test_suite/tests/TestDe.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_de_error.rs",
+      "source_qualified": "tests.test_de_error",
+      "target_path": "test_suite/tests/TestDeError.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_deprecated.rs",
+      "source_qualified": "tests.test_deprecated",
+      "target_path": "test_suite/tests/TestDeprecated.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_enum_adjacently_tagged.rs",
+      "source_qualified": "tests.test_enum_adjacently_tagged",
+      "target_path": "test_suite/tests/TestEnumAdjacentlyTagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_enum_internally_tagged.rs",
+      "source_qualified": "tests.test_enum_internally_tagged",
+      "target_path": "test_suite/tests/TestEnumInternallyTagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_enum_untagged.rs",
+      "source_qualified": "tests.test_enum_untagged",
+      "target_path": "test_suite/tests/TestEnumUntagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_gen.rs",
+      "source_qualified": "tests.test_gen",
+      "target_path": "test_suite/tests/TestGen.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_identifier.rs",
+      "source_qualified": "tests.test_identifier",
+      "target_path": "test_suite/tests/TestIdentifier.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_ignored_any.rs",
+      "source_qualified": "tests.test_ignored_any",
+      "target_path": "test_suite/tests/TestIgnoredAny.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_macros.rs",
+      "source_qualified": "tests.test_macros",
+      "target_path": "test_suite/tests/TestMacros.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_remote.rs",
+      "source_qualified": "tests.test_remote",
+      "target_path": "test_suite/tests/TestRemote.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_roundtrip.rs",
+      "source_qualified": "tests.test_roundtrip",
+      "target_path": "test_suite/tests/TestRoundtrip.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_self.rs",
+      "source_qualified": "tests.test_self",
+      "target_path": "test_suite/tests/TestSelf.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_ser.rs",
+      "source_qualified": "tests.test_ser",
+      "target_path": "test_suite/tests/TestSer.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_serde_path.rs",
+      "source_qualified": "tests.test_serde_path",
+      "target_path": "test_suite/tests/TestSerdePath.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_unstable.rs",
+      "source_qualified": "tests.test_unstable",
+      "target_path": "test_suite/tests/TestUnstable.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/test_value.rs",
+      "source_qualified": "tests.test_value",
+      "target_path": "test_suite/tests/TestValue.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/bad_lifetimes.rs",
+      "source_qualified": "borrow.bad_lifetimes",
+      "target_path": "test_suite/tests/ui/borrow/BadLifetimes.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/duplicate_lifetime.rs",
+      "source_qualified": "borrow.duplicate_lifetime",
+      "target_path": "test_suite/tests/ui/borrow/DuplicateLifetime.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/duplicate_variant.rs",
+      "source_qualified": "borrow.duplicate_variant",
+      "target_path": "test_suite/tests/ui/borrow/DuplicateVariant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/empty_lifetimes.rs",
+      "source_qualified": "borrow.empty_lifetimes",
+      "target_path": "test_suite/tests/ui/borrow/EmptyLifetimes.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/no_lifetimes.rs",
+      "source_qualified": "borrow.no_lifetimes",
+      "target_path": "test_suite/tests/ui/borrow/NoLifetimes.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/struct_variant.rs",
+      "source_qualified": "borrow.struct_variant",
+      "target_path": "test_suite/tests/ui/borrow/StructVariant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/borrow/wrong_lifetime.rs",
+      "source_qualified": "borrow.wrong_lifetime",
+      "target_path": "test_suite/tests/ui/borrow/WrongLifetime.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/adjacent-tag.rs",
+      "source_qualified": "conflict.adjacent-tag",
+      "target_path": "test_suite/tests/ui/conflict/Adjacent-tag.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/alias.rs",
+      "source_qualified": "conflict.alias",
+      "target_path": "test_suite/tests/ui/conflict/Alias.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/alias-enum.rs",
+      "source_qualified": "conflict.alias-enum",
+      "target_path": "test_suite/tests/ui/conflict/Alias-enum.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/flatten-newtype-struct.rs",
+      "source_qualified": "conflict.flatten-newtype-struct",
+      "target_path": "test_suite/tests/ui/conflict/Flatten-newtype-struct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/flatten-tuple-struct.rs",
+      "source_qualified": "conflict.flatten-tuple-struct",
+      "target_path": "test_suite/tests/ui/conflict/Flatten-tuple-struct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/from-try-from.rs",
+      "source_qualified": "conflict.from-try-from",
+      "target_path": "test_suite/tests/ui/conflict/From-try-from.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/internal-tag.rs",
+      "source_qualified": "conflict.internal-tag",
+      "target_path": "test_suite/tests/ui/conflict/Internal-tag.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/conflict/internal-tag-alias.rs",
+      "source_qualified": "conflict.internal-tag-alias",
+      "target_path": "test_suite/tests/ui/conflict/Internal-tag-alias.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde/build.rs",
+      "source_qualified": "serde.build",
+      "target_path": "serde/Build.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/enum_path.rs",
+      "source_qualified": "default-attribute.enum_path",
+      "target_path": "test_suite/tests/ui/default-attribute/EnumPath.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_enum_adjacently_tagged.rs",
+      "source_qualified": "default-attribute.incorrect_type_enum_adjacently_tagged",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeEnumAdjacentlyTagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_enum_externally_tagged.rs",
+      "source_qualified": "default-attribute.incorrect_type_enum_externally_tagged",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeEnumExternallyTagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_enum_internally_tagged.rs",
+      "source_qualified": "default-attribute.incorrect_type_enum_internally_tagged",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeEnumInternallyTagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_enum_untagged.rs",
+      "source_qualified": "default-attribute.incorrect_type_enum_untagged",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeEnumUntagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_newtype.rs",
+      "source_qualified": "default-attribute.incorrect_type_newtype",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeNewtype.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_struct.rs",
+      "source_qualified": "default-attribute.incorrect_type_struct",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeStruct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/incorrect_type_tuple.rs",
+      "source_qualified": "default-attribute.incorrect_type_tuple",
+      "target_path": "test_suite/tests/ui/default-attribute/IncorrectTypeTuple.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/tuple_struct.rs",
+      "source_qualified": "default-attribute.tuple_struct",
+      "target_path": "test_suite/tests/ui/default-attribute/TupleStruct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/tuple_struct_path.rs",
+      "source_qualified": "default-attribute.tuple_struct_path",
+      "target_path": "test_suite/tests/ui/default-attribute/TupleStructPath.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/union.rs",
+      "source_qualified": "default-attribute.union",
+      "target_path": "test_suite/tests/ui/default-attribute/Union.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde_core/src/std_error.rs",
+      "source_qualified": "serde_core.std_error",
+      "target_path": "serde_core/src/StdError.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/unit.rs",
+      "source_qualified": "default-attribute.unit",
+      "target_path": "test_suite/tests/ui/default-attribute/Unit.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/unit_path.rs",
+      "source_qualified": "default-attribute.unit_path",
+      "target_path": "test_suite/tests/ui/default-attribute/UnitPath.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/deprecated/deprecated_de_with.rs",
+      "source_qualified": "deprecated.deprecated_de_with",
+      "target_path": "test_suite/tests/ui/deprecated/DeprecatedDeWith.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/deprecated/deprecated_ser_with.rs",
+      "source_qualified": "deprecated.deprecated_ser_with",
+      "target_path": "test_suite/tests/ui/deprecated/DeprecatedSerWith.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/duplicate-attribute/rename-and-ser.rs",
+      "source_qualified": "duplicate-attribute.rename-and-ser",
+      "target_path": "test_suite/tests/ui/duplicate-attribute/Rename-and-ser.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/duplicate-attribute/rename-ser-rename.rs",
+      "source_qualified": "duplicate-attribute.rename-ser-rename",
+      "target_path": "test_suite/tests/ui/duplicate-attribute/Rename-ser-rename.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/duplicate-attribute/rename-ser-rename-ser.rs",
+      "source_qualified": "duplicate-attribute.rename-ser-rename-ser",
+      "target_path": "test_suite/tests/ui/duplicate-attribute/Rename-ser-rename-ser.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/duplicate-attribute/rename-ser-ser.rs",
+      "source_qualified": "duplicate-attribute.rename-ser-ser",
+      "target_path": "test_suite/tests/ui/duplicate-attribute/Rename-ser-ser.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/duplicate-attribute/two-rename-ser.rs",
+      "source_qualified": "duplicate-attribute.two-rename-ser",
+      "target_path": "test_suite/tests/ui/duplicate-attribute/Two-rename-ser.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/duplicate-attribute/with-and-serialize-with.rs",
+      "source_qualified": "duplicate-attribute.with-and-serialize-with",
+      "target_path": "test_suite/tests/ui/duplicate-attribute/With-and-serialize-with.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/content-no-tag.rs",
+      "source_qualified": "enum-representation.content-no-tag",
+      "target_path": "test_suite/tests/ui/enum-representation/Content-no-tag.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/internal-tuple-variant.rs",
+      "source_qualified": "enum-representation.internal-tuple-variant",
+      "target_path": "test_suite/tests/ui/enum-representation/Internal-tuple-variant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/partially_tagged_wrong_order.rs",
+      "source_qualified": "enum-representation.partially_tagged_wrong_order",
+      "target_path": "test_suite/tests/ui/enum-representation/PartiallyTaggedWrongOrder.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/untagged-and-adjacent.rs",
+      "source_qualified": "enum-representation.untagged-and-adjacent",
+      "target_path": "test_suite/tests/ui/enum-representation/Untagged-and-adjacent.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/untagged-and-content.rs",
+      "source_qualified": "enum-representation.untagged-and-content",
+      "target_path": "test_suite/tests/ui/enum-representation/Untagged-and-content.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/untagged-and-internal.rs",
+      "source_qualified": "enum-representation.untagged-and-internal",
+      "target_path": "test_suite/tests/ui/enum-representation/Untagged-and-internal.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/enum-representation/untagged-struct.rs",
+      "source_qualified": "enum-representation.untagged-struct",
+      "target_path": "test_suite/tests/ui/enum-representation/Untagged-struct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/expected-string/boolean.rs",
+      "source_qualified": "expected-string.boolean",
+      "target_path": "test_suite/tests/ui/expected-string/Boolean.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/expected-string/byte_character.rs",
+      "source_qualified": "expected-string.byte_character",
+      "target_path": "test_suite/tests/ui/expected-string/ByteCharacter.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/expected-string/byte_string.rs",
+      "source_qualified": "expected-string.byte_string",
+      "target_path": "test_suite/tests/ui/expected-string/ByteString.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/expected-string/character.rs",
+      "source_qualified": "expected-string.character",
+      "target_path": "test_suite/tests/ui/expected-string/Character.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/expected-string/float.rs",
+      "source_qualified": "expected-string.float",
+      "target_path": "test_suite/tests/ui/expected-string/Float.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/expected-string/integer.rs",
+      "source_qualified": "expected-string.integer",
+      "target_path": "test_suite/tests/ui/expected-string/Integer.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/both.rs",
+      "source_qualified": "identifier.both",
+      "target_path": "test_suite/tests/ui/identifier/Both.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/field_struct.rs",
+      "source_qualified": "identifier.field_struct",
+      "target_path": "test_suite/tests/ui/identifier/FieldStruct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/field_tuple.rs",
+      "source_qualified": "identifier.field_tuple",
+      "target_path": "test_suite/tests/ui/identifier/FieldTuple.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/newtype_not_last.rs",
+      "source_qualified": "identifier.newtype_not_last",
+      "target_path": "test_suite/tests/ui/identifier/NewtypeNotLast.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/not_unit.rs",
+      "source_qualified": "identifier.not_unit",
+      "target_path": "test_suite/tests/ui/identifier/NotUnit.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/other_not_last.rs",
+      "source_qualified": "identifier.other_not_last",
+      "target_path": "test_suite/tests/ui/identifier/OtherNotLast.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/other_untagged.rs",
+      "source_qualified": "identifier.other_untagged",
+      "target_path": "test_suite/tests/ui/identifier/OtherUntagged.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/other_variant.rs",
+      "source_qualified": "identifier.other_variant",
+      "target_path": "test_suite/tests/ui/identifier/OtherVariant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/variant_struct.rs",
+      "source_qualified": "identifier.variant_struct",
+      "target_path": "test_suite/tests/ui/identifier/VariantStruct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/identifier/variant_tuple.rs",
+      "source_qualified": "identifier.variant_tuple",
+      "target_path": "test_suite/tests/ui/identifier/VariantTuple.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/malformed/bound.rs",
+      "source_qualified": "malformed.bound",
+      "target_path": "test_suite/tests/ui/malformed/Bound.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/malformed/cut_off.rs",
+      "source_qualified": "malformed.cut_off",
+      "target_path": "test_suite/tests/ui/malformed/CutOff.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/malformed/not_list.rs",
+      "source_qualified": "malformed.not_list",
+      "target_path": "test_suite/tests/ui/malformed/NotList.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/malformed/rename.rs",
+      "source_qualified": "malformed.rename",
+      "target_path": "test_suite/tests/ui/malformed/Rename.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/malformed/str_suffix.rs",
+      "source_qualified": "malformed.str_suffix",
+      "target_path": "test_suite/tests/ui/malformed/StrSuffix.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/malformed/trailing_expr.rs",
+      "source_qualified": "malformed.trailing_expr",
+      "target_path": "test_suite/tests/ui/malformed/TrailingExpr.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/precondition/deserialize_de_lifetime.rs",
+      "source_qualified": "precondition.deserialize_de_lifetime",
+      "target_path": "test_suite/tests/ui/precondition/DeserializeDeLifetime.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/precondition/deserialize_dst.rs",
+      "source_qualified": "precondition.deserialize_dst",
+      "target_path": "test_suite/tests/ui/precondition/DeserializeDst.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/precondition/serialize_field_identifier.rs",
+      "source_qualified": "precondition.serialize_field_identifier",
+      "target_path": "test_suite/tests/ui/precondition/SerializeFieldIdentifier.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/precondition/serialize_variant_identifier.rs",
+      "source_qualified": "precondition.serialize_variant_identifier",
+      "target_path": "test_suite/tests/ui/precondition/SerializeVariantIdentifier.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/bad_getter.rs",
+      "source_qualified": "remote.bad_getter",
+      "target_path": "test_suite/tests/ui/remote/BadGetter.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/bad_remote.rs",
+      "source_qualified": "remote.bad_remote",
+      "target_path": "test_suite/tests/ui/remote/BadRemote.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/double_generic.rs",
+      "source_qualified": "remote.double_generic",
+      "target_path": "test_suite/tests/ui/remote/DoubleGeneric.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/enum_getter.rs",
+      "source_qualified": "remote.enum_getter",
+      "target_path": "test_suite/tests/ui/remote/EnumGetter.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/missing_field.rs",
+      "source_qualified": "remote.missing_field",
+      "target_path": "test_suite/tests/ui/remote/MissingField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/nonremote_getter.rs",
+      "source_qualified": "remote.nonremote_getter",
+      "target_path": "test_suite/tests/ui/remote/NonremoteGetter.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/unknown_field.rs",
+      "source_qualified": "remote.unknown_field",
+      "target_path": "test_suite/tests/ui/remote/UnknownField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/wrong_de.rs",
+      "source_qualified": "remote.wrong_de",
+      "target_path": "test_suite/tests/ui/remote/WrongDe.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/wrong_getter.rs",
+      "source_qualified": "remote.wrong_getter",
+      "target_path": "test_suite/tests/ui/remote/WrongGetter.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/remote/wrong_ser.rs",
+      "source_qualified": "remote.wrong_ser",
+      "target_path": "test_suite/tests/ui/remote/WrongSer.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/rename/container_unknown_rename_rule.rs",
+      "source_qualified": "rename.container_unknown_rename_rule",
+      "target_path": "test_suite/tests/ui/rename/ContainerUnknownRenameRule.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/rename/variant_unknown_rename_rule.rs",
+      "source_qualified": "rename.variant_unknown_rename_rule",
+      "target_path": "test_suite/tests/ui/rename/VariantUnknownRenameRule.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/struct-representation/internally-tagged-tuple.rs",
+      "source_qualified": "struct-representation.internally-tagged-tuple",
+      "target_path": "test_suite/tests/ui/struct-representation/Internally-tagged-tuple.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/struct-representation/internally-tagged-unit.rs",
+      "source_qualified": "struct-representation.internally-tagged-unit",
+      "target_path": "test_suite/tests/ui/struct-representation/Internally-tagged-unit.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/at_most_one.rs",
+      "source_qualified": "transparent.at_most_one",
+      "target_path": "test_suite/tests/ui/transparent/AtMostOne.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/de_at_least_one.rs",
+      "source_qualified": "transparent.de_at_least_one",
+      "target_path": "test_suite/tests/ui/transparent/DeAtLeastOne.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde/src/private/ser.rs",
+      "source_qualified": "private.ser",
+      "target_path": "serde/src/private/Ser.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/ser_at_least_one.rs",
+      "source_qualified": "transparent.ser_at_least_one",
+      "target_path": "test_suite/tests/ui/transparent/SerAtLeastOne.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/unit_struct.rs",
+      "source_qualified": "transparent.unit_struct",
+      "target_path": "test_suite/tests/ui/transparent/UnitStruct.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/with_from.rs",
+      "source_qualified": "transparent.with_from",
+      "target_path": "test_suite/tests/ui/transparent/WithFrom.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/with_into.rs",
+      "source_qualified": "transparent.with_into",
+      "target_path": "test_suite/tests/ui/transparent/WithInto.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/transparent/with_try_from.rs",
+      "source_qualified": "transparent.with_try_from",
+      "target_path": "test_suite/tests/ui/transparent/WithTryFrom.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/type-attribute/from.rs",
+      "source_qualified": "type-attribute.from",
+      "target_path": "test_suite/tests/ui/type-attribute/From.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/type-attribute/into.rs",
+      "source_qualified": "type-attribute.into",
+      "target_path": "test_suite/tests/ui/type-attribute/Into.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unexpected-literal/container.rs",
+      "source_qualified": "unexpected-literal.container",
+      "target_path": "test_suite/tests/ui/unexpected-literal/Container.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unexpected-literal/field.rs",
+      "source_qualified": "unexpected-literal.field",
+      "target_path": "test_suite/tests/ui/unexpected-literal/Field.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unexpected-literal/variant.rs",
+      "source_qualified": "unexpected-literal.variant",
+      "target_path": "test_suite/tests/ui/unexpected-literal/Variant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unimplemented/required_by_dependency.rs",
+      "source_qualified": "unimplemented.required_by_dependency",
+      "target_path": "test_suite/tests/ui/unimplemented/RequiredByDependency.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unimplemented/required_locally.rs",
+      "source_qualified": "unimplemented.required_locally",
+      "target_path": "test_suite/tests/ui/unimplemented/RequiredLocally.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde/src/private/de.rs",
+      "source_qualified": "private.de",
+      "target_path": "serde/src/private/De.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "serde/src/integer128.rs",
+      "source_qualified": "serde.integer128",
+      "target_path": "serde/src/Integer128.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unsupported/union_de.rs",
+      "source_qualified": "unsupported.union_de",
+      "target_path": "test_suite/tests/ui/unsupported/UnionDe.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/unsupported/union_ser.rs",
+      "source_qualified": "unsupported.union_ser",
+      "target_path": "test_suite/tests/ui/unsupported/UnionSer.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_de_newtype_field.rs",
+      "source_qualified": "with-variant.skip_de_newtype_field",
+      "target_path": "test_suite/tests/ui/with-variant/SkipDeNewtypeField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_de_struct_field.rs",
+      "source_qualified": "with-variant.skip_de_struct_field",
+      "target_path": "test_suite/tests/ui/with-variant/SkipDeStructField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_de_tuple_field.rs",
+      "source_qualified": "with-variant.skip_de_tuple_field",
+      "target_path": "test_suite/tests/ui/with-variant/SkipDeTupleField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_de_whole_variant.rs",
+      "source_qualified": "with-variant.skip_de_whole_variant",
+      "target_path": "test_suite/tests/ui/with-variant/SkipDeWholeVariant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_newtype_field.rs",
+      "source_qualified": "with-variant.skip_ser_newtype_field",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerNewtypeField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_newtype_field_if.rs",
+      "source_qualified": "with-variant.skip_ser_newtype_field_if",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerNewtypeFieldIf.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_struct_field.rs",
+      "source_qualified": "with-variant.skip_ser_struct_field",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerStructField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_struct_field_if.rs",
+      "source_qualified": "with-variant.skip_ser_struct_field_if",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerStructFieldIf.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_tuple_field.rs",
+      "source_qualified": "with-variant.skip_ser_tuple_field",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerTupleField.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_tuple_field_if.rs",
+      "source_qualified": "with-variant.skip_ser_tuple_field_if",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerTupleFieldIf.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with-variant/skip_ser_whole_variant.rs",
+      "source_qualified": "with-variant.skip_ser_whole_variant",
+      "target_path": "test_suite/tests/ui/with-variant/SkipSerWholeVariant.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/with/incorrect_type.rs",
+      "source_qualified": "with.incorrect_type",
+      "target_path": "test_suite/tests/ui/with/IncorrectType.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    },
+    {
+      "source_path": "test_suite/tests/ui/default-attribute/union_path.rs",
+      "source_qualified": "default-attribute.union_path",
+      "target_path": "test_suite/tests/ui/default-attribute/UnionPath.kt",
+      "dependent_count": 0,
+      "status": "pending"
+    }
+  ]
+}
