@@ -1,14 +1,6 @@
 // port-lint: source serde_core/src/std_error.rs
 package io.github.kotlinmania.serde.core
 
-/*
- * Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai>
- * and The Solace Project.
- *
- * Licensed under either Apache-2.0 or MIT at your option; see LICENSE-APACHE
- * and LICENSE-MIT.
- */
-
 /**
  * Either a re-export of `std::error::Error` or a new identical trait, depending on whether Serde's
  * "std" feature is enabled.

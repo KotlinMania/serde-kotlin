@@ -1,14 +1,6 @@
 // port-lint: source serde_core/src/format.rs
 package io.github.kotlinmania.serde.core
 
-/*
- * Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai>
- * and The Solace Project.
- *
- * Licensed under either Apache-2.0 or MIT at your option; see LICENSE-APACHE
- * and LICENSE-MIT.
- */
-
 internal class Buf private constructor(
     private val bytes: ByteArray,
 ) {

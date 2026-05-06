@@ -1,14 +1,6 @@
 // port-lint: source serde_core/src/private/size_hint.rs
 package io.github.kotlinmania.serde.core.`private`
 
-/*
- * Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai>
- * and The Solace Project.
- *
- * Licensed under either Apache-2.0 or MIT at your option; see LICENSE-APACHE
- * and LICENSE-MIT.
- */
-
 public interface SizeHintedIterator<out T> : Iterator<T> {
     public fun sizeHint(): Pair<Int, Int?>
 }

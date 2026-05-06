@@ -1,14 +1,6 @@
 // port-lint: source serde_core/src/ser/impossible.rs
 package io.github.kotlinmania.serde.core.ser
 
-/*
- * Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai>
- * and The Solace Project.
- *
- * Licensed under either Apache-2.0 or MIT at your option; see LICENSE-APACHE
- * and LICENSE-MIT.
- */
-
 /**
  * This module contains `Impossible` serializer and its implementations.
  */
