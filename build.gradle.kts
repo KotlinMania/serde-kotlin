@@ -1,3 +1,4 @@
+import com.quittle.setupandroidsdk.SetupAndroidSdkExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
@@ -8,6 +9,7 @@ import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec
 
 plugins {
+    id("com.quittle.setup-android-sdk") version "3.1.0"
     kotlin("multiplatform") version "2.3.21"
     kotlin("plugin.serialization") version "2.3.21"
     id("com.android.kotlin.multiplatform.library") version "9.2.0"
@@ -17,16 +19,14 @@ plugins {
 group = "io.github.kotlinmania"
 version = "0.1.0-SNAPSHOT"
 
-val androidSdkDir: String? =
-    providers.environmentVariable("ANDROID_SDK_ROOT").orNull
-        ?: providers.environmentVariable("ANDROID_HOME").orNull
-
-if (androidSdkDir != null && file(androidSdkDir).exists()) {
-    val localProperties = rootProject.file("local.properties")
-    if (!localProperties.exists()) {
-        val sdkDirPropertyValue = file(androidSdkDir).absolutePath.replace("\\", "/")
-        localProperties.writeText("sdk.dir=$sdkDirPropertyValue")
-    }
+extensions.configure<SetupAndroidSdkExtension>("setupAndroidSdk") {
+    sdkToolsVersion("14742923_latest")
+    licensesDirectory(rootProject.file("gradle/android-sdk/licenses"))
+    packages(
+        "platform-tools",
+        "platforms;android-34",
+        "build-tools;36.0.0",
+    )
 }
 
 kotlin {
