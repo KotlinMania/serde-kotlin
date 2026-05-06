@@ -1,127 +1,178 @@
-# Serde Kotlin &emsp; [![Build status]][actions] [![Maven Central]][maven]
+# serde-kotlin in Kotlin
 
-[Build status]: https://img.shields.io/github/actions/workflow/status/KotlinMania/serde-kotlin/ci.yml?branch=main
-[actions]: https://github.com/KotlinMania/serde-kotlin/actions
-[Maven Central]: https://img.shields.io/maven-central/v/io.github.kotlinmania/serde-kotlin
-[maven]: https://central.sonatype.com/artifact/io.github.kotlinmania/serde-kotlin
+[![GitHub link](https://img.shields.io/badge/GitHub-KotlinMania%2Fserde--kotlin-blue.svg)](https://github.com/KotlinMania/serde-kotlin)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.kotlinmania/serde-kotlin)](https://central.sonatype.com/artifact/io.github.kotlinmania/serde-kotlin)
+[![Build status](https://img.shields.io/github/actions/workflow/status/KotlinMania/serde-kotlin/ci.yml?branch=main)](https://github.com/KotlinMania/serde-kotlin/actions)
 
-**Serde Kotlin is a Kotlin Multiplatform port of Serde, a framework for *ser*ializing and *de*serializing data structures efficiently and generically.**
+This is a Kotlin Multiplatform line-by-line transliteration port of [`serde-rs/serde`](https://github.com/serde-rs/serde).
 
-This repository ports the Rust [`serde`](https://crates.io/crates/serde) crate into Kotlin Multiplatform. The Rust `serde_core` crate is kept together with `serde-kotlin` in this workspace, while preserving the Rust-derived API and namespace structure under `io.github.kotlinmania.serde.core`.
+**Original Project:** This port is based on [`serde-rs/serde`](https://github.com/serde-rs/serde). All design credit and project intent belong to the upstream authors; this repository is a faithful port to Kotlin Multiplatform with no behavioural changes intended.
 
-Kotlin port by Sydney Renee <sydney@solace.ofharmony.ai> ([@sydneyrenee](https://github.com/sydneyrenee)) for The Solace Project.
+### Porting status
+
+This is an **in-progress port**. The goal is feature parity with the upstream Rust crate while providing a native Kotlin Multiplatform API. Every Kotlin file carries a `// port-lint: source <path>` header naming its upstream Rust counterpart so the AST-distance tool can track provenance.
+
+---
+
+## Upstream README — `serde-rs/serde`
+
+> The text below is reproduced and lightly edited from [`https://github.com/serde-rs/serde`](https://github.com/serde-rs/serde). It is the upstream project's own description and remains under the upstream authors' authorship; links have been rewritten to absolute upstream URLs so they continue to resolve from this repository.
+
+## Serde &emsp; [![Build Status]][actions] [![Latest Version]][crates.io] [![serde msrv]][Rust 1.56] [![serde_derive msrv]][Rust 1.71]
+
+[Build Status]: https://img.shields.io/github/actions/workflow/status/serde-rs/serde/ci.yml?branch=master
+[actions]: https://github.com/serde-rs/serde/actions?query=branch%3Amaster
+[Latest Version]: https://img.shields.io/crates/v/serde.svg
+[crates.io]: https://crates.io/crates/serde
+[serde msrv]: https://img.shields.io/crates/msrv/serde.svg?label=serde%20msrv&color=lightgray
+[serde_derive msrv]: https://img.shields.io/crates/msrv/serde_derive.svg?label=serde_derive%20msrv&color=lightgray
+[Rust 1.56]: https://blog.rust-lang.org/2021/10/21/Rust-1.56.0/
+[Rust 1.71]: https://blog.rust-lang.org/2023/07/13/Rust-1.71.0/
+
+**Serde is a framework for *ser*ializing and *de*serializing Rust data structures efficiently and generically.**
 
 ---
 
 You may be looking for:
 
-- [The upstream Serde overview](https://serde.rs)
+- [An overview of Serde](https://serde.rs)
 - [Data formats supported by Serde](https://serde.rs/#data-formats)
-- [Upstream derive documentation](https://serde.rs/derive.html)
-- [Upstream examples](https://serde.rs/examples.html)
-- [Upstream API documentation](https://docs.rs/serde)
-- [KotlinMania serde-kotlin repository](https://github.com/KotlinMania/serde-kotlin)
+- [Setting up `#[derive(Serialize, Deserialize)]`](https://serde.rs/derive.html)
+- [Examples](https://serde.rs/examples.html)
+- [API documentation](https://docs.rs/serde)
+- [Release notes](https://github.com/serde-rs/serde/releases)
 
-## Port Status
-
-This port is in progress. Kotlin files are translated one Rust file at a time and carry a `// port-lint: source <path>` header so provenance checks can map each Kotlin file back to its upstream Rust source.
-
-The intended artifact is `serde-kotlin`, not a separate `serde-core-kotlin` artifact. Rust's `serde` crate imports and re-exports `serde_core`; this Kotlin port keeps that split visible in packages while shipping one Serde surface for consumers.
-
-## Serde In Action
+## Serde in action
 
 <details>
-<summary>Click to show Gradle Kotlin DSL dependencies.</summary>
+<summary>
+Click to show Cargo.toml.
+<a href="https://play.rust-lang.org/?edition=2021&gist=72755f28f99afc95e01d63174b28c1f5" target="_blank">Run this code in the playground.</a>
+</summary>
 
-```kotlin
-dependencies {
-    // The core APIs, including Serialize and Deserialize support.
-    implementation("io.github.kotlinmania:serde-kotlin:0.1.0-SNAPSHOT")
+```toml
+[dependencies]
 
-    // Each data format lives in its own artifact; this sample uses JSON.
-    implementation("io.github.kotlinmania:serde-json-kotlin:0.1.0-SNAPSHOT")
-}
-```
+# The core APIs, including the Serialize and Deserialize traits. Always
+# required when using Serde. The "derive" feature is only required when
+# using #[derive(Serialize, Deserialize)] to make Serde work with structs
+# and enums defined in your crate.
+serde = { version = "1.0", features = ["derive"] }
 
-For local development before publication, use a composite build substitution from a sibling checkout:
-
-```kotlin
-includeBuild("../serde-kotlin") {
-    dependencySubstitution {
-        substitute(module("io.github.kotlinmania:serde-kotlin")).using(project(":"))
-    }
-}
+# Each data format lives in its own crate; the sample code below uses JSON
+# but you may be using a different one.
+serde_json = "1.0"
 ```
 
 </details>
 <p></p>
 
-Expected Kotlin shape once the corresponding Serde and JSON APIs are ported:
+```rust
+use serde::{Deserialize, Serialize};
 
-```kotlin
-import kotlinx.serialization.Serializable
-import io.github.kotlinmania.serdejson.Json
+#[derive(Serialize, Deserialize, Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
 
-@Serializable
-data class Point(
-    val x: Int,
-    val y: Int,
-)
-
-fun main() {
-    val point = Point(x = 1, y = 2)
+fn main() {
+    let point = Point { x: 1, y: 2 };
 
     // Convert the Point to a JSON string.
-    val serialized = Json.toString(point).getOrThrow()
+    let serialized = serde_json::to_string(&point).unwrap();
 
     // Prints serialized = {"x":1,"y":2}
-    println("serialized = $serialized")
+    println!("serialized = {}", serialized);
 
     // Convert the JSON string back to a Point.
-    val deserialized: Point = Json.fromString(serialized).getOrThrow()
+    let deserialized: Point = serde_json::from_str(&serialized).unwrap();
 
-    // Prints deserialized = Point(x=1, y=2)
-    println("deserialized = $deserialized")
+    // Prints deserialized = Point { x: 1, y: 2 }
+    println!("deserialized = {:?}", deserialized);
 }
 ```
 
-## Supported Targets
+## Getting help
 
-- macOS arm64 / x64
-- Linux x64
-- Windows mingw-x64
-- iOS arm64 / x64 / simulator-arm64
-- JS (browser + Node.js)
-- Wasm-JS (browser + Node.js)
-- Android (API 24+)
+Serde is one of the most widely used Rust libraries so any place that Rustaceans
+congregate will be able to help you out. For chat, consider trying the
+[#rust-questions] or [#rust-beginners] channels of the unofficial community
+Discord (invite: <https://discord.gg/rust-lang-community>), the [#rust-usage] or
+[#beginners] channels of the official Rust Project Discord (invite:
+<https://discord.gg/rust-lang>), or the [#general][zulip] stream in Zulip. For
+asynchronous, consider the [\[rust\] tag on StackOverflow][stackoverflow], the
+[/r/rust] subreddit which has a pinned weekly easy questions post, or the Rust
+[Discourse forum][discourse]. It's acceptable to file a support issue in this
+repo but they tend not to get as many eyes as any of the above and may get
+closed without a response after some time.
 
-## Build
+[#rust-questions]: https://discord.com/channels/273534239310479360/274215136414400513
+[#rust-beginners]: https://discord.com/channels/273534239310479360/273541522815713281
+[#rust-usage]: https://discord.com/channels/442252698964721669/443150878111694848
+[#beginners]: https://discord.com/channels/442252698964721669/448238009733742612
+[zulip]: https://rust-lang.zulipchat.com/#narrow/stream/122651-general
+[stackoverflow]: https://stackoverflow.com/questions/tagged/rust
+[/r/rust]: https://www.reddit.com/r/rust
+[discourse]: https://users.rust-lang.org
+
+<br>
+
+#### License
+
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
+
+<br>
+
+<sub>
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in Serde by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
+</sub>
+
+---
+
+## About this Kotlin port
+
+### Installation
+
+```kotlin
+dependencies {
+    implementation("io.github.kotlinmania:serde-kotlin:0.1.0-SNAPSHOT")
+}
+```
+
+### Building
 
 ```bash
 ./gradlew build
 ./gradlew test
 ```
 
-## Porting Guidelines
+### Targets
 
-See [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) for translator discipline, port-lint header convention, Rust-to-Kotlin idiom mapping, and the rule that each Rust file maps to one Kotlin file.
+- macOS arm64
+- Linux x64
+- Windows mingw-x64
+- iOS arm64 / simulator-arm64 (Swift export + XCFramework)
+- JS (browser + Node.js)
+- Wasm-JS (browser + Node.js)
+- Android (API 24+)
 
-## Getting Help
+### Porting guidelines
 
-For Serde concepts, the upstream [Serde documentation](https://serde.rs) remains the best starting point. For KotlinMania port work, use this repository's issues and project notes.
+See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) for translator discipline, port-lint header convention, and Rust → Kotlin idiom mapping.
 
-Serde is one of the most widely used Rust libraries, so many upstream design questions have existing answers in the Rust community. The upstream README points readers toward the unofficial Rust community Discord, the official Rust Project Discord, Rust Zulip, StackOverflow, the Rust subreddit, and the Rust Discourse forum.
+### License
 
-## Acknowledgements
+This Kotlin port is distributed under the same MIT license as the upstream [`serde-rs/serde`](https://github.com/serde-rs/serde). See [LICENSE](LICENSE) (and any sibling `LICENSE-*` / `NOTICE` files mirrored from upstream) for the full text.
 
-Thank you to the original Serde authors, maintainers, and contributors, including Erick Tryzelaar, David Tolnay, and the broader `serde-rs` community. This Kotlin Multiplatform port exists because of their careful design, documentation, examples, and long stewardship of Serde.
+Original work copyrighted by the serde authors.  
+Kotlin port: Copyright (c) 2026 Sydney Renee and The Solace Project.
 
-## License
+### Acknowledgments
 
-This Kotlin port is licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
-
-Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai> and The Solace Project.
-
-The upstream Rust Serde project is licensed under the same Apache-2.0-or-MIT terms. These license files are copied from the upstream Serde repository.
-
-Unless explicitly stated otherwise, contributions intentionally submitted for inclusion in this Kotlin port are licensed as above, without additional terms or conditions.
+Thanks to the [`serde-rs/serde`](https://github.com/serde-rs/serde) maintainers and contributors for the original Rust implementation. This port reproduces their work in Kotlin Multiplatform; bug reports about upstream design or behavior should go to the upstream repository.

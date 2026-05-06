@@ -1,4 +1,3 @@
-import com.quittle.setupandroidsdk.SetupAndroidSdkExtension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
@@ -9,7 +8,6 @@ import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec
 
 plugins {
-    id("com.quittle.setup-android-sdk") version "3.1.0"
     kotlin("multiplatform") version "2.3.21"
     kotlin("plugin.serialization") version "2.3.21"
     id("com.android.kotlin.multiplatform.library") version "9.2.0"
@@ -19,14 +17,16 @@ plugins {
 group = "io.github.kotlinmania"
 version = "0.1.0-SNAPSHOT"
 
-extensions.configure<SetupAndroidSdkExtension>("setupAndroidSdk") {
-    sdkToolsVersion("14742923_latest")
-    licensesDirectory(rootProject.file("gradle/android-sdk/licenses"))
-    packages(
-        "platform-tools",
-        "platforms;android-34",
-        "build-tools;36.0.0",
-    )
+val androidSdkDir: String? =
+    providers.environmentVariable("ANDROID_SDK_ROOT").orNull
+        ?: providers.environmentVariable("ANDROID_HOME").orNull
+
+if (androidSdkDir != null && file(androidSdkDir).exists()) {
+    val localProperties = rootProject.file("local.properties")
+    if (!localProperties.exists()) {
+        val sdkDirPropertyValue = file(androidSdkDir).absolutePath.replace("\\", "/")
+        localProperties.writeText("sdk.dir=$sdkDirPropertyValue")
+    }
 }
 
 kotlin {
@@ -50,21 +50,9 @@ kotlin {
             xcf.add(this)
         }
     }
-    macosX64 {
-        binaries.framework {
-            baseName = "Serde"
-            xcf.add(this)
-        }
-    }
     linuxX64()
     mingwX64()
     iosArm64 {
-        binaries.framework {
-            baseName = "Serde"
-            xcf.add(this)
-        }
-    }
-    iosX64 {
         binaries.framework {
             baseName = "Serde"
             xcf.add(this)
@@ -180,16 +168,11 @@ mavenPublishing {
 
     pom {
         name.set("serde-kotlin")
-        description.set("Kotlin Multiplatform port of the Rust crate `serde` — Serialization / deserialization framework")
+        description.set("Kotlin Multiplatform port of serde-rs/serde - A generic serialization/deserialization framework")
         inceptionYear.set("2026")
         url.set("https://github.com/KotlinMania/serde-kotlin")
 
         licenses {
-            license {
-                name.set("Apache-2.0")
-                url.set("https://opensource.org/licenses/Apache-2.0")
-                distribution.set("repo")
-            }
             license {
                 name.set("MIT")
                 url.set("https://opensource.org/licenses/MIT")
