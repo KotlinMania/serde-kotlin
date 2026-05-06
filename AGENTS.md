@@ -8,7 +8,7 @@ Clean-room Kotlin Multiplatform port of the upstream Rust crate [`serde`](https:
 
 ## Workflow per file
 
-1. Clone <https://github.com/serde-rs/serde> into `tmp/serde/` (gitignored) if not already present, then remove `tmp/serde/.git`.
+1. Use the existing fresh upstream source in `tmp/serde/`; do not re-clone unless Sydney explicitly asks.
 2. Pick the next file to port — leaves of the dep tree first.
 3. Read the whole `.rs` before typing.
 4. Create the matching `.kt`. First line: `// port-lint: source <path-relative-to-tmp/serde/>`. Second line: `package io.github.kotlinmania.serde.<subpkg>`.

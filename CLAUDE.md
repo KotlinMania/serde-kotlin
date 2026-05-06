@@ -4,7 +4,7 @@
 
 This is **serde-kotlin**, a clean-room Kotlin Multiplatform port of the upstream Rust crate [`serde`](https://crates.io/crates/serde).
 
-The upstream Rust source is the read-only translation oracle. When porting begins, clone <https://github.com/serde-rs/serde> into `tmp/serde/` (gitignored), then remove `tmp/serde/.git`. **Never edit `tmp/`.** If upstream looks wrong, the bug is in the port or in your understanding of Rust, not in `tmp/`.
+The upstream Rust source in `tmp/serde/` is the read-only translation oracle. It is already a fresh copy of <https://github.com/serde-rs/serde> with its `.git` directory removed; do not re-clone unless Sydney explicitly asks. **Never edit `tmp/`.** If upstream looks wrong, the bug is in the port or in your understanding of Rust, not in `tmp/`.
 
 ## Translator's mindset
 
