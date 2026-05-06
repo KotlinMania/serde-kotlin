@@ -4,7 +4,7 @@
 
 This is **serde-kotlin**, a clean-room Kotlin Multiplatform port of the upstream Rust crate [`serde`](https://crates.io/crates/serde).
 
-The upstream Rust source in `tmp/serde/` is the read-only translation oracle. It is already a fresh copy of <https://github.com/serde-rs/serde> with its `.git` directory removed; do not re-clone unless Sydney explicitly asks. **Never edit `tmp/`.** If upstream looks wrong, the bug is in the port or in your understanding of Rust, not in `tmp/`.
+The upstream Rust source in `tmp/serde/` is the read-only translation oracle. **Never edit `tmp/`.** If upstream looks wrong, the bug is in the port or in your understanding of Rust, not in `tmp/`.
 
 ## Translator's mindset
 
@@ -27,7 +27,7 @@ The discipline:
 3. **Translate top to bottom in upstream order.** Preserve the declaration order. Don't reorder
    for "logical flow" — the upstream's order *is* the logical flow.
 
-4. **Comments are content.** License header, module-level doc, every `///` block, every inline
+4. **Comments are content.** Module-level doc, every `///` block, every inline
    `//` note, every upstream `// TODO`/`// FIXME` — all translate. Rust syntax inside doc comments
    gets rewritten to Kotlin equivalents (`Vec<T>` → `List<T>`, `Self::foo()` → `foo()`, lifetimes
    dropped, `cfg(test)` and `#[derive(...)]` lifted into prose).
@@ -86,6 +86,8 @@ package io.github.kotlinmania.serde
 This is how `ast_distance` tracks provenance. Never remove or alter unless the file is being re-targeted to a different Rust source.
 
 For files that have no single Rust counterpart (re-homed from a `mod.rs`, or pure Kotlin glue), use `// port-lint: ignore` and a one-line prose note explaining what it does.
+
+Kotlin files start with exactly the `port-lint` line and the package line, then continue with imports, declarations, or translated upstream comments. Source comments must be upstream Serde comments or docs translated into Kotlin form. Repository attribution and license terms live in README and the top-level license files. Translation choices are expressed in code shape and upstream-derived docs.
 
 ## Build
 

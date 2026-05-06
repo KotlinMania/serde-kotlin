@@ -8,13 +8,20 @@ Clean-room Kotlin Multiplatform port of the upstream Rust crate [`serde`](https:
 
 ## Workflow per file
 
-1. Use the existing fresh upstream source in `tmp/serde/`; do not re-clone unless Sydney explicitly asks.
+1. Use `tmp/serde/` as the read-only upstream source oracle.
 2. Pick the next file to port — leaves of the dep tree first.
 3. Read the whole `.rs` before typing.
 4. Create the matching `.kt`. First line: `// port-lint: source <path-relative-to-tmp/serde/>`. Second line: `package io.github.kotlinmania.serde.<subpkg>`.
 5. Translate top-to-bottom in upstream order. Translate every doc comment, every inline `//`, every `///`. Rewrite Rust syntax inside docs to Kotlin equivalents.
 6. Compile errors mid-port are expected. Don't paper over with stubs — port the missing dep.
 7. Commit per file.
+
+## Source preamble and comments
+
+- Kotlin files start with exactly the `port-lint` line and the package line, then continue with imports, declarations, or translated upstream comments.
+- Source comments must be upstream Serde comments or docs translated into Kotlin form.
+- Repository attribution and license terms live in README and the top-level license files.
+- Translation choices are expressed in code shape and upstream-derived docs.
 
 ## Rust → Kotlin idiom mapping
 
