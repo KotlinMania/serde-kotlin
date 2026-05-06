@@ -8,7 +8,7 @@ Clean-room Kotlin Multiplatform port of the upstream Rust crate [`serde`](https:
 
 ## Workflow per file
 
-1. Clone upstream into `tmp/serde/` (gitignored) if not already present.
+1. Clone <https://github.com/serde-rs/serde> into `tmp/serde/` (gitignored) if not already present, then remove `tmp/serde/.git`.
 2. Pick the next file to port — leaves of the dep tree first.
 3. Read the whole `.rs` before typing.
 4. Create the matching `.kt`. First line: `// port-lint: source <path-relative-to-tmp/serde/>`. Second line: `package io.github.kotlinmania.serde.<subpkg>`.
@@ -63,7 +63,7 @@ Build gate: `./gradlew test` on every shipped target.
 ./gradlew wasmJsNodeTest
 ```
 
-Provenance gate: `ast_distance --deep tmp/serde/src rust src/commonMain/kotlin/io/github/kotlinmania/serde kotlin`.
+Provenance gate: `ast_distance --deep tmp/serde rust src/commonMain/kotlin/io/github/kotlinmania/serde kotlin`.
 
 ## Scope discipline
 

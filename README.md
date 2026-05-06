@@ -118,8 +118,10 @@ Thank you to the original Serde authors, maintainers, and contributors, includin
 
 ## License
 
-This Kotlin port is licensed under Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+This Kotlin port is licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
 
-The upstream Rust Serde project is licensed under either Apache-2.0 or MIT at your option. Local copies of those upstream license texts are provided in [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT).
+Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai> and The Solace Project.
 
-Unless explicitly stated otherwise, contributions intentionally submitted for inclusion in this Kotlin port are licensed under Apache-2.0 without additional terms or conditions.
+The upstream Rust Serde project is licensed under the same Apache-2.0-or-MIT terms. These license files are copied from the upstream Serde repository.
+
+Unless explicitly stated otherwise, contributions intentionally submitted for inclusion in this Kotlin port are licensed as above, without additional terms or conditions.
