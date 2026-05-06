@@ -1,0 +1,21 @@
+serde-kotlin
+
+Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai>
+and The Solace Project.
+
+This project is a Kotlin Multiplatform port of Serde:
+
+    https://github.com/serde-rs/serde
+
+Serde was originally authored and is maintained by the serde-rs authors,
+maintainers, and contributors, including Erick Tryzelaar and David Tolnay.
+Thank you to the original Serde team and community for the design,
+documentation, examples, and long stewardship that make this port possible.
+
+The upstream Rust Serde project is licensed under either Apache-2.0 or MIT at
+your option. Local copies of those upstream license texts are provided in
+LICENSE-APACHE and LICENSE-MIT.
+
+Kotlin port code, documentation modifications, build metadata, and other
+Kotlin-specific project material are copyrighted by Sydney Renee and The Solace
+Project and are licensed under Apache-2.0 unless a file states otherwise.

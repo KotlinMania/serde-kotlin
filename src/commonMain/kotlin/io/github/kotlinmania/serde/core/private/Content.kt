@@ -2,13 +2,14 @@
 package io.github.kotlinmania.serde.core.`private`
 
 /*
- * Copyright (c) 2025 Sydney Renee, The Solace Project
+ * Copyright (c) 2026 Sydney Renee <sydney@solace.ofharmony.ai>
+ * and The Solace Project.
  *
- * This source code is dual-licensed under either the MIT license found in the
- * LICENSE-MIT file in the root directory of this source tree or the Apache
- * License, Version 2.0 found in the LICENSE-APACHE file in the root directory
- * of this source tree. You may select, at your option, one of the
- * above-listed licenses.
+ * Licensed under the Apache License, Version 2.0. See LICENSE and NOTICE.
+ *
+ * This Kotlin source is a port of upstream Serde code, which is licensed
+ * under either Apache-2.0 or MIT at your option; see LICENSE-APACHE and
+ * LICENSE-MIT.
  */
 
 // Used from generated code to buffer the contents of the Deserializer when

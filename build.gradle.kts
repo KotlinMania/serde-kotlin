@@ -50,9 +50,21 @@ kotlin {
             xcf.add(this)
         }
     }
+    macosX64 {
+        binaries.framework {
+            baseName = "Serde"
+            xcf.add(this)
+        }
+    }
     linuxX64()
     mingwX64()
     iosArm64 {
+        binaries.framework {
+            baseName = "Serde"
+            xcf.add(this)
+        }
+    }
+    iosX64 {
         binaries.framework {
             baseName = "Serde"
             xcf.add(this)
