@@ -56,6 +56,9 @@ public class Impossible<Ok, E> private constructor() :
     override fun <T> serializeField(key: String, value: T): Result<Unit>
         where T : Serialize =
         unreachable(key, value)
+
+    override fun skipField(key: String): Result<Unit> =
+        Result.success(Unit)
 }
 
 private fun unreachable(vararg touched: Any?): Nothing {
