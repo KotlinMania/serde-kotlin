@@ -1,6 +1,10 @@
 // port-lint: source serde_core/src/ser/impls.rs
 package io.github.kotlinmania.serde.core.ser
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
+
 ////////////////////////////////////////////////////////////////////////////////
 
 public fun <Ok, E> Boolean.serialize(serializer: Serializer<Ok, E>): Result<Ok>
@@ -124,6 +128,36 @@ public fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(serializer: Serializ
 
 ////////////////////////////////////////////////////////////////////////////////
 
+public fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error =
+    runCatching {
+        if (this < Duration.ZERO || this == Duration.INFINITE) {
+            throw Error.custom("duration must be finite and non-negative")
+        }
+        val secs = inWholeSeconds
+        val nanos = (this - secs.seconds).inWholeNanoseconds
+        val state = serializer.serializeStruct("Duration", 2).getOrThrow()
+        state.serializeField("secs", ULongSerialize(secs.toULong())).getOrThrow()
+        state.serializeField("nanos", UIntSerialize(nanos.toUInt())).getOrThrow()
+        state.end().getOrThrow()
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+
+public fun <Ok, E> Instant.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error =
+    runCatching {
+        if (epochSeconds < 0) {
+            throw Error.custom("SystemTime must be later than UNIX_EPOCH")
+        }
+        val state = serializer.serializeStruct("SystemTime", 2).getOrThrow()
+        state.serializeField("secs_since_epoch", ULongSerialize(epochSeconds.toULong())).getOrThrow()
+        state.serializeField("nanos_since_epoch", UIntSerialize(nanosecondsOfSecond.toUInt())).getOrThrow()
+        state.end().getOrThrow()
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+
 private val DEC_DIGITS_LUT: ByteArray =
     (
         "0001020304050607080910111213141516171819" +
@@ -151,4 +185,20 @@ internal fun formatU8(n: UByte, out: ByteArray): Int {
         out[0] = ('0'.code + value).toByte()
         1
     }
+}
+
+private data class ULongSerialize(
+    private val value: ULong,
+) : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        serializer.serializeU64(value)
+}
+
+private data class UIntSerialize(
+    private val value: UInt,
+) : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        serializer.serializeU32(value)
 }
