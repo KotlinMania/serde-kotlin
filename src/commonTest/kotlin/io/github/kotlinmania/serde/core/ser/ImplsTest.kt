@@ -44,6 +44,18 @@ public class ImplsTest {
     public fun instantBeforeEpochReturnsError() {
         assertTrue(Instant.fromEpochSeconds(-1, 0).serialize(StructRecordingSerializer()).isFailure)
     }
+
+    @Test
+    public fun phantomDataSerializesAsUnitStruct() {
+        assertEquals("PhantomData", formatSerialize(PhantomData))
+    }
+
+    @Test
+    public fun wrappersSerializeTheirValues() {
+        assertEquals("wrapped", formatSerialize(Wrapping(ImplsLiteralSerialize("wrapped"))))
+        assertEquals("saturating", formatSerialize(Saturating(ImplsLiteralSerialize("saturating"))))
+        assertEquals("reverse", formatSerialize(Reverse(ImplsLiteralSerialize("reverse"))))
+    }
 }
 
 private data object TestError : Error
@@ -139,4 +151,18 @@ private class RecordingStruct(
 
     override fun end(): Result<String> =
         Result.success(fields.joinToString(separator = ",", prefix = "$name(", postfix = ")") { (key, value) -> "$key=$value" })
+}
+
+private fun formatSerialize(value: Serialize): String {
+    val builder = StringBuilder()
+    value.serialize(FormatterSerializer(builder)).getOrThrow()
+    return builder.toString()
+}
+
+private data class ImplsLiteralSerialize(
+    private val text: String,
+) : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        serializer.serializeStr(text)
 }

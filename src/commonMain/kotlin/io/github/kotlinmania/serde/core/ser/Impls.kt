@@ -82,6 +82,14 @@ public fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok, E>): Result<Ok>
 
 ////////////////////////////////////////////////////////////////////////////////
 
+public data object PhantomData : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        serializer.serializeUnitStruct("PhantomData")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 public fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error,
           T : Serialize =
@@ -185,6 +193,32 @@ internal fun formatU8(n: UByte, out: ByteArray): Int {
         out[0] = ('0'.code + value).toByte()
         1
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+public data class Wrapping<T : Serialize>(
+    public val value: T,
+) : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        value.serialize(serializer)
+}
+
+public data class Saturating<T : Serialize>(
+    public val value: T,
+) : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        value.serialize(serializer)
+}
+
+public data class Reverse<T : Serialize>(
+    public val value: T,
+) : Serialize {
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+        where E : Error =
+        value.serialize(serializer)
 }
 
 private data class ULongSerialize(
