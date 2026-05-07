@@ -34,97 +34,92 @@ public class Error(
 }
 
 /**
- * Kotlin equivalent of the upstream `__private_serialize!` macro.
- *
- * The macro exists to define a private `Serialize` trait used only inside documentation tests.
+ * Private serialization interface used only inside documentation tests.
  */
-public interface __PrivateSerialize {
+public interface PrivateSerialize {
     public fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
         where E : SerError
 }
 
 /**
- * Kotlin equivalent of the upstream documentation-test serializer macros.
- *
- * Rust uses macros to generate a full set of `Serializer` methods for documentation tests. Kotlin
- * has no macros, so the Kotlin port provides this interface with default implementations.
+ * Serializer method set used only inside documentation tests.
  */
 public interface SerializeDocTestSerializer<Ok, E> : Serializer<Ok, E>
     where E : SerError {
     override fun serializeBool(v: Boolean): Result<Ok> =
-        documentationTestError("serializeBool")
+        documentationTestError("serializeBool", v)
 
     override fun serializeI8(v: Byte): Result<Ok> =
-        documentationTestError("serializeI8")
+        documentationTestError("serializeI8", v)
 
     override fun serializeI16(v: Short): Result<Ok> =
-        documentationTestError("serializeI16")
+        documentationTestError("serializeI16", v)
 
     override fun serializeI32(v: Int): Result<Ok> =
-        documentationTestError("serializeI32")
+        documentationTestError("serializeI32", v)
 
     override fun serializeI64(v: Long): Result<Ok> =
-        documentationTestError("serializeI64")
+        documentationTestError("serializeI64", v)
 
     override fun serializeU8(v: UByte): Result<Ok> =
-        documentationTestError("serializeU8")
+        documentationTestError("serializeU8", v)
 
     override fun serializeU16(v: UShort): Result<Ok> =
-        documentationTestError("serializeU16")
+        documentationTestError("serializeU16", v)
 
     override fun serializeU32(v: UInt): Result<Ok> =
-        documentationTestError("serializeU32")
+        documentationTestError("serializeU32", v)
 
     override fun serializeU64(v: ULong): Result<Ok> =
-        documentationTestError("serializeU64")
+        documentationTestError("serializeU64", v)
 
     override fun serializeF32(v: Float): Result<Ok> =
-        documentationTestError("serializeF32")
+        documentationTestError("serializeF32", v)
 
     override fun serializeF64(v: Double): Result<Ok> =
-        documentationTestError("serializeF64")
+        documentationTestError("serializeF64", v)
 
     override fun serializeChar(v: Char): Result<Ok> =
-        documentationTestError("serializeChar")
+        documentationTestError("serializeChar", v)
 
     override fun serializeStr(v: String): Result<Ok> =
-        documentationTestError("serializeStr")
+        documentationTestError("serializeStr", v)
 
     override fun serializeBytes(v: ByteArray): Result<Ok> =
-        documentationTestError("serializeBytes")
+        documentationTestError("serializeBytes", v)
 
     override fun serializeNone(): Result<Ok> =
         documentationTestError("serializeNone")
 
     override fun <T> serializeSome(value: T): Result<Ok>
         where T : io.github.kotlinmania.serde.core.ser.Serialize =
-        documentationTestError("serializeSome")
+        documentationTestError("serializeSome", value)
 
     override fun serializeUnit(): Result<Ok> =
         documentationTestError("serializeUnit")
 
     override fun serializeUnitStruct(name: String): Result<Ok> =
-        documentationTestError("serializeUnitStruct")
+        documentationTestError("serializeUnitStruct", name)
 
     override fun serializeUnitVariant(name: String, variantIndex: UInt, variant: String): Result<Ok> =
-        documentationTestError("serializeUnitVariant")
+        documentationTestError("serializeUnitVariant", name, variantIndex, variant)
 
     override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Ok>
         where T : io.github.kotlinmania.serde.core.ser.Serialize =
-        documentationTestError("serializeNewtypeStruct")
+        documentationTestError("serializeNewtypeStruct", name, value)
 
     override fun <T> serializeNewtypeVariant(name: String, variantIndex: UInt, variant: String, value: T): Result<Ok>
         where T : io.github.kotlinmania.serde.core.ser.Serialize =
-        documentationTestError("serializeNewtypeVariant")
+        documentationTestError("serializeNewtypeVariant", name, variantIndex, variant, value)
 
     override fun serializeSeq(len: Int?): Result<SerializeSeq<Ok, E>> =
-        documentationTestError("serializeSeq")
+        documentationTestError("serializeSeq", len)
 
     override fun serializeTuple(len: Int): Result<SerializeTuple<Ok, E>> =
-        documentationTestError("serializeTuple")
+        documentationTestError("serializeTuple", len)
 
     override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Ok, E>> =
-        documentationTestError("serializeTupleStruct")
+        documentationTestError("serializeTupleStruct", name, len)
 
     override fun serializeTupleVariant(
         name: String,
@@ -132,13 +127,13 @@ public interface SerializeDocTestSerializer<Ok, E> : Serializer<Ok, E>
         variant: String,
         len: Int,
     ): Result<SerializeTupleVariant<Ok, E>> =
-        documentationTestError("serializeTupleVariant")
+        documentationTestError("serializeTupleVariant", name, variantIndex, variant, len)
 
     override fun serializeMap(len: Int?): Result<SerializeMap<Ok, E>> =
-        documentationTestError("serializeMap")
+        documentationTestError("serializeMap", len)
 
     override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Ok, E>> =
-        documentationTestError("serializeStruct")
+        documentationTestError("serializeStruct", name, len)
 
     override fun serializeStructVariant(
         name: String,
@@ -146,8 +141,14 @@ public interface SerializeDocTestSerializer<Ok, E> : Serializer<Ok, E>
         variant: String,
         len: Int,
     ): Result<SerializeStructVariant<Ok, E>> =
-        documentationTestError("serializeStructVariant")
+        documentationTestError("serializeStructVariant", name, variantIndex, variant, len)
 }
 
-private fun <T> documentationTestError(method: String): Result<T> =
-    Result.failure(Error("serde documentation test serializer method $method was invoked"))
+private fun <T> documentationTestError(method: String, vararg ignored: Any?): Result<T> {
+    ignored.forEach(::discard)
+    return Result.failure(Error("serde documentation test serializer method $method was invoked"))
+}
+
+private fun discard(value: Any?) {
+    value.hashCode()
+}
