@@ -51,7 +51,14 @@ Check the repo before choosing a workflow.
 7. Translate top-to-bottom in upstream order. Preserve declaration order.
 8. Translate comments and docs as content. See "Source comments and KDoc."
 9. Leave hard files visible; do not fill holes with stubs.
-10. After a file lands, run the relevant compile/test gate and, when available,
+10. Never declare a file, function, test, target, or dependency as disabled,
+    skipped, not going to port, won't port, not ported, or intentionally
+    ignored as a substitute for translation. If something cannot compile yet
+    because its upstream dependencies are missing, leave the real missing
+    symbols visible and track the dependency in repo notes; do not add a
+    working-looking placeholder, disabled switch, fake fallback, or "not
+    implemented" body.
+11. After a file lands, run the relevant compile/test gate and, when available,
     `ast_distance` again.
 
 ## Required workflow in mature Kotlin mode
@@ -103,9 +110,10 @@ Use the path convention from `CLAUDE.md` or `.ast_distance_config.json`. Do not
 invent absolute upstream paths. If a repo requires an attribution line after the
 `port-lint` header, preserve it exactly.
 
-For files with no single Rust counterpart, use `// port-lint: ignore` only when
-repo docs allow it, and add the shortest possible upstream-derived or ledger
-note. Do not use ignored files as a place for translation rationale.
+Do not add `// port-lint: ignore` on your own. If Sydney explicitly asks for a
+specific no-counterpart Kotlin ledger or glue file, add the shortest possible
+upstream-derived or ledger note. Do not use ignored files as a place for
+translation rationale.
 
 ## Naming
 
@@ -285,6 +293,10 @@ internal fun <K, Q : Comparable<Q>> search(key: Q): Hit where K : Comparable<Q> 
 - Compile-time-incomplete files are acceptable only in early parity phases when
   they contain no fake stubs and the missing dependencies are tracked. Missing
   symbols are better than placeholder classes that conflict with the real port.
+- "Doc-only," "private API," "generated-code-only," and "not currently called"
+  are not exceptions to the no-placeholder rule. If a Kotlin declaration exists,
+  it must be a faithful port of the upstream behavior or an explicitly tracked
+  missing dependency that fails honestly at compile time.
 
 ## Dependencies
 
@@ -308,10 +320,20 @@ leaving a TODO or using a JVM-only shortcut.
 
 - Rust syntax leaking into Kotlin code or comments.
 - Rustifying Kotlin names, files, packages, or API shape to improve similarity.
-- `@Suppress(...)` unless a repo-local doc already records a narrow, reviewed
-  invariant that Kotlin cannot encode. New suppressions require discussion.
-- `TODO()`, `error("not implemented")`, empty shells, fake implementations, or
-  placeholder bodies.
+- `@Suppress(...)` for any reason. Do not hide warnings; fix the translation or
+  encode the missing invariant in the type/signature/control flow.
+- `TODO()`, `NotImplementedError`, `error("not implemented")`,
+  `UnsupportedOperationException`, empty shells, fake implementations,
+  placeholder bodies, or bodies that exist only to make the compiler quiet.
+- Declarations or comments that mark source, tests, targets, dependencies, or
+  behavior as disabled, skipped, ignored, not going to port, won't port, will
+  not port, not ported, impossible, or out of scope. Those phrases are not a
+  porting plan; they are a hole. Port the upstream item or leave the missing
+  dependency visible.
+- Build-script, linter, test-runner, or vendored-tool suppressions such as
+  shellcheck/eslint disables. Tool warnings are findings to fix or carry visibly
+  in repo notes, not silence inline. Agents do not get to grant exceptions;
+  only Sydney's direct instruction can override this rule.
 - Re-export `typealias` bridges for upstream `mod.rs` glue.
 - `import kotlin.jvm.*`, `java.*`, or `javax.*` from shared/common source.
 - JVM-only annotations such as `@JvmName`, `@JvmStatic`, `@JvmField`, or
