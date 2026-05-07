@@ -93,7 +93,13 @@ public data object PhantomData : Serialize {
 public fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error,
           T : Serialize =
-    serializer.collectSeq(this.asList())
+    runCatching {
+        val tuple = serializer.serializeTuple(size).getOrThrow()
+        for (element in this) {
+            tuple.serializeElement(element).getOrThrow()
+        }
+        tuple.end().getOrThrow()
+    }
 
 public fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error,

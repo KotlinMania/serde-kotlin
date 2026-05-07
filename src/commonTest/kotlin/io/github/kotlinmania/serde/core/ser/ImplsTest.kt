@@ -56,6 +56,16 @@ public class ImplsTest {
         assertEquals("saturating", formatSerialize(Saturating(ImplsLiteralSerialize("saturating"))))
         assertEquals("reverse", formatSerialize(Reverse(ImplsLiteralSerialize("reverse"))))
     }
+
+    @Test
+    public fun arraysSerializeAsTuples() {
+        val serialized = arrayOf(
+            ImplsLiteralSerialize("a"),
+            ImplsLiteralSerialize("b"),
+        ).serialize(TupleRecordingSerializer()).getOrThrow()
+
+        assertEquals("Tuple2(a,b)", serialized)
+    }
 }
 
 private data object TestError : Error
@@ -130,8 +140,32 @@ private class StructRecordingSerializer : FailingSerializer() {
 }
 
 private class FieldRecordingSerializer : FailingSerializer() {
+    override fun serializeStr(v: String): Result<String> = Result.success(v)
     override fun serializeU32(v: UInt): Result<String> = Result.success(v.toString())
     override fun serializeU64(v: ULong): Result<String> = Result.success(v.toString())
+}
+
+private class TupleRecordingSerializer : FailingSerializer() {
+    override fun serializeTuple(len: Int): Result<SerializeTuple<String, TestError>> =
+        Result.success(RecordingTuple(len))
+}
+
+private class RecordingTuple(
+    private val len: Int,
+) : SerializeTuple<String, TestError> {
+    private val elements = mutableListOf<String>()
+
+    override fun <T> serializeElement(value: T): Result<Unit>
+        where T : Serialize =
+        runCatching {
+            if (elements.size == len) {
+                throw AssertionError("too many elements")
+            }
+            elements += value.serialize(FieldRecordingSerializer()).getOrThrow()
+        }
+
+    override fun end(): Result<String> =
+        Result.success(elements.joinToString(separator = ",", prefix = "Tuple$len(", postfix = ")"))
 }
 
 private class RecordingStruct(
