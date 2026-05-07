@@ -4,8 +4,8 @@ package io.github.kotlinmania.serde.core.de
 /**
  * An efficient way of discarding data from a deserializer.
  *
- * Think of this like `serde_json.Value` in that it can be deserialized from any type, except that
- * it does not store any information about the data that gets deserialized.
+ * Think of this like a JSON value in that it can be deserialized from any type, except that it does
+ * not store any information about the data that gets deserialized.
  *
  * ```kotlin
  * import io.github.kotlinmania.serde.core.de.Deserialize
@@ -69,37 +69,30 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
     override fun expecting(): String = "anything at all"
 
     override fun visitBool(v: Boolean): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitI64(v: Long): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitI128(v: String): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitU64(v: ULong): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitU128(v: String): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitF64(v: Double): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitStr(v: String): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
@@ -107,12 +100,14 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
         Result.success(IgnoredAny)
 
     override fun <D> visitSome(deserializer: D): Result<IgnoredAny>
-        where D : Deserializer =
-        deserialize(deserializer)
+        where D : Deserializer {
+        return deserialize(deserializer)
+    }
 
     override fun <D> visitNewtypeStruct(deserializer: D): Result<IgnoredAny>
-        where D : Deserializer =
-        deserialize(deserializer)
+        where D : Deserializer {
+        return deserialize(deserializer)
+    }
 
     override fun visitUnit(): Result<IgnoredAny> =
         Result.success(IgnoredAny)
@@ -136,7 +131,6 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
         }
 
     override fun visitBytes(v: ByteArray): Result<IgnoredAny> {
-        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
@@ -147,6 +141,7 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
         }
 
     override fun <D> deserialize(deserializer: D): Result<IgnoredAny>
-        where D : Deserializer =
-        deserializer.deserializeIgnoredAny(IgnoredAny)
+        where D : Deserializer {
+        return deserializer.deserializeIgnoredAny(IgnoredAny)
+    }
 }
