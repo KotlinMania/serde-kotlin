@@ -94,15 +94,22 @@ package io.github.kotlinmania.serde
 // Support using Serde without the standard library!
 // `#![cfg_attr(not(feature = "std"), no_std)]`
 //
-// The upstream crate includes a `crate_root!()` macro that defines a `lib` facade module and
-// re-exports the public Serde traits and modules from `serde_core`. Kotlin has no analog to Rust's
-// conditional compilation or module re-exports; this port represents the same surface by pointing
-// directly at the Kotlin translations of the upstream `serde_core` modules.
-
-public typealias Deserialize<T> = io.github.kotlinmania.serde.core.de.Deserialize<T>
-public typealias Deserializer = io.github.kotlinmania.serde.core.de.Deserializer
-public typealias Serialize = io.github.kotlinmania.serde.core.ser.Serialize
-public typealias Serializer<Ok, E> = io.github.kotlinmania.serde.core.ser.Serializer<Ok, E>
+// The upstream `serde/src/lib.rs` `crate_root!()` macro emits, from `serde_core`:
+//   `pub use serde_core::{de, forward_to_deserialize_any, ser, Deserialize, Deserializer, Serialize, Serializer};`
+//
+// Per the workspace `mod.rs`/root re-export rule (CLAUDE.md `## Re-exports from upstream
+// `mod.rs` files`), no Kotlin `typealias` is introduced for these names. Callers target the
+// upstream symbol directly:
+//   `Deserialize`  -> `io.github.kotlinmania.serde.core.de.Deserialize`
+//   `Deserializer` -> `io.github.kotlinmania.serde.core.de.Deserializer`
+//   `Serialize`    -> `io.github.kotlinmania.serde.core.ser.Serialize`
+//   `Serializer`   -> `io.github.kotlinmania.serde.core.ser.Serializer`
+// optionally with `import <fqn> as <Name>` if the caller wants to keep the bare name.
+//
+// Callers migrated:
+//   (none — workspace audit confirmed zero Kotlin callers held imports of
+//   `io.github.kotlinmania.serde.{Deserialize,Deserializer,Serialize,Serializer}` at the time
+//   the typealiases were retired.)
 
 // Re-export `__require_serde_not_serde_core! {}`.
 public fun __requireSerdeNotSerdeCore() {
