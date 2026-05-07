@@ -69,30 +69,37 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
     override fun expecting(): String = "anything at all"
 
     override fun visitBool(v: Boolean): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitI64(v: Long): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitI128(v: String): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitU64(v: ULong): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitU128(v: String): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitF64(v: Double): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
     override fun visitStr(v: String): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
@@ -131,6 +138,7 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
         }
 
     override fun visitBytes(v: ByteArray): Result<IgnoredAny> {
+        v.hashCode()
         return Result.success(IgnoredAny)
     }
 
