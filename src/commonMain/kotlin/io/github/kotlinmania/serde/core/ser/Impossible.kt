@@ -25,7 +25,9 @@ package io.github.kotlinmania.serde.core.ser
  * }
  * ```
  */
-public class Impossible<Ok, E> private constructor() :
+public class Impossible<Ok, E> private constructor(
+    private val void: Void,
+) :
     SerializeSeq<Ok, E>,
     SerializeTuple<Ok, E>,
     SerializeTupleStruct<Ok, E>,
@@ -35,32 +37,51 @@ public class Impossible<Ok, E> private constructor() :
     SerializeStructVariant<Ok, E>
     where E : Error {
     override fun <T> serializeElement(value: T): Result<Unit>
-        where T : Serialize =
-        unreachable()
+        where T : Serialize {
+        discard(value)
+        return absurd(void)
+    }
 
     override fun end(): Result<Ok> =
-        unreachable()
+        absurd(void)
 
     override fun <T> serializeField(value: T): Result<Unit>
-        where T : Serialize =
-        unreachable()
+        where T : Serialize {
+        discard(value)
+        return absurd(void)
+    }
 
     override fun <T> serializeKey(key: T): Result<Unit>
-        where T : Serialize =
-        unreachable()
+        where T : Serialize {
+        discard(key)
+        return absurd(void)
+    }
 
     override fun <T> serializeValue(value: T): Result<Unit>
-        where T : Serialize =
-        unreachable()
+        where T : Serialize {
+        discard(value)
+        return absurd(void)
+    }
 
     override fun <T> serializeField(key: String, value: T): Result<Unit>
-        where T : Serialize =
-        unreachable()
+        where T : Serialize {
+        discard(key)
+        discard(value)
+        return absurd(void)
+    }
 
-    override fun skipField(key: String): Result<Unit> =
-        Result.success(Unit)
+    override fun skipField(key: String): Result<Unit> {
+        discard(key)
+        return Result.success(Unit)
+    }
 }
 
-private fun unreachable(): Nothing {
-    throw IllegalStateException("Impossible cannot be instantiated")
+private enum class Void
+
+private fun absurd(void: Void): Nothing {
+    throw AssertionError("uninhabited Void value reached: $void")
+}
+
+private fun discard(value: Any?) {
+    value.hashCode()
 }
