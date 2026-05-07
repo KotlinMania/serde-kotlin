@@ -31,4 +31,12 @@ private fun helper(bounds: Pair<Int, Int?>): Int? {
 }
 
 @PublishedApi
-internal inline fun <reified Element> sizeOf(): Int = 8
+internal inline fun <reified Element> sizeOf(): Int =
+    when (Element::class) {
+        Unit::class -> 0
+        Boolean::class, Byte::class, UByte::class -> 1
+        Short::class, UShort::class -> 2
+        Int::class, UInt::class, Float::class, Char::class -> 4
+        Long::class, ULong::class, Double::class -> 8
+        else -> 8
+    }

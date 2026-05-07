@@ -20,6 +20,17 @@ import io.github.kotlinmania.serde.core.ser.Serializer
 public class Error(
     message: String = "serde documentation test serializer was invoked",
 ) : RuntimeException(message), SerError, Lib.Debug, Lib.Display {
+    public companion object {
+        public fun custom(msg: Any?): Error = Error(msg.toString())
+    }
+
+    public fun description(): String = message.orEmpty()
+
+    public fun fmt(formatter: Appendable): Result<Unit> =
+        runCatching {
+            formatter.append(toString())
+            Unit
+        }
 }
 
 /**
