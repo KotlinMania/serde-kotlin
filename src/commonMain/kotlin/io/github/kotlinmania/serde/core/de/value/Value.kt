@@ -50,7 +50,7 @@ public fun Unit.intoDeserializer(): UnitDeserializer = UnitDeserializer.new()
 /**
  * A deserializer holding a `Unit`.
  */
-public class UnitDeserializer private constructor() : Deserializer {
+public class UnitDeserializer private constructor() : Deserializer, IntoDeserializer {
     public companion object {
         public fun new(): UnitDeserializer = UnitDeserializer()
     }
@@ -94,7 +94,7 @@ public class UnitDeserializer private constructor() : Deserializer {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-private inline fun <V> forwardToAny(deserializer: Deserializer, visitor: Visitor<V>): Result<V> =
+private fun <V> forwardToAny(deserializer: Deserializer, visitor: Visitor<V>): Result<V> =
     deserializer.deserializeAny(visitor)
 
 private class ExpectedInSeq(
@@ -111,7 +111,7 @@ private class ExpectedInMap(
         if (expected == 1) "1 element in map" else "$expected elements in map"
 }
 
-private abstract class PrimitiveDeserializer<T> : Deserializer, IntoDeserializer {
+public abstract class PrimitiveDeserializer<T> : Deserializer, IntoDeserializer {
     protected abstract val value: T
     protected abstract fun <V> visit(visitor: Visitor<V>, value: T): Result<V>
 
@@ -687,11 +687,12 @@ public class MapDeserializer<K, V>(
     }
 
     private class PairVisitor<K, V>(
-        private var key: K?,
-        private var value: V?,
+        key: K,
+        value: V,
     ) : SeqAccess
         where K : IntoDeserializer, V : IntoDeserializer {
-        constructor(key: K, value: V) : this(key, value)
+        private var key: K? = key
+        private var value: V? = value
 
         override fun <T> nextElementSeed(seed: DeserializeSeed<T>): Result<T?> =
             runCatching {

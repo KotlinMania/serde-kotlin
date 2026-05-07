@@ -359,7 +359,7 @@ private sealed class Content : Serialize {
             is NewtypeVariant ->
                 serializer.serializeNewtypeVariant(name, variantIndex, variant, value)
             is Seq ->
-                elements.map { it as Serialize }.serialize(serializer)
+                serializer.collectSeq(elements)
             is Tuple ->
                 runCatching {
                     val tuple = serializer.serializeTuple(elements.size).getOrThrow()

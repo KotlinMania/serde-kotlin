@@ -122,3 +122,33 @@ public fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(serializer: Serializ
         tuple.end().getOrThrow()
     }
 
+////////////////////////////////////////////////////////////////////////////////
+
+private val DEC_DIGITS_LUT: ByteArray =
+    (
+        "0001020304050607080910111213141516171819" +
+            "2021222324252627282930313233343536373839" +
+            "4041424344454647484950515253545556575859" +
+            "6061626364656667686970717273747576777879" +
+            "8081828384858687888990919293949596979899"
+    ).encodeToByteArray()
+
+internal fun formatU8(n: UByte, out: ByteArray): Int {
+    var value = n.toInt()
+    return if (value >= 100) {
+        val d1 = ((value % 100) shl 1)
+        value /= 100
+        out[0] = ('0'.code + value).toByte()
+        out[1] = DEC_DIGITS_LUT[d1]
+        out[2] = DEC_DIGITS_LUT[d1 + 1]
+        3
+    } else if (value >= 10) {
+        val d1 = (value shl 1)
+        out[0] = DEC_DIGITS_LUT[d1]
+        out[1] = DEC_DIGITS_LUT[d1 + 1]
+        2
+    } else {
+        out[0] = ('0'.code + value).toByte()
+        1
+    }
+}

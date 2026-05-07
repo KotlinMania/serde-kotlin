@@ -2,10 +2,10 @@
 package io.github.kotlinmania.serde.core.de
 
 import io.github.kotlinmania.serde.core.`private`.fromUtf8LossyNoAlloc
-import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -694,4 +694,3 @@ private fun fieldIdentifierDeserialize(
                 },
             )
     }
-
