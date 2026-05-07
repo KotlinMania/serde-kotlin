@@ -36,32 +36,31 @@ public class Impossible<Ok, E> private constructor() :
     where E : Error {
     override fun <T> serializeElement(value: T): Result<Unit>
         where T : Serialize =
-        unreachable(value)
+        unreachable()
 
     override fun end(): Result<Ok> =
         unreachable()
 
     override fun <T> serializeField(value: T): Result<Unit>
         where T : Serialize =
-        unreachable(value)
+        unreachable()
 
     override fun <T> serializeKey(key: T): Result<Unit>
         where T : Serialize =
-        unreachable(key)
+        unreachable()
 
     override fun <T> serializeValue(value: T): Result<Unit>
         where T : Serialize =
-        unreachable(value)
+        unreachable()
 
     override fun <T> serializeField(key: String, value: T): Result<Unit>
         where T : Serialize =
-        unreachable(key, value)
+        unreachable()
 
     override fun skipField(key: String): Result<Unit> =
         Result.success(Unit)
 }
 
-private fun unreachable(vararg touched: Any?): Nothing {
-    touched.forEach { it?.hashCode() }
+private fun unreachable(): Nothing {
     throw IllegalStateException("Impossible cannot be instantiated")
 }
