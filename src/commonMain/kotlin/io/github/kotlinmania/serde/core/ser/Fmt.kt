@@ -85,21 +85,14 @@ public class FormatterSerializer(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Unit> {
-        name.hashCode()
-        variantIndex.hashCode()
-        return display(variant)
-    }
+    ): Result<Unit> =
+        display(variant)
 
-    override fun <T : Serialize> serializeNewtypeStruct(name: String, value: T): Result<Unit> {
-        name.hashCode()
-        return value.serialize(this)
-    }
+    override fun <T : Serialize> serializeNewtypeStruct(name: String, value: T): Result<Unit> =
+        value.serialize(this)
 
-    override fun serializeBytes(v: ByteArray): Result<Unit> {
-        v.hashCode()
-        return fmtError()
-    }
+    override fun serializeBytes(v: ByteArray): Result<Unit> =
+        fmtError()
 
     override fun serializeNone(): Result<Unit> =
         fmtError()
@@ -115,13 +108,8 @@ public class FormatterSerializer(
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<Unit> {
-        name.hashCode()
-        variantIndex.hashCode()
-        variant.hashCode()
-        value.hashCode()
-        return fmtError()
-    }
+    ): Result<Unit> =
+        fmtError()
 
     override fun serializeSeq(len: Int?): Result<SerializeSeq<Unit, FmtError>> =
         fmtError()
@@ -137,13 +125,8 @@ public class FormatterSerializer(
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Unit, FmtError>> {
-        name.hashCode()
-        variantIndex.hashCode()
-        variant.hashCode()
-        len.hashCode()
-        return fmtError()
-    }
+    ): Result<SerializeTupleVariant<Unit, FmtError>> =
+        fmtError()
 
     override fun serializeMap(len: Int?): Result<SerializeMap<Unit, FmtError>> =
         fmtError()
@@ -156,13 +139,8 @@ public class FormatterSerializer(
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Unit, FmtError>> {
-        name.hashCode()
-        variantIndex.hashCode()
-        variant.hashCode()
-        len.hashCode()
-        return fmtError()
-    }
+    ): Result<SerializeStructVariant<Unit, FmtError>> =
+        fmtError()
 
     override fun collectStr(value: Any?): Result<Unit> =
         display(value)
