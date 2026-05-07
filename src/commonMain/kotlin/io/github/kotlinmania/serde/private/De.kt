@@ -18,6 +18,7 @@ import io.github.kotlinmania.serde.core.de.VariantAccess
 import io.github.kotlinmania.serde.core.de.Visitor
 import io.github.kotlinmania.serde.core.de.value.BytesDeserializer
 import io.github.kotlinmania.serde.core.de.value.SeqAccessDeserializer
+import io.github.kotlinmania.serde.core.de.value.intoDeserializer
 
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
@@ -66,7 +67,8 @@ public fun <V> missingField(field: String, deserialize: Deserialize<V>): Result<
 }
 
 public fun borrowCowStr(deserializer: Deserializer): Result<String> {
-    data object CowStrVisitor : Visitor<String> {
+    val cowStrVisitor =
+        object : Visitor<String> {
         override fun expecting(): String = "a string"
 
         override fun visitStr(v: String): Result<String> = Result.success(v)
@@ -84,13 +86,14 @@ public fun borrowCowStr(deserializer: Deserializer): Result<String> {
         override fun visitByteBuf(v: ByteArray): Result<String> =
             runCatching { v.decodeToString(throwOnInvalidSequence = true) }
                 .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
-    }
+        }
 
-    return deserializer.deserializeStr(CowStrVisitor)
+    return deserializer.deserializeStr(cowStrVisitor)
 }
 
 public fun borrowCowBytes(deserializer: Deserializer): Result<ByteArray> {
-    data object CowBytesVisitor : Visitor<ByteArray> {
+    val cowBytesVisitor =
+        object : Visitor<ByteArray> {
         override fun expecting(): String = "a byte array"
 
         override fun visitStr(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
@@ -100,9 +103,9 @@ public fun borrowCowBytes(deserializer: Deserializer): Result<ByteArray> {
         override fun visitBytes(v: ByteArray): Result<ByteArray> = Result.success(v)
         override fun visitBorrowedBytes(v: ByteArray): Result<ByteArray> = Result.success(v)
         override fun visitByteBuf(v: ByteArray): Result<ByteArray> = Result.success(v)
-    }
+        }
 
-    return deserializer.deserializeBytes(CowBytesVisitor)
+    return deserializer.deserializeBytes(cowBytesVisitor)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -282,83 +285,83 @@ public class TagOrContentVisitor(
     private fun content(value: Content): Result<TagOrContent> =
         Result.success(TagOrContent.ContentValue(value))
 
-    override fun visitBool(v: Boolean): Result<TagOrContent> = ContentVisitor.new().visitBool(v).map(::TagOrContent.ContentValue)
-    override fun visitI8(v: Byte): Result<TagOrContent> = ContentVisitor.new().visitI8(v).map(::TagOrContent.ContentValue)
-    override fun visitI16(v: Short): Result<TagOrContent> = ContentVisitor.new().visitI16(v).map(::TagOrContent.ContentValue)
-    override fun visitI32(v: Int): Result<TagOrContent> = ContentVisitor.new().visitI32(v).map(::TagOrContent.ContentValue)
-    override fun visitI64(v: Long): Result<TagOrContent> = ContentVisitor.new().visitI64(v).map(::TagOrContent.ContentValue)
-    override fun visitU8(v: UByte): Result<TagOrContent> = ContentVisitor.new().visitU8(v).map(::TagOrContent.ContentValue)
-    override fun visitU16(v: UShort): Result<TagOrContent> = ContentVisitor.new().visitU16(v).map(::TagOrContent.ContentValue)
-    override fun visitU32(v: UInt): Result<TagOrContent> = ContentVisitor.new().visitU32(v).map(::TagOrContent.ContentValue)
-    override fun visitU64(v: ULong): Result<TagOrContent> = ContentVisitor.new().visitU64(v).map(::TagOrContent.ContentValue)
-    override fun visitF32(v: Float): Result<TagOrContent> = ContentVisitor.new().visitF32(v).map(::TagOrContent.ContentValue)
-    override fun visitF64(v: Double): Result<TagOrContent> = ContentVisitor.new().visitF64(v).map(::TagOrContent.ContentValue)
-    override fun visitChar(v: Char): Result<TagOrContent> = ContentVisitor.new().visitChar(v).map(::TagOrContent.ContentValue)
+    override fun visitBool(v: Boolean): Result<TagOrContent> = ContentVisitor.new().visitBool(v).map { TagOrContent.ContentValue(it) }
+    override fun visitI8(v: Byte): Result<TagOrContent> = ContentVisitor.new().visitI8(v).map { TagOrContent.ContentValue(it) }
+    override fun visitI16(v: Short): Result<TagOrContent> = ContentVisitor.new().visitI16(v).map { TagOrContent.ContentValue(it) }
+    override fun visitI32(v: Int): Result<TagOrContent> = ContentVisitor.new().visitI32(v).map { TagOrContent.ContentValue(it) }
+    override fun visitI64(v: Long): Result<TagOrContent> = ContentVisitor.new().visitI64(v).map { TagOrContent.ContentValue(it) }
+    override fun visitU8(v: UByte): Result<TagOrContent> = ContentVisitor.new().visitU8(v).map { TagOrContent.ContentValue(it) }
+    override fun visitU16(v: UShort): Result<TagOrContent> = ContentVisitor.new().visitU16(v).map { TagOrContent.ContentValue(it) }
+    override fun visitU32(v: UInt): Result<TagOrContent> = ContentVisitor.new().visitU32(v).map { TagOrContent.ContentValue(it) }
+    override fun visitU64(v: ULong): Result<TagOrContent> = ContentVisitor.new().visitU64(v).map { TagOrContent.ContentValue(it) }
+    override fun visitF32(v: Float): Result<TagOrContent> = ContentVisitor.new().visitF32(v).map { TagOrContent.ContentValue(it) }
+    override fun visitF64(v: Double): Result<TagOrContent> = ContentVisitor.new().visitF64(v).map { TagOrContent.ContentValue(it) }
+    override fun visitChar(v: Char): Result<TagOrContent> = ContentVisitor.new().visitChar(v).map { TagOrContent.ContentValue(it) }
 
     override fun visitStr(v: String): Result<TagOrContent> =
         if (v == name) {
             Result.success(TagOrContent.Tag)
         } else {
-            ContentVisitor.new().visitStr(v).map(::TagOrContent.ContentValue)
+            ContentVisitor.new().visitStr(v).map { TagOrContent.ContentValue(it) }
         }
 
     override fun visitBorrowedStr(v: String): Result<TagOrContent> =
         if (v == name) {
             Result.success(TagOrContent.Tag)
         } else {
-            ContentVisitor.new().visitBorrowedStr(v).map(::TagOrContent.ContentValue)
+            ContentVisitor.new().visitBorrowedStr(v).map { TagOrContent.ContentValue(it) }
         }
 
     override fun visitString(v: String): Result<TagOrContent> =
         if (v == name) {
             Result.success(TagOrContent.Tag)
         } else {
-            ContentVisitor.new().visitString(v).map(::TagOrContent.ContentValue)
+            ContentVisitor.new().visitString(v).map { TagOrContent.ContentValue(it) }
         }
 
     override fun visitBytes(v: ByteArray): Result<TagOrContent> =
         if (v.contentEquals(name.encodeToByteArray())) {
             Result.success(TagOrContent.Tag)
         } else {
-            ContentVisitor.new().visitBytes(v).map(::TagOrContent.ContentValue)
+            ContentVisitor.new().visitBytes(v).map { TagOrContent.ContentValue(it) }
         }
 
     override fun visitBorrowedBytes(v: ByteArray): Result<TagOrContent> =
         if (v.contentEquals(name.encodeToByteArray())) {
             Result.success(TagOrContent.Tag)
         } else {
-            ContentVisitor.new().visitBorrowedBytes(v).map(::TagOrContent.ContentValue)
+            ContentVisitor.new().visitBorrowedBytes(v).map { TagOrContent.ContentValue(it) }
         }
 
     override fun visitByteBuf(v: ByteArray): Result<TagOrContent> =
         if (v.contentEquals(name.encodeToByteArray())) {
             Result.success(TagOrContent.Tag)
         } else {
-            ContentVisitor.new().visitByteBuf(v).map(::TagOrContent.ContentValue)
+            ContentVisitor.new().visitByteBuf(v).map { TagOrContent.ContentValue(it) }
         }
 
-    override fun visitUnit(): Result<TagOrContent> = ContentVisitor.new().visitUnit().map(::TagOrContent.ContentValue)
-    override fun visitNone(): Result<TagOrContent> = ContentVisitor.new().visitNone().map(::TagOrContent.ContentValue)
+    override fun visitUnit(): Result<TagOrContent> = ContentVisitor.new().visitUnit().map { TagOrContent.ContentValue(it) }
+    override fun visitNone(): Result<TagOrContent> = ContentVisitor.new().visitNone().map { TagOrContent.ContentValue(it) }
 
     override fun <D> visitSome(deserializer: D): Result<TagOrContent>
         where D : Deserializer =
-        ContentVisitor.new().visitSome(deserializer).map(::TagOrContent.ContentValue)
+        ContentVisitor.new().visitSome(deserializer).map { TagOrContent.ContentValue(it) }
 
     override fun <D> visitNewtypeStruct(deserializer: D): Result<TagOrContent>
         where D : Deserializer =
-        ContentVisitor.new().visitNewtypeStruct(deserializer).map(::TagOrContent.ContentValue)
+        ContentVisitor.new().visitNewtypeStruct(deserializer).map { TagOrContent.ContentValue(it) }
 
     override fun <A> visitSeq(seq: A): Result<TagOrContent>
         where A : SeqAccess =
-        ContentVisitor.new().visitSeq(seq).map(::TagOrContent.ContentValue)
+        ContentVisitor.new().visitSeq(seq).map { TagOrContent.ContentValue(it) }
 
     override fun <A> visitMap(map: A): Result<TagOrContent>
         where A : MapAccess =
-        ContentVisitor.new().visitMap(map).map(::TagOrContent.ContentValue)
+        ContentVisitor.new().visitMap(map).map { TagOrContent.ContentValue(it) }
 
     override fun <A> visitEnum(data: A): Result<TagOrContent>
         where A : EnumAccess =
-        ContentVisitor.new().visitEnum(data).map(::TagOrContent.ContentValue)
+        ContentVisitor.new().visitEnum(data).map { TagOrContent.ContentValue(it) }
 }
 
 /**
@@ -534,7 +537,7 @@ public class TagContentOtherFieldVisitor(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-private class ContentDeserializer(
+public class ContentDeserializer(
     private val content: Content,
 ) : Deserializer {
     public companion object {
@@ -1495,7 +1498,7 @@ public class AdjacentlyTaggedEnumVariantVisitor<F>(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-private class ContentRefDeserializer(
+public class ContentRefDeserializer(
     private val content: Content,
 ) : Deserializer {
     public companion object {

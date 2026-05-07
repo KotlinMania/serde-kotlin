@@ -1,25 +1,29 @@
 // port-lint: source serde_core/src/ser/fmt.rs
 package io.github.kotlinmania.serde.core.ser
 
-public data object FmtError : Error
+public data object FmtError : Error {
+    public fun custom(_msg: Any?): FmtError = this
+}
 
 /**
  * ```kotlin
  * import io.github.kotlinmania.serde.core.ser.Serialize
+ * import io.github.kotlinmania.serde.core.ser.Serializer
  *
  * enum class MessageType : Serialize {
  *     StartRequest,
  *     EndRequest;
  *
- *     override fun toString(): String =
- *         when (this) {
- *             StartRequest -> "start-request"
- *             EndRequest -> "end-request"
- *         }
- *
  *     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
  *         where E : Error =
- *         serializer.serializeUnitVariant("MessageType", ordinal.toUInt(), toString())
+ *         serializer.serializeUnitVariant(
+ *             name = "MessageType",
+ *             variantIndex = ordinal.toUInt(),
+ *             variant = when (this) {
+ *                 StartRequest -> "start-request"
+ *                 EndRequest -> "end-request"
+ *             },
+ *         )
  * }
  *
  * fun MessageType.format(formatter: Appendable): Result<Unit> =
@@ -81,80 +85,94 @@ public class FormatterSerializer(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Unit> =
-        display(variant, name, variantIndex)
+    ): Result<Unit> {
+        name.hashCode()
+        variantIndex.hashCode()
+        return display(variant)
+    }
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Unit>
-        where T : Serialize {
+    override fun <T : Serialize> serializeNewtypeStruct(name: String, value: T): Result<Unit> {
         name.hashCode()
         return value.serialize(this)
     }
 
-    override fun serializeBytes(v: ByteArray): Result<Unit> =
-        fmtError(v)
+    override fun serializeBytes(v: ByteArray): Result<Unit> {
+        v.hashCode()
+        return fmtError()
+    }
 
     override fun serializeNone(): Result<Unit> =
         fmtError()
 
-    override fun <T> serializeSome(value: T): Result<Unit>
-        where T : Serialize =
-        fmtError(value)
+    override fun <T : Serialize> serializeSome(value: T): Result<Unit> =
+        fmtError()
 
     override fun serializeUnit(): Result<Unit> =
         fmtError()
 
-    override fun <T> serializeNewtypeVariant(
+    override fun <T : Serialize> serializeNewtypeVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<Unit>
-        where T : Serialize =
-        fmtError(name, variantIndex, variant, value)
+    ): Result<Unit> {
+        name.hashCode()
+        variantIndex.hashCode()
+        variant.hashCode()
+        value.hashCode()
+        return fmtError()
+    }
 
     override fun serializeSeq(len: Int?): Result<SerializeSeq<Unit, FmtError>> =
-        fmtError(len)
+        fmtError()
 
     override fun serializeTuple(len: Int): Result<SerializeTuple<Unit, FmtError>> =
-        fmtError(len)
+        fmtError()
 
     override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Unit, FmtError>> =
-        fmtError(name, len)
+        fmtError()
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Unit, FmtError>> =
-        fmtError(name, variantIndex, variant, len)
+    ): Result<SerializeTupleVariant<Unit, FmtError>> {
+        name.hashCode()
+        variantIndex.hashCode()
+        variant.hashCode()
+        len.hashCode()
+        return fmtError()
+    }
 
     override fun serializeMap(len: Int?): Result<SerializeMap<Unit, FmtError>> =
-        fmtError(len)
+        fmtError()
 
     override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Unit, FmtError>> =
-        fmtError(name, len)
+        fmtError()
 
     override fun serializeStructVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Unit, FmtError>> =
-        fmtError(name, variantIndex, variant, len)
+    ): Result<SerializeStructVariant<Unit, FmtError>> {
+        name.hashCode()
+        variantIndex.hashCode()
+        variant.hashCode()
+        len.hashCode()
+        return fmtError()
+    }
 
     override fun collectStr(value: Any?): Result<Unit> =
         display(value)
 
-    private fun display(value: Any?, vararg touched: Any?): Result<Unit> =
+    private fun display(value: Any?): Result<Unit> =
         runCatching {
-            touched.forEach { it?.hashCode() }
             formatter.append(value.toString())
             Unit
         }
 }
 
-private fun <T> fmtError(vararg touched: Any?): Result<T> {
-    touched.forEach { it?.hashCode() }
-    return Result.failure(SerdeSerializationException("formatting error"))
-}
+private fun <T> fmtError(): Result<T> =
+    Result.failure(SerdeSerializationException("formatting error"))
