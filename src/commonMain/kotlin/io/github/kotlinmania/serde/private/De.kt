@@ -538,6 +538,7 @@ private class ContentDeserializer(
     private val content: Content,
 ) : Deserializer {
     public companion object {
+        // Private API, don't use.
         public fun new(content: Content): ContentDeserializer = ContentDeserializer(content)
     }
 
@@ -651,18 +652,36 @@ private class ContentDeserializer(
             Content.None -> visitor.visitNone()
             is Content.Some -> visitor.visitSome(new(content.value))
             Content.Unit -> visitor.visitUnit()
+            // Some data formats do not encode an indication of whether a value is optional.
+            //
+            // An example is JSON, and a counterexample is RON. When requesting `deserializeAny` in
+            // JSON, the data format never performs `Visitor.visitSome` but we still must be able
+            // to deserialize the resulting content into data structures with optional fields.
             else -> visitor.visitSome(this)
         }
 
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> =
         when (content) {
             Content.Unit -> visitor.visitUnit()
+
+            // Allow deserializing a newtype enum variant containing unit.
+            //
+            // This supports self-describing formats in which a unit-like newtype variant may be
+            // represented as an object that only contains the tag, with no content.
+            //
+            // We want an object like `{"result":"Success"}` to be able to deserialize into a
+            // response type whose payload type is `Unit`.
             is Content.Map -> if (content.value.isEmpty()) visitor.visitUnit() else Result.failure(invalidType(visitor))
             else -> Result.failure(invalidType(visitor))
         }
 
     override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> =
         when (content) {
+            // As a special case, allow deserializing an untagged newtype variant containing a
+            // unit struct.
+            //
+            // This supports self-describing formats in which a unit-struct-like newtype variant may
+            // be represented as an empty object or empty sequence when only the tag is present.
             is Content.Map -> if (content.value.isEmpty()) visitor.visitUnit() else deserializeAny(visitor)
             is Content.Seq -> if (content.value.isEmpty()) visitor.visitUnit() else deserializeAny(visitor)
             else -> deserializeAny(visitor)
@@ -671,6 +690,14 @@ private class ContentDeserializer(
     override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> =
         when (content) {
             is Content.Newtype -> visitor.visitNewtypeStruct(new(content.value))
+
+            // Some data formats encode newtype structs and their underlying data the same, with no
+            // indication whether a newtype wrapper was present. For example JSON does this, while
+            // RON does not. In RON a newtype's name is included in the serialized representation
+            // and it knows to call `Visitor.visitNewtypeStruct` from `deserializeAny`.
+            //
+            // JSON's `deserializeAny` never calls `visitNewtypeStruct` but we still must be able to
+            // deserialize the resulting content into newtypes.
             else -> visitor.visitNewtypeStruct(this)
         }
 
@@ -707,6 +734,7 @@ private class ContentDeserializer(
                         if (iter.hasNext()) {
                             throw Error.invalidValue(Unexpected.Map, object : Expected { override fun expecting(): String = "map with a single key" })
                         }
+                        // Enums are encoded in JSON as objects with a single key-value pair.
                         first.first to first.second
                     }
 
@@ -767,6 +795,8 @@ private class SeqDeserializer(
             if (remaining == 0) {
                 Unit
             } else {
+                // First argument is the number of elements in the data, second argument is the
+                // number of elements expected by the deserializer.
                 throw Error.invalidLength(count + remaining, ExpectedInSeq(count))
             }
         }
@@ -853,6 +883,8 @@ private class MapDeserializer(
             if (remaining == 0) {
                 Unit
             } else {
+                // First argument is the number of elements in the data, second argument is the
+                // number of elements expected by the deserializer.
                 throw Error.invalidLength(count + remaining, ExpectedInMap(count))
             }
         }
@@ -926,6 +958,8 @@ private class MapDeserializer(
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): Result<V> =
         runCatching {
             val v = value
+                // Throw because this indicates a bug in the program rather than an expected
+                // failure.
                 ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
             value = null
             seed.deserialize(ContentDeserializer.new(v)).getOrThrow()
@@ -970,6 +1004,8 @@ private class PairDeserializer(
                 pair
             } else {
                 val remaining = pairVisitor.sizeHint() ?: 0
+                // First argument is the number of elements in the data, second argument is the
+                // number of elements expected by the deserializer.
                 throw Error.invalidLength(2, ExpectedInSeq(2 - remaining))
             }
         }
@@ -978,6 +1014,8 @@ private class PairDeserializer(
         if (len == 2) {
             deserializeSeq(visitor)
         } else {
+            // First argument is the number of elements in the data, second argument is the number
+            // of elements expected by the deserializer.
             Result.failure(Error.invalidLength(2, ExpectedInSeq(len)))
         }
 
@@ -1101,13 +1139,11 @@ private class VariantDeserializer(
 // Like `IntoDeserializer` but also implemented for `ByteArray`. This is used for
 // the newtype fallthrough case of `field_identifier`.
 //
-//    #[derive(Deserialize)]
-//    #[serde(field_identifier)]
-//    enum F {
-//        A,
-//        B,
-//        Other(String), // deserialized using IdentifierDeserializer
-//    }
+// Consider a field-identifier enum with a fallback string case, conceptually:
+//
+//    enum class F { A, B, Other(String) }
+//
+// The fallback case is deserialized using `IdentifierDeserializer`.
 public interface IdentifierDeserializer {
     public fun intoIdentifierDeserializer(): Deserializer
 }
@@ -1346,6 +1382,7 @@ private class FlatMapAccess(
     override fun <K> nextKeySeed(seed: DeserializeSeed<K>): Result<K?> =
         runCatching {
             for (item in iter) {
+                // Items in the vector are nulled out when used by a struct.
                 val entry = item ?: continue
                 // Do not take(), instead borrow this entry. The internally tagged
                 // enum does its own buffering so we can't tell whether this entry
@@ -1462,6 +1499,7 @@ private class ContentRefDeserializer(
     private val content: Content,
 ) : Deserializer {
     public companion object {
+        // Private API, don't use.
         public fun new(content: Content): ContentRefDeserializer = ContentRefDeserializer(content)
     }
 
@@ -1625,6 +1663,7 @@ private class ContentRefDeserializer(
                         if (iter.hasNext()) {
                             throw Error.invalidValue(Unexpected.Map, object : Expected { override fun expecting(): String = "map with a single key" })
                         }
+                        // Enums are encoded in JSON as objects with a single key-value pair.
                         first.first to first.second
                     }
 
@@ -1685,6 +1724,8 @@ private class SeqRefDeserializer(
             if (remaining == 0) {
                 Unit
             } else {
+                // First argument is the number of elements in the data, second argument is the
+                // number of elements expected by the deserializer.
                 throw Error.invalidLength(count + remaining, ExpectedInSeq(count))
             }
         }
@@ -1760,6 +1801,8 @@ private class MapRefDeserializer(
             if (remaining == 0) {
                 Unit
             } else {
+                // First argument is the number of elements in the data, second argument is the
+                // number of elements expected by the deserializer.
                 throw Error.invalidLength(count + remaining, ExpectedInMap(count))
             }
         }
@@ -1833,6 +1876,8 @@ private class MapRefDeserializer(
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): Result<V> =
         runCatching {
             val v = value
+                // Throw because this indicates a bug in the program rather than an expected
+                // failure.
                 ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
             value = null
             seed.deserialize(ContentRefDeserializer.new(v)).getOrThrow()
@@ -1877,6 +1922,8 @@ private class PairRefDeserializer(
                 pair
             } else {
                 val remaining = pairVisitor.sizeHint() ?: 0
+                // First argument is the number of elements in the data, second argument is the
+                // number of elements expected by the deserializer.
                 throw Error.invalidLength(2, ExpectedInSeq(2 - remaining))
             }
         }
@@ -1885,6 +1932,8 @@ private class PairRefDeserializer(
         if (len == 2) {
             deserializeSeq(visitor)
         } else {
+            // First argument is the number of elements in the data, second argument is the number
+            // of elements expected by the deserializer.
             Result.failure(Error.invalidLength(2, ExpectedInSeq(len)))
         }
 
@@ -1990,4 +2039,3 @@ private class VariantRefDeserializer(
 ////////////////////////////////////////////////////////////////////////////////
 
 private fun <T> Iterator<T>.nextOrNull(): T? = if (hasNext()) next() else null
-
