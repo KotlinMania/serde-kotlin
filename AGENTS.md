@@ -377,6 +377,7 @@ upstream behavior is truly public runtime behavior.
 ## Scope and commits
 
 - Work until you are blocked or reach a limit.
+- Automation note: Work until you are blocked or reach a limit.
 - More than about five source files in one change is usually too much; stop and
   ask unless the user explicitly requested a mechanical sweep.
 - Commit at file or coherent phase boundaries.
