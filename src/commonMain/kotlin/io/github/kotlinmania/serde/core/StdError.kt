@@ -2,27 +2,28 @@
 package io.github.kotlinmania.serde.core
 
 /**
- * Either a re-export of `std::error::Error` or a new identical trait, depending on whether Serde's
- * "std" feature is enabled.
+ * Either a re-export of the standard error trait or a new identical trait, depending on whether
+ * Serde's "std" feature is enabled.
  *
- * Serde's error traits `serde::ser::Error` and `serde::de::Error` require `std::error::Error` as a
+ * Serde's serialization and deserialization error traits require the standard error trait as a
  * supertrait, but only when Serde is built with "std" enabled. Data formats that don't care about
- * no_std support should generally provide their error types with a `std::error::Error` implementation
- * directly:
+ * standard-library-free support should generally provide their error types with a standard error
+ * implementation directly:
  *
  * ```kotlin
- * // We don't support no_std!
+ * // This format requires the standard library.
  * class MySerError : io.github.kotlinmania.serde.core.ser.Error
  * ```
  *
- * Data formats that *do* support no_std may either have a "std" feature of their own:
+ * Data formats that *do* support standard-library-free use may either have a "std" feature of
+ * their own:
  *
  * ```toml
  * [features]
  * std = ["serde/std"]
  * ```
  *
- * ... or else provide the std Error implementation unconditionally via Serde's re-export:
+ * ... or else provide the standard error implementation unconditionally via Serde's re-export:
  *
  * ```kotlin
  * class MySerError : io.github.kotlinmania.serde.core.ser.StdError

@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/format.rs
 package io.github.kotlinmania.serde.core
 
+internal class FormatError : RuntimeException()
+
 internal class Buf private constructor(
     private val bytes: ByteArray,
 ) {
@@ -11,14 +13,17 @@ internal class Buf private constructor(
     }
 
     fun asStr(): String {
-        val slice = bytes.copyOfRange(0, offset)
-        return slice.decodeToString(throwOnInvalidSequence = true)
+        return bytes.decodeToString(
+            startIndex = 0,
+            endIndex = offset,
+            throwOnInvalidSequence = false,
+        )
     }
 
     fun writeStr(s: String): Result<Unit> {
         val stringBytes = s.encodeToByteArray()
         return if (offset + stringBytes.size > bytes.size) {
-            Result.failure(IllegalStateException("format buffer is full"))
+            Result.failure(FormatError())
         } else {
             stringBytes.copyInto(bytes, destinationOffset = offset)
             offset += stringBytes.size
