@@ -38,7 +38,6 @@ public class Impossible<Ok, E> private constructor(
     where E : Error {
     override fun <T> serializeElement(value: T): Result<Unit>
         where T : Serialize {
-        discard(value)
         return absurd(void)
     }
 
@@ -47,31 +46,25 @@ public class Impossible<Ok, E> private constructor(
 
     override fun <T> serializeField(value: T): Result<Unit>
         where T : Serialize {
-        discard(value)
         return absurd(void)
     }
 
     override fun <T> serializeKey(key: T): Result<Unit>
         where T : Serialize {
-        discard(key)
         return absurd(void)
     }
 
     override fun <T> serializeValue(value: T): Result<Unit>
         where T : Serialize {
-        discard(value)
         return absurd(void)
     }
 
     override fun <T> serializeField(key: String, value: T): Result<Unit>
         where T : Serialize {
-        discard(key)
-        discard(value)
         return absurd(void)
     }
 
     override fun skipField(key: String): Result<Unit> {
-        discard(key)
         return Result.success(Unit)
     }
 }
@@ -80,8 +73,4 @@ private enum class Void
 
 private fun absurd(void: Void): Nothing {
     throw AssertionError("uninhabited Void value reached: $void")
-}
-
-private fun discard(value: Any?) {
-    value.hashCode()
 }
