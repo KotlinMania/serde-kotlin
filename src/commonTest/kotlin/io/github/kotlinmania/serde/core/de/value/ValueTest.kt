@@ -1,0 +1,49 @@
+// port-lint: source serde_core/src/de/value.rs
+package io.github.kotlinmania.serde.core.de.value
+
+import io.github.kotlinmania.serde.core.de.DeserializeSeed
+import io.github.kotlinmania.serde.core.de.Deserializer
+import io.github.kotlinmania.serde.core.de.Visitor
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+public class ValueTest {
+    @Test
+    public fun strDeserializerVisitsBorrowedStringPath() {
+        assertEquals("str:value", StrDeserializer.new("value").deserializeAny(StringKindVisitor).getOrThrow())
+        assertEquals("str:value", StrDeserializer.new("value").deserializeString(StringKindVisitor).getOrThrow())
+    }
+
+    @Test
+    public fun stringDeserializerVisitsOwnedStringPath() {
+        assertEquals("string:value", StringDeserializer.new("value").deserializeAny(StringKindVisitor).getOrThrow())
+    }
+
+    @Test
+    public fun strDeserializerActsAsUnitEnumAccess() {
+        val (variant, access) = StrDeserializer.new("Variant").variantSeed(StringSeed).getOrThrow()
+
+        assertEquals("Variant", variant)
+        assertEquals(Unit, access.unitVariant().getOrThrow())
+    }
+}
+
+private data object StringKindVisitor : Visitor<String> {
+    override fun expecting(): String = "a string"
+
+    override fun visitStr(v: String): Result<String> = Result.success("str:$v")
+
+    override fun visitString(v: String): Result<String> = Result.success("string:$v")
+}
+
+private data object StringSeed : DeserializeSeed<String> {
+    override fun <D> deserialize(deserializer: D): Result<String>
+        where D : Deserializer =
+        deserializer.deserializeStr(StringOnlyVisitor)
+}
+
+private data object StringOnlyVisitor : Visitor<String> {
+    override fun expecting(): String = "a string"
+
+    override fun visitStr(v: String): Result<String> = Result.success(v)
+}
