@@ -64,39 +64,30 @@ public interface ForwardToDeserializeAnyDeserializer : Deserializer {
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> {
-        name.hashCode()
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> {
-        name.hashCode()
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> {
-        len.hashCode()
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> {
-        name.hashCode()
-        len.hashCode()
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> {
-        name.hashCode()
-        fields.hashCode()
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> {
-        name.hashCode()
-        variants.hashCode()
         return deserializeAny(visitor)
     }
 
