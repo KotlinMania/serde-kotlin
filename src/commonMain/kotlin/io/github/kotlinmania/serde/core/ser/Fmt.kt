@@ -3,7 +3,6 @@ package io.github.kotlinmania.serde.core.ser
 
 public data object FmtError : Error {
     public fun custom(msg: Any?): FmtError {
-        discard(msg)
         return this
     }
 }
@@ -89,19 +88,15 @@ public class FormatterSerializer(
         variantIndex: UInt,
         variant: String,
     ): Result<Unit> {
-        discard(name)
-        discard(variantIndex)
         return display(variant)
     }
 
     override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Unit>
         where T : Serialize {
-        discard(name)
         return value.serialize(this)
     }
 
     override fun serializeBytes(v: ByteArray): Result<Unit> {
-        discard(v)
         return fmtError()
     }
 
@@ -110,7 +105,6 @@ public class FormatterSerializer(
 
     override fun <T> serializeSome(value: T): Result<Unit>
         where T : Serialize {
-        discard(value)
         return fmtError()
     }
 
@@ -124,26 +118,18 @@ public class FormatterSerializer(
         value: T,
     ): Result<Unit>
         where T : Serialize {
-        discard(name)
-        discard(variantIndex)
-        discard(variant)
-        discard(value)
         return fmtError()
     }
 
     override fun serializeSeq(len: Int?): Result<SerializeSeq<Unit, FmtError>> {
-        discard(len)
         return fmtError()
     }
 
     override fun serializeTuple(len: Int): Result<SerializeTuple<Unit, FmtError>> {
-        discard(len)
         return fmtError()
     }
 
     override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Unit, FmtError>> {
-        discard(name)
-        discard(len)
         return fmtError()
     }
 
@@ -153,21 +139,14 @@ public class FormatterSerializer(
         variant: String,
         len: Int,
     ): Result<SerializeTupleVariant<Unit, FmtError>> {
-        discard(name)
-        discard(variantIndex)
-        discard(variant)
-        discard(len)
         return fmtError()
     }
 
     override fun serializeMap(len: Int?): Result<SerializeMap<Unit, FmtError>> {
-        discard(len)
         return fmtError()
     }
 
     override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Unit, FmtError>> {
-        discard(name)
-        discard(len)
         return fmtError()
     }
 
@@ -177,10 +156,6 @@ public class FormatterSerializer(
         variant: String,
         len: Int,
     ): Result<SerializeStructVariant<Unit, FmtError>> {
-        discard(name)
-        discard(variantIndex)
-        discard(variant)
-        discard(len)
         return fmtError()
     }
 
@@ -196,10 +171,6 @@ public class FormatterSerializer(
 
 private fun <T> fmtError(): Result<T> =
     Result.failure(SerdeSerializationException("formatting error"))
-
-private fun discard(value: Any?) {
-    value.hashCode()
-}
 
 private fun rustDisplayFloat(value: Float): String =
     when {
