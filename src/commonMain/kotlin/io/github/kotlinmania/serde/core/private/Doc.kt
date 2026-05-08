@@ -21,7 +21,7 @@ public class Error(
     message: String = "serde documentation test serializer was invoked",
 ) : RuntimeException(message), SerError, Lib.Debug, Lib.Display {
     public companion object {
-        public fun custom(msg: Any?): Error = Error(msg.toString())
+        public fun custom(msg: Any?): Error = Error()
     }
 
     public fun description(): String = message.orEmpty()
@@ -145,10 +145,5 @@ public interface SerializeDocTestSerializer<Ok, E> : Serializer<Ok, E>
 }
 
 private fun <T> documentationTestError(method: String, vararg ignored: Any?): Result<T> {
-    ignored.forEach(::discard)
     return Result.failure(Error("serde documentation test serializer method $method was invoked"))
-}
-
-private fun discard(value: Any?) {
-    value.hashCode()
 }
