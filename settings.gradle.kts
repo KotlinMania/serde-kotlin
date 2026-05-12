@@ -7,7 +7,7 @@ pluginManagement {
     plugins { kotlin("multiplatform") version "2.3.21" }
 }
 
-plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0" }
+plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0" }
 
 dependencyResolutionManagement {
     repositories {
@@ -18,8 +18,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "serde-kotlin"
 
-val procMacro2Local = file("../proc-macro2-kotlin")
-if (procMacro2Local.exists()) {
+fun findLocalDependencyDir(name: String): File? =
+    listOf(
+        file("../$name"),
+        file("deps/$name"),
+    ).firstOrNull { it.exists() }
+
+val procMacro2Local = findLocalDependencyDir("proc-macro2-kotlin")
+if (procMacro2Local != null) {
     includeBuild(procMacro2Local) {
         dependencySubstitution {
             substitute(module("io.github.kotlinmania:proc-macro2-kotlin")).using(project(":"))
@@ -27,8 +33,8 @@ if (procMacro2Local.exists()) {
     }
 }
 
-val quoteLocal = file("../quote-kotlin")
-if (quoteLocal.exists()) {
+val quoteLocal = findLocalDependencyDir("quote-kotlin")
+if (quoteLocal != null) {
     includeBuild(quoteLocal) {
         dependencySubstitution {
             substitute(module("io.github.kotlinmania:quote-kotlin")).using(project(":"))
@@ -36,8 +42,8 @@ if (quoteLocal.exists()) {
     }
 }
 
-val synLocal = file("../syn-kotlin")
-if (synLocal.exists()) {
+val synLocal = findLocalDependencyDir("syn-kotlin")
+if (synLocal != null) {
     includeBuild(synLocal) {
         dependencySubstitution {
             substitute(module("io.github.kotlinmania:syn-kotlin")).using(project(":"))
