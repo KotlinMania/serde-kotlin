@@ -62,7 +62,7 @@ The paths include repository metadata and build files, GitHub workflow files,
 Gradle wrapper and npm patch files, Kotlin source under `src/commonMain` and
 `src/commonTest`, serde core/de/ser/private sources, serde derive internals,
 and report/task artifacts such as `PORT_REPORT.md`, `RUST_CALLERS.md`,
-`tasks.json`, and `tasks_core.json`.
+and `tasks_core.json`.
 
 The 28 tree objects were then anchored by creating one commit per tree and
 merging those commits into `recovery/lost-code` with an ours-strategy merge
