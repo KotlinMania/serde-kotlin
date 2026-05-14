@@ -17,7 +17,7 @@ import io.github.kotlinmania.serde.core.de.Visitor
  * Building blocks for deserializing basic values using the `IntoDeserializer` interface.
  *
  * ```kotlin
- * // In Rust this example uses serde_derive and FromStr. In Kotlin, the same shape is a
+ * // Upstream uses derive support and string parsing. In Kotlin, the same shape is a
  * // `deserialize` call driven by a value deserializer.
  * //
  * // enum class Setting { On, Off }

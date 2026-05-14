@@ -15,9 +15,9 @@ import io.github.kotlinmania.serde.core.de.Visitor
  * data they can tell is in the input. This requires repetitive implementations of all the
  * `Deserializer` interface methods.
  *
- * In Rust, Serde provides a `forward_to_deserialize_any!` macro to generate these forwarding
- * methods so that they forward directly to `Deserializer.deserializeAny`. Kotlin does not have
- * macros, so the Kotlin port provides an interface that supplies default implementations.
+ * Serde provides a forwarding macro to generate these methods so that they forward directly to
+ * `Deserializer.deserializeAny`. Kotlin does not have macros, so this port provides an interface
+ * that supplies default implementations.
  *
  * Implement `deserializeAny` and inherit the rest of the `Deserializer` methods from this
  * interface.

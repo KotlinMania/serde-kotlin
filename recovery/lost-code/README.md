@@ -52,11 +52,14 @@ unreachable tree objects. Those tree objects do not add new file contents, but
 they preserve directory snapshots and path-to-blob relationships that may matter
 while reconstructing prior work.
 
-`unreachable-tree-map.tsv` records those relationships. The map contains:
+`unreachable-tree-map.tsv` records those relationships. After comparing the
+full `src/**/*.kt` paths against the files already present in this branch, exact
+duplicate source rows were pruned from the map. The map now contains:
 
 - 28 tree objects.
-- 139 unique blob hashes.
-- 661 tree/path entries.
+- 138 unique blob hashes.
+- 597 tree/path entries.
+- 19 remaining full-source Kotlin rows that differ from the checked-out files.
 
 The paths include repository metadata and build files, GitHub workflow files,
 Gradle wrapper and npm patch files, Kotlin source under `src/commonMain` and
@@ -67,3 +70,44 @@ and `tasks_core.json`.
 The 28 tree objects were then anchored by creating one commit per tree and
 merging those commits into `recovery/lost-code` with an ours-strategy merge
 commit. `tree-anchor-map.tsv` records the tree hash to anchor-commit mapping.
+
+## Reconstruction review
+
+The differing full-source Kotlin rows were compared file-by-file against the
+corresponding Rust source in `tmp/serde` with `ast_distance`.
+
+Files kept from the checked-out branch:
+
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/Lib.kt`: recovered variant
+  had a higher structural score but reintroduced root `typealias` re-export
+  bridges, which violates the project re-export rule.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/core/Lib.kt`: recovered
+  variant was only a comment/prose predecessor; current prose removes stale
+  snake-case crate names.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/core/Macros.kt`: recovered
+  variant contains unresolved conflict markers. Current file was kept and the
+  snake-case macro name in KDoc was translated to Kotlin-facing prose.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/core/de/Impls.kt`: current
+  file has the better `ast_distance` score and more function coverage.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/core/de/value/Value.kt`:
+  current file is the later, fuller variant and includes the recovered
+  `NeverDeserializer`; the snake-case derive reference in KDoc was translated.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/core/private/SizeHint.kt`:
+  current file has the better score; recovered variant contains unresolved
+  conflict markers.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/core/private/String.kt`:
+  current and recovered score identically; current keeps Kotlin-facing fully
+  qualified sample text.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/private/Mod.kt`: recovered
+  variant puts implementation helpers into a `mod.rs` tracking file and has
+  parser errors, so current ledger shape is kept.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/serdederive/src/Fragment.kt`:
+  recovered variant scores slightly higher but imports a non-existent root
+  `syn.Token` facade; current file matches the available sibling APIs.
+- `src/commonMain/kotlin/io/github/kotlinmania/serde/serdederive/src/internals/Respan.kt`:
+  current file has the better function score and matches the available
+  `proc-macro2-kotlin` API.
+
+The loose `ValueTest` blob differs from
+`src/commonTest/kotlin/io/github/kotlinmania/serde/core/de/value/ValueTest.kt`
+only by an extra `VariantAccess` import. The checked-out test was kept.
