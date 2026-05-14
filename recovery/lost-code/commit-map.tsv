@@ -1,0 +1,7 @@
+commit	parents	subject
+2d92ae9de504cdacc36cdd5fdd27114a7cdf5f2d	07d68f9,0d948ab	On docs/mod-rs-reexport-rule: audit-claude-md
+0d948ab9f53ae73e15302dfdbdbef45cb4d4d238	07d68f9	index on docs/mod-rs-reexport-rule: 07d68f9 Persist WIP before starlark-kotlin template conformance
+75a7825a7b3518498a2a7c264158bd8e6d80dcf4	251703d,a50cf00	WIP on main: 251703d Extend serde value deserializers
+a50cf003e23bac845ecb8c7282901ce15cdbdefb	251703d	index on main: 251703d Extend serde value deserializers
+16c8ac77994540230b3ac12c1eeec99a3ca5ceea	4e7a06b	Port serde Content
+089b6f6802b486d3d1fbab5dd1ab363d35eeb897	07d68f9	Conform build/CI/license to starlark-kotlin template

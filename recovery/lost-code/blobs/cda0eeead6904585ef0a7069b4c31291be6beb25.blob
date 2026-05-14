@@ -15,9 +15,9 @@ import io.github.kotlinmania.serde.core.de.Visitor
  * data they can tell is in the input. This requires repetitive implementations of all the
  * `Deserializer` interface methods.
  *
- * Serde provides a forwarding macro to generate these methods so that they forward directly to
- * `Deserializer.deserializeAny`. Kotlin does not have macros, so this port provides an interface
- * that supplies default implementations.
+ * In Rust, Serde provides a `forward_to_deserialize_any!` macro to generate these forwarding
+ * methods so that they forward directly to `Deserializer.deserializeAny`. Kotlin does not have
+ * macros, so the Kotlin port provides an interface that supplies default implementations.
  *
  * Implement `deserializeAny` and inherit the rest of the `Deserializer` methods from this
  * interface.
@@ -64,30 +64,57 @@ public interface ForwardToDeserializeAnyDeserializer : Deserializer {
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> {
+<<<<<<< HEAD
+=======
+        name.hashCode()
+>>>>>>> backup/local-main-pre-sync
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> {
+<<<<<<< HEAD
+=======
+        name.hashCode()
+>>>>>>> backup/local-main-pre-sync
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> {
+<<<<<<< HEAD
+=======
+        len.hashCode()
+>>>>>>> backup/local-main-pre-sync
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> {
+<<<<<<< HEAD
+=======
+        name.hashCode()
+        len.hashCode()
+>>>>>>> backup/local-main-pre-sync
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> {
+<<<<<<< HEAD
+=======
+        name.hashCode()
+        fields.hashCode()
+>>>>>>> backup/local-main-pre-sync
         return deserializeAny(visitor)
     }
 
     override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> {
+<<<<<<< HEAD
+=======
+        name.hashCode()
+        variants.hashCode()
+>>>>>>> backup/local-main-pre-sync
         return deserializeAny(visitor)
     }
 
