@@ -1,0 +1,7 @@
+commit 0d948ab9f53ae73e15302dfdbdbef45cb4d4d238
+Author:     Sydney Renee <sydney@solace.ofharmony.ai>
+AuthorDate: Wed May 6 17:20:05 2026 -0700
+Commit:     Sydney Renee <sydney@solace.ofharmony.ai>
+CommitDate: Wed May 6 17:20:05 2026 -0700
+
+    index on docs/mod-rs-reexport-rule: 07d68f9 Persist WIP before starlark-kotlin template conformance
