@@ -31,6 +31,7 @@ private fun helper(bounds: Pair<Int, Int?>): Int? {
 }
 
 @PublishedApi
+<<<<<<< HEAD
 internal inline fun <reified Element> sizeOf(): Int =
     when (Element::class) {
         Unit::class -> 0
@@ -40,3 +41,6 @@ internal inline fun <reified Element> sizeOf(): Int =
         Long::class, ULong::class, Double::class -> 8
         else -> 8
     }
+=======
+internal inline fun <reified Element> sizeOf(): Int = 8
+>>>>>>> backup/local-main-pre-sync
