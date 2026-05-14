@@ -3,9 +3,8 @@ package io.github.kotlinmania.serde.serdederive.src
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.quote.toTokens
+import io.github.kotlinmania.syn.Token
 import io.github.kotlinmania.syn.token.Brace
-import io.github.kotlinmania.syn.token.Comma
 
 public sealed class Fragment {
     /**
@@ -70,7 +69,7 @@ public data class Match(public val fragment: Fragment) : ToTokens {
         when (val current = fragment) {
             is Fragment.Expr -> {
                 current.expr.toTokens(out)
-                Comma.default().toTokens(out)
+                Token.Comma.default().toTokens(out)
             }
 
             is Fragment.Block -> {

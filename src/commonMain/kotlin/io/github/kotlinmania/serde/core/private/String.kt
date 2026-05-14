@@ -5,7 +5,7 @@ public fun fromUtf8Lossy(bytes: ByteArray): String = bytes.decodeToString()
 
 // The generated code calls this like:
 //
-//     val value = io.github.kotlinmania.serde.core.`private`.fromUtf8Lossy(bytes)
+//     val value = serde.private.fromUtf8Lossy(bytes)
 //     Err(serde.de.Error.unknownVariant(value, VARIANTS))
 //
 // so it is okay for the return type to be different from the standard-library

@@ -7,13 +7,13 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.procmacro2.TokenTree
 
 internal fun respan(stream: TokenStream, span: Span): TokenStream =
-    TokenStream.fromTokenTrees(stream.map { token: TokenTree -> respanToken(token, span) })
+    TokenStream.fromIterable(stream.map { token: TokenTree -> respanToken(token, span) })
 
 private fun respanToken(token: TokenTree, span: Span): TokenTree {
     val respanned =
         when (token) {
             is TokenTree.Group -> {
-                val group = token.value
+                val group = token.group
                 TokenTree.Group(
                     Group(
                         group.delimiter(),
