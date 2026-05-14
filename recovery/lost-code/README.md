@@ -43,3 +43,23 @@ mapped by the recovered commit trees.
 
 `blob-map.tsv` records sizes and any paths discovered in the recovered commit
 trees. `commit-map.tsv` records the recovered commit parents and subjects.
+
+## Recovered tree maps
+
+After the recovery anchor and blob export commit, `git fsck --no-reflogs --unreachable`
+reported no unreachable commits and no unreachable blobs. It still reported 28
+unreachable tree objects. Those tree objects do not add new file contents, but
+they preserve directory snapshots and path-to-blob relationships that may matter
+while reconstructing prior work.
+
+`unreachable-tree-map.tsv` records those relationships. The map contains:
+
+- 28 tree objects.
+- 139 unique blob hashes.
+- 661 tree/path entries.
+
+The paths include repository metadata and build files, GitHub workflow files,
+Gradle wrapper and npm patch files, Kotlin source under `src/commonMain` and
+`src/commonTest`, serde core/de/ser/private sources, serde derive internals,
+and report/task artifacts such as `PORT_REPORT.md`, `RUST_CALLERS.md`,
+`tasks.json`, and `tasks_core.json`.
