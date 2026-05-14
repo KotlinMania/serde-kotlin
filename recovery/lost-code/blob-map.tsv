@@ -1,9 +1,0 @@
-blob	size	known_paths_in_recovered_commits
-268bfe1fa5c813617b3ab6366edfda6d89f5392e	957	16c8ac7:src/commonMain/kotlin/io/github/kotlinmania/serde/Integer128.kt
-45fd29060913772a208612af31279e0c5ec8bcd5	1242	unmapped by recovered commit trees
-a3c4e1088fd22e530ab904d21f7ec60367e9d457	1855	unmapped by recovered commit trees
-b1e8d81723090971b497ae9345ed36da81b8afa4	2229	16c8ac7:src/commonMain/kotlin/io/github/kotlinmania/serde/core/private/Content.kt
-bf7c2e73ece8e717565ffc827daac19f57b20820	3684	unmapped by recovered commit trees
-cda0eeead6904585ef0a7069b4c31291be6beb25	4970	unmapped by recovered commit trees
-4845aead0089445db7931a68496b0426b43c6375	7033	unmapped by recovered commit trees
-5e61689a688025b6f1b8e443f2073b94653c3f53	19354	unmapped by recovered commit trees
