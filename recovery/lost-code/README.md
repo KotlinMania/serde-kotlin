@@ -63,3 +63,7 @@ Gradle wrapper and npm patch files, Kotlin source under `src/commonMain` and
 `src/commonTest`, serde core/de/ser/private sources, serde derive internals,
 and report/task artifacts such as `PORT_REPORT.md`, `RUST_CALLERS.md`,
 `tasks.json`, and `tasks_core.json`.
+
+The 28 tree objects were then anchored by creating one commit per tree and
+merging those commits into `recovery/lost-code` with an ours-strategy merge
+commit. `tree-anchor-map.tsv` records the tree hash to anchor-commit mapping.
