@@ -94,6 +94,7 @@ package io.github.kotlinmania.serde
 // Support using Serde without the standard library!
 // `#![cfg_attr(not(feature = "std"), no_std)]`
 //
+<<<<<<< HEAD
 // The upstream `serde/src/lib.rs` `crate_root!()` macro emits, from `serde_core`:
 //   `pub use serde_core::{de, forward_to_deserialize_any, ser, Deserialize, Deserializer, Serialize, Serializer};`
 //
@@ -110,6 +111,17 @@ package io.github.kotlinmania.serde
 //   (none — workspace audit confirmed zero Kotlin callers held imports of
 //   `io.github.kotlinmania.serde.{Deserialize,Deserializer,Serialize,Serializer}` at the time
 //   the typealiases were retired.)
+=======
+// The upstream crate includes a `crate_root!()` macro that defines a `lib` facade module and
+// re-exports the public Serde traits and modules from `serde_core`. Kotlin has no analog to Rust's
+// conditional compilation or module re-exports; this port represents the same surface by pointing
+// directly at the Kotlin translations of the upstream `serde_core` modules.
+
+public typealias Deserialize<T> = io.github.kotlinmania.serde.core.de.Deserialize<T>
+public typealias Deserializer = io.github.kotlinmania.serde.core.de.Deserializer
+public typealias Serialize = io.github.kotlinmania.serde.core.ser.Serialize
+public typealias Serializer<Ok, E> = io.github.kotlinmania.serde.core.ser.Serializer<Ok, E>
+>>>>>>> backup/local-main-pre-sync
 
 // Re-export `__require_serde_not_serde_core! {}`.
 public fun __requireSerdeNotSerdeCore() {
