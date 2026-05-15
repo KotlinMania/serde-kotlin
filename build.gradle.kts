@@ -251,8 +251,12 @@ mavenPublishing {
 // ---------------------------------------------------------------------------
 // CodeQL Java/Kotlin extraction task
 //
-// .github/workflows/codeql.yml invokes `./gradlew codeqlCompileJvm` to feed
-// kotlinc-compiled commonMain through the CodeQL Java agent.
+// This mirrors the kotlinmania build template: commonMain sources are compiled
+// as a single-target JVM compile so CodeQL's Kotlin extractor can hook kotlinc
+// without adding a real jvm() publication target. Kotlinmania dependencies are
+// supplied from their Android AAR classes.jar files because every repo publishes
+// an Android variant, while many ports intentionally do not publish jvm().
+
 val codeqlKotlinc: Configuration by configurations.creating {
     description = "Kotlin compiler (CodeQL extraction target only - not published)"
     isCanBeResolved = true
@@ -266,7 +270,7 @@ val codeqlSourceClasspath: Configuration by configurations.creating {
 }
 
 val codeqlAndroidAar: Configuration by configurations.creating {
-    description = "Android AAR artifacts for CodeQL classpath extraction (classes.jar only)"
+    description = "Android AAR artifacts for CodeQL dependency classpath extraction (classes.jar only)"
     isCanBeResolved = true
     isCanBeConsumed = false
 }
