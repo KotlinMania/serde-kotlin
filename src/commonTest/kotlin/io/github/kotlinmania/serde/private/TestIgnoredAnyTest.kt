@@ -29,7 +29,7 @@ private sealed class Target {
     }
 }
 
-private class EnumDeserializer(
+private class TestEnumDeserializer(
     private val variant: String,
 ) : Deserializer, EnumAccess, VariantAccess {
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> =
@@ -169,15 +169,15 @@ public class TestIgnoredAnyTest {
     @Test
     public fun testDeserializeEnum() {
         // First just make sure the Deserializer implementation works.
-        assertEquals(Target.UnitVariant, Target.deserialize(EnumDeserializer("Unit")).getOrThrow())
-        assertEquals(Target.Newtype(10), Target.deserialize(EnumDeserializer("Newtype")).getOrThrow())
-        assertEquals(Target.Tuple(1, 2), Target.deserialize(EnumDeserializer("Tuple")).getOrThrow())
-        assertEquals(Target.Struct(a = 10), Target.deserialize(EnumDeserializer("Struct")).getOrThrow())
+        assertEquals(Target.UnitVariant, Target.deserialize(TestEnumDeserializer("Unit")).getOrThrow())
+        assertEquals(Target.Newtype(10), Target.deserialize(TestEnumDeserializer("Newtype")).getOrThrow())
+        assertEquals(Target.Tuple(1, 2), Target.deserialize(TestEnumDeserializer("Tuple")).getOrThrow())
+        assertEquals(Target.Struct(a = 10), Target.deserialize(TestEnumDeserializer("Struct")).getOrThrow())
 
         // Now try IgnoredAny.
-        IgnoredAny.deserialize(EnumDeserializer("Unit")).getOrThrow()
-        IgnoredAny.deserialize(EnumDeserializer("Newtype")).getOrThrow()
-        IgnoredAny.deserialize(EnumDeserializer("Tuple")).getOrThrow()
-        IgnoredAny.deserialize(EnumDeserializer("Struct")).getOrThrow()
+        IgnoredAny.deserialize(TestEnumDeserializer("Unit")).getOrThrow()
+        IgnoredAny.deserialize(TestEnumDeserializer("Newtype")).getOrThrow()
+        IgnoredAny.deserialize(TestEnumDeserializer("Tuple")).getOrThrow()
+        IgnoredAny.deserialize(TestEnumDeserializer("Struct")).getOrThrow()
     }
 }
