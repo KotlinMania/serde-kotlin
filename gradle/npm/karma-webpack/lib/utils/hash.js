@@ -5,9 +5,9 @@
 function hash(s) {
   let h = 0xdeadbeef;
   for (let i = 0; i < s.length; i++) {
-    h = Math.imul(h ^ s.charCodeAt(i), 2654435761);
+    h = Math.imul(h ^ s.charCodeAt(i), 2654435761); // eslint-disable-line no-bitwise
   }
-  return (h ^ (h >>> 16)) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0; // eslint-disable-line no-bitwise
 }
 
 module.exports = { hash };
