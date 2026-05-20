@@ -14,7 +14,7 @@ public class MultiName internal constructor(
     internal val serializeRenamed: Boolean,
     internal val deserialize: Name,
     internal val deserializeRenamed: Boolean,
-    private val deserializeAliasesValue: List<Name>,
+    private val deserializeAliasesValue: MutableList<Name>,
 ) {
     public companion object {
         internal fun fromAttrs(
@@ -58,10 +58,17 @@ public class MultiName internal constructor(
     public fun deserializeName(): Name = deserialize
 
     internal fun deserializeAliases(): List<Name> = deserializeAliasesValue
+
+    internal fun addDeserializeAlias(alias: Name) {
+        if (alias !in deserializeAliasesValue) {
+            deserializeAliasesValue += alias
+            deserializeAliasesValue.sort()
+        }
+    }
 }
 
 public class Name(
-    public val value: String,
+    public var value: String,
     public val span: Span,
 ) : ToTokens, Comparable<Name> {
     override fun toTokens(tokens: TokenStream) {
