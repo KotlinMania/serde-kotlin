@@ -24,7 +24,7 @@ function configToWebpackEntries(config) {
     exclude.find((exPat) => minimatch(filePath, exPat));
 
   config.files.forEach((fileEntry, i) => {
-    // forcefully disable karma watch as we use webpack watch only
+    // Webpack watch owns rebuilds for these files.
     config.files[i].watched = false;
     files = [...files, ...glob.sync(fileEntry.pattern)];
   });
@@ -89,7 +89,7 @@ ignoring attempt to set the entry option...
 
   return function processFile(content, file, done) {
     controller.bundle().then(() => {
-      file.path = normalize(file.path); // eslint-disable-line no-param-reassign
+      file.path = normalize(file.path);
 
       const transformedFilePath = transformPath(getPathKey(file.path, true));
       const bundleContent = controller.bundlesContent[transformedFilePath];
