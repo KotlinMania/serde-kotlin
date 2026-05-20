@@ -2,6 +2,7 @@
 package io.github.kotlinmania.serde.serdederive.src.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
+import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.Error as SynError
 
@@ -36,6 +37,16 @@ public class Ctxt private constructor(
         requireNotNull(errors)
             // Curb monomorphization from generating too many identical methods.
             .add(SynError.newSpanned(tokens, msg.toString()))
+    }
+
+    public fun errorSpannedBy(obj: Any?, msg: Any?) {
+        val error =
+            when (obj) {
+                is ToTokens -> SynError.newSpanned(obj, msg.toString())
+                is TokenStream -> SynError.newSpanned(obj, msg.toString())
+                else -> SynError.new(Span.callSite(), msg.toString())
+            }
+        requireNotNull(errors).add(error)
     }
 
     /**

@@ -37,11 +37,11 @@ public fun quoteBlock(tokens: TokenStream): Fragment =
  * curly braces.
  */
 public data class Expr(public val fragment: Fragment) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         when (val current = fragment) {
-            is Fragment.Expr -> current.expr.toTokens(out)
+            is Fragment.Expr -> current.expr.toTokens(tokens)
             is Fragment.Block -> {
-                Brace.default().surround(out) { inner: TokenStream ->
+                Brace.default().surround(tokens) { inner: TokenStream ->
                     current.block.toTokens(inner)
                 }
             }
@@ -53,10 +53,10 @@ public data class Expr(public val fragment: Fragment) : ToTokens {
  * Interpolate a fragment as the statements of a block.
  */
 public data class Stmts(public val fragment: Fragment) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         when (val current = fragment) {
-            is Fragment.Expr -> current.expr.toTokens(out)
-            is Fragment.Block -> current.block.toTokens(out)
+            is Fragment.Expr -> current.expr.toTokens(tokens)
+            is Fragment.Block -> current.block.toTokens(tokens)
         }
     }
 }
@@ -66,15 +66,15 @@ public data class Stmts(public val fragment: Fragment) : ToTokens {
  * after expressions and curly braces around blocks.
  */
 public data class Match(public val fragment: Fragment) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         when (val current = fragment) {
             is Fragment.Expr -> {
-                current.expr.toTokens(out)
-                Comma.default().toTokens(out)
+                current.expr.toTokens(tokens)
+                Comma.default().toTokens(tokens)
             }
 
             is Fragment.Block -> {
-                Brace.default().surround(out) { inner: TokenStream ->
+                Brace.default().surround(tokens) { inner: TokenStream ->
                     current.block.toTokens(inner)
                 }
             }

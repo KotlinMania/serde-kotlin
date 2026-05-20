@@ -4,6 +4,7 @@ package io.github.kotlinmania.serde.serdederive.src
 import io.github.kotlinmania.serde.serdederive.src.internals.ast.Container
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathArguments
+import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.PathSep
 
 public fun thisType(cont: Container): Path {
