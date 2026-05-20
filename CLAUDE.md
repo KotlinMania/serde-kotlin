@@ -96,9 +96,9 @@ Kotlin files start with exactly the `port-lint` line and the package line, then 
 ./gradlew test
 ```
 
-Targets: macOS arm64/x64, Linux x64, mingw-x64, iOS arm64/x64/simulator-arm64, JS, Wasm-JS, Android.
+Targets: macOS arm64/x64, Linux x64, mingw-x64, iOS arm64/x64/simulator-arm64, JS, Wasm-JS, Wasm-WASI, Android, Android Native, and JVM.
 
-There is no JVM-only target. `./gradlew jvmTest` is **not** valid.
+`./gradlew jvmTest` is part of the default verification surface.
 
 ## Forbidden
 
