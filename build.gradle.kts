@@ -40,7 +40,6 @@ kotlin {
     sourceSets.all {
         languageSettings.optIn("kotlin.time.ExperimentalTime")
         languageSettings.optIn("kotlin.concurrent.atomics.ExperimentalAtomicApi")
-        kotlin.exclude("**/serdederive/**")
     }
 
     compilerOptions {
@@ -155,10 +154,6 @@ tasks.withType<AbstractTestTask>().configureEach {
         showStackTraces = true
         showStandardStreams = true
     }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    exclude("**/serdederive/**")
 }
 
 rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") {
@@ -306,7 +301,6 @@ val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
     val sources =
         fileTree("src/commonMain/kotlin") {
             include("**/*.kt")
-            exclude("io/github/kotlinmania/serde/serdederive/**")
         }
     val sentinelDir = layout.buildDirectory.dir("generated/codeql-empty-source")
     inputs.files(sources).withPathSensitivity(PathSensitivity.RELATIVE)
