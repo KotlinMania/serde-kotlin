@@ -262,6 +262,8 @@ kotlin {
         }
     }
 
+    jvm()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -399,9 +401,9 @@ mavenPublishing {
 //
 // This mirrors the kotlinmania build template: commonMain sources are compiled
 // as a single-target JVM compile so CodeQL's Kotlin extractor can hook kotlinc
-// without adding a real jvm() publication target. Kotlinmania dependencies are
+// independently of the published jvm() target. Kotlinmania dependencies are
 // supplied from their Android AAR classes.jar files because every repo publishes
-// an Android variant, while many ports intentionally do not publish jvm().
+// an Android variant.
 
 val codeqlKotlinc: Configuration by configurations.creating {
     description = "Kotlin compiler (CodeQL extraction target only - not published)"
@@ -522,6 +524,7 @@ tasks.register("test") {
 
     val defaultTestTasks = listOf(
         "macosArm64Test",
+        "jvmTest",
         "jsNodeTest",
         "wasmJsNodeTest",
         "compileAndroidMain",

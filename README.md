@@ -160,7 +160,10 @@ dependencies {
 - iOS arm64 / simulator-arm64 (Swift export + XCFramework)
 - JS (browser + Node.js)
 - Wasm-JS (browser + Node.js)
+- Wasm-WASI (Node.js)
 - Android (API 24+)
+- Android Native arm32 / arm64 / x86 / x64
+- JVM
 
 ### Porting guidelines
 
