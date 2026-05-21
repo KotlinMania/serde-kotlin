@@ -433,7 +433,7 @@ dependencies {
     codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.4.0")
     codeqlAndroidAar("io.github.kotlinmania:proc-macro2-kotlin-android:0.1.2")
     codeqlAndroidAar("io.github.kotlinmania:quote-kotlin-android:0.1.2")
-    codeqlAndroidAar("io.github.kotlinmania:syn-kotlin-android:0.1.0")
+    codeqlAndroidAar("io.github.kotlinmania:syn-kotlin-android:0.1.1")
 }
 
 val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
