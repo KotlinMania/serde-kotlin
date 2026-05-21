@@ -274,7 +274,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
                 api("io.github.kotlinmania:proc-macro2-kotlin:0.1.2")
                 api("io.github.kotlinmania:quote-kotlin:0.1.2")
-                api("io.github.kotlinmania:syn-kotlin:0.1.0")
+                api("io.github.kotlinmania:syn-kotlin:0.1.1")
             }
         }
         val commonTest by getting { dependencies { implementation(kotlin("test")) } }
