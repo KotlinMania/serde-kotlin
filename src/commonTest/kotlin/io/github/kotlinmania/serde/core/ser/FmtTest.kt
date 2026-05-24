@@ -38,10 +38,18 @@ public class FmtTest {
         val builder = StringBuilder()
         val serializer = FormatterSerializer(builder)
 
+        assertTrue(serializer.serializeBytes(byteArrayOf(1, 2, 3)).isFailure)
         assertTrue(serializer.serializeNone().isFailure)
         assertTrue(serializer.serializeSome(LiteralSerialize("value")).isFailure)
+        assertTrue(serializer.serializeUnit().isFailure)
         assertTrue(serializer.serializeNewtypeVariant("EnumName", 0u, "Variant", LiteralSerialize("value")).isFailure)
         assertTrue(serializer.serializeSeq(null).isFailure)
+        assertTrue(serializer.serializeTuple(2).isFailure)
+        assertTrue(serializer.serializeTupleStruct("TupleStruct", 2).isFailure)
+        assertTrue(serializer.serializeTupleVariant("EnumName", 0u, "Tuple", 2).isFailure)
+        assertTrue(serializer.serializeMap(null).isFailure)
+        assertTrue(serializer.serializeStruct("Struct", 1).isFailure)
+        assertTrue(serializer.serializeStructVariant("EnumName", 0u, "Struct", 1).isFailure)
         assertEquals("", builder.toString())
     }
 }
