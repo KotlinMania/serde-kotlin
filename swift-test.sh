@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # swift-test.sh — build the Swift Export package and run swift test locally.
 #
 # Usage:
