@@ -7,6 +7,7 @@ import io.github.kotlinmania.syn.Data
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Meta
 import io.github.kotlinmania.syn.parseNestedMeta
+import io.github.kotlinmania.syn.Result
 
 public fun allowDeprecated(input: DeriveInput): TokenStream? =
     if (shouldAllowDeprecated(input)) {
