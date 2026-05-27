@@ -4,7 +4,7 @@ package io.github.kotlinmania.serde.serdederive.src.internals
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.syn.Error as SynError
+import io.github.kotlinmania.syn.SynError
 
 /**
  * A type to collect errors together and format them.

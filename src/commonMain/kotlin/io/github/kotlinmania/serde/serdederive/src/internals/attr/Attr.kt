@@ -64,7 +64,7 @@ import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.PathSegment
 import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.Type
+import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.Variant as SynVariant
 import io.github.kotlinmania.syn.WherePredicate
 import io.github.kotlinmania.syn.copy
@@ -194,9 +194,9 @@ public class Container private constructor(
     private val serBoundValue: List<WherePredicate>?,
     private val deBoundValue: List<WherePredicate>?,
     private val tagValue: TagType,
-    private val typeFromValue: Type?,
-    private val typeTryFromValue: Type?,
-    private val typeIntoValue: Type?,
+    private val typeFromValue: SynType?,
+    private val typeTryFromValue: SynType?,
+    private val typeIntoValue: SynType?,
     private val remoteValue: Path?,
     private val identifierValue: Identifier,
     private val serdePathValue: Path?,
@@ -223,9 +223,9 @@ public class Container private constructor(
             val untagged = BoolAttr.none(cx, UNTAGGED)
             val internalTag = Attr.none<String>(cx, TAG)
             val content = Attr.none<String>(cx, CONTENT)
-            val typeFrom = Attr.none<Type>(cx, FROM)
-            val typeTryFrom = Attr.none<Type>(cx, TRY_FROM)
-            val typeInto = Attr.none<Type>(cx, INTO)
+            val typeFrom = Attr.none<SynType>(cx, FROM)
+            val typeTryFrom = Attr.none<SynType>(cx, TRY_FROM)
+            val typeInto = Attr.none<SynType>(cx, INTO)
             val remote = Attr.none<Path>(cx, REMOTE)
             val fieldIdentifier = BoolAttr.none(cx, FIELD_IDENTIFIER)
             val variantIdentifier = BoolAttr.none(cx, VARIANT_IDENTIFIER)
@@ -420,9 +420,9 @@ public class Container private constructor(
     public fun serBound(): List<WherePredicate>? = serBoundValue
     public fun deBound(): List<WherePredicate>? = deBoundValue
     public fun tag(): TagType = tagValue
-    public fun typeFrom(): Type? = typeFromValue
-    public fun typeTryFrom(): Type? = typeTryFromValue
-    public fun typeInto(): Type? = typeIntoValue
+    public fun typeFrom(): SynType? = typeFromValue
+    public fun typeTryFrom(): SynType? = typeTryFromValue
+    public fun typeInto(): SynType? = typeIntoValue
     public fun remote(): Path? = remoteValue?.copy()
     public fun isPacked(): Boolean = isPackedValue
     public fun identifier(): Identifier = identifierValue
@@ -1069,8 +1069,8 @@ private fun setRenameRule(
 private fun parseExprPath(value: String): Expr.Path =
     Expr.Path(emptyList(), null, parsePath(value))
 
-private fun parseType(value: String): Type =
-    Type.Path(null, parsePath(value))
+private fun parseType(value: String): SynType =
+    SynType.Path(null, parsePath(value))
 
 private fun parsePath(value: String): Path {
     val cleaned = value.substringBefore('<').trim()
@@ -1122,14 +1122,14 @@ private fun pathFromSegments(segments: List<String>): Path {
     return path
 }
 
-private fun isImplicitlyBorrowed(ty: Type): Boolean =
+private fun isImplicitlyBorrowed(ty: SynType): Boolean =
     isImplicitlyBorrowedReference(ty) || isOption(ty, ::isImplicitlyBorrowedReference)
 
-private fun isImplicitlyBorrowedReference(ty: Type): Boolean =
+private fun isImplicitlyBorrowedReference(ty: SynType): Boolean =
     isReference(ty, ::isStr) || isReference(ty, ::isSliceU8)
 
-private fun isCow(ty: Type, elem: (Type) -> Boolean): Boolean {
-    val path = (ungroup(ty) as? Type.Path)?.path ?: return false
+private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
+    val path = (ungroup(ty) as? SynType.Path)?.path ?: return false
     val seg = path.segments.last() ?: return false
     val args = (seg.arguments as? PathArguments.AngleBracketed)?.args ?: return false
     if (seg.ident.toString() != "Cow" || args.len() != 2) {
@@ -1139,8 +1139,8 @@ private fun isCow(ty: Type, elem: (Type) -> Boolean): Boolean {
         (args[1] as? GenericArgument.TypeArg)?.type?.let(elem) == true
 }
 
-private fun isOption(ty: Type, elem: (Type) -> Boolean): Boolean {
-    val path = (ungroup(ty) as? Type.Path)?.path ?: return false
+private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
+    val path = (ungroup(ty) as? SynType.Path)?.path ?: return false
     val seg = path.segments.last() ?: return false
     val args = (seg.arguments as? PathArguments.AngleBracketed)?.args ?: return false
     return seg.ident.toString() == "Option" &&
@@ -1148,17 +1148,17 @@ private fun isOption(ty: Type, elem: (Type) -> Boolean): Boolean {
         (args[0] as? GenericArgument.TypeArg)?.type?.let(elem) == true
 }
 
-private fun isReference(ty: Type, elem: (Type) -> Boolean): Boolean =
-    (ungroup(ty) as? Type.Reference)?.elem?.let(elem) == true
+private fun isReference(ty: SynType, elem: (SynType) -> Boolean): Boolean =
+    (ungroup(ty) as? SynType.Reference)?.elem?.let(elem) == true
 
-private fun isStr(ty: Type): Boolean =
+private fun isStr(ty: SynType): Boolean =
     isPrimitiveType(ty, "str")
 
-private fun isSliceU8(ty: Type): Boolean =
-    (ungroup(ty) as? Type.Slice)?.elem?.let { isPrimitiveType(it, "u8") } == true
+private fun isSliceU8(ty: SynType): Boolean =
+    (ungroup(ty) as? SynType.Slice)?.elem?.let { isPrimitiveType(it, "u8") } == true
 
-private fun isPrimitiveType(ty: Type, primitive: String): Boolean {
-    val pathType = ungroup(ty) as? Type.Path ?: return false
+private fun isPrimitiveType(ty: SynType, primitive: String): Boolean {
+    val pathType = ungroup(ty) as? SynType.Path ?: return false
     return pathType.qself == null && isPrimitivePath(pathType.path, primitive)
 }
 
@@ -1183,23 +1183,23 @@ private fun borrowableLifetimes(
     }
 }
 
-private fun collectLifetimes(ty: Type, out: MutableSet<Lifetime>) {
+private fun collectLifetimes(ty: SynType, out: MutableSet<Lifetime>) {
     when (val type = ty) {
-        is Type.Slice -> collectLifetimes(type.elem, out)
-        is Type.Array -> collectLifetimes(type.elem, out)
-        is Type.Ptr -> collectLifetimes(type.elem, out)
-        is Type.Reference -> {
+        is SynType.Slice -> collectLifetimes(type.elem, out)
+        is SynType.Array -> collectLifetimes(type.elem, out)
+        is SynType.Ptr -> collectLifetimes(type.elem, out)
+        is SynType.Reference -> {
             type.lifetime?.let(out::add)
             collectLifetimes(type.elem, out)
         }
 
-        is Type.Tuple -> {
+        is SynType.Tuple -> {
             for (elem in type.elems) {
                 collectLifetimes(elem, out)
             }
         }
 
-        is Type.Path -> {
+        is SynType.Path -> {
             type.qself?.let { collectLifetimes(it.ty, out) }
             for (seg in type.path.segments) {
                 val bracketed = seg.arguments as? PathArguments.AngleBracketed ?: continue
@@ -1217,15 +1217,15 @@ private fun collectLifetimes(ty: Type, out: MutableSet<Lifetime>) {
             }
         }
 
-        is Type.Paren -> collectLifetimes(type.elem, out)
-        is Type.Group -> collectLifetimes(type.elem, out)
-        is Type.Macro -> collectLifetimesFromTokens(type.mac.tokens, out)
-        is Type.BareFn,
-        is Type.Never,
-        is Type.TraitObject,
-        is Type.ImplTrait,
-        is Type.Infer,
-        is Type.Verbatim,
+        is SynType.Paren -> collectLifetimes(type.elem, out)
+        is SynType.Group -> collectLifetimes(type.elem, out)
+        is SynType.Macro -> collectLifetimesFromTokens(type.mac.tokens, out)
+        is SynType.BareFn,
+        is SynType.Never,
+        is SynType.TraitObject,
+        is SynType.ImplTrait,
+        is SynType.Infer,
+        is SynType.Verbatim,
         -> Unit
     }
 }

@@ -18,7 +18,7 @@ import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.Type
+import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.Variant as SynVariant
 import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.Comma
@@ -151,7 +151,7 @@ public class Variant(
 public class Field(
     public val member: Member,
     public val attrs: AttrField,
-    public val ty: Type,
+    public val ty: SynType,
     public val original: SynField,
 )
 
@@ -272,6 +272,6 @@ private fun fieldsFromAst(
 
 private fun SynField.tySpan(): Span =
     when (val type = ty) {
-        is Type.Path -> type.path.getIdent()?.span() ?: Span.callSite()
+        is SynType.Path -> type.path.getIdent()?.span() ?: Span.callSite()
         else -> Span.callSite()
     }
