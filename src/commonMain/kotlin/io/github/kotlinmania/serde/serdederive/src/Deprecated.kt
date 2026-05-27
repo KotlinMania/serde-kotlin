@@ -7,7 +7,7 @@ import io.github.kotlinmania.syn.Data
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Meta
 import io.github.kotlinmania.syn.parseNestedMeta
-import io.github.kotlinmania.syn.Result
+import io.github.kotlinmania.syn.SynResult
 
 public fun allowDeprecated(input: DeriveInput): TokenStream? =
     if (shouldAllowDeprecated(input)) {
@@ -55,7 +55,7 @@ private fun containsDeprecated(attrs: List<Attribute>): Boolean {
                 if (nested.path.isIdent("deprecated")) {
                     allowDeprecated = true
                 }
-                Result.success(Unit)
+                SynResult.success(Unit)
             }
             if (allowDeprecated) {
                 return true

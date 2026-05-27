@@ -423,10 +423,10 @@ public class Container private constructor(
     public fun typeFrom(): SynType? = typeFromValue
     public fun typeTryFrom(): SynType? = typeTryFromValue
     public fun typeInto(): SynType? = typeIntoValue
-    public fun remote(): Path? = remoteValue?.copy()
+    public fun remote(): Path? = remoteValue?.deepCopy()
     public fun isPacked(): Boolean = isPackedValue
     public fun identifier(): Identifier = identifierValue
-    public fun customSerdePath(): Path? = serdePathValue?.copy()
+    public fun customSerdePath(): Path? = serdePathValue?.deepCopy()
     public fun expecting(): String? = expectingValue
     public fun nonExhaustive(): Boolean = nonExhaustiveValue
 }
@@ -732,8 +732,8 @@ public class Variant private constructor(
     public fun skipDeserializing(): Boolean = skipDeserializingValue
     public fun skipSerializing(): Boolean = skipSerializingValue
     public fun other(): Boolean = otherValue
-    public fun serializeWith(): Expr.Path? = serializeWithValue?.copy(attrs = serializeWithValue.attrs.map { it.deepCopy() }, path = serializeWithValue.path.copy())
-    public fun deserializeWith(): Expr.Path? = deserializeWithValue?.copy(attrs = deserializeWithValue.attrs.map { it.deepCopy() }, path = deserializeWithValue.path.copy())
+    public fun serializeWith(): Expr.Path? = serializeWithValue?.copy(attrs = serializeWithValue.attrs.map { it.deepCopy() }, path = serializeWithValue.path.deepCopy())
+    public fun deserializeWith(): Expr.Path? = deserializeWithValue?.copy(attrs = deserializeWithValue.attrs.map { it.deepCopy() }, path = deserializeWithValue.path.deepCopy())
     public fun untagged(): Boolean = untaggedValue
 }
 
@@ -1011,8 +1011,8 @@ private data class AttributeEntry(
     fun pathText(): String =
         path.toString().replace(" ", "")
 
-    fun error(message: String): io.github.kotlinmania.syn.Error =
-        io.github.kotlinmania.syn.Error.new(path.span(), message)
+    fun error(message: String): io.github.kotlinmania.syn.SynError =
+        io.github.kotlinmania.syn.SynError.new(path.span(), message)
 }
 
 private fun serdeEntries(attr: Attribute): List<AttributeEntry> =
@@ -1094,7 +1094,7 @@ private fun parsePath(value: String): Path {
 }
 
 private fun appendPath(expr: Expr.Path, segment: String): Expr.Path {
-    val copied = expr.copy(attrs = expr.attrs.map { it.deepCopy() }, path = expr.path.copy())
+    val copied = expr.copy(attrs = expr.attrs.map { it.deepCopy() }, path = expr.path.deepCopy())
     val span = copied.path.segments.last()?.ident?.span() ?: Span.callSite()
     copied.path.segments.push(PathSegment.from(Ident.new(segment, span))) { PathSep.from(span) }
     return copied
@@ -1306,6 +1306,3 @@ private fun unquoteLiteral(literal: Literal): String? {
 
 private fun litStr(value: String, span: Span): io.github.kotlinmania.syn.LitStr =
     io.github.kotlinmania.syn.LitStr.new(value, span)
-
-private fun Path.span(): Span =
-    getIdent()?.span() ?: segments.first()?.ident?.span() ?: Span.callSite()
