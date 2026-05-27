@@ -20,11 +20,17 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec
 
+// Centralized versions from gradle.properties (used throughout the build script).
+// NOTE: Plugin versions are supplied via gradle/libs.versions.toml version catalog.
+val kotlinVersion = (project.findProperty("versions.kotlin") as? String) ?: "2.3.21"
+
 plugins {
-    kotlin("multiplatform") version "2.3.21"
-    kotlin("plugin.serialization") version "2.3.21"
-    id("com.android.kotlin.multiplatform.library") version "9.2.1"
-    id("com.vanniktech.maven.publish") version "0.36.0"
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.android.kmp)
+    alias(libs.plugins.vanniktech)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 group = (project.findProperty("project.group") as? String) ?: "io.github.kotlinmania"
@@ -36,16 +42,16 @@ val projectNamespace = (project.findProperty("project.namespace") as? String) ?:
 // Android SDK installer
 // ----------------------------------------------------------------------------
 // The Android Gradle Plugin resolves the SDK location at configuration time,
-// so the SDK must already be on disk before the `kotlin { android { ... } }`
+// so the SDK must already be on disk before the `kotlin { androidLibrary { ... } }`
 // block evaluates. The installer is idempotent — a .install-complete marker
 // short-circuits the download on every subsequent invocation, so warm runs
 // pay only a directory-existence check. CI runners pay a one-time cold cost
 // the first time they touch the project.
 // ============================================================================
 
-val androidCommandLineToolsRevision = "14742923"
-val projectCompileSdk = "34"
-val projectAndroidBuildTools = "36.0.0"
+val androidCommandLineToolsRevision = (project.findProperty("android.commandLineTools.revision") as? String) ?: "14742923"
+val projectCompileSdk = (project.findProperty("android.compileSdk") as? String) ?: "34"
+val projectAndroidBuildTools = (project.findProperty("android.buildTools") as? String) ?: "36.0.0"
 val isWindowsHost = System.getProperty("os.name").lowercase().contains("windows")
 val isMacHost = System.getProperty("os.name").lowercase().contains("mac")
 val androidSdkOsName = when {
@@ -165,25 +171,35 @@ fun installProjectAndroidSdk(execOperations: ExecOperations) {
     println("setup-android-sdk: done; SDK at $projectAndroidSdkDir")
 }
 
-// Gate the (slow, network-bound) SDK download on whether any task in
-// gradle.startParameter.taskNames looks like it needs Android. local.properties
-// is always written so AGP's config-time sdk.dir resolution still succeeds.
-// macOS / iOS / tvOS / watchOS / Linux / Windows / JS / Wasm / host-JVM
-// invocations no longer pay the SDK-download tax. The `setupAndroidSdk` task
-// remains the explicit entry point when the SDK has to be installed deliberately.
-val androidTaskRequested = gradle.startParameter.taskNames.isEmpty() || gradle.startParameter.taskNames.any { taskName ->
-    val lower = taskName.lowercase()
-    "android" in lower || "aar" in lower || "build" in lower || "assemble" in lower || "publish" in lower || "setupandroidsdk" in lower
+// New policy: do NOT guess from start tasks. Always wire local.properties at
+// configuration time so AGP can resolve sdk.dir, and make a REAL Android task
+// responsible for ensuring the SDK is installed on first use.
+//
+// We keep the installer purely programmatic (no bash): downloads the
+// cmdline-tools ZIP, accepts licenses, installs exact packages, writes a
+// marker, and short-circuits on subsequent runs.
+
+// Always ensure local.properties exists for AGP configuration time.
+writeAndroidLocalProperties()
+
+// Idempotent task that installs the SDK only when missing. This runs inside
+// the Gradle build (no external shell). It can be depended on by any Android
+// task that truly needs the SDK; by default we hook it to `compileAndroidMain`.
+val ensureAndroidSdk by tasks.registering {
+    group = "setup"
+    description = "Ensures the project-local Android SDK is installed (idempotent)."
+    // Skip the action when everything we need is already in place.
+    onlyIf { !isProjectAndroidSdkInstalled() }
+    doLast {
+        installProjectAndroidSdk(serviceOf())
+    }
 }
-val androidSdkExecOperations = serviceOf<ExecOperations>()
-if (androidTaskRequested) {
-    installProjectAndroidSdk(androidSdkExecOperations)
-} else {
-    writeAndroidLocalProperties()
-    println(
-        "setup-android-sdk: skipped install (no Android tasks in start parameter); " +
-            "local.properties -> $projectAndroidSdkDir",
-    )
+
+// Make the primary Android compilation task responsible for ensuring the SDK
+// is present. Other Android tasks typically depend on this one transitively.
+// If the task does not exist on this host, the configuration is a no-op.
+tasks.matching { it.name == "compileAndroidMain" }.configureEach {
+    dependsOn(ensureAndroidSdk)
 }
 
 // ============================================================================
@@ -247,8 +263,8 @@ kotlin {
     // Android KMP library
     android {
         namespace = projectNamespace
-        compileSdk = 34
-        minSdk = 24
+        compileSdk = ((project.findProperty("android.compileSdk") as? String) ?: "34").toInt()
+        minSdk = ((project.findProperty("android.minSdk") as? String) ?: "24").toInt()
         withHostTestBuilder {}.configure {}
         withDeviceTestBuilder { sourceSetTreeName = "test" }
     }
@@ -262,17 +278,15 @@ kotlin {
     // overrides because serde-kotlin's logic is pure Kotlin with zero FFI.
     sourceSets {
         commonMain.dependencies {
-            val commonMainDeps = (project.findProperty("project.dependencies.commonMain") as? String) ?: ""
-            commonMainDeps.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { dep ->
-                implementation(dep)
-            }
+            // Use version-catalog aliases instead of stringly-typed properties.
+            implementation(libs.bundles.serde.commonMain)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
     }
 
-    jvmToolchain(21)
+    jvmToolchain(((project.findProperty("jvm.toolchain") as? String) ?: "21").toInt())
 }
 
 // ============================================================================
@@ -297,39 +311,88 @@ tasks.withType<AbstractTestTask>().configureEach {
 }
 
 // ============================================================================
+// Static analysis: Detekt (code smells, potential-bugs) + Ktlint (format)
+// =========================================================================
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = false
+    source.setFrom(files("src"))
+    config.setFrom(files("detekt.yml"))
+    parallel = true
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        sarif.required.set(true)
+        txt.required.set(false)
+        xml.required.set(false)
+    }
+}
+
+ktlint {
+    debug.set(false)
+    verbose.set(false)
+    android.set(false)
+    outputToConsole.set(true)
+    ignoreFailures.set(false)
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.SARIF)
+    }
+    filter {
+        exclude("**/build/**")
+        include("**/src/**/kotlin/**")
+    }
+}
+
+// Make `check` run static analysis. Build gate already pulls `check` via tests and others.
+tasks.matching { it.name == "check" }.configureEach {
+    dependsOn("detekt")
+    dependsOn("ktlintCheck")
+}
+
+// ============================================================================
 // JS / Wasm toolchain pins (Node + Yarn versions + yarn resolutions +
 // vendored karma-webpack). Required because Kotlin/JS pulls a large npm
 // dependency graph that has been the source of repeated CVE noise.
 // ============================================================================
-rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") { version.set("24.15.0") }
-rootProject.extensions.configure<WasmNodeJsEnvSpec>("kotlinWasmNodeJsSpec") { version.set("24.15.0") }
-rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") { version.set("1.22.22") }
-rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") { version.set("1.22.22") }
+val nodeVersion = (project.findProperty("node.version") as? String) ?: "24.15.0"
+val wasmNodeVersion = (project.findProperty("wasm.node.version") as? String) ?: nodeVersion
+val yarnVersion = (project.findProperty("yarn.version") as? String) ?: "1.22.22"
+val wasmYarnVersion = (project.findProperty("wasm.yarn.version") as? String) ?: yarnVersion
+
+rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") { version.set(nodeVersion) }
+rootProject.extensions.configure<WasmNodeJsEnvSpec>("kotlinWasmNodeJsSpec") { version.set(wasmNodeVersion) }
+rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") { version.set(yarnVersion) }
+rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") { version.set(wasmYarnVersion) }
 rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
-    resolution("diff", "8.0.3"); resolution("**/diff", "8.0.3")
-    resolution("fast-uri", "3.1.2"); resolution("**/fast-uri", "3.1.2")
-    resolution("serialize-javascript", "7.0.5"); resolution("**/serialize-javascript", "7.0.5")
-    resolution("webpack", "5.106.2"); resolution("**/webpack", "5.106.2")
-    resolution("follow-redirects", "1.16.0"); resolution("**/follow-redirects", "1.16.0")
-    resolution("lodash", "4.18.1"); resolution("**/lodash", "4.18.1")
-    resolution("ajv", "8.20.0"); resolution("**/ajv", "8.20.0")
-    resolution("brace-expansion", "5.0.6"); resolution("**/brace-expansion", "5.0.6")
-    resolution("flatted", "3.4.2"); resolution("**/flatted", "3.4.2")
-    resolution("minimatch", "10.2.5"); resolution("**/minimatch", "10.2.5")
-    resolution("picomatch", "4.0.4"); resolution("**/picomatch", "4.0.4")
-    resolution("qs", "6.15.2"); resolution("**/qs", "6.15.2")
-    resolution("socket.io-parser", "4.2.6"); resolution("**/socket.io-parser", "4.2.6")
-    resolution("ws", "8.20.1"); resolution("**/ws", "8.20.1")
-    resolution("tmp", "0.2.6"); resolution("**/tmp", "0.2.6")
+    fun prop(name: String, default: String) = (project.findProperty(name) as? String) ?: default
+    resolution("diff", prop("yarn.resolution.diff", "8.0.3")); resolution("**/diff", prop("yarn.resolution.diff", "8.0.3"))
+    resolution("fast-uri", prop("yarn.resolution.fast-uri", "3.1.2")); resolution("**/fast-uri", prop("yarn.resolution.fast-uri", "3.1.2"))
+    resolution("serialize-javascript", prop("yarn.resolution.serialize-javascript", "7.0.5")); resolution("**/serialize-javascript", prop("yarn.resolution.serialize-javascript", "7.0.5"))
+    resolution("webpack", prop("yarn.resolution.webpack", "5.106.2")); resolution("**/webpack", prop("yarn.resolution.webpack", "5.106.2"))
+    resolution("follow-redirects", prop("yarn.resolution.follow-redirects", "1.16.0")); resolution("**/follow-redirects", prop("yarn.resolution.follow-redirects", "1.16.0"))
+    resolution("lodash", prop("yarn.resolution.lodash", "4.18.1")); resolution("**/lodash", prop("yarn.resolution.lodash", "4.18.1"))
+    resolution("ajv", prop("yarn.resolution.ajv", "8.20.0")); resolution("**/ajv", prop("yarn.resolution.ajv", "8.20.0"))
+    resolution("brace-expansion", prop("yarn.resolution.brace-expansion", "5.0.6")); resolution("**/brace-expansion", prop("yarn.resolution.brace-expansion", "5.0.6"))
+    resolution("flatted", prop("yarn.resolution.flatted", "3.4.2")); resolution("**/flatted", prop("yarn.resolution.flatted", "3.4.2"))
+    resolution("minimatch", prop("yarn.resolution.minimatch", "10.2.5")); resolution("**/minimatch", prop("yarn.resolution.minimatch", "10.2.5"))
+    resolution("picomatch", prop("yarn.resolution.picomatch", "4.0.4")); resolution("**/picomatch", prop("yarn.resolution.picomatch", "4.0.4"))
+    resolution("qs", prop("yarn.resolution.qs", "6.15.2")); resolution("**/qs", prop("yarn.resolution.qs", "6.15.2"))
+    resolution("socket.io-parser", prop("yarn.resolution.socket-io-parser", "4.2.6")); resolution("**/socket.io-parser", prop("yarn.resolution.socket-io-parser", "4.2.6"))
+    resolution("ws", prop("yarn.resolution.ws", "8.20.1")); resolution("**/ws", prop("yarn.resolution.ws", "8.20.1"))
+    resolution("tmp", prop("yarn.resolution.tmp", "0.2.6")); resolution("**/tmp", prop("yarn.resolution.tmp", "0.2.6"))
 }
 val patchedKarmaWebpackPackage = rootProject.layout.projectDirectory.dir("gradle/npm/karma-webpack").asFile.absolutePath.replace("\\", "/")
 rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
-    versions.webpack.version = "5.106.2"
-    versions.webpackCli.version = "7.0.2"
-    versions.karma.version = "npm:karma-maintained@6.4.7"
+    versions.webpack.version = (project.findProperty("node.webpack.version") as? String) ?: "5.106.2"
+    versions.webpackCli.version = (project.findProperty("node.webpackCli.version") as? String) ?: "7.0.2"
+    versions.karma.version = (project.findProperty("node.karma.version") as? String) ?: "npm:karma-maintained@6.4.7"
     versions.karmaWebpack.version = "file:$patchedKarmaWebpackPackage"
-    versions.mocha.version = "12.0.0-beta-10"
-    versions.kotlinWebHelpers.version = "3.1.0"
+    versions.mocha.version = (project.findProperty("node.mocha.version") as? String) ?: "12.0.0-beta-10"
+    versions.kotlinWebHelpers.version = (project.findProperty("node.kotlinWebHelpers.version") as? String) ?: "3.1.0"
 }
 
 // ============================================================================
@@ -389,7 +452,8 @@ val codeqlAndroidAar: Configuration by configurations.creating {
     isCanBeConsumed = false
 }
 dependencies {
-    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
+    val codeqlKotlinVersion = (project.findProperty("codeql.kotlin.version") as? String) ?: kotlinVersion
+    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:$codeqlKotlinVersion")
     
     val codeqlSourceDeps = (project.findProperty("project.dependencies.codeqlSourceClasspath") as? String) ?: ""
     codeqlSourceDeps.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { dep ->
@@ -401,8 +465,11 @@ dependencies {
         codeqlAndroidAar(aar)
     }
 }
+val codeqlLanguageVersion = (project.findProperty("kotlin.languageVersion") as? String) ?: kotlinVersion.substringBeforeLast('.')
+val codeqlApiVersion = (project.findProperty("kotlin.apiVersion") as? String) ?: codeqlLanguageVersion
+
 val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
-    description = "Compile commonMain Kotlin sources with kotlinc 2.3.21 for CodeQL Java/Kotlin extraction."
+    description = "Compile commonMain Kotlin sources with kotlinc $codeqlLanguageVersion for CodeQL Java/Kotlin extraction."
     group = "verification"
     classpath(codeqlKotlinc)
     mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
@@ -452,8 +519,8 @@ val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
             "-jvm-target", "21",
             "-no-stdlib",
             "-no-reflect",
-            "-language-version", "2.3",
-            "-api-version", "2.3",
+            "-language-version", codeqlLanguageVersion,
+            "-api-version", codeqlApiVersion,
             "-Xexpect-actual-classes",
             "-opt-in", "kotlin.time.ExperimentalTime",
             "-opt-in", "kotlin.concurrent.atomics.ExperimentalAtomicApi",
@@ -467,8 +534,8 @@ val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
 
 tasks.register("setupAndroidSdk") {
     group = "setup"
-    description = "Downloads and configures the project-local Android SDK."
-    doLast { installProjectAndroidSdk(androidSdkExecOperations) }
+    description = "Downloads and configures the project-local Android SDK. (Alias for ensureAndroidSdk)"
+    dependsOn("ensureAndroidSdk")
 }
 
 // The umbrella `test` task. Every entry is a REAL test task that runs ported
