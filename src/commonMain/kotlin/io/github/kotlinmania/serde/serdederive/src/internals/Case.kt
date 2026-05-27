@@ -68,14 +68,15 @@ public enum class RenameRule {
             LowerCase -> variant.toAsciiLowercase()
             UpperCase -> variant.toAsciiUppercase()
             CamelCase -> variant.substring(0, 1).toAsciiLowercase() + variant.substring(1)
-            SnakeCase -> buildString {
-                for ((index, ch) in variant.withIndex()) {
-                    if (index > 0 && ch.isAsciiUppercase()) {
-                        append('_')
+            SnakeCase ->
+                buildString {
+                    for ((index, ch) in variant.withIndex()) {
+                        if (index > 0 && ch.isAsciiUppercase()) {
+                            append('_')
+                        }
+                        append(ch.toAsciiLowercase())
                     }
-                    append(ch.toAsciiLowercase())
                 }
-            }
 
             ScreamingSnakeCase -> SnakeCase.applyToVariant(variant).toAsciiUppercase()
             KebabCase -> SnakeCase.applyToVariant(variant).replace('_', '-')
@@ -93,19 +94,20 @@ public enum class RenameRule {
             -> field
 
             UpperCase -> field.toAsciiUppercase()
-            PascalCase -> buildString {
-                var capitalize = true
-                for (ch in field) {
-                    if (ch == '_') {
-                        capitalize = true
-                    } else if (capitalize) {
-                        append(ch.toAsciiUppercase())
-                        capitalize = false
-                    } else {
-                        append(ch)
+            PascalCase ->
+                buildString {
+                    var capitalize = true
+                    for (ch in field) {
+                        if (ch == '_') {
+                            capitalize = true
+                        } else if (capitalize) {
+                            append(ch.toAsciiUppercase())
+                            capitalize = false
+                        } else {
+                            append(ch)
+                        }
                     }
                 }
-            }
 
             CamelCase -> {
                 val pascal = PascalCase.applyToField(field)

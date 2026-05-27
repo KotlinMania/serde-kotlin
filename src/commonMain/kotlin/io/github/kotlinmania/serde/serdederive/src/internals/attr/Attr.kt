@@ -28,11 +28,16 @@ public class Attr<T> private constructor(
     private var value: T?,
 ) {
     public companion object {
-        public fun <T> none(cx: Ctxt, name: Symbol): Attr<T> =
-            Attr(cx, name, TokenStream.new(), null)
+        public fun <T> none(
+            cx: Ctxt,
+            name: Symbol,
+        ): Attr<T> = Attr(cx, name, TokenStream.new(), null)
     }
 
-    public fun set(obj: Any, value: T) {
+    public fun set(
+        obj: Any,
+        value: T,
+    ) {
         val newTokens = tokensFrom(obj)
         if (this.value != null) {
             cx.errorSpannedBy(newTokens, "duplicate serde attribute `$name`")
@@ -42,7 +47,10 @@ public class Attr<T> private constructor(
         }
     }
 
-    public fun setOpt(obj: Any, value: T?) {
+    public fun setOpt(
+        obj: Any,
+        value: T?,
+    ) {
         if (value != null) {
             set(obj, value)
         }
@@ -56,16 +64,17 @@ public class Attr<T> private constructor(
 
     public fun get(): T? = value
 
-    internal fun getWithTokens(): Pair<TokenStream, T>? =
-        value?.let { tokens to it }
+    internal fun getWithTokens(): Pair<TokenStream, T>? = value?.let { tokens to it }
 }
 
 private class BoolAttr private constructor(
     val attr: Attr<Unit>,
 ) {
     companion object {
-        fun none(cx: Ctxt, name: Symbol): BoolAttr =
-            BoolAttr(Attr.none(cx, name))
+        fun none(
+            cx: Ctxt,
+            name: Symbol,
+        ): BoolAttr = BoolAttr(Attr.none(cx, name))
     }
 
     fun setTrue(obj: Any) {
@@ -82,11 +91,16 @@ public class VecAttr<T> private constructor(
     private val values: MutableList<T>,
 ) {
     public companion object {
-        public fun <T> none(cx: Ctxt, name: Symbol): VecAttr<T> =
-            VecAttr(cx, name, TokenStream.new(), mutableListOf())
+        public fun <T> none(
+            cx: Ctxt,
+            name: Symbol,
+        ): VecAttr<T> = VecAttr(cx, name, TokenStream.new(), mutableListOf())
     }
 
-    public fun insert(obj: Any, value: T) {
+    public fun insert(
+        obj: Any,
+        value: T,
+    ) {
         if (values.size == 1) {
             firstDupTokens = tokensFrom(obj)
         }
@@ -104,8 +118,7 @@ public class VecAttr<T> private constructor(
     public fun get(): List<T> = values.toList()
 }
 
-private fun unraw(ident: Ident): Ident =
-    Ident.new(ident.toString().removePrefix("r#"), ident.span())
+private fun unraw(ident: Ident): Ident = Ident.new(ident.toString().removePrefix("r#"), ident.span())
 
 public data class RenameAllRules(
     public val serialize: RenameRule,
@@ -149,7 +162,10 @@ public class Container private constructor(
         /**
          * Extract out the serde attributes from an item.
          */
-        public fun fromAst(cx: Ctxt, item: DeriveInput): Container {
+        public fun fromAst(
+            cx: Ctxt,
+            item: DeriveInput,
+        ): Container {
             val serName = Attr.none<Name>(cx, RENAME)
             val deName = Attr.none<Name>(cx, RENAME)
             val transparent = BoolAttr.none(cx, TRANSPARENT)
@@ -235,7 +251,9 @@ public class Container private constructor(
                                 when (val data = item.data) {
                                     is SynData.Struct ->
                                         if (data.fields is SynFields.Unit) {
-                                            cx.synError(entry.error("#[serde(default = \"...\")] can only be used on structs that have fields"))
+                                            cx.synError(
+                                                entry.error("#[serde(default = \"...\")] can only be used on structs that have fields"),
+                                            )
                                         } else {
                                             default.set(entry.path, Default.Path(entry.exprPathValue()))
                                         }
@@ -282,10 +300,17 @@ public class Container private constructor(
                                         if (data.fields is SynFields.Named) {
                                             internalTag.set(entry.path, tag)
                                         } else {
-                                            cx.synError(entry.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
+                                            cx.synError(
+                                                entry.error(
+                                                    "#[serde(tag = \"...\")] can only be used on enums and structs with named fields",
+                                                ),
+                                            )
                                         }
 
-                                    is SynData.Union -> cx.synError(entry.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
+                                    is SynData.Union ->
+                                        cx.synError(
+                                            entry.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"),
+                                        )
                                 }
                             }
                         }
@@ -303,14 +328,15 @@ public class Container private constructor(
                         entry.eq(FROM) -> entry.value?.let { typeFrom.set(entry.path, parseType(it)) }
                         entry.eq(TRY_FROM) -> entry.value?.let { typeTryFrom.set(entry.path, parseType(it)) }
                         entry.eq(INTO) -> entry.value?.let { typeInto.set(entry.path, parseType(it)) }
-                        entry.eq(REMOTE) -> entry.value?.let { value ->
-                            val path = parsePath(value)
-                            if (isPrimitivePath(path, "Self")) {
-                                remote.set(entry.path, Path.from(item.ident.copy()))
-                            } else {
-                                remote.set(entry.path, path)
+                        entry.eq(REMOTE) ->
+                            entry.value?.let { value ->
+                                val path = parsePath(value)
+                                if (isPrimitivePath(path, "Self")) {
+                                    remote.set(entry.path, Path.from(item.ident.copy()))
+                                } else {
+                                    remote.set(entry.path, path)
+                                }
                             }
-                        }
 
                         entry.eq(FIELD_IDENTIFIER) -> fieldIdentifier.setTrue(entry.path)
                         entry.eq(VARIANT_IDENTIFIER) -> variantIdentifier.setTrue(entry.path)
@@ -353,22 +379,39 @@ public class Container private constructor(
     }
 
     public fun name(): MultiName = nameValue
+
     public fun renameAllRules(): RenameAllRules = renameAllRulesValue
+
     public fun renameAllFieldsRules(): RenameAllRules = renameAllFieldsRulesValue
+
     public fun transparent(): Boolean = transparentValue
+
     public fun denyUnknownFields(): Boolean = denyUnknownFieldsValue
+
     public fun default(): Default = defaultValue
+
     public fun serBound(): List<WherePredicate>? = serBoundValue
+
     public fun deBound(): List<WherePredicate>? = deBoundValue
+
     public fun tag(): TagType = tagValue
+
     public fun typeFrom(): SynType? = typeFromValue
+
     public fun typeTryFrom(): SynType? = typeTryFromValue
+
     public fun typeInto(): SynType? = typeIntoValue
+
     public fun remote(): Path? = remoteValue?.deepCopy()
+
     public fun isPacked(): Boolean = isPackedValue
+
     public fun identifier(): Identifier = identifierValue
+
     public fun customSerdePath(): Path? = serdePathValue?.deepCopy()
+
     public fun expecting(): String? = expectingValue
+
     public fun nonExhaustive(): Boolean = nonExhaustiveValue
 }
 
@@ -384,12 +427,17 @@ public sealed class TagType {
     /**
      * `serde(tag = "type")`.
      */
-    public data class Internal(public val tag: String) : TagType()
+    public data class Internal(
+        public val tag: String,
+    ) : TagType()
 
     /**
      * `serde(tag = "t", content = "c")`.
      */
-    public data class Adjacent(public val tag: String, public val content: String) : TagType()
+    public data class Adjacent(
+        public val tag: String,
+        public val content: String,
+    ) : TagType()
 
     /**
      * `serde(untagged)`.
@@ -537,7 +585,10 @@ public class Variant private constructor(
     private val untaggedValue: Boolean,
 ) {
     public companion object {
-        public fun fromAst(cx: Ctxt, variant: SynVariant): Variant {
+        public fun fromAst(
+            cx: Ctxt,
+            variant: SynVariant,
+        ): Variant {
             val serName = Attr.none<Name>(cx, RENAME)
             val deName = Attr.none<Name>(cx, RENAME)
             val deAliases = VecAttr.none<Name>(cx, RENAME)
@@ -599,11 +650,12 @@ public class Variant private constructor(
                             deBound.setOpt(entry.path, de)
                         }
 
-                        entry.eq(WITH) -> entry.value?.let { value ->
-                            val path = parseExprPath(value)
-                            serializeWith.set(entry.path, appendPath(path, "serialize"))
-                            deserializeWith.set(entry.path, appendPath(path, "deserialize"))
-                        }
+                        entry.eq(WITH) ->
+                            entry.value?.let { value ->
+                                val path = parseExprPath(value)
+                                serializeWith.set(entry.path, appendPath(path, "serialize"))
+                                deserializeWith.set(entry.path, appendPath(path, "deserialize"))
+                            }
 
                         entry.eq(SERIALIZE_WITH) -> entry.value?.let { serializeWith.set(entry.path, parseExprPath(it)) }
                         entry.eq(DESERIALIZE_WITH) -> entry.value?.let { deserializeWith.set(entry.path, parseExprPath(it)) }
@@ -655,6 +707,7 @@ public class Variant private constructor(
     }
 
     public fun name(): MultiName = nameValue
+
     public fun aliases(): List<Name> = nameValue.deserializeAliases()
 
     public fun renameByRules(rules: RenameAllRules) {
@@ -668,13 +721,35 @@ public class Variant private constructor(
     }
 
     public fun renameAllRules(): RenameAllRules = renameAllRulesValue
+
     public fun serBound(): List<WherePredicate>? = serBoundValue
+
     public fun deBound(): List<WherePredicate>? = deBoundValue
+
     public fun skipDeserializing(): Boolean = skipDeserializingValue
+
     public fun skipSerializing(): Boolean = skipSerializingValue
+
     public fun other(): Boolean = otherValue
-    public fun serializeWith(): Expr.Path? = serializeWithValue?.copy(attrs = serializeWithValue.attrs.map { it.deepCopy() }, path = serializeWithValue.path.deepCopy())
-    public fun deserializeWith(): Expr.Path? = deserializeWithValue?.copy(attrs = deserializeWithValue.attrs.map { it.deepCopy() }, path = deserializeWithValue.path.deepCopy())
+
+    public fun serializeWith(): Expr.Path? =
+        serializeWithValue?.copy(
+            attrs =
+                serializeWithValue.attrs.map {
+                    it.deepCopy()
+                },
+            path = serializeWithValue.path.deepCopy(),
+        )
+
+    public fun deserializeWith(): Expr.Path? =
+        deserializeWithValue?.copy(
+            attrs =
+                deserializeWithValue.attrs.map {
+                    it.deepCopy()
+                },
+            path = deserializeWithValue.path.deepCopy(),
+        )
+
     public fun untagged(): Boolean = untaggedValue
 }
 
@@ -783,11 +858,12 @@ public class Field private constructor(
                         entry.eq(SKIP_SERIALIZING_IF) -> entry.value?.let { skipSerializingIf.set(entry.path, parseExprPath(it)) }
                         entry.eq(SERIALIZE_WITH) -> entry.value?.let { serializeWith.set(entry.path, parseExprPath(it)) }
                         entry.eq(DESERIALIZE_WITH) -> entry.value?.let { deserializeWith.set(entry.path, parseExprPath(it)) }
-                        entry.eq(WITH) -> entry.value?.let { value ->
-                            val path = parseExprPath(value)
-                            serializeWith.set(entry.path, appendPath(path, "serialize"))
-                            deserializeWith.set(entry.path, appendPath(path, "deserialize"))
-                        }
+                        entry.eq(WITH) ->
+                            entry.value?.let { value ->
+                                val path = parseExprPath(value)
+                                serializeWith.set(entry.path, appendPath(path, "serialize"))
+                                deserializeWith.set(entry.path, appendPath(path, "deserialize"))
+                            }
 
                         entry.eq(BOUND) -> {
                             val (ser, de) = entry.wherePredicates()
@@ -857,6 +933,7 @@ public class Field private constructor(
     }
 
     public fun name(): MultiName = nameValue
+
     public fun aliases(): List<Name> = nameValue.deserializeAliases()
 
     public fun renameByRules(rules: RenameAllRules) {
@@ -870,17 +947,29 @@ public class Field private constructor(
     }
 
     public fun skipSerializing(): Boolean = skipSerializingValue
+
     public fun skipDeserializing(): Boolean = skipDeserializingValue
+
     public fun skipSerializingIf(): Expr.Path? = skipSerializingIfValue
+
     public fun default(): Default = defaultValue
+
     public fun serializeWith(): Expr.Path? = serializeWithValue
+
     public fun deserializeWith(): Expr.Path? = deserializeWithValue
+
     public fun serBound(): List<WherePredicate>? = serBoundValue
+
     public fun deBound(): List<WherePredicate>? = deBoundValue
+
     public fun borrowedLifetimes(): Set<Lifetime> = borrowedLifetimesValue
+
     public fun getter(): Expr.Path? = getterValue
+
     public fun flatten(): Boolean = flattenValue
+
     public fun transparent(): Boolean = transparentValue
+
     public fun markTransparent() {
         transparentValue = true
     }
@@ -903,10 +992,11 @@ public sealed class Default {
     /**
      * The default is given by this function.
      */
-    public data class Path(public val value: Expr.Path) : Default()
+    public data class Path(
+        public val value: Expr.Path,
+    ) : Default()
 
-    public fun isNone(): Boolean =
-        this is None
+    public fun isNone(): Boolean = this is None
 }
 
 private data class SerAndDe<T>(
@@ -943,17 +1033,15 @@ private data class AttributeEntry(
         return ser to listOfNotNull(de)
     }
 
-    fun wherePredicates(): SerAndDe<List<WherePredicate>> =
-        SerAndDe(emptyList(), emptyList())
+    fun wherePredicates(): SerAndDe<List<WherePredicate>> = SerAndDe(emptyList(), emptyList())
 
-    fun exprPathValue(): Expr.Path =
-        parseExprPath(value.orEmpty())
+    fun exprPathValue(): Expr.Path = parseExprPath(value.orEmpty())
 
-    fun pathText(): String =
-        path.toString().replace(" ", "")
+    fun pathText(): String = path.toString().replace(" ", "")
 
     fun error(message: String): io.github.kotlinmania.syn.SynError =
-        io.github.kotlinmania.syn.SynError.new(path.span(), message)
+        io.github.kotlinmania.syn.SynError
+            .new(path.span(), message)
 }
 
 private fun serdeEntries(attr: Attribute): List<AttributeEntry> =
@@ -1002,16 +1090,15 @@ private fun setRenameRule(
     path: Path,
     value: io.github.kotlinmania.syn.LitStr,
 ) {
-    RenameRule.fromStr(value.value())
+    RenameRule
+        .fromStr(value.value())
         .onSuccess { rule -> attr.set(path, rule) }
         .onFailure { err -> cx.errorSpannedBy(value, err) }
 }
 
-private fun parseExprPath(value: String): Expr.Path =
-    Expr.Path(emptyList(), null, parsePath(value))
+private fun parseExprPath(value: String): Expr.Path = Expr.Path(emptyList(), null, parsePath(value))
 
-private fun parseType(value: String): SynType =
-    SynType.Path(null, parsePath(value))
+private fun parseType(value: String): SynType = SynType.Path(null, parsePath(value))
 
 private fun parsePath(value: String): Path {
     val cleaned = value.substringBefore('<').trim()
@@ -1026,28 +1113,43 @@ private fun parsePath(value: String): Path {
         last.arguments =
             PathArguments.AngleBracketed(
                 colon2Token = null,
-                ltToken = io.github.kotlinmania.syn.token.Lt.from(span),
+                ltToken =
+                    io.github.kotlinmania.syn.token.Lt
+                        .from(span),
                 args = Punctuated.new(),
-                gtToken = io.github.kotlinmania.syn.token.Gt.from(span),
+                gtToken =
+                    io.github.kotlinmania.syn.token.Gt
+                        .from(span),
             )
     }
     return path
 }
 
-private fun appendPath(expr: Expr.Path, segment: String): Expr.Path {
+private fun appendPath(
+    expr: Expr.Path,
+    segment: String,
+): Expr.Path {
     val copied = expr.copy(attrs = expr.attrs.map { it.deepCopy() }, path = expr.path.deepCopy())
-    val span = copied.path.segments.last()?.ident?.span() ?: Span.callSite()
+    val span =
+        copied.path.segments
+            .last()
+            ?.ident
+            ?.span() ?: Span.callSite()
     copied.path.segments.push(PathSegment.from(Ident.new(segment, span))) { PathSep.from(span) }
     return copied
 }
 
 private fun parseLifetimes(value: String): Set<Lifetime> =
-    value.split('+')
+    value
+        .split('+')
         .map { it.trim() }
         .filter { it.startsWith("'") && it.length > 1 }
         .mapTo(mutableSetOf()) { Lifetime.new(it, Span.callSite()) }
 
-private fun borrowCowPath(private: Ident, function: String): Expr.Path =
+private fun borrowCowPath(
+    private: Ident,
+    function: String,
+): Expr.Path =
     Expr.Path(
         attrs = emptyList(),
         qself = null,
@@ -1063,13 +1165,14 @@ private fun pathFromSegments(segments: List<String>): Path {
     return path
 }
 
-private fun isImplicitlyBorrowed(ty: SynType): Boolean =
-    isImplicitlyBorrowedReference(ty) || isOption(ty, ::isImplicitlyBorrowedReference)
+private fun isImplicitlyBorrowed(ty: SynType): Boolean = isImplicitlyBorrowedReference(ty) || isOption(ty, ::isImplicitlyBorrowedReference)
 
-private fun isImplicitlyBorrowedReference(ty: SynType): Boolean =
-    isReference(ty, ::isStr) || isReference(ty, ::isSliceU8)
+private fun isImplicitlyBorrowedReference(ty: SynType): Boolean = isReference(ty, ::isStr) || isReference(ty, ::isSliceU8)
 
-private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
+private fun isCow(
+    ty: SynType,
+    elem: (SynType) -> Boolean,
+): Boolean {
     val path = (ungroup(ty) as? SynType.Path)?.path ?: return false
     val seg = path.segments.last() ?: return false
     val args = (seg.arguments as? PathArguments.AngleBracketed)?.args ?: return false
@@ -1080,7 +1183,10 @@ private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
         (args[1] as? GenericArgument.TypeArg)?.type?.let(elem) == true
 }
 
-private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
+private fun isOption(
+    ty: SynType,
+    elem: (SynType) -> Boolean,
+): Boolean {
     val path = (ungroup(ty) as? SynType.Path)?.path ?: return false
     val seg = path.segments.last() ?: return false
     val args = (seg.arguments as? PathArguments.AngleBracketed)?.args ?: return false
@@ -1089,21 +1195,27 @@ private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
         (args[0] as? GenericArgument.TypeArg)?.type?.let(elem) == true
 }
 
-private fun isReference(ty: SynType, elem: (SynType) -> Boolean): Boolean =
-    (ungroup(ty) as? SynType.Reference)?.elem?.let(elem) == true
+private fun isReference(
+    ty: SynType,
+    elem: (SynType) -> Boolean,
+): Boolean = (ungroup(ty) as? SynType.Reference)?.elem?.let(elem) == true
 
-private fun isStr(ty: SynType): Boolean =
-    isPrimitiveType(ty, "str")
+private fun isStr(ty: SynType): Boolean = isPrimitiveType(ty, "str")
 
-private fun isSliceU8(ty: SynType): Boolean =
-    (ungroup(ty) as? SynType.Slice)?.elem?.let { isPrimitiveType(it, "u8") } == true
+private fun isSliceU8(ty: SynType): Boolean = (ungroup(ty) as? SynType.Slice)?.elem?.let { isPrimitiveType(it, "u8") } == true
 
-private fun isPrimitiveType(ty: SynType, primitive: String): Boolean {
+private fun isPrimitiveType(
+    ty: SynType,
+    primitive: String,
+): Boolean {
     val pathType = ungroup(ty) as? SynType.Path ?: return false
     return pathType.qself == null && isPrimitivePath(pathType.path, primitive)
 }
 
-private fun isPrimitivePath(path: Path, primitive: String): Boolean =
+private fun isPrimitivePath(
+    path: Path,
+    primitive: String,
+): Boolean =
     path.leadingColon == null &&
         path.segments.len() == 1 &&
         path.segments[0].ident.toString() == primitive &&
@@ -1124,7 +1236,10 @@ private fun borrowableLifetimes(
     }
 }
 
-private fun collectLifetimes(ty: SynType, out: MutableSet<Lifetime>) {
+private fun collectLifetimes(
+    ty: SynType,
+    out: MutableSet<Lifetime>,
+) {
     when (val type = ty) {
         is SynType.Slice -> collectLifetimes(type.elem, out)
         is SynType.Array -> collectLifetimes(type.elem, out)
@@ -1171,7 +1286,10 @@ private fun collectLifetimes(ty: SynType, out: MutableSet<Lifetime>) {
     }
 }
 
-private fun collectLifetimesFromTokens(tokens: TokenStream, out: MutableSet<Lifetime>) {
+private fun collectLifetimesFromTokens(
+    tokens: TokenStream,
+    out: MutableSet<Lifetime>,
+) {
     val iterator = tokens.iterator()
     while (iterator.hasNext()) {
         when (val tree = iterator.next()) {
@@ -1207,8 +1325,7 @@ private fun Attribute.tokenText(): String =
         is Meta.PathMeta -> meta.path.toString()
     }
 
-private fun litString(expr: Expr): String? =
-    ((expr as? Expr.Lit)?.lit as? Lit.Str)?.value?.value()
+private fun litString(expr: Expr): String? = ((expr as? Expr.Lit)?.lit as? Lit.Str)?.value?.value()
 
 private fun literalText(tree: TokenTree): String? =
     when (tree) {
@@ -1245,5 +1362,9 @@ private fun unquoteLiteral(literal: Literal): String? {
     }
 }
 
-private fun litStr(value: String, span: Span): io.github.kotlinmania.syn.LitStr =
-    io.github.kotlinmania.syn.LitStr.new(value, span)
+private fun litStr(
+    value: String,
+    span: Span,
+): io.github.kotlinmania.syn.LitStr =
+    io.github.kotlinmania.syn.LitStr
+        .new(value, span)

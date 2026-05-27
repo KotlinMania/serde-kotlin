@@ -8,7 +8,6 @@ import io.github.kotlinmania.serde.core.de.EnumAccess
 import io.github.kotlinmania.serde.core.de.I128Deserialize
 import io.github.kotlinmania.serde.core.de.MapAccess
 import io.github.kotlinmania.serde.core.de.U128Deserialize
-import io.github.kotlinmania.serde.core.de.VariantAccess
 import io.github.kotlinmania.serde.core.de.Visitor
 import io.github.kotlinmania.serde.core.de.value.F64Deserializer
 import io.github.kotlinmania.serde.core.de.value.I128Deserializer
@@ -70,7 +69,9 @@ private data object EVariantVisitor : Visitor<E> {
         }
 }
 
-private data class Airebo(val ljSigma: Double) {
+private data class Airebo(
+    val ljSigma: Double,
+) {
     public companion object : Deserialize<Airebo> {
         override fun <D> deserialize(deserializer: D): Result<Airebo>
             where D : Deserializer =
@@ -115,8 +116,7 @@ private data object AireboFieldVisitor : Visitor<AireboField> {
 
 private data object F64Seed : DeserializeSeed<Double> {
     override fun <D> deserialize(deserializer: D): Result<Double>
-        where D : Deserializer =
-        deserializer.deserializeF64(F64Capture)
+        where D : Deserializer = deserializer.deserializeF64(F64Capture)
 }
 
 private data object F64Capture : Visitor<Double> {
@@ -126,7 +126,9 @@ private data object F64Capture : Visitor<Double> {
 }
 
 private sealed class PotentialKind {
-    public data class Airebo(public val value: io.github.kotlinmania.serde.`private`.Airebo) : PotentialKind()
+    public data class Airebo(
+        public val value: io.github.kotlinmania.serde.`private`.Airebo,
+    ) : PotentialKind()
 
     public companion object : Deserialize<PotentialKind> {
         override fun <D> deserialize(deserializer: D): Result<PotentialKind>
@@ -169,11 +171,12 @@ private data object PotentialKindVariantVisitor : Visitor<PotentialKindVariant> 
 
 private data object AireboDeserializeSeed : DeserializeSeed<Airebo> {
     override fun <D> deserialize(deserializer: D): Result<Airebo>
-        where D : Deserializer =
-        Airebo.deserialize(deserializer)
+        where D : Deserializer = Airebo.deserialize(deserializer)
 }
 
-private data class Potential(val kind: PotentialKind) {
+private data class Potential(
+    val kind: PotentialKind,
+) {
     public companion object : Deserialize<Potential> {
         override fun <D> deserialize(deserializer: D): Result<Potential>
             where D : Deserializer =
@@ -217,12 +220,14 @@ public class TestValueTest {
 
     @Test
     public fun testMapAccessToEnum() {
-        val inner = MapDeserializer(
-            listOf(StrDeserializer.new("lj_sigma") to F64Deserializer.new(14.0)).iterator(),
-        )
-        val outer = MapDeserializer(
-            listOf(StrDeserializer.new("Airebo") to inner).iterator(),
-        )
+        val inner =
+            MapDeserializer(
+                listOf(StrDeserializer.new("lj_sigma") to F64Deserializer.new(14.0)).iterator(),
+            )
+        val outer =
+            MapDeserializer(
+                listOf(StrDeserializer.new("Airebo") to inner).iterator(),
+            )
 
         val expected = Potential(PotentialKind.Airebo(Airebo(ljSigma = 14.0)))
         assertEquals(expected, Potential.deserialize(outer).getOrThrow())

@@ -22,8 +22,7 @@ public class Ctxt private constructor(
          *
          * This object contains no errors, but still must be `check`ed.
          */
-        public fun new(): Ctxt =
-            Ctxt(mutableListOf())
+        public fun new(): Ctxt = Ctxt(mutableListOf())
     }
 
     /**
@@ -31,7 +30,10 @@ public class Ctxt private constructor(
      *
      * The object is used for spanning in error messages.
      */
-    public fun errorSpannedBy(obj: ToTokens, msg: Any?) {
+    public fun errorSpannedBy(
+        obj: ToTokens,
+        msg: Any?,
+    ) {
         val tokens = TokenStream.new()
         obj.toTokens(tokens)
         requireNotNull(errors)
@@ -39,7 +41,10 @@ public class Ctxt private constructor(
             .add(SynError.newSpanned(tokens, msg.toString()))
     }
 
-    public fun errorSpannedBy(obj: Any?, msg: Any?) {
+    public fun errorSpannedBy(
+        obj: Any?,
+        msg: Any?,
+    ) {
         val error =
             when (obj) {
                 is ToTokens -> SynError.newSpanned(obj, msg.toString())

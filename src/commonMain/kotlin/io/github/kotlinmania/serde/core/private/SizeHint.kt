@@ -5,9 +5,7 @@ public interface IteratorWithSizeHint<out T> : Iterator<T> {
     public fun sizeHint(): Pair<Int, Int?>
 }
 
-public fun fromBounds(iter: IteratorWithSizeHint<*>): Int? {
-    return helper(iter.sizeHint())
-}
+public fun fromBounds(iter: IteratorWithSizeHint<*>): Int? = helper(iter.sizeHint())
 
 public inline fun <reified Element> cautious(hint: Int?): Int {
     val maxPreallocBytes = 1024 * 1024

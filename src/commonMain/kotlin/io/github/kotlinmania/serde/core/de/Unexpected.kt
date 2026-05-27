@@ -11,40 +11,53 @@ public sealed class Unexpected {
     /**
      * The input contained a boolean value that was not expected.
      */
-    public data class Bool(public val value: Boolean) : Unexpected()
+    public data class Bool(
+        public val value: Boolean,
+    ) : Unexpected()
 
     /**
      * The input contained an unsigned integer `UByte`, `UShort`, `UInt` or `ULong` that was not
      * expected.
      */
-    public data class Unsigned(public val value: ULong) : Unexpected()
+    public data class Unsigned(
+        public val value: ULong,
+    ) : Unexpected()
 
     /**
      * The input contained a signed integer `Byte`, `Short`, `Int` or `Long` that was not expected.
      */
-    public data class Signed(public val value: Long) : Unexpected()
+    public data class Signed(
+        public val value: Long,
+    ) : Unexpected()
 
     /**
      * The input contained a floating point `Float` or `Double` that was not expected.
      */
-    public data class FloatValue(public val value: Double) : Unexpected()
+    public data class FloatValue(
+        public val value: Double,
+    ) : Unexpected()
 
     /**
      * The input contained a `Char` that was not expected.
      */
-    public data class CharValue(public val value: Char) : Unexpected()
+    public data class CharValue(
+        public val value: Char,
+    ) : Unexpected()
 
     /**
      * The input contained a `String` that was not expected.
      */
-    public data class Str(public val value: String) : Unexpected()
+    public data class Str(
+        public val value: String,
+    ) : Unexpected()
 
     /**
      * The input contained a `ByteArray` that was not expected.
      */
-    public data class Bytes(public val value: ByteArray) : Unexpected() {
-        override fun equals(other: Any?): Boolean =
-            this === other || other is Bytes && value.contentEquals(other.value)
+    public data class Bytes(
+        public val value: ByteArray,
+    ) : Unexpected() {
+        override fun equals(other: Any?): Boolean = this === other || other is Bytes && value.contentEquals(other.value)
 
         override fun hashCode(): Int = value.contentHashCode()
     }
@@ -105,7 +118,9 @@ public sealed class Unexpected {
      * The message should be a noun or noun phrase, not capitalized and without a period. An example
      * message is "unoriginal superhero".
      */
-    public data class Other(public val value: String) : Unexpected()
+    public data class Other(
+        public val value: String,
+    ) : Unexpected()
 
     override fun toString(): String =
         when (this) {

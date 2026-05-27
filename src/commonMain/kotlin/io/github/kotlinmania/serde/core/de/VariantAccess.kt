@@ -19,16 +19,21 @@ public interface VariantAccess {
     /**
      * Called when deserializing a variant with a single value.
      */
-    public fun <T> newtypeVariant(seed: DeserializeSeed<T>): Result<T> =
-        newtypeVariantSeed(seed)
+    public fun <T> newtypeVariant(seed: DeserializeSeed<T>): Result<T> = newtypeVariantSeed(seed)
 
     /**
      * Called when deserializing a tuple-like variant.
      */
-    public fun <V> tupleVariant(len: Int, visitor: Visitor<V>): Result<V>
+    public fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Called when deserializing a struct-like variant.
      */
-    public fun <V> structVariant(fields: List<String>, visitor: Visitor<V>): Result<V>
+    public fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V>
 }

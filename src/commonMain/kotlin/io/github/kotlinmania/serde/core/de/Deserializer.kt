@@ -132,12 +132,18 @@ public interface Deserializer {
     /**
      * Hint that the `Deserialize` type is expecting a unit class with a particular name.
      */
-    public fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V>
+    public fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Hint that the `Deserialize` type is expecting a newtype class with a particular name.
      */
-    public fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V>
+    public fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Hint that the `Deserialize` type is expecting a sequence of values.
@@ -148,13 +154,20 @@ public interface Deserializer {
      * Hint that the `Deserialize` type is expecting a sequence of values and knows how many values
      * there are without looking at the serialized data.
      */
-    public fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V>
+    public fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Hint that the `Deserialize` type is expecting a tuple class with a particular name and number
      * of fields.
      */
-    public fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V>
+    public fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Hint that the `Deserialize` type is expecting a map of key-value pairs.
@@ -164,13 +177,21 @@ public interface Deserializer {
     /**
      * Hint that the `Deserialize` type is expecting a class with a particular name and fields.
      */
-    public fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V>
+    public fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Hint that the `Deserialize` type is expecting an enum value with a particular name and
      * possible variants.
      */
-    public fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V>
+    public fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V>
 
     /**
      * Hint that the `Deserialize` type is expecting the name of a class field or the discriminant

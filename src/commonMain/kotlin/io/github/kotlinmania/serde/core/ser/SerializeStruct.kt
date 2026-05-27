@@ -9,7 +9,10 @@ public interface SerializeStruct<Ok, E>
     /**
      * Serialize a class field.
      */
-    public fun <T> serializeField(key: String, value: T): Result<Unit>
+    public fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize
 
     /**

@@ -22,7 +22,10 @@ public interface MapAccess {
      * This returns `Result.success(Pair(key, value))` for the next key-value pair in the map, or
      * `Result.success(null)` if there are no more remaining items.
      */
-    public fun <K, V> nextEntrySeed(keySeed: DeserializeSeed<K>, valueSeed: DeserializeSeed<V>): Result<Pair<K, V>?> =
+    public fun <K, V> nextEntrySeed(
+        keySeed: DeserializeSeed<K>,
+        valueSeed: DeserializeSeed<V>,
+    ): Result<Pair<K, V>?> =
         runCatching {
             val key = nextKeySeed(keySeed).getOrThrow()
             if (key == null) {

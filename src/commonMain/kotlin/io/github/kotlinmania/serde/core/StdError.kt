@@ -29,7 +29,9 @@ package io.github.kotlinmania.serde.core
  * class MySerError : io.github.kotlinmania.serde.core.ser.StdError
  * ```
  */
-internal interface Error : Lib.Debug, Lib.Display {
+internal interface Error :
+    Lib.Debug,
+    Lib.Display {
     /**
      * The underlying cause of this error, if any.
      */

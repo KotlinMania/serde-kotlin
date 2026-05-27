@@ -19,7 +19,10 @@ public interface Deserialize<T> {
      * parts of the struct have been overwritten. Although whatever state that is will be
      * memory-safe.
      */
-    public fun <D> deserializeInPlace(deserializer: D, place: (T) -> Unit): Result<Unit>
+    public fun <D> deserializeInPlace(
+        deserializer: D,
+        place: (T) -> Unit,
+    ): Result<Unit>
         where D : Deserializer =
         runCatching {
             place(deserialize(deserializer).getOrThrow())

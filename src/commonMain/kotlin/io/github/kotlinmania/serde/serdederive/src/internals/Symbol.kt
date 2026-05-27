@@ -4,7 +4,9 @@ package io.github.kotlinmania.serde.serdederive.src.internals
 import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Path
 
-public class Symbol(public val value: String) {
+public class Symbol(
+    public val value: String,
+) {
     public fun fmt(formatter: Appendable): Result<Unit> =
         runCatching {
             formatter.append(value)
@@ -50,8 +52,6 @@ public val UNTAGGED: Symbol = Symbol("untagged")
 public val VARIANT_IDENTIFIER: Symbol = Symbol("variant_identifier")
 public val WITH: Symbol = Symbol("with")
 
-public fun Ident.eq(word: Symbol): Boolean =
-    toString() == word.value
+public fun Ident.eq(word: Symbol): Boolean = toString() == word.value
 
-public fun Path.eq(word: Symbol): Boolean =
-    isIdent(word.value)
+public fun Path.eq(word: Symbol): Boolean = isIdent(word.value)

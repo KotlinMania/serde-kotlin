@@ -9,7 +9,10 @@ public interface SerializeStructVariant<Ok, E>
     /**
      * Serialize a class variant field.
      */
-    public fun <T> serializeField(key: String, value: T): Result<Unit>
+    public fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize
 
     /**

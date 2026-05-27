@@ -70,30 +70,26 @@ public class MultiName internal constructor(
 public class Name(
     public var value: String,
     public val span: Span,
-) : ToTokens, Comparable<Name> {
+) : ToTokens,
+    Comparable<Name> {
     override fun toTokens(tokens: TokenStream) {
         LitStr.new(value, span).toTokens(tokens)
     }
 
-    public fun cmp(other: Name): Int =
-        value.compareTo(other.value)
+    public fun cmp(other: Name): Int = value.compareTo(other.value)
 
-    override fun compareTo(other: Name): Int =
-        cmp(other)
+    override fun compareTo(other: Name): Int = cmp(other)
 
-    public fun partialCmp(other: Name): Int =
-        cmp(other)
+    public fun partialCmp(other: Name): Int = cmp(other)
 
-    public fun eq(other: Name): Boolean =
-        value == other.value
+    public fun eq(other: Name): Boolean = value == other.value
 
     public fun copy(
         value: String = this.value,
         span: Span = this.span,
     ): Name = Name(value, span)
 
-    override fun equals(other: Any?): Boolean =
-        other is Name && eq(other)
+    override fun equals(other: Any?): Boolean = other is Name && eq(other)
 
     override fun hashCode(): Int = value.hashCode()
 

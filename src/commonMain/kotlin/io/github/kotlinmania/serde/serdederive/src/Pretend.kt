@@ -10,7 +10,10 @@ import io.github.kotlinmania.syn.Member
 /**
  * Emit hidden token references that keep remote derive fields and variants visible to diagnostics.
  */
-public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream =
+public fun pretendUsed(
+    cont: Container,
+    isPacked: Boolean,
+): TokenStream =
     tokenStream(
         listOf(
             pretendFieldsUsed(cont, isPacked),
@@ -18,7 +21,10 @@ public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream =
         ).joinToString("\n") { stream -> stream.toString() },
     )
 
-private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream =
+private fun pretendFieldsUsed(
+    cont: Container,
+    isPacked: Boolean,
+): TokenStream =
     when (val data = cont.data) {
         is Data.Enum -> pretendFieldsUsedEnum(cont, data.variants)
         is Data.Struct ->
@@ -34,13 +40,17 @@ private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream =
             }
     }
 
-private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): TokenStream {
+private fun pretendFieldsUsedStruct(
+    cont: Container,
+    fields: List<Field>,
+): TokenStream {
     val typeIdent = cont.ident.toString()
     val typeGenerics = typeGenerics(cont.generics)
     val members =
-        fields.mapIndexed { index, field ->
-            "${member(field.member)}: __v$index"
-        }.joinToString(", ")
+        fields
+            .mapIndexed { index, field ->
+                "${member(field.member)}: __v$index"
+            }.joinToString(", ")
 
     return tokenStream(
         """
@@ -52,7 +62,10 @@ private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): Token
     )
 }
 
-private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>): TokenStream {
+private fun pretendFieldsUsedStructPacked(
+    cont: Container,
+    fields: List<Field>,
+): TokenStream {
     val typeIdent = cont.ident.toString()
     val typeGenerics = typeGenerics(cont.generics)
     val wildcardMembers =
@@ -76,23 +89,28 @@ private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>):
     )
 }
 
-private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): TokenStream {
+private fun pretendFieldsUsedEnum(
+    cont: Container,
+    variants: List<Variant>,
+): TokenStream {
     val typeIdent = cont.ident.toString()
     val typeGenerics = typeGenerics(cont.generics)
     val patterns =
-        variants.mapNotNull { variant ->
-            when (variant.style) {
-                Style.Struct, Style.Tuple, Style.Newtype -> {
-                    val members =
-                        variant.fields.mapIndexed { index, field ->
-                            "${member(field.member)}: __v$index"
-                        }.joinToString(", ")
-                    "_serde::__private::Some($typeIdent::${variant.ident} { $members }) => {}"
-                }
+        variants
+            .mapNotNull { variant ->
+                when (variant.style) {
+                    Style.Struct, Style.Tuple, Style.Newtype -> {
+                        val members =
+                            variant.fields
+                                .mapIndexed { index, field ->
+                                    "${member(field.member)}: __v$index"
+                                }.joinToString(", ")
+                        "_serde::__private::Some($typeIdent::${variant.ident} { $members }) => {}"
+                    }
 
-                Style.Unit -> null
-            }
-        }.joinToString("\n")
+                    Style.Unit -> null
+                }
+            }.joinToString("\n")
 
     return tokenStream(
         """
@@ -122,9 +140,10 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
                 when (variant.style) {
                     Style.Struct -> {
                         val members =
-                            variant.fields.mapIndexed { index, field ->
-                                "${member(field.member)}: __v$index"
-                            }.joinToString(", ")
+                            variant.fields
+                                .mapIndexed { index, field ->
+                                    "${member(field.member)}: __v$index"
+                                }.joinToString(", ")
                         "{ $members }"
                     }
 

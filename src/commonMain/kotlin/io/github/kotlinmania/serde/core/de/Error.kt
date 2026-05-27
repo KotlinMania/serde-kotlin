@@ -26,27 +26,36 @@ public interface Error : StdError {
         /**
          * Raised when a `Deserialize` receives a type different from what it was expecting.
          */
-        public fun invalidType(unexp: Unexpected, exp: Expected): Throwable =
-            custom("invalid type: $unexp, expected ${exp.expecting()}")
+        public fun invalidType(
+            unexp: Unexpected,
+            exp: Expected,
+        ): Throwable = custom("invalid type: $unexp, expected ${exp.expecting()}")
 
         /**
          * Raised when a `Deserialize` receives a value of the right type but that is wrong for some
          * other reason.
          */
-        public fun invalidValue(unexp: Unexpected, exp: Expected): Throwable =
-            custom("invalid value: $unexp, expected ${exp.expecting()}")
+        public fun invalidValue(
+            unexp: Unexpected,
+            exp: Expected,
+        ): Throwable = custom("invalid value: $unexp, expected ${exp.expecting()}")
 
         /**
          * Raised when deserializing a sequence or map and the input data contains too many or too
          * few elements.
          */
-        public fun invalidLength(len: Int, exp: Expected): Throwable =
-            custom("invalid length $len, expected ${exp.expecting()}")
+        public fun invalidLength(
+            len: Int,
+            exp: Expected,
+        ): Throwable = custom("invalid length $len, expected ${exp.expecting()}")
 
         /**
          * Raised when a `Deserialize` enum type received a variant with an unrecognized name.
          */
-        public fun unknownVariant(variant: String, expected: List<String>): Throwable =
+        public fun unknownVariant(
+            variant: String,
+            expected: List<String>,
+        ): Throwable =
             if (expected.isEmpty()) {
                 custom("unknown variant `$variant`, there are no variants")
             } else {
@@ -56,7 +65,10 @@ public interface Error : StdError {
         /**
          * Raised when a `Deserialize` class type received a field with an unrecognized name.
          */
-        public fun unknownField(field: String, expected: List<String>): Throwable =
+        public fun unknownField(
+            field: String,
+            expected: List<String>,
+        ): Throwable =
             if (expected.isEmpty()) {
                 custom("unknown field `$field`, there are no fields")
             } else {
@@ -67,13 +79,11 @@ public interface Error : StdError {
          * Raised when a `Deserialize` class type expected to receive a required field with a
          * particular name but that field was not present in the input.
          */
-        public fun missingField(field: String): Throwable =
-            custom("missing field `$field`")
+        public fun missingField(field: String): Throwable = custom("missing field `$field`")
 
         /**
          * Raised when a `Deserialize` class type received more than one of the same field.
          */
-        public fun duplicateField(field: String): Throwable =
-            custom("duplicate field `$field`")
+        public fun duplicateField(field: String): Throwable = custom("duplicate field `$field`")
     }
 }

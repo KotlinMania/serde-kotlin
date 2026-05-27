@@ -21,7 +21,10 @@ public interface SerializeMap<Ok, E>
     /**
      * Serialize a map entry consisting of a key and a value.
      */
-    public fun <K, V> serializeEntry(key: K, value: V): Result<Unit>
+    public fun <K, V> serializeEntry(
+        key: K,
+        value: V,
+    ): Result<Unit>
         where K : Serialize,
               V : Serialize =
         runCatching {

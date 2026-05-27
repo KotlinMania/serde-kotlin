@@ -30,8 +30,7 @@ private sealed class Type : Serialize {
 
 private data object UnitValue : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        serializer.serializeUnit()
+        where E : Error = serializer.serializeUnit()
 }
 
 private sealed class Token {
@@ -41,8 +40,12 @@ private sealed class Token {
         public val len: Int,
     ) : Token()
 
-    public data class Str(public val value: String) : Token()
+    public data class Str(
+        public val value: String,
+    ) : Token()
+
     public data object Unit : Token()
+
     public data object StructVariantEnd : Token()
 }
 
@@ -51,8 +54,7 @@ private data object TokenError : Error
 private class TokenSerializer(
     private val tokens: MutableList<Token> = mutableListOf(),
 ) : Serializer<List<Token>, TokenError> {
-    private fun <T> unexpected(): Result<T> =
-        Result.failure(AssertionError("unexpected serializer method"))
+    private fun <T> unexpected(): Result<T> = Result.failure(AssertionError("unexpected serializer method"))
 
     override fun serializeBool(v: Boolean): Result<List<Token>> {
         v.hashCode()
@@ -125,8 +127,7 @@ private class TokenSerializer(
         return unexpected()
     }
 
-    override fun serializeNone(): Result<List<Token>> =
-        unexpected()
+    override fun serializeNone(): Result<List<Token>> = unexpected()
 
     override fun <T> serializeSome(value: T): Result<List<Token>>
         where T : Serialize {
@@ -145,14 +146,21 @@ private class TokenSerializer(
         return unexpected()
     }
 
-    override fun serializeUnitVariant(name: String, variantIndex: UInt, variant: String): Result<List<Token>> {
+    override fun serializeUnitVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+    ): Result<List<Token>> {
         name.hashCode()
         variantIndex.hashCode()
         variant.hashCode()
         return unexpected()
     }
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<List<Token>>
+    override fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<List<Token>>
         where T : Serialize {
         name.hashCode()
         value.hashCode()
@@ -183,7 +191,10 @@ private class TokenSerializer(
         return unexpected()
     }
 
-    override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<List<Token>, TokenError>> {
+    override fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<List<Token>, TokenError>> {
         name.hashCode()
         len.hashCode()
         return unexpected()
@@ -207,7 +218,10 @@ private class TokenSerializer(
         return unexpected()
     }
 
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<List<Token>, TokenError>> {
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<List<Token>, TokenError>> {
         name.hashCode()
         len.hashCode()
         return unexpected()
@@ -229,7 +243,10 @@ private class TokenSerializer(
 private class TokenStructVariant(
     private val tokens: MutableList<Token>,
 ) : SerializeStructVariant<List<Token>, TokenError> {
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize =
         runCatching {
             tokens += Token.Str(key)

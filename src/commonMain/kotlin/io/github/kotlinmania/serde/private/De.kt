@@ -11,43 +11,93 @@ import io.github.kotlinmania.serde.core.private.cautious
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
  */
-public fun <V> missingField(field: String, deserialize: Deserialize<V>): Result<V> {
-    class MissingFieldDeserializer(private val name: String) : Deserializer {
+public fun <V> missingField(
+    field: String,
+    deserialize: Deserialize<V>,
+): Result<V> {
+    class MissingFieldDeserializer(
+        private val name: String,
+    ) : Deserializer {
         override fun <T> deserializeAny(visitor: Visitor<T>): Result<T> {
             visitor.hashCode()
             return Result.failure(Error.missingField(name))
         }
 
         override fun <T> deserializeBool(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeI8(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeI16(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeI32(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeI64(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeU8(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeU16(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeU32(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeU64(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeF32(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeF64(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeChar(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeStr(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeString(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeBytes(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeByteBuf(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
 
-        override fun <T> deserializeOption(visitor: Visitor<T>): Result<T> =
-            visitor.visitNone()
+        override fun <T> deserializeOption(visitor: Visitor<T>): Result<T> = visitor.visitNone()
 
         override fun <T> deserializeUnit(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
-        override fun <T> deserializeUnitStruct(name: String, visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
-        override fun <T> deserializeNewtypeStruct(name: String, visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
+        override fun <T> deserializeUnitStruct(
+            name: String,
+            visitor: Visitor<T>,
+        ): Result<T> = deserializeAny(visitor)
+
+        override fun <T> deserializeNewtypeStruct(
+            name: String,
+            visitor: Visitor<T>,
+        ): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeSeq(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
-        override fun <T> deserializeTuple(len: Int, visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
-        override fun <T> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
+        override fun <T> deserializeTuple(
+            len: Int,
+            visitor: Visitor<T>,
+        ): Result<T> = deserializeAny(visitor)
+
+        override fun <T> deserializeTupleStruct(
+            name: String,
+            len: Int,
+            visitor: Visitor<T>,
+        ): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeMap(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
-        override fun <T> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
-        override fun <T> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
+        override fun <T> deserializeStruct(
+            name: String,
+            fields: List<String>,
+            visitor: Visitor<T>,
+        ): Result<T> = deserializeAny(visitor)
+
+        override fun <T> deserializeEnum(
+            name: String,
+            variants: List<String>,
+            visitor: Visitor<T>,
+        ): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeIdentifier(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
+
         override fun <T> deserializeIgnoredAny(visitor: Visitor<T>): Result<T> = deserializeAny(visitor)
     }
 
@@ -57,23 +107,25 @@ public fun <V> missingField(field: String, deserialize: Deserialize<V>): Result<
 public fun borrowCowStr(deserializer: Deserializer): Result<String> {
     val cowStrVisitor =
         object : Visitor<String> {
-        override fun expecting(): String = "a string"
+            override fun expecting(): String = "a string"
 
-        override fun visitStr(v: String): Result<String> = Result.success(v)
-        override fun visitBorrowedStr(v: String): Result<String> = Result.success(v)
-        override fun visitString(v: String): Result<String> = Result.success(v)
+            override fun visitStr(v: String): Result<String> = Result.success(v)
 
-        override fun visitBytes(v: ByteArray): Result<String> =
-            runCatching { v.decodeToString(throwOnInvalidSequence = true) }
-                .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
+            override fun visitBorrowedStr(v: String): Result<String> = Result.success(v)
 
-        override fun visitBorrowedBytes(v: ByteArray): Result<String> =
-            runCatching { v.decodeToString(throwOnInvalidSequence = true) }
-                .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
+            override fun visitString(v: String): Result<String> = Result.success(v)
 
-        override fun visitByteBuf(v: ByteArray): Result<String> =
-            runCatching { v.decodeToString(throwOnInvalidSequence = true) }
-                .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
+            override fun visitBytes(v: ByteArray): Result<String> =
+                runCatching { v.decodeToString(throwOnInvalidSequence = true) }
+                    .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
+
+            override fun visitBorrowedBytes(v: ByteArray): Result<String> =
+                runCatching { v.decodeToString(throwOnInvalidSequence = true) }
+                    .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
+
+            override fun visitByteBuf(v: ByteArray): Result<String> =
+                runCatching { v.decodeToString(throwOnInvalidSequence = true) }
+                    .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
         }
 
     return deserializer.deserializeStr(cowStrVisitor)
@@ -82,21 +134,25 @@ public fun borrowCowStr(deserializer: Deserializer): Result<String> {
 public fun borrowCowBytes(deserializer: Deserializer): Result<ByteArray> {
     val cowBytesVisitor =
         object : Visitor<ByteArray> {
-        override fun expecting(): String = "a byte array"
+            override fun expecting(): String = "a byte array"
 
-        override fun visitStr(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
-        override fun visitBorrowedStr(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
-        override fun visitString(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
+            override fun visitStr(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
 
-        override fun visitBytes(v: ByteArray): Result<ByteArray> = Result.success(v)
-        override fun visitBorrowedBytes(v: ByteArray): Result<ByteArray> = Result.success(v)
-        override fun visitByteBuf(v: ByteArray): Result<ByteArray> = Result.success(v)
+            override fun visitBorrowedStr(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
+
+            override fun visitString(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
+
+            override fun visitBytes(v: ByteArray): Result<ByteArray> = Result.success(v)
+
+            override fun visitBorrowedBytes(v: ByteArray): Result<ByteArray> = Result.success(v)
+
+            override fun visitByteBuf(v: ByteArray): Result<ByteArray> = Result.success(v)
         }
 
     return deserializer.deserializeBytes(cowBytesVisitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 // This module is private and nothing here should be used outside of generated code.
 //
@@ -171,7 +227,9 @@ private fun contentUnexpected(content: Content): Unexpected =
         is Content.Map -> Unexpected.Map
     }
 
-public class ContentVisitor : DeserializeSeed<Content>, Visitor<Content> {
+public class ContentVisitor :
+    DeserializeSeed<Content>,
+    Visitor<Content> {
     public companion object {
         public fun new(): ContentVisitor = ContentVisitor()
     }
@@ -179,28 +237,46 @@ public class ContentVisitor : DeserializeSeed<Content>, Visitor<Content> {
     override fun expecting(): String = "any value"
 
     override fun <D> deserialize(deserializer: D): Result<Content>
-        where D : Deserializer =
-        deserializer.deserializeAny(this)
+        where D : Deserializer = deserializer.deserializeAny(this)
 
     override fun visitBool(v: Boolean): Result<Content> = Result.success(Content.Bool(v))
+
     override fun visitI8(v: Byte): Result<Content> = Result.success(Content.I8(v))
+
     override fun visitI16(v: Short): Result<Content> = Result.success(Content.I16(v))
+
     override fun visitI32(v: Int): Result<Content> = Result.success(Content.I32(v))
+
     override fun visitI64(v: Long): Result<Content> = Result.success(Content.I64(v))
+
     override fun visitU8(v: UByte): Result<Content> = Result.success(Content.U8(v))
+
     override fun visitU16(v: UShort): Result<Content> = Result.success(Content.U16(v))
+
     override fun visitU32(v: UInt): Result<Content> = Result.success(Content.U32(v))
+
     override fun visitU64(v: ULong): Result<Content> = Result.success(Content.U64(v))
+
     override fun visitF32(v: Float): Result<Content> = Result.success(Content.F32(v))
+
     override fun visitF64(v: Double): Result<Content> = Result.success(Content.F64(v))
+
     override fun visitChar(v: Char): Result<Content> = Result.success(Content.Char(v))
+
     override fun visitStr(v: String): Result<Content> = Result.success(Content.String(v))
+
     override fun visitBorrowedStr(v: String): Result<Content> = Result.success(Content.Str(v))
+
     override fun visitString(v: String): Result<Content> = Result.success(Content.String(v))
+
     override fun visitBytes(v: ByteArray): Result<Content> = Result.success(Content.ByteBuf(v.copyOf()))
+
     override fun visitBorrowedBytes(v: ByteArray): Result<Content> = Result.success(Content.Bytes(v))
+
     override fun visitByteBuf(v: ByteArray): Result<Content> = Result.success(Content.ByteBuf(v))
+
     override fun visitUnit(): Result<Content> = Result.success(Content.Unit)
+
     override fun visitNone(): Result<Content> = Result.success(Content.None)
 
     override fun <D> visitSome(deserializer: D): Result<Content>
@@ -249,7 +325,10 @@ public class ContentVisitor : DeserializeSeed<Content>, Visitor<Content> {
  */
 public sealed class TagOrContent {
     public data object Tag : TagOrContent()
-    public data class ContentValue(public val value: Content) : TagOrContent()
+
+    public data class ContentValue(
+        public val value: Content,
+    ) : TagOrContent()
 }
 
 /**
@@ -258,7 +337,8 @@ public sealed class TagOrContent {
  */
 public class TagOrContentVisitor(
     private val name: String,
-) : DeserializeSeed<TagOrContent>, Visitor<TagOrContent> {
+) : DeserializeSeed<TagOrContent>,
+    Visitor<TagOrContent> {
     public companion object {
         public fun new(name: String): TagOrContentVisitor = TagOrContentVisitor(name)
     }
@@ -270,20 +350,30 @@ public class TagOrContentVisitor(
         // Internally tagged enums are only supported in self-describing formats.
         deserializer.deserializeAny(this)
 
-    private fun content(value: Content): Result<TagOrContent> =
-        Result.success(TagOrContent.ContentValue(value))
+    private fun content(value: Content): Result<TagOrContent> = Result.success(TagOrContent.ContentValue(value))
 
     override fun visitBool(v: Boolean): Result<TagOrContent> = ContentVisitor.new().visitBool(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitI8(v: Byte): Result<TagOrContent> = ContentVisitor.new().visitI8(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitI16(v: Short): Result<TagOrContent> = ContentVisitor.new().visitI16(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitI32(v: Int): Result<TagOrContent> = ContentVisitor.new().visitI32(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitI64(v: Long): Result<TagOrContent> = ContentVisitor.new().visitI64(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitU8(v: UByte): Result<TagOrContent> = ContentVisitor.new().visitU8(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitU16(v: UShort): Result<TagOrContent> = ContentVisitor.new().visitU16(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitU32(v: UInt): Result<TagOrContent> = ContentVisitor.new().visitU32(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitU64(v: ULong): Result<TagOrContent> = ContentVisitor.new().visitU64(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitF32(v: Float): Result<TagOrContent> = ContentVisitor.new().visitF32(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitF64(v: Double): Result<TagOrContent> = ContentVisitor.new().visitF64(v).map { TagOrContent.ContentValue(it) }
+
     override fun visitChar(v: Char): Result<TagOrContent> = ContentVisitor.new().visitChar(v).map { TagOrContent.ContentValue(it) }
 
     override fun visitStr(v: String): Result<TagOrContent> =
@@ -329,6 +419,7 @@ public class TagOrContentVisitor(
         }
 
     override fun visitUnit(): Result<TagOrContent> = ContentVisitor.new().visitUnit().map { TagOrContent.ContentValue(it) }
+
     override fun visitNone(): Result<TagOrContent> = ContentVisitor.new().visitNone().map { TagOrContent.ContentValue(it) }
 
     override fun <D> visitSome(deserializer: D): Result<TagOrContent>
@@ -379,11 +470,15 @@ public class TaggedContentVisitor<T>(
     override fun <A> visitSeq(seq: A): Result<Pair<T, Content>>
         where A : SeqAccess =
         runCatching {
-            val tag = seq.nextElementSeed(object : DeserializeSeed<T> {
-                override fun <D> deserialize(deserializer: D): Result<T>
-                    where D : Deserializer =
-                    deserializeTag.deserialize(deserializer)
-            }).getOrThrow() ?: throw Error.missingField(tagName)
+            val tag =
+                seq
+                    .nextElementSeed(
+                        object : DeserializeSeed<T> {
+                            override fun <D> deserialize(deserializer: D): Result<T>
+                            where D : Deserializer =
+                                deserializeTag.deserialize(deserializer)
+                        },
+                    ).getOrThrow() ?: throw Error.missingField(tagName)
 
             val rest = SeqAccessDeserializer.new(seq)
             val content = ContentVisitor.new().deserialize(rest).getOrThrow()
@@ -402,11 +497,17 @@ public class TaggedContentVisitor<T>(
                         if (tag != null) {
                             throw Error.duplicateField(tagName)
                         }
-                        tag = map.nextValueSeed(object : DeserializeSeed<T> {
-                            override fun <D> deserialize(deserializer: D): Result<T>
-                                where D : Deserializer =
-                                deserializeTag.deserialize(deserializer)
-                        }).getOrThrow()
+                        tag =
+                            map
+                                .nextValueSeed(
+                                    object : DeserializeSeed<T> {
+                                        override fun <D> deserialize(
+                                            deserializer: D,
+                                        ): Result<T>
+                                        where D : Deserializer =
+                                            deserializeTag.deserialize(deserializer)
+                                    },
+                                ).getOrThrow()
                     }
 
                     is TagOrContent.ContentValue -> {
@@ -445,7 +546,8 @@ public class TagOrContentFieldVisitor(
      * Name of the content field of the adjacently tagged enum
      */
     public val content: String,
-) : DeserializeSeed<TagOrContentField>, Visitor<TagOrContentField> {
+) : DeserializeSeed<TagOrContentField>,
+    Visitor<TagOrContentField> {
     override fun expecting(): String = "\"$tag\" or \"$content\""
 
     override fun <D> deserialize(deserializer: D): Result<TagOrContentField>
@@ -498,7 +600,8 @@ public class TagContentOtherFieldVisitor(
      * Name of the content field of the adjacently tagged enum
      */
     public val content: String,
-) : DeserializeSeed<TagContentOtherField>, Visitor<TagContentOtherField> {
+) : DeserializeSeed<TagContentOtherField>,
+    Visitor<TagContentOtherField> {
     override fun expecting(): String = "\"$tag\", \"$content\", or other ignored fields"
 
     override fun <D> deserialize(deserializer: D): Result<TagContentOtherField>
@@ -512,8 +615,7 @@ public class TagContentOtherFieldVisitor(
             else -> Result.success(TagContentOtherField.Other)
         }
 
-    override fun visitStr(v: String): Result<TagContentOtherField> =
-        visitBytes(v.encodeToByteArray())
+    override fun visitStr(v: String): Result<TagContentOtherField> = visitBytes(v.encodeToByteArray())
 
     override fun visitBytes(v: ByteArray): Result<TagContentOtherField> =
         when {
@@ -523,7 +625,7 @@ public class TagContentOtherFieldVisitor(
         }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 public class ContentDeserializer(
     private val content: Content,
@@ -533,8 +635,7 @@ public class ContentDeserializer(
         public fun new(content: Content): ContentDeserializer = ContentDeserializer(content)
     }
 
-    private fun invalidType(exp: Expected): Throwable =
-        Error.invalidType(contentUnexpected(content), exp)
+    private fun invalidType(exp: Expected): Throwable = Error.invalidType(contentUnexpected(content), exp)
 
     private fun <V> deserializeInteger(visitor: Visitor<V>): Result<V> =
         when (content) {
@@ -597,14 +698,23 @@ public class ContentDeserializer(
         }
 
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeFloat(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeFloat(visitor)
 
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> =
@@ -666,7 +776,10 @@ public class ContentDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (content) {
             // As a special case, allow deserializing an untagged newtype variant containing a
             // unit struct.
@@ -678,7 +791,10 @@ public class ContentDeserializer(
             else -> deserializeAny(visitor)
         }
 
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (content) {
             is Content.Newtype -> visitor.visitNewtypeStruct(new(content.value))
 
@@ -698,8 +814,16 @@ public class ContentDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeSeq(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeSeq(visitor)
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeSeq(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeSeq(visitor)
 
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> =
         when (content) {
@@ -707,23 +831,42 @@ public class ContentDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (content) {
             is Content.Seq -> visitContentSeq(content.value, visitor)
             is Content.Map -> visitContentMap(content.value, visitor)
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         runCatching {
             val (variant, value) =
                 when (content) {
                     is Content.Map -> {
                         val iter = content.value.iterator()
-                        val first = iter.nextOrNull()
-                            ?: throw Error.invalidValue(Unexpected.Map, object : Expected { override fun expecting(): String = "map with a single key" })
+                        val first =
+                            iter.nextOrNull()
+                                ?: throw Error.invalidValue(
+                                    Unexpected.Map,
+                                    object : Expected {
+                                        override fun expecting(): String = "map with a single key"
+                                    },
+                                )
                         if (iter.hasNext()) {
-                            throw Error.invalidValue(Unexpected.Map, object : Expected { override fun expecting(): String = "map with a single key" })
+                            throw Error.invalidValue(
+                                Unexpected.Map,
+                                object : Expected {
+                                    override fun expecting(): String = "map with a single key"
+                                },
+                            )
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
                         first.first to first.second
@@ -731,7 +874,12 @@ public class ContentDeserializer(
 
                     is Content.String -> content to null
                     is Content.Str -> content to null
-                    else -> throw Error.invalidType(contentUnexpected(content), object : Expected { override fun expecting(): String = "string or map" })
+                    else -> throw Error.invalidType(
+                        contentUnexpected(content),
+                        object : Expected {
+                            override fun expecting(): String = "string or map"
+                        },
+                    )
                 }
 
             visitor.visitEnum(EnumDeserializer.new(variant, value)).getOrThrow()
@@ -748,11 +896,13 @@ public class ContentDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> =
-        visitor.visitUnit()
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = visitor.visitUnit()
 }
 
-private fun <V> visitContentSeq(content: List<Content>, visitor: Visitor<V>): Result<V> =
+private fun <V> visitContentSeq(
+    content: List<Content>,
+    visitor: Visitor<V>,
+): Result<V> =
     runCatching {
         val seqVisitor = SeqDeserializer.new(content)
         val value = visitor.visitSeq(seqVisitor).getOrThrow()
@@ -760,7 +910,10 @@ private fun <V> visitContentSeq(content: List<Content>, visitor: Visitor<V>): Re
         value
     }
 
-private fun <V> visitContentMap(content: List<Pair<Content, Content>>, visitor: Visitor<V>): Result<V> =
+private fun <V> visitContentMap(
+    content: List<Pair<Content, Content>>,
+    visitor: Visitor<V>,
+): Result<V> =
     runCatching {
         val mapVisitor = MapDeserializer.new(content)
         val value = visitor.visitMap(mapVisitor).getOrThrow()
@@ -770,14 +923,16 @@ private fun <V> visitContentMap(content: List<Pair<Content, Content>>, visitor: 
 
 private class SeqDeserializer(
     private val iter: Iterator<Content>,
-) : Deserializer, SeqAccess {
+) : Deserializer,
+    SeqAccess {
     private var count: Int = 0
     private var remainingHint: Int? = null
 
     public companion object {
-        public fun new(content: List<Content>): SeqDeserializer = SeqDeserializer(content.iterator()).also {
-            it.remainingHint = content.size
-        }
+        public fun new(content: List<Content>): SeqDeserializer =
+            SeqDeserializer(content.iterator()).also {
+                it.remainingHint = content.size
+            }
     }
 
     fun end(): Result<Unit> =
@@ -800,32 +955,80 @@ private class SeqDeserializer(
         }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): Result<T?> =
@@ -858,7 +1061,9 @@ private class ExpectedInSeq(
 
 private class MapDeserializer(
     private val iter: Iterator<Pair<Content, Content>>,
-) : Deserializer, MapAccess, SeqAccess {
+) : Deserializer,
+    MapAccess,
+    SeqAccess {
     private var value: Content? = null
     private var count: Int = 0
     private var remainingHint: Int? = null
@@ -905,34 +1110,79 @@ private class MapDeserializer(
             value
         }
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> =
-        deserializeSeq(visitor)
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeSeq(visitor)
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <K> nextKeySeed(seed: DeserializeSeed<K>): Result<K?> =
@@ -948,15 +1198,19 @@ private class MapDeserializer(
 
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): Result<V> =
         runCatching {
-            val v = value
-                // Throw because this indicates a bug in the program rather than an expected
-                // failure.
-                ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
+            val v =
+                value
+                    // Throw because this indicates a bug in the program rather than an expected
+                    // failure.
+                    ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
             value = null
             seed.deserialize(ContentDeserializer.new(v)).getOrThrow()
         }
 
-    override fun <K, V> nextEntrySeed(keySeed: DeserializeSeed<K>, valueSeed: DeserializeSeed<V>): Result<Pair<K, V>?> =
+    override fun <K, V> nextEntrySeed(
+        keySeed: DeserializeSeed<K>,
+        valueSeed: DeserializeSeed<V>,
+    ): Result<Pair<K, V>?> =
         runCatching {
             val pair = nextPair()
             if (pair == null) {
@@ -1001,7 +1255,10 @@ private class PairDeserializer(
             }
         }
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> =
         if (len == 2) {
             deserializeSeq(visitor)
         } else {
@@ -1011,30 +1268,73 @@ private class PairDeserializer(
         }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
@@ -1086,8 +1386,10 @@ public class EnumDeserializer private constructor(
     private val value: Content?,
 ) : EnumAccess {
     public companion object {
-        public fun new(variant: Content, value: Content?): EnumDeserializer =
-            EnumDeserializer(variant, value)
+        public fun new(
+            variant: Content,
+            value: Content?,
+        ): EnumDeserializer = EnumDeserializer(variant, value)
     }
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): Result<Pair<V, VariantAccess>> =
@@ -1105,27 +1407,73 @@ private class VariantDeserializer(
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): Result<T> =
         when (val v = value) {
-            null -> Result.failure(Error.invalidType(Unexpected.UnitVariant, object : Expected { override fun expecting(): String = "newtype variant" }))
+            null ->
+                Result.failure(
+                    Error.invalidType(
+                        Unexpected.UnitVariant,
+                        object : Expected {
+                            override fun expecting(): String = "newtype variant"
+                        },
+                    ),
+                )
             else -> seed.deserialize(ContentDeserializer.new(v))
         }
 
-    override fun <V> tupleVariant(len: Int, visitor: Visitor<V>): Result<V> =
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (val v = value) {
             is Content.Seq -> SeqDeserializer.new(v.value).deserializeAny(visitor)
-            null -> Result.failure(Error.invalidType(Unexpected.UnitVariant, object : Expected { override fun expecting(): String = "tuple variant" }))
-            else -> Result.failure(Error.invalidType(contentUnexpected(v), object : Expected { override fun expecting(): String = "tuple variant" }))
+            null ->
+                Result.failure(
+                    Error.invalidType(
+                        Unexpected.UnitVariant,
+                        object : Expected {
+                            override fun expecting(): String = "tuple variant"
+                        },
+                    ),
+                )
+            else ->
+                Result.failure(
+                    Error.invalidType(
+                        contentUnexpected(v),
+                        object : Expected {
+                            override fun expecting(): String = "tuple variant"
+                        },
+                    ),
+                )
         }
 
-    override fun <V> structVariant(fields: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (val v = value) {
             is Content.Map -> MapDeserializer.new(v.value).deserializeAny(visitor)
             is Content.Seq -> SeqDeserializer.new(v.value).deserializeAny(visitor)
-            null -> Result.failure(Error.invalidType(Unexpected.UnitVariant, object : Expected { override fun expecting(): String = "struct variant" }))
-            else -> Result.failure(Error.invalidType(contentUnexpected(v), object : Expected { override fun expecting(): String = "struct variant" }))
+            null ->
+                Result.failure(
+                    Error.invalidType(
+                        Unexpected.UnitVariant,
+                        object : Expected {
+                            override fun expecting(): String = "struct variant"
+                        },
+                    ),
+                )
+            else ->
+                Result.failure(
+                    Error.invalidType(
+                        contentUnexpected(v),
+                        object : Expected {
+                            override fun expecting(): String = "struct variant"
+                        },
+                    ),
+                )
         }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 // Like `IntoDeserializer` but also implemented for `ByteArray`. This is used for
 // the newtype fallthrough case of `field_identifier`.
@@ -1179,32 +1527,80 @@ public class StrDeserializer(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitStr(value)
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
@@ -1214,32 +1610,80 @@ public class BorrowedStrDeserializer(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitBorrowedStr(value)
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
@@ -1253,47 +1697,97 @@ public class BorrowedBytesDeserializer private constructor(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitBorrowedBytes(value)
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 public class FlatMapDeserializer(
     public val entries: MutableList<Pair<Content, Content>?>,
 ) : Deserializer {
-    private fun <V> deserializeOther(): Result<V> =
-        Result.failure(Error.custom("can only flatten structs and maps"))
+    private fun <V> deserializeOther(): Result<V> = Result.failure(Error.custom("can only flatten structs and maps"))
 
-    override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> =
-        deserializeMap(visitor)
+    override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = deserializeMap(visitor)
 
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         runCatching {
             for (index in entries.indices) {
                 val entry = entries[index]
@@ -1314,7 +1808,11 @@ public class FlatMapDeserializer(
             ),
         )
 
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         visitor.visitMap(
             FlatStructAccess(
                 iter = entries.listIterator(),
@@ -1322,8 +1820,10 @@ public class FlatMapDeserializer(
             ),
         )
 
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> =
-        visitor.visitNewtypeStruct(this)
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = visitor.visitNewtypeStruct(this)
 
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> {
         val privateResult = visitor.privateVisitUntaggedOption(this)
@@ -1334,34 +1834,60 @@ public class FlatMapDeserializer(
         }
     }
 
-    override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> =
-        visitor.visitUnit()
+    override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = visitor.visitUnit()
 
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> =
-        visitor.visitUnit()
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = visitor.visitUnit()
 
-    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> =
-        visitor.visitUnit()
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = visitor.visitUnit()
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeOther()
+
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeOther()
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeOther()
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeOther()
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeOther()
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeOther()
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeOther()
 }
 
@@ -1474,17 +2000,20 @@ public class AdjacentlyTaggedEnumVariantVisitor<F>(
         where A : EnumAccess =
         runCatching {
             val (variant, variantAccess) =
-                data.variantSeed(object : DeserializeSeed<F> {
-                    override fun <D> deserialize(deserializer: D): Result<F>
-                        where D : Deserializer =
-                        deserializeFieldsEnum.deserialize(deserializer)
-                }).getOrThrow()
+                data
+                    .variantSeed(
+                        object : DeserializeSeed<F> {
+                            override fun <D> deserialize(deserializer: D): Result<F>
+                            where D : Deserializer =
+                                deserializeFieldsEnum.deserialize(deserializer)
+                        },
+                    ).getOrThrow()
             variantAccess.unitVariant().getOrThrow()
             variant
         }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 public class ContentRefDeserializer(
     private val content: Content,
@@ -1494,8 +2023,7 @@ public class ContentRefDeserializer(
         public fun new(content: Content): ContentRefDeserializer = ContentRefDeserializer(content)
     }
 
-    private fun invalidType(exp: Expected): Throwable =
-        Error.invalidType(contentUnexpected(content), exp)
+    private fun invalidType(exp: Expected): Throwable = Error.invalidType(contentUnexpected(content), exp)
 
     private fun <V> deserializeInteger(visitor: Visitor<V>): Result<V> =
         when (content) {
@@ -1558,14 +2086,23 @@ public class ContentRefDeserializer(
         }
 
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeInteger(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeFloat(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeFloat(visitor)
 
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> =
@@ -1613,9 +2150,15 @@ public class ContentRefDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeUnit(visitor)
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeUnit(visitor)
 
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (content) {
             is Content.Newtype -> visitor.visitNewtypeStruct(new(content.value))
             else -> visitor.visitNewtypeStruct(this)
@@ -1627,8 +2170,16 @@ public class ContentRefDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeSeq(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeSeq(visitor)
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeSeq(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeSeq(visitor)
 
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> =
         when (content) {
@@ -1636,23 +2187,42 @@ public class ContentRefDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (content) {
             is Content.Seq -> visitContentSeqRef(content.value, visitor)
             is Content.Map -> visitContentMapRef(content.value, visitor)
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         runCatching {
             val (variant, value) =
                 when (content) {
                     is Content.Map -> {
                         val iter = content.value.iterator()
-                        val first = iter.nextOrNull()
-                            ?: throw Error.invalidValue(Unexpected.Map, object : Expected { override fun expecting(): String = "map with a single key" })
+                        val first =
+                            iter.nextOrNull()
+                                ?: throw Error.invalidValue(
+                                    Unexpected.Map,
+                                    object : Expected {
+                                        override fun expecting(): String = "map with a single key"
+                                    },
+                                )
                         if (iter.hasNext()) {
-                            throw Error.invalidValue(Unexpected.Map, object : Expected { override fun expecting(): String = "map with a single key" })
+                            throw Error.invalidValue(
+                                Unexpected.Map,
+                                object : Expected {
+                                    override fun expecting(): String = "map with a single key"
+                                },
+                            )
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
                         first.first to first.second
@@ -1660,7 +2230,12 @@ public class ContentRefDeserializer(
 
                     is Content.String -> content to null
                     is Content.Str -> content to null
-                    else -> throw Error.invalidType(contentUnexpected(content), object : Expected { override fun expecting(): String = "string or map" })
+                    else -> throw Error.invalidType(
+                        contentUnexpected(content),
+                        object : Expected {
+                            override fun expecting(): String = "string or map"
+                        },
+                    )
                 }
 
             visitor.visitEnum(EnumRefDeserializer(variant, value)).getOrThrow()
@@ -1677,11 +2252,13 @@ public class ContentRefDeserializer(
             else -> Result.failure(invalidType(visitor))
         }
 
-    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> =
-        visitor.visitUnit()
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = visitor.visitUnit()
 }
 
-private fun <V> visitContentSeqRef(content: List<Content>, visitor: Visitor<V>): Result<V> =
+private fun <V> visitContentSeqRef(
+    content: List<Content>,
+    visitor: Visitor<V>,
+): Result<V> =
     runCatching {
         val seqVisitor = SeqRefDeserializer.new(content)
         val value = visitor.visitSeq(seqVisitor).getOrThrow()
@@ -1689,7 +2266,10 @@ private fun <V> visitContentSeqRef(content: List<Content>, visitor: Visitor<V>):
         value
     }
 
-private fun <V> visitContentMapRef(content: List<Pair<Content, Content>>, visitor: Visitor<V>): Result<V> =
+private fun <V> visitContentMapRef(
+    content: List<Pair<Content, Content>>,
+    visitor: Visitor<V>,
+): Result<V> =
     runCatching {
         val mapVisitor = MapRefDeserializer.new(content)
         val value = visitor.visitMap(mapVisitor).getOrThrow()
@@ -1699,14 +2279,16 @@ private fun <V> visitContentMapRef(content: List<Pair<Content, Content>>, visito
 
 private class SeqRefDeserializer(
     private val iter: Iterator<Content>,
-) : Deserializer, SeqAccess {
+) : Deserializer,
+    SeqAccess {
     private var count: Int = 0
     private var remainingHint: Int? = null
 
     public companion object {
-        public fun new(content: List<Content>): SeqRefDeserializer = SeqRefDeserializer(content.iterator()).also {
-            it.remainingHint = content.size
-        }
+        public fun new(content: List<Content>): SeqRefDeserializer =
+            SeqRefDeserializer(content.iterator()).also {
+                it.remainingHint = content.size
+            }
     }
 
     fun end(): Result<Unit> =
@@ -1729,32 +2311,80 @@ private class SeqRefDeserializer(
         }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): Result<T?> =
@@ -1776,7 +2406,9 @@ private class SeqRefDeserializer(
 
 private class MapRefDeserializer(
     private val iter: Iterator<Pair<Content, Content>>,
-) : Deserializer, MapAccess, SeqAccess {
+) : Deserializer,
+    MapAccess,
+    SeqAccess {
     private var value: Content? = null
     private var count: Int = 0
     private var remainingHint: Int? = null
@@ -1823,34 +2455,79 @@ private class MapRefDeserializer(
             value
         }
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> =
-        deserializeSeq(visitor)
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeSeq(visitor)
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <K> nextKeySeed(seed: DeserializeSeed<K>): Result<K?> =
@@ -1866,15 +2543,19 @@ private class MapRefDeserializer(
 
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): Result<V> =
         runCatching {
-            val v = value
-                // Throw because this indicates a bug in the program rather than an expected
-                // failure.
-                ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
+            val v =
+                value
+                    // Throw because this indicates a bug in the program rather than an expected
+                    // failure.
+                    ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
             value = null
             seed.deserialize(ContentRefDeserializer.new(v)).getOrThrow()
         }
 
-    override fun <K, V> nextEntrySeed(keySeed: DeserializeSeed<K>, valueSeed: DeserializeSeed<V>): Result<Pair<K, V>?> =
+    override fun <K, V> nextEntrySeed(
+        keySeed: DeserializeSeed<K>,
+        valueSeed: DeserializeSeed<V>,
+    ): Result<Pair<K, V>?> =
         runCatching {
             val pair = nextPair()
             if (pair == null) {
@@ -1919,7 +2600,10 @@ private class PairRefDeserializer(
             }
         }
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> =
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> =
         if (len == 2) {
             deserializeSeq(visitor)
         } else {
@@ -1929,30 +2613,73 @@ private class PairRefDeserializer(
         }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeI64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU16(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeU64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF32(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeF64(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeChar(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeStr(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeString(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeBytes(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeOption(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
+
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
@@ -2007,26 +2734,72 @@ private class VariantRefDeserializer(
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): Result<T> =
         when (val v = value) {
-            null -> Result.failure(Error.invalidType(Unexpected.UnitVariant, object : Expected { override fun expecting(): String = "newtype variant" }))
+            null ->
+                Result.failure(
+                    Error.invalidType(
+                        Unexpected.UnitVariant,
+                        object : Expected {
+                            override fun expecting(): String = "newtype variant"
+                        },
+                    ),
+                )
             else -> seed.deserialize(ContentRefDeserializer.new(v))
         }
 
-    override fun <V> tupleVariant(len: Int, visitor: Visitor<V>): Result<V> =
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (val v = value) {
             is Content.Seq -> visitContentSeqRef(v.value, visitor)
-            null -> Result.failure(Error.invalidType(Unexpected.UnitVariant, object : Expected { override fun expecting(): String = "tuple variant" }))
-            else -> Result.failure(Error.invalidType(contentUnexpected(v), object : Expected { override fun expecting(): String = "tuple variant" }))
+            null ->
+                Result.failure(
+                    Error.invalidType(
+                        Unexpected.UnitVariant,
+                        object : Expected {
+                            override fun expecting(): String = "tuple variant"
+                        },
+                    ),
+                )
+            else ->
+                Result.failure(
+                    Error.invalidType(
+                        contentUnexpected(v),
+                        object : Expected {
+                            override fun expecting(): String = "tuple variant"
+                        },
+                    ),
+                )
         }
 
-    override fun <V> structVariant(fields: List<String>, visitor: Visitor<V>): Result<V> =
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> =
         when (val v = value) {
             is Content.Map -> visitContentMapRef(v.value, visitor)
             is Content.Seq -> visitContentSeqRef(v.value, visitor)
-            null -> Result.failure(Error.invalidType(Unexpected.UnitVariant, object : Expected { override fun expecting(): String = "struct variant" }))
-            else -> Result.failure(Error.invalidType(contentUnexpected(v), object : Expected { override fun expecting(): String = "struct variant" }))
+            null ->
+                Result.failure(
+                    Error.invalidType(
+                        Unexpected.UnitVariant,
+                        object : Expected {
+                            override fun expecting(): String = "struct variant"
+                        },
+                    ),
+                )
+            else ->
+                Result.failure(
+                    Error.invalidType(
+                        contentUnexpected(v),
+                        object : Expected {
+                            override fun expecting(): String = "struct variant"
+                        },
+                    ),
+                )
         }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private fun <T> Iterator<T>.nextOrNull(): T? = if (hasNext()) next() else null

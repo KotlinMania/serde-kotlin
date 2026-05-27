@@ -152,12 +152,19 @@ public interface Serializer<Ok, E>
      * Serialize a unit variant like `E.A` in `sealed class E { data object A : E(); data object B :
      * E() }`.
      */
-    public fun serializeUnitVariant(name: String, variantIndex: UInt, variant: String): Result<Ok>
+    public fun serializeUnitVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+    ): Result<Ok>
 
     /**
      * Serialize a newtype class like `value class Millimeters(val value: UByte)`.
      */
-    public fun <T> serializeNewtypeStruct(name: String, value: T): Result<Ok>
+    public fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<Ok>
         where T : Serialize
 
     /**
@@ -188,7 +195,10 @@ public interface Serializer<Ok, E>
      * Begin to serialize a tuple class like `data class Rgb(val red: UByte, val green: UByte, val
      * blue: UByte)`.
      */
-    public fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Ok, E>>
+    public fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<Ok, E>>
 
     /**
      * Begin to serialize a tuple variant like `E.T` in `sealed class E { data class T(val first:
@@ -210,7 +220,10 @@ public interface Serializer<Ok, E>
      * Begin to serialize a class like `data class Rgb(val red: UByte, val green: UByte, val blue:
      * UByte)`.
      */
-    public fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Ok, E>>
+    public fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<Ok, E>>
 
     /**
      * Begin to serialize a class variant like `E.S` in `sealed class E { data class S(val red:

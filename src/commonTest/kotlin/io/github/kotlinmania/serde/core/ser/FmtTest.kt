@@ -64,6 +64,5 @@ private data class LiteralSerialize(
     private val text: String,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        serializer.serializeStr(text)
+        where E : Error = serializer.serializeStr(text)
 }

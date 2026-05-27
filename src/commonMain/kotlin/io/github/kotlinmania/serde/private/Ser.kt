@@ -123,8 +123,7 @@ private class TaggedSerializer<Ok, E, S>(
         return Result.failure(badType(Unsupported.ByteArray))
     }
 
-    override fun serializeNone(): Result<Ok> =
-        Result.failure(badType(Unsupported.Optional))
+    override fun serializeNone(): Result<Ok> = Result.failure(badType(Unsupported.Optional))
 
     override fun <T> serializeSome(value: T): Result<Ok>
         where T : Serialize {
@@ -161,7 +160,10 @@ private class TaggedSerializer<Ok, E, S>(
             map.end().getOrThrow()
         }
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Ok>
+    override fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<Ok>
         where T : Serialize {
         name.hashCode()
         return value.serialize(this)
@@ -193,7 +195,10 @@ private class TaggedSerializer<Ok, E, S>(
         return Result.failure(badType(Unsupported.Tuple))
     }
 
-    override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Ok, E>> {
+    override fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<Ok, E>> {
         name.hashCode()
         len.hashCode()
         return Result.failure(badType(Unsupported.TupleStruct))
@@ -221,7 +226,10 @@ private class TaggedSerializer<Ok, E, S>(
             map
         }
 
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Ok, E>> =
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<Ok, E>> =
         runCatching {
             val state = delegate.serializeStruct(name, len + 1).getOrThrow()
             state.serializeField(tag, Content.String(variantName)).getOrThrow()
@@ -243,8 +251,7 @@ private class TaggedSerializer<Ok, E, S>(
             SerializeStructVariantAsMapValue(map = map, name = variant, len = len)
         }
 
-    override fun collectStr(value: Any?): Result<Ok> =
-        Result.failure(badType(Unsupported.String))
+    override fun collectStr(value: Any?): Result<Ok> = Result.failure(badType(Unsupported.String))
 }
 
 private enum class Unsupported {
@@ -278,34 +285,84 @@ private enum class Unsupported {
 }
 
 private sealed class Content : Serialize {
-    data class Bool(val value: Boolean) : Content()
+    data class Bool(
+        val value: Boolean,
+    ) : Content()
 
-    data class U8(val value: UByte) : Content()
-    data class U16(val value: UShort) : Content()
-    data class U32(val value: UInt) : Content()
-    data class U64(val value: ULong) : Content()
+    data class U8(
+        val value: UByte,
+    ) : Content()
 
-    data class I8(val value: Byte) : Content()
-    data class I16(val value: Short) : Content()
-    data class I32(val value: Int) : Content()
-    data class I64(val value: Long) : Content()
+    data class U16(
+        val value: UShort,
+    ) : Content()
 
-    data class F32(val value: Float) : Content()
-    data class F64(val value: Double) : Content()
+    data class U32(
+        val value: UInt,
+    ) : Content()
 
-    data class Char(val value: kotlin.Char) : Content()
-    data class String(val value: kotlin.String) : Content()
-    data class Bytes(val value: ByteArray) : Content()
+    data class U64(
+        val value: ULong,
+    ) : Content()
+
+    data class I8(
+        val value: Byte,
+    ) : Content()
+
+    data class I16(
+        val value: Short,
+    ) : Content()
+
+    data class I32(
+        val value: Int,
+    ) : Content()
+
+    data class I64(
+        val value: Long,
+    ) : Content()
+
+    data class F32(
+        val value: Float,
+    ) : Content()
+
+    data class F64(
+        val value: Double,
+    ) : Content()
+
+    data class Char(
+        val value: kotlin.Char,
+    ) : Content()
+
+    data class String(
+        val value: kotlin.String,
+    ) : Content()
+
+    data class Bytes(
+        val value: ByteArray,
+    ) : Content()
 
     data object None : Content()
-    data class Some(val value: Content) : Content()
+
+    data class Some(
+        val value: Content,
+    ) : Content()
 
     data object Unit : Content()
-    data class UnitStruct(val name: kotlin.String) : Content()
-    data class UnitVariant(val name: kotlin.String, val variantIndex: UInt, val variant: kotlin.String) :
-        Content()
 
-    data class NewtypeStruct(val name: kotlin.String, val value: Content) : Content()
+    data class UnitStruct(
+        val name: kotlin.String,
+    ) : Content()
+
+    data class UnitVariant(
+        val name: kotlin.String,
+        val variantIndex: UInt,
+        val variant: kotlin.String,
+    ) : Content()
+
+    data class NewtypeStruct(
+        val name: kotlin.String,
+        val value: Content,
+    ) : Content()
 
     data class NewtypeVariant(
         val name: kotlin.String,
@@ -314,14 +371,34 @@ private sealed class Content : Serialize {
         val value: Content,
     ) : Content()
 
-    data class Seq(val elements: List<Content>) : Content()
-    data class Tuple(val elements: List<Content>) : Content()
-    data class TupleStruct(val name: kotlin.String, val fields: List<Content>) : Content()
-    data class TupleVariant(val name: kotlin.String, val variantIndex: UInt, val variant: kotlin.String, val fields: List<Content>) :
-        Content()
+    data class Seq(
+        val elements: List<Content>,
+    ) : Content()
 
-    data class Map(val entries: List<Pair<Content, Content>>) : Content()
-    data class Struct(val name: kotlin.String, val fields: List<Pair<kotlin.String, Content>>) : Content()
+    data class Tuple(
+        val elements: List<Content>,
+    ) : Content()
+
+    data class TupleStruct(
+        val name: kotlin.String,
+        val fields: List<Content>,
+    ) : Content()
+
+    data class TupleVariant(
+        val name: kotlin.String,
+        val variantIndex: UInt,
+        val variant: kotlin.String,
+        val fields: List<Content>,
+    ) : Content()
+
+    data class Map(
+        val entries: List<Pair<Content, Content>>,
+    ) : Content()
+
+    data class Struct(
+        val name: kotlin.String,
+        val fields: List<Pair<kotlin.String, Content>>,
+    ) : Content()
 
     data class StructVariant(
         val name: kotlin.String,
@@ -412,65 +489,54 @@ private sealed class Content : Serialize {
 
 private class ContentSerializer<E> : Serializer<Content, E>
     where E : Error {
-    override fun serializeBool(v: Boolean): Result<Content> =
-        Result.success(Content.Bool(v))
+    override fun serializeBool(v: Boolean): Result<Content> = Result.success(Content.Bool(v))
 
-    override fun serializeI8(v: Byte): Result<Content> =
-        Result.success(Content.I8(v))
+    override fun serializeI8(v: Byte): Result<Content> = Result.success(Content.I8(v))
 
-    override fun serializeI16(v: Short): Result<Content> =
-        Result.success(Content.I16(v))
+    override fun serializeI16(v: Short): Result<Content> = Result.success(Content.I16(v))
 
-    override fun serializeI32(v: Int): Result<Content> =
-        Result.success(Content.I32(v))
+    override fun serializeI32(v: Int): Result<Content> = Result.success(Content.I32(v))
 
-    override fun serializeI64(v: Long): Result<Content> =
-        Result.success(Content.I64(v))
+    override fun serializeI64(v: Long): Result<Content> = Result.success(Content.I64(v))
 
-    override fun serializeU8(v: UByte): Result<Content> =
-        Result.success(Content.U8(v))
+    override fun serializeU8(v: UByte): Result<Content> = Result.success(Content.U8(v))
 
-    override fun serializeU16(v: UShort): Result<Content> =
-        Result.success(Content.U16(v))
+    override fun serializeU16(v: UShort): Result<Content> = Result.success(Content.U16(v))
 
-    override fun serializeU32(v: UInt): Result<Content> =
-        Result.success(Content.U32(v))
+    override fun serializeU32(v: UInt): Result<Content> = Result.success(Content.U32(v))
 
-    override fun serializeU64(v: ULong): Result<Content> =
-        Result.success(Content.U64(v))
+    override fun serializeU64(v: ULong): Result<Content> = Result.success(Content.U64(v))
 
-    override fun serializeF32(v: Float): Result<Content> =
-        Result.success(Content.F32(v))
+    override fun serializeF32(v: Float): Result<Content> = Result.success(Content.F32(v))
 
-    override fun serializeF64(v: Double): Result<Content> =
-        Result.success(Content.F64(v))
+    override fun serializeF64(v: Double): Result<Content> = Result.success(Content.F64(v))
 
-    override fun serializeChar(v: Char): Result<Content> =
-        Result.success(Content.Char(v))
+    override fun serializeChar(v: Char): Result<Content> = Result.success(Content.Char(v))
 
-    override fun serializeStr(v: String): Result<Content> =
-        Result.success(Content.String(v))
+    override fun serializeStr(v: String): Result<Content> = Result.success(Content.String(v))
 
-    override fun serializeBytes(v: ByteArray): Result<Content> =
-        Result.success(Content.Bytes(v))
+    override fun serializeBytes(v: ByteArray): Result<Content> = Result.success(Content.Bytes(v))
 
-    override fun serializeNone(): Result<Content> =
-        Result.success(Content.None)
+    override fun serializeNone(): Result<Content> = Result.success(Content.None)
 
     override fun <T> serializeSome(value: T): Result<Content>
         where T : Serialize =
         runCatching { Content.Some(value.serialize(ContentSerializer<E>()).getOrThrow()) }
 
-    override fun serializeUnit(): Result<Content> =
-        Result.success(Content.Unit)
+    override fun serializeUnit(): Result<Content> = Result.success(Content.Unit)
 
-    override fun serializeUnitStruct(name: String): Result<Content> =
-        Result.success(Content.UnitStruct(name))
+    override fun serializeUnitStruct(name: String): Result<Content> = Result.success(Content.UnitStruct(name))
 
-    override fun serializeUnitVariant(name: String, variantIndex: UInt, variant: String): Result<Content> =
-        Result.success(Content.UnitVariant(name, variantIndex, variant))
+    override fun serializeUnitVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+    ): Result<Content> = Result.success(Content.UnitVariant(name, variantIndex, variant))
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Content>
+    override fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<Content>
         where T : Serialize =
         runCatching { Content.NewtypeStruct(name, value.serialize(ContentSerializer<E>()).getOrThrow()) }
 
@@ -488,36 +554,38 @@ private class ContentSerializer<E> : Serializer<Content, E>
     override fun serializeSeq(len: Int?): Result<io.github.kotlinmania.serde.core.ser.SerializeSeq<Content, E>> =
         Result.success(SerializeSeq(len))
 
-    override fun serializeTuple(len: Int): Result<SerializeTuple<Content, E>> =
-        Result.success(SerializeTuple(len))
+    override fun serializeTuple(len: Int): Result<SerializeTuple<Content, E>> = Result.success(SerializeTuple(len))
 
-    override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Content, E>> =
-        Result.success(SerializeTupleStruct(name, len))
+    override fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<Content, E>> = Result.success(SerializeTupleStruct(name, len))
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Content, E>> =
-        Result.success(SerializeTupleVariant(name, variantIndex, variant, len))
+    ): Result<SerializeTupleVariant<Content, E>> = Result.success(SerializeTupleVariant(name, variantIndex, variant, len))
 
-    override fun serializeMap(len: Int?): Result<SerializeMap<Content, E>> =
-        Result.success(SerializeMap(len))
+    override fun serializeMap(len: Int?): Result<SerializeMap<Content, E>> = Result.success(SerializeMap(len))
 
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Content, E>> =
-        Result.success(SerializeStruct(name, len))
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<Content, E>> = Result.success(SerializeStruct(name, len))
 
     override fun serializeStructVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Content, E>> =
-        Result.success(SerializeStructVariant(name, variantIndex, variant, len))
+    ): Result<SerializeStructVariant<Content, E>> = Result.success(SerializeStructVariant(name, variantIndex, variant, len))
 }
 
-private class SerializeSeq<E>(len: Int?) : io.github.kotlinmania.serde.core.ser.SerializeSeq<Content, E>
+private class SerializeSeq<E>(
+    len: Int?,
+) : io.github.kotlinmania.serde.core.ser.SerializeSeq<Content, E>
     where E : Error {
     private val elements: MutableList<Content> = ArrayList(len ?: 0)
 
@@ -528,11 +596,12 @@ private class SerializeSeq<E>(len: Int?) : io.github.kotlinmania.serde.core.ser.
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.Seq(elements))
+    override fun end(): Result<Content> = Result.success(Content.Seq(elements))
 }
 
-private class SerializeTuple<E>(len: Int) : SerializeTuple<Content, E>
+private class SerializeTuple<E>(
+    len: Int,
+) : SerializeTuple<Content, E>
     where E : Error {
     private val elements: MutableList<Content> = ArrayList(len)
 
@@ -543,8 +612,7 @@ private class SerializeTuple<E>(len: Int) : SerializeTuple<Content, E>
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.Tuple(elements))
+    override fun end(): Result<Content> = Result.success(Content.Tuple(elements))
 }
 
 private class SerializeTupleStruct<E>(
@@ -561,8 +629,7 @@ private class SerializeTupleStruct<E>(
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.TupleStruct(name, fields))
+    override fun end(): Result<Content> = Result.success(Content.TupleStruct(name, fields))
 }
 
 private class SerializeTupleVariant<E>(
@@ -581,11 +648,12 @@ private class SerializeTupleVariant<E>(
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.TupleVariant(name, variantIndex, variant, fields))
+    override fun end(): Result<Content> = Result.success(Content.TupleVariant(name, variantIndex, variant, fields))
 }
 
-private class SerializeMap<E>(len: Int?) : SerializeMap<Content, E>
+private class SerializeMap<E>(
+    len: Int?,
+) : SerializeMap<Content, E>
     where E : Error {
     private val entries: MutableList<Pair<Content, Content>> = ArrayList(len ?: 0)
     private var key: Content? = null
@@ -607,7 +675,10 @@ private class SerializeMap<E>(len: Int?) : SerializeMap<Content, E>
             Unit
         }
 
-    override fun <K, V> serializeEntry(key: K, value: V): Result<Unit>
+    override fun <K, V> serializeEntry(
+        key: K,
+        value: V,
+    ): Result<Unit>
         where K : Serialize,
               V : Serialize =
         runCatching {
@@ -617,8 +688,7 @@ private class SerializeMap<E>(len: Int?) : SerializeMap<Content, E>
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.Map(entries))
+    override fun end(): Result<Content> = Result.success(Content.Map(entries))
 }
 
 private class SerializeStruct<E>(
@@ -628,15 +698,17 @@ private class SerializeStruct<E>(
     where E : Error {
     private val fields: MutableList<Pair<String, Content>> = ArrayList(len)
 
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize =
         runCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.Struct(name, fields))
+    override fun end(): Result<Content> = Result.success(Content.Struct(name, fields))
 }
 
 private class SerializeStructVariant<E>(
@@ -648,15 +720,17 @@ private class SerializeStructVariant<E>(
     where E : Error {
     private val fields: MutableList<Pair<String, Content>> = ArrayList(len)
 
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize =
         runCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> =
-        Result.success(Content.StructVariant(name, variantIndex, variant, fields))
+    override fun end(): Result<Content> = Result.success(Content.StructVariant(name, variantIndex, variant, fields))
 }
 
 private class SerializeTupleVariantAsMapValue<Ok, E, M>(
@@ -691,7 +765,10 @@ private class SerializeStructVariantAsMapValue<Ok, E, M>(
           M : SerializeMap<Ok, E> {
     private val fields: MutableList<Pair<String, Content>> = ArrayList(len)
 
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize =
         runCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
@@ -710,8 +787,7 @@ public class FlatMapSerializer<MOk, E, M>(
 ) : Serializer<Unit, E>
     where E : Error,
           M : SerializeMap<MOk, E> {
-    private fun badType(what: Unsupported): Throwable =
-        Error.custom("can only flatten structs and maps (got $what)")
+    private fun badType(what: Unsupported): Throwable = Error.custom("can only flatten structs and maps (got $what)")
 
     override fun serializeBool(v: Boolean): Result<Unit> {
         v.hashCode()
@@ -783,22 +859,23 @@ public class FlatMapSerializer<MOk, E, M>(
         return Result.failure(badType(Unsupported.ByteArray))
     }
 
-    override fun serializeNone(): Result<Unit> =
-        Result.success(Unit)
+    override fun serializeNone(): Result<Unit> = Result.success(Unit)
 
     override fun <T> serializeSome(value: T): Result<Unit>
-        where T : Serialize =
-        value.serialize(this)
+        where T : Serialize = value.serialize(this)
 
-    override fun serializeUnit(): Result<Unit> =
-        Result.success(Unit)
+    override fun serializeUnit(): Result<Unit> = Result.success(Unit)
 
     override fun serializeUnitStruct(name: String): Result<Unit> {
         name.hashCode()
         return Result.success(Unit)
     }
 
-    override fun serializeUnitVariant(name: String, variantIndex: UInt, variant: String): Result<Unit> =
+    override fun serializeUnitVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+    ): Result<Unit> =
         runCatching {
             name.hashCode()
             variantIndex.hashCode()
@@ -806,7 +883,10 @@ public class FlatMapSerializer<MOk, E, M>(
             Unit
         }
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Unit>
+    override fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize {
         name.hashCode()
         return value.serialize(this)
@@ -836,7 +916,10 @@ public class FlatMapSerializer<MOk, E, M>(
         return Result.failure(badType(Unsupported.Tuple))
     }
 
-    override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Unit, E>> {
+    override fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<Unit, E>> {
         name.hashCode()
         len.hashCode()
         return Result.failure(badType(Unsupported.TupleStruct))
@@ -861,7 +944,10 @@ public class FlatMapSerializer<MOk, E, M>(
             FlatMapSerializeMap(map)
         }
 
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Unit, E>> =
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<Unit, E>> =
         runCatching {
             name.hashCode()
             len.hashCode()
@@ -889,20 +975,19 @@ private class FlatMapSerializeMap<MOk, E, M>(
     where E : Error,
           M : SerializeMap<MOk, E> {
     override fun <T> serializeKey(key: T): Result<Unit>
-        where T : Serialize =
-        map.serializeKey(key)
+        where T : Serialize = map.serializeKey(key)
 
     override fun <T> serializeValue(value: T): Result<Unit>
-        where T : Serialize =
-        map.serializeValue(value)
+        where T : Serialize = map.serializeValue(value)
 
-    override fun <K, V> serializeEntry(key: K, value: V): Result<Unit>
+    override fun <K, V> serializeEntry(
+        key: K,
+        value: V,
+    ): Result<Unit>
         where K : Serialize,
-              V : Serialize =
-        map.serializeEntry(key, value)
+              V : Serialize = map.serializeEntry(key, value)
 
-    override fun end(): Result<Unit> =
-        Result.success(Unit)
+    override fun end(): Result<Unit> = Result.success(Unit)
 }
 
 private class FlatMapSerializeStruct<MOk, E, M>(
@@ -910,12 +995,13 @@ private class FlatMapSerializeStruct<MOk, E, M>(
 ) : SerializeStruct<Unit, E>
     where E : Error,
           M : SerializeMap<MOk, E> {
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
-        where T : Serialize =
-        map.serializeEntry(Content.String(key), value)
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
+        where T : Serialize = map.serializeEntry(Content.String(key), value)
 
-    override fun end(): Result<Unit> =
-        Result.success(Unit)
+    override fun end(): Result<Unit> = Result.success(Unit)
 }
 
 private class FlatMapSerializeTupleVariantAsMapValue<MOk, E, M>(
@@ -948,7 +1034,10 @@ private class FlatMapSerializeStructVariantAsMapValue<MOk, E, M>(
           M : SerializeMap<MOk, E> {
     private val fields: MutableList<Pair<String, Content>> = ArrayList()
 
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize =
         runCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
@@ -974,7 +1063,8 @@ public data class AdjacentlyTaggedEnumVariant(
 
 // Error when Serialize for a non_exhaustive remote enum encounters a variant
 // that is not recognized.
-public data class CannotSerializeVariant<T>(public val value: T) {
-    override fun toString(): String =
-        "enum variant cannot be serialized: $value"
+public data class CannotSerializeVariant<T>(
+    public val value: T,
+) {
+    override fun toString(): String = "enum variant cannot be serialized: $value"
 }

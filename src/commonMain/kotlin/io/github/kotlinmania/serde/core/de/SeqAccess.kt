@@ -18,8 +18,7 @@ public interface SeqAccess {
      * This returns `Result.success(value)` for the next value in the sequence, or
      * `Result.success(null)` if there are no more remaining items.
      */
-    public fun <T> nextElement(seed: DeserializeSeed<T>): Result<T?> =
-        nextElementSeed(seed)
+    public fun <T> nextElement(seed: DeserializeSeed<T>): Result<T?> = nextElementSeed(seed)
 
     /**
      * Returns the number of elements remaining in the sequence, if known.

@@ -68,49 +68,29 @@ package io.github.kotlinmania.serde.core.de
 public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, DeserializeSeed<IgnoredAny> {
     override fun expecting(): String = "anything at all"
 
-    override fun visitBool(v: Boolean): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitBool(v: Boolean): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitI64(v: Long): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitI64(v: Long): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitI128(v: String): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitI128(v: String): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitU64(v: ULong): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitU64(v: ULong): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitU128(v: String): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitU128(v: String): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitF64(v: Double): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitF64(v: Double): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitStr(v: String): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitStr(v: String): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun visitNone(): Result<IgnoredAny> =
-        Result.success(IgnoredAny)
+    override fun visitNone(): Result<IgnoredAny> = Result.success(IgnoredAny)
 
     override fun <D> visitSome(deserializer: D): Result<IgnoredAny>
-        where D : Deserializer {
-        return deserialize(deserializer)
-    }
+        where D : Deserializer = deserialize(deserializer)
 
     override fun <D> visitNewtypeStruct(deserializer: D): Result<IgnoredAny>
-        where D : Deserializer {
-        return deserialize(deserializer)
-    }
+        where D : Deserializer = deserialize(deserializer)
 
-    override fun visitUnit(): Result<IgnoredAny> =
-        Result.success(IgnoredAny)
+    override fun visitUnit(): Result<IgnoredAny> = Result.success(IgnoredAny)
 
     override fun <A> visitSeq(seq: A): Result<IgnoredAny>
         where A : SeqAccess =
@@ -130,18 +110,20 @@ public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, De
             IgnoredAny
         }
 
-    override fun visitBytes(v: ByteArray): Result<IgnoredAny> {
-        return Result.success(IgnoredAny)
-    }
+    override fun visitBytes(v: ByteArray): Result<IgnoredAny> = Result.success(IgnoredAny)
 
     override fun <A> visitEnum(data: A): Result<IgnoredAny>
         where A : EnumAccess =
         runCatching {
-            data.variantSeed(IgnoredAny).getOrThrow().second.newtypeVariant(IgnoredAny).getOrThrow()
+            data
+                .variantSeed(IgnoredAny)
+                .getOrThrow()
+                .second
+                .newtypeVariant(IgnoredAny)
+                .getOrThrow()
         }
 
     override fun <D> deserialize(deserializer: D): Result<IgnoredAny>
-        where D : Deserializer {
-        return deserializer.deserializeIgnoredAny(IgnoredAny)
-    }
+        where D : Deserializer =
+        deserializer.deserializeIgnoredAny(IgnoredAny)
 }

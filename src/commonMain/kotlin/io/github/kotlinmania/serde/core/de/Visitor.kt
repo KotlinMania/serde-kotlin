@@ -13,8 +13,7 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a boolean.
      */
-    public fun visitBool(v: Boolean): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Bool(v), this))
+    public fun visitBool(v: Boolean): Result<Value> = Result.failure(Error.invalidType(Unexpected.Bool(v), this))
 
     /**
      * The input contains a `Byte`.
@@ -34,14 +33,12 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a `Long`.
      */
-    public fun visitI64(v: Long): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Signed(v), this))
+    public fun visitI64(v: Long): Result<Value> = Result.failure(Error.invalidType(Unexpected.Signed(v), this))
 
     /**
      * The input contains an `i128`.
      */
-    public fun visitI128(v: String): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Other("integer `$v` as i128"), this))
+    public fun visitI128(v: String): Result<Value> = Result.failure(Error.invalidType(Unexpected.Other("integer `$v` as i128"), this))
 
     /**
      * The input contains a `UByte`.
@@ -61,14 +58,12 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a `ULong`.
      */
-    public fun visitU64(v: ULong): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Unsigned(v), this))
+    public fun visitU64(v: ULong): Result<Value> = Result.failure(Error.invalidType(Unexpected.Unsigned(v), this))
 
     /**
      * The input contains a `u128`.
      */
-    public fun visitU128(v: String): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Other("integer `$v` as u128"), this))
+    public fun visitU128(v: String): Result<Value> = Result.failure(Error.invalidType(Unexpected.Other("integer `$v` as u128"), this))
 
     /**
      * The input contains a `Float`.
@@ -78,8 +73,7 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a `Double`.
      */
-    public fun visitF64(v: Double): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.FloatValue(v), this))
+    public fun visitF64(v: Double): Result<Value> = Result.failure(Error.invalidType(Unexpected.FloatValue(v), this))
 
     /**
      * The input contains a `Char`.
@@ -89,8 +83,7 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a string.
      */
-    public fun visitStr(v: String): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Str(v), this))
+    public fun visitStr(v: String): Result<Value> = Result.failure(Error.invalidType(Unexpected.Str(v), this))
 
     /**
      * The input contains a string that lives at least as long as the `Deserializer`.
@@ -105,8 +98,7 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a byte array.
      */
-    public fun visitBytes(v: ByteArray): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Bytes(v), this))
+    public fun visitBytes(v: ByteArray): Result<Value> = Result.failure(Error.invalidType(Unexpected.Bytes(v), this))
 
     /**
      * The input contains a byte array that lives at least as long as the `Deserializer`.
@@ -122,8 +114,7 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains an optional that is absent.
      */
-    public fun visitNone(): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.Option, this))
+    public fun visitNone(): Result<Value> = Result.failure(Error.invalidType(Unexpected.Option, this))
 
     /**
      * The input contains an optional that is present.
@@ -137,8 +128,7 @@ public interface Visitor<Value> : Expected {
     /**
      * The input contains a unit `Unit`.
      */
-    public fun visitUnit(): Result<Value> =
-        Result.failure(Error.invalidType(Unexpected.UnitValue, this))
+    public fun visitUnit(): Result<Value> = Result.failure(Error.invalidType(Unexpected.UnitValue, this))
 
     /**
      * The input contains a newtype class.

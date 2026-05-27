@@ -115,8 +115,14 @@ public class Container(
  * Analogous to `syn.Data`.
  */
 public sealed class Data {
-    public data class Enum(public val variants: List<Variant>) : Data()
-    public data class Struct(public val style: Style, public val fields: List<Field>) : Data()
+    public data class Enum(
+        public val variants: List<Variant>,
+    ) : Data()
+
+    public data class Struct(
+        public val style: Style,
+        public val fields: List<Field>,
+    ) : Data()
 
     public fun allFields(): Sequence<Field> =
         when (this) {
@@ -124,8 +130,7 @@ public sealed class Data {
             is Struct -> fields.asSequence()
         }
 
-    public fun hasGetter(): Boolean =
-        allFields().any { field -> field.attrs.getter() != null }
+    public fun hasGetter(): Boolean = allFields().any { field -> field.attrs.getter() != null }
 }
 
 /**
