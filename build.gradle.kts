@@ -249,7 +249,7 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
             implementation("io.github.kotlinmania:proc-macro2-kotlin:0.1.2")
             implementation("io.github.kotlinmania:quote-kotlin:0.1.2")
-            implementation("io.github.kotlinmania:syn-kotlin:0.1.7")
+            implementation("io.github.kotlinmania:syn-kotlin:0.1.6")
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
@@ -380,7 +380,7 @@ dependencies {
     codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.4.0")
     codeqlAndroidAar("io.github.kotlinmania:proc-macro2-kotlin-android:0.1.2")
     codeqlAndroidAar("io.github.kotlinmania:quote-kotlin-android:0.1.2")
-    codeqlAndroidAar("io.github.kotlinmania:syn-kotlin-android:0.1.7")
+    codeqlAndroidAar("io.github.kotlinmania:syn-kotlin-android:0.1.6")
 }
 val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
     description = "Compile commonMain Kotlin sources with kotlinc 2.3.21 for CodeQL Java/Kotlin extraction."
