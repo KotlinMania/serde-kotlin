@@ -27,8 +27,10 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
-group = "io.github.kotlinmania"
-version = "0.1.1"
+group = (project.findProperty("project.group") as? String) ?: "io.github.kotlinmania"
+version = (project.findProperty("project.version") as? String) ?: "0.1.0-SNAPSHOT"
+val frameworkName = (project.findProperty("project.frameworkName") as? String) ?: "Unnamed"
+val projectNamespace = (project.findProperty("project.namespace") as? String) ?: "io.github.kotlinmania"
 
 // ============================================================================
 // Android SDK installer
@@ -169,9 +171,9 @@ fun installProjectAndroidSdk(execOperations: ExecOperations) {
 // macOS / iOS / tvOS / watchOS / Linux / Windows / JS / Wasm / host-JVM
 // invocations no longer pay the SDK-download tax. The `setupAndroidSdk` task
 // remains the explicit entry point when the SDK has to be installed deliberately.
-val androidTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+val androidTaskRequested = gradle.startParameter.taskNames.isEmpty() || gradle.startParameter.taskNames.any { taskName ->
     val lower = taskName.lowercase()
-    "android" in lower || "aar" in lower
+    "android" in lower || "aar" in lower || "build" in lower || "assemble" in lower || "publish" in lower || "setupandroidsdk" in lower
 }
 val androidSdkExecOperations = serviceOf<ExecOperations>()
 if (androidTaskRequested) {
@@ -207,18 +209,18 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
-    val xcf = XCFramework("Serde")
+    val xcf = XCFramework(frameworkName)
 
     // Apple
-    macosArm64 { binaries.framework { baseName = "Serde"; xcf.add(this) } }
-    iosArm64 { binaries.framework { baseName = "Serde"; isStatic = true; xcf.add(this) } }
-    iosSimulatorArm64 { binaries.framework { baseName = "Serde"; isStatic = true; xcf.add(this) } }
-    iosX64 { binaries.framework { baseName = "Serde"; isStatic = true; xcf.add(this) } }
-    tvosArm64 { binaries.framework { baseName = "Serde"; xcf.add(this) } }
-    tvosSimulatorArm64 { binaries.framework { baseName = "Serde"; xcf.add(this) } }
-    watchosArm64 { binaries.framework { baseName = "Serde"; xcf.add(this) } }
-    watchosDeviceArm64 { binaries.framework { baseName = "Serde"; xcf.add(this) } }
-    watchosSimulatorArm64 { binaries.framework { baseName = "Serde"; xcf.add(this) } }
+    macosArm64 { binaries.framework { baseName = frameworkName; xcf.add(this) } }
+    iosArm64 { binaries.framework { baseName = frameworkName; isStatic = true; xcf.add(this) } }
+    iosSimulatorArm64 { binaries.framework { baseName = frameworkName; isStatic = true; xcf.add(this) } }
+    iosX64 { binaries.framework { baseName = frameworkName; isStatic = true; xcf.add(this) } }
+    tvosArm64 { binaries.framework { baseName = frameworkName; xcf.add(this) } }
+    tvosSimulatorArm64 { binaries.framework { baseName = frameworkName; xcf.add(this) } }
+    watchosArm64 { binaries.framework { baseName = frameworkName; xcf.add(this) } }
+    watchosDeviceArm64 { binaries.framework { baseName = frameworkName; xcf.add(this) } }
+    watchosSimulatorArm64 { binaries.framework { baseName = frameworkName; xcf.add(this) } }
 
     // Other native
     linuxX64()
@@ -238,13 +240,13 @@ kotlin {
 
     // Swift Export bridge
     swiftExport {
-        moduleName = "Serde"
-        flattenPackage = "io.github.kotlinmania.serde"
+        moduleName = frameworkName
+        flattenPackage = projectNamespace
     }
 
     // Android KMP library
     android {
-        namespace = "io.github.kotlinmania.serde"
+        namespace = projectNamespace
         compileSdk = 34
         minSdk = 24
         withHostTestBuilder {}.configure {}
@@ -260,14 +262,10 @@ kotlin {
     // overrides because serde-kotlin's logic is pure Kotlin with zero FFI.
     sourceSets {
         commonMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
-            implementation("io.github.kotlinmania:proc-macro2-kotlin:0.1.2")
-            implementation("io.github.kotlinmania:quote-kotlin:0.1.2")
-            implementation("io.github.kotlinmania:syn-kotlin:0.1.7")
+            val commonMainDeps = (project.findProperty("project.dependencies.commonMain") as? String) ?: ""
+            commonMainDeps.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { dep ->
+                implementation(dep)
+            }
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
@@ -340,12 +338,13 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
-    coordinates(group.toString(), "serde-kotlin", version.toString())
+    val projectName = (project.findProperty("project.name") as? String) ?: "unnamed-project"
+    coordinates(group.toString(), projectName, version.toString())
     pom {
-        name.set("serde-kotlin")
-        description.set("Kotlin Multiplatform port of serde-rs/serde - A generic serialization/deserialization framework")
+        name.set(projectName)
+        description.set((project.findProperty("project.pom.description") as? String) ?: "")
         inceptionYear.set("2026")
-        url.set("https://github.com/KotlinMania/serde-kotlin")
+        url.set("https://github.com/KotlinMania/$projectName")
         licenses {
             license {
                 name.set("MIT")
@@ -362,9 +361,9 @@ mavenPublishing {
             }
         }
         scm {
-            url.set("https://github.com/KotlinMania/serde-kotlin")
-            connection.set("scm:git:git://github.com/KotlinMania/serde-kotlin.git")
-            developerConnection.set("scm:git:ssh://github.com/KotlinMania/serde-kotlin.git")
+            url.set("https://github.com/KotlinMania/$projectName")
+            connection.set("scm:git:git://github.com/KotlinMania/$projectName.git")
+            developerConnection.set("scm:git:ssh://github.com/KotlinMania/$projectName.git")
         }
     }
 }
@@ -391,15 +390,16 @@ val codeqlAndroidAar: Configuration by configurations.creating {
 }
 dependencies {
     codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
-    codeqlSourceClasspath("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
-    codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.11.0")
-    codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.11.0")
-    codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.11.0")
-    codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.8.0")
-    codeqlSourceClasspath("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.4.0")
-    codeqlAndroidAar("io.github.kotlinmania:proc-macro2-kotlin-android:0.1.2")
-    codeqlAndroidAar("io.github.kotlinmania:quote-kotlin-android:0.1.2")
-    codeqlAndroidAar("io.github.kotlinmania:syn-kotlin-android:0.1.7")
+    
+    val codeqlSourceDeps = (project.findProperty("project.dependencies.codeqlSourceClasspath") as? String) ?: ""
+    codeqlSourceDeps.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { dep ->
+        codeqlSourceClasspath(dep)
+    }
+
+    val codeqlAars = (project.findProperty("project.dependencies.codeqlAndroidAar") as? String) ?: ""
+    codeqlAars.split(",").map { it.trim() }.filter { it.isNotEmpty() }.forEach { aar ->
+        codeqlAndroidAar(aar)
+    }
 }
 val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
     description = "Compile commonMain Kotlin sources with kotlinc 2.3.21 for CodeQL Java/Kotlin extraction."
@@ -559,7 +559,7 @@ val fullTargetBuildTaskNames = setOf(
     "watchosSimulatorArm64Binaries", "watchosSimulatorArm64TestBinaries",
     // Swift Export + XCFramework
     "embedSwiftExportForXcode",
-    "assembleSerdeXCFramework",
+    "assemble${frameworkName}XCFramework",
 )
 
 tasks.named("build") { dependsOn(fullTargetBuildTaskNames) }
