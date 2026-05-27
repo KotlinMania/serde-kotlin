@@ -47,8 +47,11 @@ jobs:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
+          jsMainClasses
+          jsTestClasses
           jsBrowserTest
           jsNodeTest
+          jsTest
           --no-configuration-cache
 
       - name: Upload test reports (JS)
