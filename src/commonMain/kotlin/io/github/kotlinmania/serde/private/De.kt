@@ -18,7 +18,7 @@ fun <V> missingField(
     class MissingFieldDeserializer(
         private val name: String,
     ) : Deserializer {
-        override fun <T> deserializeAny(_: Visitor<T>): Result<T> {
+        override fun <T> deserializeAny(visitor: Visitor<T>): Result<T> {
             return Result.failure(Error.missingField(name))
         }
 
@@ -286,31 +286,31 @@ class ContentVisitor :
         where D : Deserializer =
         deserialize(deserializer).map { Content.Newtype(it) }
 
-    override fun <A> visitSeq(seq: A): Result<Content>
+    override fun <A> visitSeq(access: A): Result<Content>
         where A : SeqAccess =
         runCatching {
-            val hint = seq.sizeHint()
+            val hint = access.sizeHint()
             val values = ArrayList<Content>(cautious<Content>(hint))
             while (true) {
-                val next = seq.nextElementSeed(new()).getOrThrow() ?: break
+                val next = access.nextElementSeed(new()).getOrThrow() ?: break
                 values.add(next)
             }
             Content.Seq(values)
         }
 
-    override fun <A> visitMap(map: A): Result<Content>
+    override fun <A> visitMap(access: A): Result<Content>
         where A : MapAccess =
         runCatching {
-            val hint = map.sizeHint()
+            val hint = access.sizeHint()
             val values = ArrayList<Pair<Content, Content>>(cautious<Pair<Content, Content>>(hint))
             while (true) {
-                val next = map.nextEntrySeed(new(), new()).getOrThrow() ?: break
+                val next = access.nextEntrySeed(new(), new()).getOrThrow() ?: break
                 values.add(next)
             }
             Content.Map(values)
         }
 
-    override fun <A> visitEnum(data: A): Result<Content>
+    override fun <A> visitEnum(access: A): Result<Content>
         where A : EnumAccess =
         Result.failure(
             Error.custom("untagged and internally tagged enums do not support enum input"),
@@ -429,17 +429,17 @@ class TagOrContentVisitor(
         where D : Deserializer =
         ContentVisitor.new().visitNewtypeStruct(deserializer).map { TagOrContent.ContentValue(it) }
 
-    override fun <A> visitSeq(seq: A): Result<TagOrContent>
+    override fun <A> visitSeq(access: A): Result<TagOrContent>
         where A : SeqAccess =
-        ContentVisitor.new().visitSeq(seq).map { TagOrContent.ContentValue(it) }
+        ContentVisitor.new().visitSeq(access).map { TagOrContent.ContentValue(it) }
 
-    override fun <A> visitMap(map: A): Result<TagOrContent>
+    override fun <A> visitMap(access: A): Result<TagOrContent>
         where A : MapAccess =
-        ContentVisitor.new().visitMap(map).map { TagOrContent.ContentValue(it) }
+        ContentVisitor.new().visitMap(access).map { TagOrContent.ContentValue(it) }
 
-    override fun <A> visitEnum(data: A): Result<TagOrContent>
+    override fun <A> visitEnum(access: A): Result<TagOrContent>
         where A : EnumAccess =
-        ContentVisitor.new().visitEnum(data).map { TagOrContent.ContentValue(it) }
+        ContentVisitor.new().visitEnum(access).map { TagOrContent.ContentValue(it) }
 }
 
 /**
@@ -466,11 +466,11 @@ class TaggedContentVisitor<T>(
 
     override fun expecting(): String = expecting
 
-    override fun <A> visitSeq(seq: A): Result<Pair<T, Content>>
+    override fun <A> visitSeq(access: A): Result<Pair<T, Content>>
         where A : SeqAccess =
         runCatching {
             val tag =
-                seq
+                access
                     .nextElementSeed(
                         object : DeserializeSeed<T> {
                             override fun <D> deserialize(deserializer: D): Result<T>
@@ -479,25 +479,25 @@ class TaggedContentVisitor<T>(
                         },
                     ).getOrThrow() ?: throw Error.missingField(tagName)
 
-            val rest = SeqAccessDeserializer.new(seq)
+            val rest = SeqAccessDeserializer.new(access)
             val content = ContentVisitor.new().deserialize(rest).getOrThrow()
             tag to content
         }
 
-    override fun <A> visitMap(map: A): Result<Pair<T, Content>>
+    override fun <A> visitMap(access: A): Result<Pair<T, Content>>
         where A : MapAccess =
         runCatching {
             var tag: T? = null
-            val values = ArrayList<Pair<Content, Content>>(cautious<Pair<Content, Content>>(map.sizeHint()))
+            val values = ArrayList<Pair<Content, Content>>(cautious<Pair<Content, Content>>(access.sizeHint()))
             while (true) {
-                val key = map.nextKeySeed(TagOrContentVisitor.new(tagName)).getOrThrow() ?: break
+                val key = access.nextKeySeed(TagOrContentVisitor.new(tagName)).getOrThrow() ?: break
                 when (key) {
                     TagOrContent.Tag -> {
                         if (tag != null) {
                             throw Error.duplicateField(tagName)
                         }
                         tag =
-                            map
+                            access
                                 .nextValueSeed(
                                     object : DeserializeSeed<T> {
                                         override fun <D> deserialize(
@@ -510,7 +510,7 @@ class TaggedContentVisitor<T>(
                     }
 
                     is TagOrContent.ContentValue -> {
-                        val value = map.nextValueSeed(ContentVisitor.new()).getOrThrow()
+                        val value = access.nextValueSeed(ContentVisitor.new()).getOrThrow()
                         values.add(key.value to value)
                     }
                 }
@@ -1995,11 +1995,11 @@ class AdjacentlyTaggedEnumVariantVisitor<F>(
     where F : Any {
     override fun expecting(): String = "variant of enum $enumName"
 
-    override fun <A> visitEnum(data: A): Result<F>
+    override fun <A> visitEnum(access: A): Result<F>
         where A : EnumAccess =
         runCatching {
             val (variant, variantAccess) =
-                data
+                access
                     .variantSeed(
                         object : DeserializeSeed<F> {
                             override fun <D> deserialize(deserializer: D): Result<F>

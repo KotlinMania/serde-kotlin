@@ -17,7 +17,7 @@ class Error(
     Lib.Debug,
     Lib.Display {
     companion object {
-        fun custom(_: String): Error = Error()
+        fun custom(msg: String): Error = Error()
     }
 
     fun description(): String = message.orEmpty()

@@ -523,14 +523,14 @@ fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<
                 object : Visitor<MutableList<T>> {
                     override fun expecting(): String = "a sequence"
 
-                    override fun <A> visitSeq(seq: A): Result<MutableList<T>>
+                    override fun <A> visitSeq(access: A): Result<MutableList<T>>
                         where A : SeqAccess =
                         runCatching {
-                            val hint = seq.sizeHint() ?: 0
+                            val hint = access.sizeHint() ?: 0
                             val values = ArrayList<T>(hint)
                             val seed = SeedFromDeserialize(elementDeserialize)
                             while (true) {
-                                val next = seq.nextElementSeed(seed).getOrThrow() ?: break
+                                val next = access.nextElementSeed(seed).getOrThrow() ?: break
                                 values.add(next)
                             }
                             values
@@ -552,15 +552,15 @@ fun <K, V> mutableMapDeserialize(
                 object : Visitor<MutableMap<K, V>> {
                     override fun expecting(): String = "a map"
 
-                    override fun <A> visitMap(map: A): Result<MutableMap<K, V>>
+                    override fun <A> visitMap(access: A): Result<MutableMap<K, V>>
                         where A : MapAccess =
                         runCatching {
-                            val hint = map.sizeHint() ?: 0
+                            val hint = access.sizeHint() ?: 0
                             val values = LinkedHashMap<K, V>(hint)
                             val keySeed = SeedFromDeserialize(keyDeserialize)
                             val valueSeed = SeedFromDeserialize(valueDeserialize)
                             while (true) {
-                                val entry = map.nextEntrySeed(keySeed, valueSeed).getOrThrow() ?: break
+                                val entry = access.nextEntrySeed(keySeed, valueSeed).getOrThrow() ?: break
                                 values[entry.first] = entry.second
                             }
                             values
@@ -583,14 +583,14 @@ fun <T0, T1> pairDeserialize(
                 object : Visitor<Pair<T0, T1>> {
                     override fun expecting(): String = "a tuple of size 2"
 
-                    override fun <A> visitSeq(seq: A): Result<Pair<T0, T1>>
+                    override fun <A> visitSeq(access: A): Result<Pair<T0, T1>>
                         where A : SeqAccess =
                         runCatching {
                             val first =
-                                seq.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
+                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
                                     ?: throw Error.invalidLength(0, this)
                             val second =
-                                seq.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
+                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
                                     ?: throw Error.invalidLength(1, this)
                             first to second
                         }
@@ -611,17 +611,17 @@ fun <T0, T1, T2> tripleDeserialize(
                 object : Visitor<Triple<T0, T1, T2>> {
                     override fun expecting(): String = "a tuple of size 3"
 
-                    override fun <A> visitSeq(seq: A): Result<Triple<T0, T1, T2>>
+                    override fun <A> visitSeq(access: A): Result<Triple<T0, T1, T2>>
                         where A : SeqAccess =
                         runCatching {
                             val first =
-                                seq.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
+                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
                                     ?: throw Error.invalidLength(0, this)
                             val second =
-                                seq.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
+                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
                                     ?: throw Error.invalidLength(1, this)
                             val third =
-                                seq.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow()
+                                access.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow()
                                     ?: throw Error.invalidLength(2, this)
                             Triple(first, second, third)
                         }
@@ -640,19 +640,19 @@ data object DurationDeserialize : Deserialize<Duration> {
             object : Visitor<Duration> {
                 override fun expecting(): String = "struct Duration"
 
-                override fun <A> visitSeq(seq: A): Result<Duration>
+                override fun <A> visitSeq(access: A): Result<Duration>
                     where A : SeqAccess =
                     runCatching {
                         val secs =
-                            seq.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
                                 ?: throw Error.invalidLength(0, this)
                         val nanos =
-                            seq.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 ?: throw Error.invalidLength(1, this)
                         secs.toLong().seconds + nanos.toLong().nanoseconds
                     }
 
-                override fun <A> visitMap(map: A): Result<Duration>
+                override fun <A> visitMap(access: A): Result<Duration>
                     where A : MapAccess =
                     runCatching {
                         var secs: ULong? = null
@@ -665,15 +665,15 @@ data object DurationDeserialize : Deserialize<Duration> {
                                 ),
                             )
                         while (true) {
-                            val key = map.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                            val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
                             when (key) {
                                 "secs" -> {
                                     if (secs != null) throw Error.duplicateField("secs")
-                                    secs = map.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                                    secs = access.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
                                 }
                                 "nanos" -> {
                                     if (nanos != null) throw Error.duplicateField("nanos")
-                                    nanos = map.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                                    nanos = access.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 }
                                 else -> throw Error.unknownField(key, listOf("secs", "nanos"))
                             }
@@ -697,19 +697,19 @@ data object SystemTimeDeserialize : Deserialize<Instant> {
             object : Visitor<Instant> {
                 override fun expecting(): String = "struct SystemTime"
 
-                override fun <A> visitSeq(seq: A): Result<Instant>
+                override fun <A> visitSeq(access: A): Result<Instant>
                     where A : SeqAccess =
                     runCatching {
                         val secs =
-                            seq.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
                                 ?: throw Error.invalidLength(0, this)
                         val nanos =
-                            seq.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 ?: throw Error.invalidLength(1, this)
                         Instant.fromEpochSeconds(secs.toLong(), nanos.toInt())
                     }
 
-                override fun <A> visitMap(map: A): Result<Instant>
+                override fun <A> visitMap(access: A): Result<Instant>
                     where A : MapAccess =
                     runCatching {
                         var secs: ULong? = null
@@ -722,15 +722,15 @@ data object SystemTimeDeserialize : Deserialize<Instant> {
                                 ),
                             )
                         while (true) {
-                            val key = map.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                            val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
                             when (key) {
                                 "secs_since_epoch" -> {
                                     if (secs != null) throw Error.duplicateField("secs_since_epoch")
-                                    secs = map.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                                    secs = access.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
                                 }
                                 "nanos_since_epoch" -> {
                                     if (nanos != null) throw Error.duplicateField("nanos_since_epoch")
-                                    nanos = map.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                                    nanos = access.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 }
                                 else -> throw Error.unknownField(
                                     key,

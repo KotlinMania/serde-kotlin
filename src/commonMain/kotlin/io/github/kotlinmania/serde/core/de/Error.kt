@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/de/mod.rs
 package io.github.kotlinmania.serde.core.de
 
+import io.github.kotlinmania.serde.SerdeError
+
 /**
  * The `Error` interface allows `Deserialize` implementations to create descriptive error messages
  * belonging to the `Deserializer` against which they are currently running.
@@ -21,7 +23,7 @@ interface Error : StdError {
          *
          * The message should not be capitalized and should not end with a period.
          */
-        fun custom(msg: String): Throwable = SerdeDeserializationException(msg)
+        fun custom(msg: String): SerdeError = SerdeError(msg)
 
         /**
          * Raised when a `Deserialize` receives a type different from what it was expecting.
@@ -29,7 +31,7 @@ interface Error : StdError {
         fun invalidType(
             unexp: Unexpected,
             exp: Expected,
-        ): Throwable = custom("invalid type: $unexp, expected ${exp.expecting()}")
+        ): SerdeError = custom("invalid type: $unexp, expected ${exp.expecting()}")
 
         /**
          * Raised when a `Deserialize` receives a value of the right type but that is wrong for some
@@ -38,7 +40,7 @@ interface Error : StdError {
         fun invalidValue(
             unexp: Unexpected,
             exp: Expected,
-        ): Throwable = custom("invalid value: $unexp, expected ${exp.expecting()}")
+        ): SerdeError = custom("invalid value: $unexp, expected ${exp.expecting()}")
 
         /**
          * Raised when deserializing a sequence or map and the input data contains too many or too
@@ -47,7 +49,7 @@ interface Error : StdError {
         fun invalidLength(
             len: Int,
             exp: Expected,
-        ): Throwable = custom("invalid length $len, expected ${exp.expecting()}")
+        ): SerdeError = custom("invalid length $len, expected ${exp.expecting()}")
 
         /**
          * Raised when a `Deserialize` enum type received a variant with an unrecognized name.
@@ -55,7 +57,7 @@ interface Error : StdError {
         fun unknownVariant(
             variant: String,
             expected: List<String>,
-        ): Throwable =
+        ): SerdeError =
             if (expected.isEmpty()) {
                 custom("unknown variant `$variant`, there are no variants")
             } else {
@@ -68,7 +70,7 @@ interface Error : StdError {
         fun unknownField(
             field: String,
             expected: List<String>,
-        ): Throwable =
+        ): SerdeError =
             if (expected.isEmpty()) {
                 custom("unknown field `$field`, there are no fields")
             } else {
@@ -79,11 +81,11 @@ interface Error : StdError {
          * Raised when a `Deserialize` class type expected to receive a required field with a
          * particular name but that field was not present in the input.
          */
-        fun missingField(field: String): Throwable = custom("missing field `$field`")
+        fun missingField(field: String): SerdeError = custom("missing field `$field`")
 
         /**
          * Raised when a `Deserialize` class type received more than one of the same field.
          */
-        fun duplicateField(field: String): Throwable = custom("duplicate field `$field`")
+        fun duplicateField(field: String): SerdeError = custom("duplicate field `$field`")
     }
 }

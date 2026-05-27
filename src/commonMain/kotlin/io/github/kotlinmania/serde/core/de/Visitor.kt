@@ -119,7 +119,7 @@ interface Visitor<Value> : Expected {
     /**
      * The input contains an optional that is present.
      */
-    fun <D> visitSome(_: D): Result<Value>
+    fun <D> visitSome(deserializer: D): Result<Value>
         where D : Deserializer {
         return Result.failure(Error.invalidType(Unexpected.Option, this))
     }
@@ -132,7 +132,7 @@ interface Visitor<Value> : Expected {
     /**
      * The input contains a newtype class.
      */
-    fun <D> visitNewtypeStruct(_: D): Result<Value>
+    fun <D> visitNewtypeStruct(deserializer: D): Result<Value>
         where D : Deserializer {
         return Result.failure(Error.invalidType(Unexpected.NewtypeStruct, this))
     }
@@ -140,7 +140,7 @@ interface Visitor<Value> : Expected {
     /**
      * The input contains a sequence of elements.
      */
-    fun <A> visitSeq(_: A): Result<Value>
+    fun <A> visitSeq(access: A): Result<Value>
         where A : SeqAccess {
         return Result.failure(Error.invalidType(Unexpected.Seq, this))
     }
@@ -148,7 +148,7 @@ interface Visitor<Value> : Expected {
     /**
      * The input contains a key-value map.
      */
-    fun <A> visitMap(_: A): Result<Value>
+    fun <A> visitMap(access: A): Result<Value>
         where A : MapAccess {
         return Result.failure(Error.invalidType(Unexpected.Map, this))
     }
@@ -156,7 +156,7 @@ interface Visitor<Value> : Expected {
     /**
      * The input contains an enum.
      */
-    fun <A> visitEnum(_: A): Result<Value>
+    fun <A> visitEnum(access: A): Result<Value>
         where A : EnumAccess {
         return Result.failure(Error.invalidType(Unexpected.Enum, this))
     }
@@ -164,7 +164,7 @@ interface Visitor<Value> : Expected {
     /**
      * Used when deserializing a flattened optional field. Not public API.
      */
-    fun <D> privateVisitUntaggedOption(_: D): Result<Value>
+    fun <D> privateVisitUntaggedOption(deserializer: D): Result<Value>
         where D : Deserializer {
         return Result.failure(SerdeDeserializationException("untagged option is absent"))
     }

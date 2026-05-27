@@ -23,10 +23,13 @@ import io.github.kotlinmania.serde.core.de.Error as DeError
 /**
  * A minimal representation of all possible errors that can occur using the `IntoDeserializer`
  * interface.
+ *
+ * Not a `Throwable` subclass — avoids Swift export's Class Stdlib hazard
+ * (unchecked-cast bridge on `Throwable.getStackTrace()`).
  */
 class Error private constructor(
     private val err: String,
-) : Exception(err) {
+) {
     companion object {
         fun custom(msg: String): Error = Error(msg)
     }
@@ -201,13 +204,13 @@ class NeverDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -316,13 +319,13 @@ abstract class PrimitiveDeserializer<T> :
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = forwardToAny(this, visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = forwardToAny(this, visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = forwardToAny(this, visitor)
 
@@ -508,8 +511,8 @@ class U32Deserializer private constructor(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitU32(value)
 
     override fun <V> deserializeEnum(
-        _: String,
-        _: List<String>,
+        name: String,
+        variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
         return visitor.visitEnum(this)
@@ -568,13 +571,13 @@ class U32Deserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -709,8 +712,8 @@ class StrDeserializer private constructor(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitStr(value)
 
     override fun <V> deserializeEnum(
-        _: String,
-        _: List<String>,
+        name: String,
+        variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
         return visitor.visitEnum(this)
@@ -769,13 +772,13 @@ class StrDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -814,8 +817,8 @@ class BorrowedStrDeserializer private constructor(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitBorrowedStr(value)
 
     override fun <V> deserializeEnum(
-        _: String,
-        _: List<String>,
+        name: String,
+        variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
         return visitor.visitEnum(this)
@@ -874,13 +877,13 @@ class BorrowedStrDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -921,8 +924,8 @@ class StringDeserializer private constructor(
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitString(value)
 
     override fun <V> deserializeEnum(
-        _: String,
-        _: List<String>,
+        name: String,
+        variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
         return visitor.visitEnum(this)
@@ -981,13 +984,13 @@ class StringDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -1039,8 +1042,8 @@ class CowStrDeserializer private constructor(
         }
 
     override fun <V> deserializeEnum(
-        _: String,
-        _: List<String>,
+        name: String,
+        variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
         return visitor.visitEnum(this)
@@ -1099,13 +1102,13 @@ class CowStrDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -1197,13 +1200,13 @@ class BytesDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -1297,13 +1300,13 @@ class BorrowedBytesDeserializer private constructor(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -1410,13 +1413,13 @@ class SeqDeserializer<T : IntoDeserializer>(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -1523,13 +1526,13 @@ class SeqAccessDeserializer<A : SeqAccess>(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -1615,7 +1618,7 @@ class MapDeserializer<K, V>(
         }
 
     override fun <R> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<R>,
     ): Result<R> {
         return deserializeSeq(visitor)
@@ -1683,7 +1686,7 @@ class MapDeserializer<K, V>(
 
     override fun <R> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<R>,
     ): Result<R> = deserializeAny(visitor)
 
@@ -1724,7 +1727,7 @@ class MapDeserializer<K, V>(
             }
 
         override fun <R> deserializeTuple(
-            _: Int,
+            len: Int,
             visitor: Visitor<R>,
         ): Result<R> =
             if (len == 2) {
@@ -1923,13 +1926,13 @@ class MapAccessDeserializer<A : MapAccess>(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
@@ -2028,13 +2031,13 @@ class EnumAccessDeserializer<A : EnumAccess>(
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTuple(
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeTupleStruct(
         name: String,
-        _: Int,
+        len: Int,
         visitor: Visitor<V>,
     ): Result<V> = deserializeAny(visitor)
 

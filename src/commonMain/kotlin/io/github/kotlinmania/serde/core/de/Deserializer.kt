@@ -45,7 +45,7 @@ interface Deserializer {
      *
      * The default behavior unconditionally returns an error.
      */
-    fun <V> deserializeI128(_: Visitor<V>): Result<V> {
+    fun <V> deserializeI128(visitor: Visitor<V>): Result<V> {
         return Result.failure(Error.custom("i128 is not supported"))
     }
 
@@ -74,7 +74,7 @@ interface Deserializer {
      *
      * The default behavior unconditionally returns an error.
      */
-    fun <V> deserializeU128(_: Visitor<V>): Result<V> {
+    fun <V> deserializeU128(visitor: Visitor<V>): Result<V> {
         return Result.failure(Error.custom("u128 is not supported"))
     }
 

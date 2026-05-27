@@ -122,19 +122,17 @@ private data object NewtypeUIntVisitor : Visitor<UInt> {
 private data object EnumNewtypeVisitor : Visitor<Pair<String, UInt>> {
     override fun expecting(): String = "an enum"
 
-    override fun <A> visitEnum(data: A): Result<Pair<String, UInt>>
+    override fun <A> visitEnum(access: A): Result<Pair<String, UInt>>
         where A : EnumAccess =
         runCatching {
             val (variant, variantAccess) =
-                data
-                    .variantSeed(
+                access.variantSeed(
                         seed { deserializer ->
                             deserializer.deserializeString(StringVisitor)
                         },
                     ).getOrThrow()
             val value =
-                variantAccess
-                    .newtypeVariantSeed(
+                variantAccess.newtypeVariantSeed(
                         seed { deserializer ->
                             deserializer.deserializeU32(UIntVisitor)
                         },

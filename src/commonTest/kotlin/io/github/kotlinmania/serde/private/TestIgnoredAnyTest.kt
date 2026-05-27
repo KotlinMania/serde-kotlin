@@ -152,10 +152,10 @@ private class TestEnumDeserializer(
 private data object TargetVisitor : Visitor<Target> {
     override fun expecting(): String = "a Target enum"
 
-    override fun <A> visitEnum(data: A): Result<Target>
+    override fun <A> visitEnum(access: A): Result<Target>
         where A : EnumAccess =
         runCatching {
-            val (variant, access) = data.variantSeed(IgnoredAnyStringSeed).getOrThrow()
+            val (variant, access) = access.variantSeed(IgnoredAnyStringSeed).getOrThrow()
             when (variant) {
                 "Unit" -> {
                     access.unitVariant().getOrThrow()
@@ -198,11 +198,11 @@ private data object IgnoredAnyIntVisitor : Visitor<Int> {
 private data object IgnoredAnyTupleVisitor : Visitor<Target> {
     override fun expecting(): String = "a tuple variant"
 
-    override fun <A> visitSeq(seq: A): Result<Target>
+    override fun <A> visitSeq(access: A): Result<Target>
         where A : SeqAccess =
         runCatching {
-            val first = seq.nextElementSeed(IgnoredAnyIntSeed).getOrThrow() ?: throw AssertionError("missing first tuple field")
-            val second = seq.nextElementSeed(IgnoredAnyIntSeed).getOrThrow() ?: throw AssertionError("missing second tuple field")
+            val first = access.nextElementSeed(IgnoredAnyIntSeed).getOrThrow() ?: throw AssertionError("missing first tuple field")
+            val second = access.nextElementSeed(IgnoredAnyIntSeed).getOrThrow() ?: throw AssertionError("missing second tuple field")
             Target.Tuple(first, second)
         }
 }
@@ -210,16 +210,16 @@ private data object IgnoredAnyTupleVisitor : Visitor<Target> {
 private data object IgnoredAnyStructVisitor : Visitor<Target> {
     override fun expecting(): String = "a struct variant"
 
-    override fun <A> visitMap(map: A): Result<Target>
+    override fun <A> visitMap(access: A): Result<Target>
         where A : MapAccess =
         runCatching {
             var a: Int? = null
             while (true) {
-                val key = map.nextKeySeed(IgnoredAnyStringSeed).getOrThrow() ?: break
+                val key = access.nextKeySeed(IgnoredAnyStringSeed).getOrThrow() ?: break
                 if (key == "a") {
-                    a = map.nextValueSeed(IgnoredAnyIntSeed).getOrThrow()
+                    a = access.nextValueSeed(IgnoredAnyIntSeed).getOrThrow()
                 } else {
-                    map.nextValueSeed(IgnoredAny).getOrThrow()
+                    access.nextValueSeed(IgnoredAny).getOrThrow()
                 }
             }
             Target.Struct(a ?: throw AssertionError("missing field a"))

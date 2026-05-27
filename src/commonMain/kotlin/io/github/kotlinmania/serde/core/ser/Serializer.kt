@@ -52,7 +52,7 @@ interface Serializer<Ok, E>
      *
      * The default behavior unconditionally returns an error.
      */
-    fun serializeI128(_: String): Result<Ok> {
+    fun serializeI128(value: String): Result<Ok> {
         return Result.failure(Error.custom("i128 is not supported"))
     }
 
@@ -90,7 +90,7 @@ interface Serializer<Ok, E>
      *
      * The default behavior unconditionally returns an error.
      */
-    fun serializeU128(_: String): Result<Ok> {
+    fun serializeU128(value: String): Result<Ok> {
         return Result.failure(Error.custom("u128 is not supported"))
     }
 

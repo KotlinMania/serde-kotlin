@@ -24,7 +24,7 @@ private enum class E {
     B,
     ;
 
-    public companion object : Deserialize<E> {
+    companion object : Deserialize<E> {
         override fun <D> deserialize(deserializer: D): Result<E>
             where D : Deserializer =
             deserializer.deserializeEnum("E", listOf("A", "B"), EVisitor)
@@ -34,10 +34,10 @@ private enum class E {
 private data object EVisitor : Visitor<E> {
     override fun expecting(): String = "enum E"
 
-    override fun <A> visitEnum(data: A): Result<E>
+    override fun <A> visitEnum(access: A): Result<E>
         where A : EnumAccess =
         runCatching {
-            val (variant, access) = data.variantSeed(EVariantSeed).getOrThrow()
+            val (variant, access) = access.variantSeed(EVariantSeed).getOrThrow()
             access.unitVariant().getOrThrow()
             variant
         }
@@ -72,7 +72,7 @@ private data object EVariantVisitor : Visitor<E> {
 private data class Airebo(
     val ljSigma: Double,
 ) {
-    public companion object : Deserialize<Airebo> {
+    companion object : Deserialize<Airebo> {
         override fun <D> deserialize(deserializer: D): Result<Airebo>
             where D : Deserializer =
             deserializer.deserializeStruct("Airebo", listOf("lj_sigma"), AireboVisitor)
@@ -82,14 +82,14 @@ private data class Airebo(
 private data object AireboVisitor : Visitor<Airebo> {
     override fun expecting(): String = "struct Airebo"
 
-    override fun <A> visitMap(map: A): Result<Airebo>
+    override fun <A> visitMap(access: A): Result<Airebo>
         where A : MapAccess =
         runCatching {
             var ljSigma: Double? = null
             while (true) {
-                val key = map.nextKeySeed(AireboFieldSeed).getOrThrow() ?: break
+                val key = access.nextKeySeed(AireboFieldSeed).getOrThrow() ?: break
                 when (key) {
-                    AireboField.LjSigma -> ljSigma = map.nextValueSeed(F64Seed).getOrThrow()
+                    AireboField.LjSigma -> ljSigma = access.nextValueSeed(F64Seed).getOrThrow()
                 }
             }
             Airebo(ljSigma = ljSigma ?: throw AssertionError("missing field lj_sigma"))
@@ -126,11 +126,11 @@ private data object F64Capture : Visitor<Double> {
 }
 
 private sealed class PotentialKind {
-    public data class Airebo(
-        public val value: io.github.kotlinmania.serde.`private`.Airebo,
+    data class Airebo(
+        val value: io.github.kotlinmania.serde.`private`.Airebo,
     ) : PotentialKind()
 
-    public companion object : Deserialize<PotentialKind> {
+    companion object : Deserialize<PotentialKind> {
         override fun <D> deserialize(deserializer: D): Result<PotentialKind>
             where D : Deserializer =
             deserializer.deserializeEnum("PotentialKind", listOf("Airebo"), PotentialKindVisitor)
@@ -140,10 +140,10 @@ private sealed class PotentialKind {
 private data object PotentialKindVisitor : Visitor<PotentialKind> {
     override fun expecting(): String = "enum PotentialKind"
 
-    override fun <A> visitEnum(data: A): Result<PotentialKind>
+    override fun <A> visitEnum(access: A): Result<PotentialKind>
         where A : EnumAccess =
         runCatching {
-            val (variant, access) = data.variantSeed(PotentialKindVariantSeed).getOrThrow()
+            val (variant, access) = access.variantSeed(PotentialKindVariantSeed).getOrThrow()
             when (variant) {
                 PotentialKindVariant.Airebo ->
                     PotentialKind.Airebo(access.newtypeVariantSeed(AireboDeserializeSeed).getOrThrow())
@@ -177,7 +177,7 @@ private data object AireboDeserializeSeed : DeserializeSeed<Airebo> {
 private data class Potential(
     val kind: PotentialKind,
 ) {
-    public companion object : Deserialize<Potential> {
+    companion object : Deserialize<Potential> {
         override fun <D> deserialize(deserializer: D): Result<Potential>
             where D : Deserializer =
             deserializer.deserializeAny(PotentialVisitor)
@@ -187,21 +187,21 @@ private data class Potential(
 private data object PotentialVisitor : Visitor<Potential> {
     override fun expecting(): String = "a map"
 
-    override fun <A> visitMap(map: A): Result<Potential>
+    override fun <A> visitMap(access: A): Result<Potential>
         where A : MapAccess =
-        PotentialKind.deserialize(MapAccessDeserializer.new(map)).map { Potential(it) }
+        PotentialKind.deserialize(MapAccessDeserializer.new(access)).map { Potential(it) }
 }
 
-public class TestValueTest {
+class TestValueTest {
     @Test
-    public fun testU32ToEnum() {
+    fun testU32ToEnum() {
         val deserializer = 1u.intoDeserializer()
         val e = E.deserialize(deserializer).getOrThrow()
         assertEquals(E.B, e)
     }
 
     @Test
-    public fun testInteger128() {
+    fun testInteger128() {
         val deU128 = U128Deserializer.new("1")
         val deI128 = I128Deserializer.new("1")
 
@@ -219,7 +219,7 @@ public class TestValueTest {
     }
 
     @Test
-    public fun testMapAccessToEnum() {
+    fun testMapAccessToEnum() {
         val inner =
             MapDeserializer(
                 listOf(StrDeserializer.new("lj_sigma") to F64Deserializer.new(14.0)).iterator(),

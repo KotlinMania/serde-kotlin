@@ -2,7 +2,7 @@
 package io.github.kotlinmania.serde.core.ser
 
 data object FmtError : Error {
-    fun custom(_: String): FmtError = this
+    fun custom(msg: String): FmtError = this
 }
 
 /**
@@ -33,33 +33,33 @@ data object FmtError : Error {
 class FormatterSerializer(
     private val formatter: Appendable,
 ) : Serializer<Unit, FmtError> {
-    override fun serializeBool(v: Boolean): Result<Unit> = display(v)
+    override fun serializeBool(v: Boolean): Result<Unit> = display(v.toString())
 
-    override fun serializeI8(v: Byte): Result<Unit> = display(v)
+    override fun serializeI8(v: Byte): Result<Unit> = display(v.toString())
 
-    override fun serializeI16(v: Short): Result<Unit> = display(v)
+    override fun serializeI16(v: Short): Result<Unit> = display(v.toString())
 
-    override fun serializeI32(v: Int): Result<Unit> = display(v)
+    override fun serializeI32(v: Int): Result<Unit> = display(v.toString())
 
-    override fun serializeI64(v: Long): Result<Unit> = display(v)
+    override fun serializeI64(v: Long): Result<Unit> = display(v.toString())
 
-    override fun serializeI128(v: String): Result<Unit> = display(v)
+    override fun serializeI128(value: String): Result<Unit> = display(value)
 
-    override fun serializeU8(v: UByte): Result<Unit> = display(v)
+    override fun serializeU8(v: UByte): Result<Unit> = display(v.toString())
 
-    override fun serializeU16(v: UShort): Result<Unit> = display(v)
+    override fun serializeU16(v: UShort): Result<Unit> = display(v.toString())
 
-    override fun serializeU32(v: UInt): Result<Unit> = display(v)
+    override fun serializeU32(v: UInt): Result<Unit> = display(v.toString())
 
-    override fun serializeU64(v: ULong): Result<Unit> = display(v)
+    override fun serializeU64(v: ULong): Result<Unit> = display(v.toString())
 
-    override fun serializeU128(v: String): Result<Unit> = display(v)
+    override fun serializeU128(value: String): Result<Unit> = display(value)
 
     override fun serializeF32(v: Float): Result<Unit> = display(rustDisplayFloat(v))
 
     override fun serializeF64(v: Double): Result<Unit> = display(rustDisplayFloat(v))
 
-    override fun serializeChar(v: Char): Result<Unit> = display(v)
+    override fun serializeChar(v: Char): Result<Unit> = display(v.toString())
 
     override fun serializeStr(v: String): Result<Unit> = display(v)
 

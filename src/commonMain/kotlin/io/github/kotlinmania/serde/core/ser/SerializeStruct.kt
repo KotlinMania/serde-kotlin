@@ -20,7 +20,7 @@ interface SerializeStruct<Ok, E>
      *
      * The default implementation does nothing.
      */
-    fun skipField(_: String): Result<Unit> {
+    fun skipField(key: String): Result<Unit> {
         return Result.success(Unit)
     }
 

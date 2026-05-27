@@ -32,7 +32,7 @@ package io.github.kotlinmania.serde.core.de
  *     override fun expecting(): String =
  *         "a sequence in which we care about element $n"
  *
- *     override fun <A> visitSeq(seq: A): Result<T>
+ *     override fun <A> visitSeq(access: A): Result<T>
  *         where A : SeqAccess =
  *         runCatching {
  *             for (index in 0 until n) {
@@ -47,7 +47,7 @@ package io.github.kotlinmania.serde.core.de
  *                     deserializeValue.deserialize(deserializer)
  *             }).getOrThrow() ?: throw Error.invalidLength(n, this)
  *
- *             while (seq.nextElement(IgnoredAny).getOrThrow() != null) {
+ *             while (access.nextElement(IgnoredAny).getOrThrow() != null) {
  *                 // ignore
  *             }
  *
@@ -92,19 +92,19 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
 
     override fun visitUnit(): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun <A> visitSeq(seq: A): Result<IgnoredAny>
+    override fun <A> visitSeq(access: A): Result<IgnoredAny>
         where A : SeqAccess =
         runCatching {
-            while (seq.nextElement(IgnoredAny).getOrThrow() != null) {
+            while (access.nextElement(IgnoredAny).getOrThrow() != null) {
                 // Gobble
             }
             IgnoredAny
         }
 
-    override fun <A> visitMap(map: A): Result<IgnoredAny>
+    override fun <A> visitMap(access: A): Result<IgnoredAny>
         where A : MapAccess =
         runCatching {
-            while (map.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
+            while (access.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
                 // Gobble
             }
             IgnoredAny
@@ -112,11 +112,10 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
 
     override fun visitBytes(v: ByteArray): Result<IgnoredAny> = Result.success(IgnoredAny)
 
-    override fun <A> visitEnum(data: A): Result<IgnoredAny>
+    override fun <A> visitEnum(access: A): Result<IgnoredAny>
         where A : EnumAccess =
         runCatching {
-            data
-                .variantSeed(IgnoredAny)
+            access.variantSeed(IgnoredAny)
                 .getOrThrow()
                 .second
                 .newtypeVariant(IgnoredAny)

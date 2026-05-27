@@ -41,19 +41,17 @@ private data object BoolVisitor : Visitor<Boolean> {
 private data object FlatBoolEnumVisitor : Visitor<Pair<String, Boolean>> {
     override fun expecting(): String = "an enum"
 
-    override fun <A> visitEnum(data: A): Result<Pair<String, Boolean>>
+    override fun <A> visitEnum(access: A): Result<Pair<String, Boolean>>
         where A : EnumAccess =
         runCatching {
             val (variant, variantAccess) =
-                data
-                    .variantSeed(
+                access.variantSeed(
                         flatSeed { deserializer ->
                             deserializer.deserializeString(FlatStringVisitor)
                         },
                     ).getOrThrow()
             val value =
-                variantAccess
-                    .newtypeVariantSeed(
+                variantAccess.newtypeVariantSeed(
                         flatSeed { deserializer ->
                             deserializer.deserializeBool(BoolVisitor)
                         },

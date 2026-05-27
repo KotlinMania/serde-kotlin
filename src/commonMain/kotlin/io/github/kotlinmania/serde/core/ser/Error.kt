@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/ser/mod.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeError
+
 /**
  * Interface used by `Serialize` implementations to generically construct errors belonging to the
  * `Serializer` against which they are currently running.
@@ -20,6 +22,6 @@ interface Error : StdError {
          * For example, a filesystem `Path` may refuse to serialize itself if it contains invalid
          * UTF-8 data.
          */
-        fun custom(msg: String): Throwable = SerdeSerializationException(msg)
+        fun custom(msg: String): SerdeError = SerdeError(msg)
     }
 }

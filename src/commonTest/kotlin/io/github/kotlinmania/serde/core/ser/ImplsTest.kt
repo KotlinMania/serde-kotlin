@@ -84,7 +84,7 @@ private open class FailingSerializer : Serializer<String, TestError> {
 
     override fun serializeI64(v: Long): Result<String> = unexpected()
 
-    override fun serializeI128(v: String): Result<String> = unexpected()
+    override fun serializeI128(value: String): Result<String> = unexpected()
 
     override fun serializeU8(v: UByte): Result<String> = unexpected()
 
