@@ -4,12 +4,12 @@ package io.github.kotlinmania.serde.core.ser
 /**
  * Returned from `Serializer.serializeStruct`.
  */
-public interface SerializeStruct<Ok, E>
+interface SerializeStruct<Ok, E>
     where E : Error {
     /**
      * Serialize a class field.
      */
-    public fun <T> serializeField(
+    fun <T> serializeField(
         key: String,
         value: T,
     ): Result<Unit>
@@ -20,12 +20,12 @@ public interface SerializeStruct<Ok, E>
      *
      * The default implementation does nothing.
      */
-    public fun skipField(key: String): Result<Unit> {
+    fun skipField(_: String): Result<Unit> {
         return Result.success(Unit)
     }
 
     /**
      * Finish serializing a class.
      */
-    public fun end(): Result<Ok>
+    fun end(): Result<Ok>
 }

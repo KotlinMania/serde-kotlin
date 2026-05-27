@@ -4,7 +4,7 @@ package io.github.kotlinmania.serde.serdederive.src
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.syn.*
 
-public fun allowDeprecated(input: DeriveInput): TokenStream? =
+fun allowDeprecated(input: DeriveInput): TokenStream? =
     if (shouldAllowDeprecated(input)) {
         TokenStream.fromString("#[allow(deprecated)]").getOrThrow()
     } else {

@@ -7,21 +7,21 @@ package io.github.kotlinmania.serde.core.de
  * This is an interface that a `Deserializer` passes to a `Visitor` implementation, which
  * deserializes each item in a sequence.
  */
-public interface SeqAccess {
+interface SeqAccess {
     /**
      * This returns `Result.success(value)` for the next value in the sequence, or
      * `Result.success(null)` if there are no more remaining items.
      */
-    public fun <T> nextElementSeed(seed: DeserializeSeed<T>): Result<T?>
+    fun <T> nextElementSeed(seed: DeserializeSeed<T>): Result<T?>
 
     /**
      * This returns `Result.success(value)` for the next value in the sequence, or
      * `Result.success(null)` if there are no more remaining items.
      */
-    public fun <T> nextElement(seed: DeserializeSeed<T>): Result<T?> = nextElementSeed(seed)
+    fun <T> nextElement(seed: DeserializeSeed<T>): Result<T?> = nextElementSeed(seed)
 
     /**
      * Returns the number of elements remaining in the sequence, if known.
      */
-    public fun sizeHint(): Int? = null
+    fun sizeHint(): Int? = null
 }

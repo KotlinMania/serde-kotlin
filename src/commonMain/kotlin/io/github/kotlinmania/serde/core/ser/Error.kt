@@ -10,8 +10,8 @@ package io.github.kotlinmania.serde.core.ser
  * The example data format presented on the website shows an error type appropriate for a basic JSON
  * data format.
  */
-public interface Error : StdError {
-    public companion object {
+interface Error : StdError {
+    companion object {
         /**
          * Used when a `Serialize` implementation encounters any error while serializing a type.
          *
@@ -20,6 +20,6 @@ public interface Error : StdError {
          * For example, a filesystem `Path` may refuse to serialize itself if it contains invalid
          * UTF-8 data.
          */
-        public fun custom(msg: Any?): Throwable = SerdeSerializationException(msg.toString())
+        fun custom(msg: String): Throwable = SerdeSerializationException(msg)
     }
 }

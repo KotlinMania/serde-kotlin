@@ -4,7 +4,7 @@ package io.github.kotlinmania.serde.serdederive.src
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.syn.Path
 
-public fun wrapInConst(
+fun wrapInConst(
     serdePath: Path?,
     code: TokenStream,
 ): TokenStream {

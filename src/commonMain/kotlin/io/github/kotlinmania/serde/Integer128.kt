@@ -10,4 +10,4 @@ support. These days Serde requires a Rust compiler newer than that so 128-bit
 integers are always supported.
 """,
 )
-public inline fun <T> serdeIfInteger128(block: () -> T): T = block()
+inline fun <T> serdeIfInteger128(block: () -> T): T = block()

@@ -112,6 +112,6 @@ package io.github.kotlinmania.serde
 //   the typealiases were retired.)
 
 // Re-export `__require_serde_not_serde_core! {}`.
-public fun __requireSerdeNotSerdeCore() {
+fun __requireSerdeNotSerdeCore() {
     // No-op in Kotlin.
 }

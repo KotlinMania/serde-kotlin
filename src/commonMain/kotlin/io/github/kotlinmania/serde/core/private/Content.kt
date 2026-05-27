@@ -7,88 +7,96 @@ package io.github.kotlinmania.serde.core.`private`
 // Not public API. Use serde-value instead.
 //
 // Obsoleted by format-specific buffer types (https://github.com/serde-rs/serde/pull/2912).
-public sealed class Content {
-    public data class Bool(
-        public val value: Boolean,
+sealed class Content {
+    data class Bool(
+        val value: Boolean,
     ) : Content()
 
-    public data class U8(
-        public val value: UByte,
+    data class U8(
+        val value: UByte,
     ) : Content()
 
-    public data class U16(
-        public val value: UShort,
+    data class U16(
+        val value: UShort,
     ) : Content()
 
-    public data class U32(
-        public val value: UInt,
+    data class U32(
+        val value: UInt,
     ) : Content()
 
-    public data class U64(
-        public val value: ULong,
+    data class U64(
+        val value: ULong,
     ) : Content()
 
-    public data class I8(
-        public val value: Byte,
+    data class I8(
+        val value: Byte,
     ) : Content()
 
-    public data class I16(
-        public val value: Short,
+    data class I16(
+        val value: Short,
     ) : Content()
 
-    public data class I32(
-        public val value: Int,
+    data class I32(
+        val value: Int,
     ) : Content()
 
-    public data class I64(
-        public val value: Long,
+    data class I64(
+        val value: Long,
     ) : Content()
 
-    public data class F32(
-        public val value: Float,
+    data class F32(
+        val value: Float,
     ) : Content()
 
-    public data class F64(
-        public val value: Double,
+    data class F64(
+        val value: Double,
     ) : Content()
 
-    public data class Char(
-        public val value: kotlin.Char,
+    data class Char(
+        val value: kotlin.Char,
     ) : Content()
 
-    public data class String(
-        public val value: kotlin.String,
+    data class String(
+        val value: kotlin.String,
     ) : Content()
 
-    public data class Str(
-        public val value: kotlin.String,
+    data class Str(
+        val value: kotlin.String,
     ) : Content()
 
-    public data class ByteBuf(
-        public val value: ByteArray,
+    data class ByteBuf(
+        val value: ByteArray,
+    ) : Content() {
+        override fun equals(other: Any?): Boolean = this === other || other is ByteBuf && value.contentEquals(other.value)
+
+        override fun hashCode(): Int = value.contentHashCode()
+    }
+
+    data class Bytes(
+        val value: ByteArray,
+    ) : Content() {
+        override fun equals(other: Any?): Boolean = this === other || other is Bytes && value.contentEquals(other.value)
+
+        override fun hashCode(): Int = value.contentHashCode()
+    }
+
+    data object None : Content()
+
+    data class Some(
+        val value: Content,
     ) : Content()
 
-    public data class Bytes(
-        public val value: ByteArray,
+    data object Unit : Content()
+
+    data class Newtype(
+        val value: Content,
     ) : Content()
 
-    public data object None : Content()
-
-    public data class Some(
-        public val value: Content,
+    data class Seq(
+        val value: List<Content>,
     ) : Content()
 
-    public data object Unit : Content()
-
-    public data class Newtype(
-        public val value: Content,
-    ) : Content()
-
-    public data class Seq(
-        public val value: List<Content>,
-    ) : Content()
-
-    public data class Map(
-        public val value: List<Pair<Content, Content>>,
+    data class Map(
+        val value: List<Pair<Content, Content>>,
     ) : Content()
 }

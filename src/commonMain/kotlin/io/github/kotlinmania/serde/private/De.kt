@@ -11,14 +11,14 @@ import io.github.kotlinmania.serde.core.private.cautious
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
  */
-public fun <V> missingField(
+fun <V> missingField(
     field: String,
     deserialize: Deserialize<V>,
 ): Result<V> {
     class MissingFieldDeserializer(
         private val name: String,
     ) : Deserializer {
-        override fun <T> deserializeAny(visitor: Visitor<T>): Result<T> {
+        override fun <T> deserializeAny(_: Visitor<T>): Result<T> {
             return Result.failure(Error.missingField(name))
         }
 
@@ -103,7 +103,7 @@ public fun <V> missingField(
     return deserialize.deserialize(MissingFieldDeserializer(field))
 }
 
-public fun borrowCowStr(deserializer: Deserializer): Result<String> {
+fun borrowCowStr(deserializer: Deserializer): Result<String> {
     val cowStrVisitor =
         object : Visitor<String> {
             override fun expecting(): String = "a string"
@@ -130,7 +130,7 @@ public fun borrowCowStr(deserializer: Deserializer): Result<String> {
     return deserializer.deserializeStr(cowStrVisitor)
 }
 
-public fun borrowCowBytes(deserializer: Deserializer): Result<ByteArray> {
+fun borrowCowBytes(deserializer: Deserializer): Result<ByteArray> {
     val cowBytesVisitor =
         object : Visitor<ByteArray> {
             override fun expecting(): String = "a byte array"
@@ -162,7 +162,7 @@ public fun borrowCowBytes(deserializer: Deserializer): Result<ByteArray> {
 // This issue is tracking making some of this stuff public:
 // https://github.com/serde-rs/serde/issues/741
 
-public fun contentAsStr(content: Content): String? =
+fun contentAsStr(content: Content): String? =
     when (content) {
         is Content.Str -> content.value
         is Content.String -> content.value
@@ -226,11 +226,11 @@ private fun contentUnexpected(content: Content): Unexpected =
         is Content.Map -> Unexpected.Map
     }
 
-public class ContentVisitor :
+class ContentVisitor :
     DeserializeSeed<Content>,
     Visitor<Content> {
-    public companion object {
-        public fun new(): ContentVisitor = ContentVisitor()
+    companion object {
+        fun new(): ContentVisitor = ContentVisitor()
     }
 
     override fun expecting(): String = "any value"
@@ -322,11 +322,11 @@ public class ContentVisitor :
  *
  * Not public API.
  */
-public sealed class TagOrContent {
-    public data object Tag : TagOrContent()
+sealed class TagOrContent {
+    data object Tag : TagOrContent()
 
-    public data class ContentValue(
-        public val value: Content,
+    data class ContentValue(
+        val value: Content,
     ) : TagOrContent()
 }
 
@@ -334,12 +334,12 @@ public sealed class TagOrContent {
  * Serves as a seed for deserializing a key of internally tagged enum.
  * Cannot capture externally tagged enums, `i128` and `u128`.
  */
-public class TagOrContentVisitor(
+class TagOrContentVisitor(
     private val name: String,
 ) : DeserializeSeed<TagOrContent>,
     Visitor<TagOrContent> {
-    public companion object {
-        public fun new(name: String): TagOrContentVisitor = TagOrContentVisitor(name)
+    companion object {
+        fun new(name: String): TagOrContentVisitor = TagOrContentVisitor(name)
     }
 
     override fun expecting(): String = "a type tag `$name` or any other value"
@@ -450,14 +450,14 @@ public class TagOrContentVisitor(
  *
  * Not public API.
  */
-public class TaggedContentVisitor<T>(
+class TaggedContentVisitor<T>(
     private val tagName: String,
     private val expecting: String,
     private val deserializeTag: Deserialize<T>,
 ) : Visitor<Pair<T, Content>>
     where T : Any {
-    public companion object {
-        public fun <T : Any> new(
+    companion object {
+        fun <T : Any> new(
             name: String,
             expecting: String,
             deserializeTag: Deserialize<T>,
@@ -528,7 +528,7 @@ public class TaggedContentVisitor<T>(
  *
  * Not public API.
  */
-public enum class TagOrContentField {
+enum class TagOrContentField {
     Tag,
     Content,
 }
@@ -536,15 +536,15 @@ public enum class TagOrContentField {
 /**
  * Not public API.
  */
-public class TagOrContentFieldVisitor(
+class TagOrContentFieldVisitor(
     /**
      * Name of the tag field of the adjacently tagged enum
      */
-    public val tag: String,
+    val tag: String,
     /**
      * Name of the content field of the adjacently tagged enum
      */
-    public val content: String,
+    val content: String,
 ) : DeserializeSeed<TagOrContentField>,
     Visitor<TagOrContentField> {
     override fun expecting(): String = "\"$tag\" or \"$content\""
@@ -581,7 +581,7 @@ public class TagOrContentFieldVisitor(
  *
  * Not public API.
  */
-public enum class TagContentOtherField {
+enum class TagContentOtherField {
     Tag,
     Content,
     Other,
@@ -590,15 +590,15 @@ public enum class TagContentOtherField {
 /**
  * Not public API.
  */
-public class TagContentOtherFieldVisitor(
+class TagContentOtherFieldVisitor(
     /**
      * Name of the tag field of the adjacently tagged enum
      */
-    public val tag: String,
+    val tag: String,
     /**
      * Name of the content field of the adjacently tagged enum
      */
-    public val content: String,
+    val content: String,
 ) : DeserializeSeed<TagContentOtherField>,
     Visitor<TagContentOtherField> {
     override fun expecting(): String = "\"$tag\", \"$content\", or other ignored fields"
@@ -626,12 +626,12 @@ public class TagContentOtherFieldVisitor(
 
 // //////////////////////////////////////////////////////////////////////////////
 
-public class ContentDeserializer(
+class ContentDeserializer(
     private val content: Content,
 ) : Deserializer {
-    public companion object {
+    companion object {
         // Private API, don't use.
-        public fun new(content: Content): ContentDeserializer = ContentDeserializer(content)
+        fun new(content: Content): ContentDeserializer = ContentDeserializer(content)
     }
 
     private fun invalidType(exp: Expected): Throwable = Error.invalidType(contentUnexpected(content), exp)
@@ -927,8 +927,8 @@ private class SeqDeserializer(
     private var count: Int = 0
     private var remainingHint: Int? = null
 
-    public companion object {
-        public fun new(content: List<Content>): SeqDeserializer =
+    companion object {
+        fun new(content: List<Content>): SeqDeserializer =
             SeqDeserializer(content.iterator()).also {
                 it.remainingHint = content.size
             }
@@ -1067,8 +1067,8 @@ private class MapDeserializer(
     private var count: Int = 0
     private var remainingHint: Int? = null
 
-    public companion object {
-        public fun new(content: List<Pair<Content, Content>>): MapDeserializer =
+    companion object {
+        fun new(content: List<Pair<Content, Content>>): MapDeserializer =
             MapDeserializer(content.iterator()).also { it.remainingHint = content.size }
     }
 
@@ -1380,12 +1380,12 @@ private class ExpectedInMap(
         }
 }
 
-public class EnumDeserializer private constructor(
+class EnumDeserializer private constructor(
     private val variant: Content,
     private val value: Content?,
 ) : EnumAccess {
-    public companion object {
-        public fun new(
+    companion object {
+        fun new(
             variant: Content,
             value: Content?,
         ): EnumDeserializer = EnumDeserializer(variant, value)
@@ -1482,45 +1482,45 @@ private class VariantDeserializer(
 //    enum class F { A, B, Other(String) }
 //
 // The fallback case is deserialized using `IdentifierDeserializer`.
-public interface IdentifierDeserializer {
-    public fun intoIdentifierDeserializer(): Deserializer
+interface IdentifierDeserializer {
+    fun intoIdentifierDeserializer(): Deserializer
 }
 
-public class Borrowed<T>(
-    public val value: T,
+class Borrowed<T>(
+    val value: T,
 )
 
-public class U64IdentifierDeserializer(
+class U64IdentifierDeserializer(
     private val value: ULong,
 ) : IdentifierDeserializer {
     override fun intoIdentifierDeserializer(): Deserializer = value.intoDeserializer()
 }
 
-public class StrIdentifierDeserializer(
+class StrIdentifierDeserializer(
     private val value: String,
 ) : IdentifierDeserializer {
     override fun intoIdentifierDeserializer(): Deserializer = StrDeserializer(value)
 }
 
-public class BorrowedStrIdentifierDeserializer(
+class BorrowedStrIdentifierDeserializer(
     private val value: String,
 ) : IdentifierDeserializer {
     override fun intoIdentifierDeserializer(): Deserializer = BorrowedStrDeserializer(value)
 }
 
-public class BytesIdentifierDeserializer(
+class BytesIdentifierDeserializer(
     private val value: ByteArray,
 ) : IdentifierDeserializer {
     override fun intoIdentifierDeserializer(): Deserializer = BytesDeserializer.new(value)
 }
 
-public class BorrowedBytesIdentifierDeserializer(
+class BorrowedBytesIdentifierDeserializer(
     private val value: ByteArray,
 ) : IdentifierDeserializer {
     override fun intoIdentifierDeserializer(): Deserializer = BorrowedBytesDeserializer.new(value)
 }
 
-public class StrDeserializer(
+class StrDeserializer(
     private val value: String,
 ) : Deserializer {
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitStr(value)
@@ -1603,7 +1603,7 @@ public class StrDeserializer(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
-public class BorrowedStrDeserializer(
+class BorrowedStrDeserializer(
     private val value: String,
 ) : Deserializer {
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitBorrowedStr(value)
@@ -1686,11 +1686,11 @@ public class BorrowedStrDeserializer(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 }
 
-public class BorrowedBytesDeserializer private constructor(
+class BorrowedBytesDeserializer private constructor(
     private val value: ByteArray,
 ) : Deserializer {
-    public companion object {
-        public fun new(value: ByteArray): BorrowedBytesDeserializer = BorrowedBytesDeserializer(value)
+    companion object {
+        fun new(value: ByteArray): BorrowedBytesDeserializer = BorrowedBytesDeserializer(value)
     }
 
     override fun <V> deserializeAny(visitor: Visitor<V>): Result<V> = visitor.visitBorrowedBytes(value)
@@ -1775,8 +1775,8 @@ public class BorrowedBytesDeserializer private constructor(
 
 // //////////////////////////////////////////////////////////////////////////////
 
-public class FlatMapDeserializer(
-    public val entries: MutableList<Pair<Content, Content>?>,
+class FlatMapDeserializer(
+    val entries: MutableList<Pair<Content, Content>?>,
 ) : Deserializer {
     private fun <V> deserializeOther(): Result<V> = Result.failure(Error.custom("can only flatten structs and maps"))
 
@@ -1970,9 +1970,9 @@ private fun flatMapTakeEntry(
     return if (isRecognized) entry else null
 }
 
-public class AdjacentlyTaggedEnumVariantSeed<F>(
-    public val enumName: String,
-    public val variants: List<String>,
+class AdjacentlyTaggedEnumVariantSeed<F>(
+    val enumName: String,
+    val variants: List<String>,
     private val deserializeFieldsEnum: Deserialize<F>,
 ) : DeserializeSeed<F>
     where F : Any {
@@ -1988,7 +1988,7 @@ public class AdjacentlyTaggedEnumVariantSeed<F>(
         )
 }
 
-public class AdjacentlyTaggedEnumVariantVisitor<F>(
+class AdjacentlyTaggedEnumVariantVisitor<F>(
     private val enumName: String,
     private val deserializeFieldsEnum: Deserialize<F>,
 ) : Visitor<F>
@@ -2014,12 +2014,12 @@ public class AdjacentlyTaggedEnumVariantVisitor<F>(
 
 // //////////////////////////////////////////////////////////////////////////////
 
-public class ContentRefDeserializer(
+class ContentRefDeserializer(
     private val content: Content,
 ) : Deserializer {
-    public companion object {
+    companion object {
         // Private API, don't use.
-        public fun new(content: Content): ContentRefDeserializer = ContentRefDeserializer(content)
+        fun new(content: Content): ContentRefDeserializer = ContentRefDeserializer(content)
     }
 
     private fun invalidType(exp: Expected): Throwable = Error.invalidType(contentUnexpected(content), exp)
@@ -2283,8 +2283,8 @@ private class SeqRefDeserializer(
     private var count: Int = 0
     private var remainingHint: Int? = null
 
-    public companion object {
-        public fun new(content: List<Content>): SeqRefDeserializer =
+    companion object {
+        fun new(content: List<Content>): SeqRefDeserializer =
             SeqRefDeserializer(content.iterator()).also {
                 it.remainingHint = content.size
             }
@@ -2412,8 +2412,8 @@ private class MapRefDeserializer(
     private var count: Int = 0
     private var remainingHint: Int? = null
 
-    public companion object {
-        public fun new(content: List<Pair<Content, Content>>): MapRefDeserializer =
+    companion object {
+        fun new(content: List<Pair<Content, Content>>): MapRefDeserializer =
             MapRefDeserializer(content.iterator()).also { it.remainingHint = content.size }
     }
 

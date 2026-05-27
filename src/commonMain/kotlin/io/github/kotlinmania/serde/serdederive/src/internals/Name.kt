@@ -9,14 +9,14 @@ import io.github.kotlinmania.serde.serdederive.src.internals.attr.Attr
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.VecAttr
 import io.github.kotlinmania.syn.LitStr
 
-public class MultiName internal constructor(
+class MultiName internal constructor(
     internal val serialize: Name,
     internal val serializeRenamed: Boolean,
     internal val deserialize: Name,
     internal val deserializeRenamed: Boolean,
     private val deserializeAliasesValue: MutableList<Name>,
 ) {
-    public companion object {
+    companion object {
         internal fun fromAttrs(
             sourceName: Name,
             serName: Attr<Name>,
@@ -50,12 +50,12 @@ public class MultiName internal constructor(
     /**
      * Return the container name for the container when serializing.
      */
-    public fun serializeName(): Name = serialize
+    fun serializeName(): Name = serialize
 
     /**
      * Return the container name for the container when deserializing.
      */
-    public fun deserializeName(): Name = deserialize
+    fun deserializeName(): Name = deserialize
 
     internal fun deserializeAliases(): List<Name> = deserializeAliasesValue
 
@@ -67,24 +67,24 @@ public class MultiName internal constructor(
     }
 }
 
-public class Name(
-    public var value: String,
-    public val span: Span,
+class Name(
+    var value: String,
+    val span: Span,
 ) : ToTokens,
     Comparable<Name> {
     override fun toTokens(tokens: TokenStream) {
         LitStr.new(value, span).toTokens(tokens)
     }
 
-    public fun cmp(other: Name): Int = value.compareTo(other.value)
+    fun cmp(other: Name): Int = value.compareTo(other.value)
 
     override fun compareTo(other: Name): Int = cmp(other)
 
-    public fun partialCmp(other: Name): Int = cmp(other)
+    fun partialCmp(other: Name): Int = cmp(other)
 
-    public fun eq(other: Name): Boolean = value == other.value
+    fun eq(other: Name): Boolean = value == other.value
 
-    public fun copy(
+    fun copy(
         value: String = this.value,
         span: Span = this.span,
     ): Name = Name(value, span)
@@ -93,7 +93,7 @@ public class Name(
 
     override fun hashCode(): Int = value.hashCode()
 
-    public fun fmt(formatter: Appendable): Result<Unit> =
+    fun fmt(formatter: Appendable): Result<Unit> =
         runCatching {
             formatter.append(value)
             Unit
@@ -101,14 +101,14 @@ public class Name(
 
     override fun toString(): String = value
 
-    public companion object {
-        public fun from(ident: Ident): Name =
+    companion object {
+        fun from(ident: Ident): Name =
             Name(
                 value = ident.toString(),
                 span = ident.span(),
             )
 
-        public fun from(lit: LitStr): Name =
+        fun from(lit: LitStr): Name =
             Name(
                 value = lit.value(),
                 span = lit.span(),

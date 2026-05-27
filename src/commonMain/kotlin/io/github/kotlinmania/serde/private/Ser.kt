@@ -13,12 +13,12 @@ import io.github.kotlinmania.serde.core.ser.SerializeTupleVariant
  * Used to check that serde(getter) attributes return the expected type.
  * Not public API.
  */
-public fun <T> constrain(t: T): T = t
+fun <T> constrain(t: T): T = t
 
 /**
  * Not public API.
  */
-public fun <Ok, E, S, T> serializeTaggedNewtype(
+fun <Ok, E, S, T> serializeTaggedNewtype(
     serializer: S,
     typeIdent: String,
     variantIdent: String,
@@ -53,59 +53,59 @@ private class TaggedSerializer<Ok, E, S>(
             "cannot serialize tagged newtype variant $typeIdent::$variantIdent containing $what",
         )
 
-    override fun serializeBool(v: Boolean): Result<Ok> {
+    override fun serializeBool(_: Boolean): Result<Ok> {
         return Result.failure(badType(Unsupported.Boolean))
     }
 
-    override fun serializeI8(v: Byte): Result<Ok> {
+    override fun serializeI8(_: Byte): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeI16(v: Short): Result<Ok> {
+    override fun serializeI16(_: Short): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeI32(v: Int): Result<Ok> {
+    override fun serializeI32(_: Int): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeI64(v: Long): Result<Ok> {
+    override fun serializeI64(_: Long): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU8(v: UByte): Result<Ok> {
+    override fun serializeU8(_: UByte): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU16(v: UShort): Result<Ok> {
+    override fun serializeU16(_: UShort): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU32(v: UInt): Result<Ok> {
+    override fun serializeU32(_: UInt): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU64(v: ULong): Result<Ok> {
+    override fun serializeU64(_: ULong): Result<Ok> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeF32(v: Float): Result<Ok> {
+    override fun serializeF32(_: Float): Result<Ok> {
         return Result.failure(badType(Unsupported.Float))
     }
 
-    override fun serializeF64(v: Double): Result<Ok> {
+    override fun serializeF64(_: Double): Result<Ok> {
         return Result.failure(badType(Unsupported.Float))
     }
 
-    override fun serializeChar(v: Char): Result<Ok> {
+    override fun serializeChar(_: Char): Result<Ok> {
         return Result.failure(badType(Unsupported.Char))
     }
 
-    override fun serializeStr(v: String): Result<Ok> {
+    override fun serializeStr(_: String): Result<Ok> {
         return Result.failure(badType(Unsupported.String))
     }
 
-    override fun serializeBytes(v: ByteArray): Result<Ok> {
+    override fun serializeBytes(_: ByteArray): Result<Ok> {
         return Result.failure(badType(Unsupported.ByteArray))
     }
 
@@ -123,7 +123,7 @@ private class TaggedSerializer<Ok, E, S>(
             map.end().getOrThrow()
         }
 
-    override fun serializeUnitStruct(name: String): Result<Ok> =
+    override fun serializeUnitStruct(_: String): Result<Ok> =
         runCatching {
             val map = delegate.serializeMap(1).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
@@ -222,7 +222,7 @@ private class TaggedSerializer<Ok, E, S>(
             SerializeStructVariantAsMapValue(map = map, name = variant, len = len)
         }
 
-    override fun collectStr(value: Any?): Result<Ok> = Result.failure(badType(Unsupported.String))
+    override fun collectStr(_: String): Result<Ok> = Result.failure(badType(Unsupported.String))
 }
 
 private enum class Unsupported {
@@ -310,7 +310,11 @@ private sealed class Content : Serialize {
 
     data class Bytes(
         val value: ByteArray,
-    ) : Content()
+    ) : Content() {
+        override fun equals(other: Any?): Boolean = this === other || other is Bytes && value.contentEquals(other.value)
+
+        override fun hashCode(): Int = value.contentHashCode()
+    }
 
     data object None : Content()
 
@@ -460,33 +464,33 @@ private sealed class Content : Serialize {
 
 private class ContentSerializer<E> : Serializer<Content, E>
     where E : Error {
-    override fun serializeBool(v: Boolean): Result<Content> = Result.success(Content.Bool(v))
+    override fun serializeBool(_: Boolean): Result<Content> = Result.success(Content.Bool(v))
 
-    override fun serializeI8(v: Byte): Result<Content> = Result.success(Content.I8(v))
+    override fun serializeI8(_: Byte): Result<Content> = Result.success(Content.I8(v))
 
-    override fun serializeI16(v: Short): Result<Content> = Result.success(Content.I16(v))
+    override fun serializeI16(_: Short): Result<Content> = Result.success(Content.I16(v))
 
-    override fun serializeI32(v: Int): Result<Content> = Result.success(Content.I32(v))
+    override fun serializeI32(_: Int): Result<Content> = Result.success(Content.I32(v))
 
-    override fun serializeI64(v: Long): Result<Content> = Result.success(Content.I64(v))
+    override fun serializeI64(_: Long): Result<Content> = Result.success(Content.I64(v))
 
-    override fun serializeU8(v: UByte): Result<Content> = Result.success(Content.U8(v))
+    override fun serializeU8(_: UByte): Result<Content> = Result.success(Content.U8(v))
 
-    override fun serializeU16(v: UShort): Result<Content> = Result.success(Content.U16(v))
+    override fun serializeU16(_: UShort): Result<Content> = Result.success(Content.U16(v))
 
-    override fun serializeU32(v: UInt): Result<Content> = Result.success(Content.U32(v))
+    override fun serializeU32(_: UInt): Result<Content> = Result.success(Content.U32(v))
 
-    override fun serializeU64(v: ULong): Result<Content> = Result.success(Content.U64(v))
+    override fun serializeU64(_: ULong): Result<Content> = Result.success(Content.U64(v))
 
-    override fun serializeF32(v: Float): Result<Content> = Result.success(Content.F32(v))
+    override fun serializeF32(_: Float): Result<Content> = Result.success(Content.F32(v))
 
-    override fun serializeF64(v: Double): Result<Content> = Result.success(Content.F64(v))
+    override fun serializeF64(_: Double): Result<Content> = Result.success(Content.F64(v))
 
-    override fun serializeChar(v: Char): Result<Content> = Result.success(Content.Char(v))
+    override fun serializeChar(_: Char): Result<Content> = Result.success(Content.Char(v))
 
-    override fun serializeStr(v: String): Result<Content> = Result.success(Content.String(v))
+    override fun serializeStr(_: String): Result<Content> = Result.success(Content.String(v))
 
-    override fun serializeBytes(v: ByteArray): Result<Content> = Result.success(Content.Bytes(v))
+    override fun serializeBytes(_: ByteArray): Result<Content> = Result.success(Content.Bytes(v))
 
     override fun serializeNone(): Result<Content> = Result.success(Content.None)
 
@@ -496,7 +500,7 @@ private class ContentSerializer<E> : Serializer<Content, E>
 
     override fun serializeUnit(): Result<Content> = Result.success(Content.Unit)
 
-    override fun serializeUnitStruct(name: String): Result<Content> = Result.success(Content.UnitStruct(name))
+    override fun serializeUnitStruct(_: String): Result<Content> = Result.success(Content.UnitStruct(name))
 
     override fun serializeUnitVariant(
         name: String,
@@ -753,66 +757,66 @@ private class SerializeStructVariantAsMapValue<Ok, E, M>(
         }
 }
 
-public class FlatMapSerializer<MOk, E, M>(
+class FlatMapSerializer<MOk, E, M>(
     private val map: M,
 ) : Serializer<Unit, E>
     where E : Error,
           M : SerializeMap<MOk, E> {
     private fun badType(what: Unsupported): Throwable = Error.custom("can only flatten structs and maps (got $what)")
 
-    override fun serializeBool(v: Boolean): Result<Unit> {
+    override fun serializeBool(_: Boolean): Result<Unit> {
         return Result.failure(badType(Unsupported.Boolean))
     }
 
-    override fun serializeI8(v: Byte): Result<Unit> {
+    override fun serializeI8(_: Byte): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeI16(v: Short): Result<Unit> {
+    override fun serializeI16(_: Short): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeI32(v: Int): Result<Unit> {
+    override fun serializeI32(_: Int): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeI64(v: Long): Result<Unit> {
+    override fun serializeI64(_: Long): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU8(v: UByte): Result<Unit> {
+    override fun serializeU8(_: UByte): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU16(v: UShort): Result<Unit> {
+    override fun serializeU16(_: UShort): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU32(v: UInt): Result<Unit> {
+    override fun serializeU32(_: UInt): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeU64(v: ULong): Result<Unit> {
+    override fun serializeU64(_: ULong): Result<Unit> {
         return Result.failure(badType(Unsupported.Integer))
     }
 
-    override fun serializeF32(v: Float): Result<Unit> {
+    override fun serializeF32(_: Float): Result<Unit> {
         return Result.failure(badType(Unsupported.Float))
     }
 
-    override fun serializeF64(v: Double): Result<Unit> {
+    override fun serializeF64(_: Double): Result<Unit> {
         return Result.failure(badType(Unsupported.Float))
     }
 
-    override fun serializeChar(v: Char): Result<Unit> {
+    override fun serializeChar(_: Char): Result<Unit> {
         return Result.failure(badType(Unsupported.Char))
     }
 
-    override fun serializeStr(v: String): Result<Unit> {
+    override fun serializeStr(_: String): Result<Unit> {
         return Result.failure(badType(Unsupported.String))
     }
 
-    override fun serializeBytes(v: ByteArray): Result<Unit> {
+    override fun serializeBytes(_: ByteArray): Result<Unit> {
         return Result.failure(badType(Unsupported.ByteArray))
     }
 
@@ -823,7 +827,7 @@ public class FlatMapSerializer<MOk, E, M>(
 
     override fun serializeUnit(): Result<Unit> = Result.success(Unit)
 
-    override fun serializeUnitStruct(name: String): Result<Unit> {
+    override fun serializeUnitStruct(_: String): Result<Unit> {
         return Result.success(Unit)
     }
 
@@ -990,10 +994,10 @@ private class FlatMapSerializeStructVariantAsMapValue<MOk, E, M>(
         }
 }
 
-public data class AdjacentlyTaggedEnumVariant(
-    public val enumName: String,
-    public val variantIndex: UInt,
-    public val variantName: String,
+data class AdjacentlyTaggedEnumVariant(
+    val enumName: String,
+    val variantIndex: UInt,
+    val variantName: String,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
         where E : Error =
@@ -1002,8 +1006,8 @@ public data class AdjacentlyTaggedEnumVariant(
 
 // Error when Serialize for a non_exhaustive remote enum encounters a variant
 // that is not recognized.
-public data class CannotSerializeVariant<T>(
-    public val value: T,
+data class CannotSerializeVariant<T>(
+    val value: T,
 ) {
     override fun toString(): String = "enum variant cannot be serialized: $value"
 }

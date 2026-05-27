@@ -10,7 +10,7 @@ import io.github.kotlinmania.syn.Member
 /**
  * Emit hidden token references that keep remote derive fields and variants visible to diagnostics.
  */
-public fun pretendUsed(
+fun pretendUsed(
     cont: Container,
     isPacked: Boolean,
 ): TokenStream =

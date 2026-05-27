@@ -13,16 +13,16 @@ import io.github.kotlinmania.syn.SynError
  *
  * References can be shared since this type uses run-time exclusive mutation checking.
  */
-public class Ctxt private constructor(
+class Ctxt private constructor(
     private var errors: MutableList<SynError>?,
 ) {
-    public companion object {
+    companion object {
         /**
          * Create a new context object.
          *
          * This object contains no errors, but still must be `check`ed.
          */
-        public fun new(): Ctxt = Ctxt(mutableListOf())
+        fun new(): Ctxt = Ctxt(mutableListOf())
     }
 
     /**
@@ -30,7 +30,7 @@ public class Ctxt private constructor(
      *
      * The object is used for spanning in error messages.
      */
-    public fun errorSpannedBy(
+    fun errorSpannedBy(
         obj: ToTokens,
         msg: Any?,
     ) {
@@ -41,7 +41,7 @@ public class Ctxt private constructor(
             .add(SynError.newSpanned(tokens, msg.toString()))
     }
 
-    public fun errorSpannedBy(
+    fun errorSpannedBy(
         obj: Any?,
         msg: Any?,
     ) {
@@ -57,14 +57,14 @@ public class Ctxt private constructor(
     /**
      * Add one of Syn's parse errors.
      */
-    public fun synError(err: SynError) {
+    fun synError(err: SynError) {
         requireNotNull(errors).add(err)
     }
 
     /**
      * Consume this object, producing a formatted error string if there are errors.
      */
-    public fun check(): Result<Unit> {
+    fun check(): Result<Unit> {
         val collected = requireNotNull(errors)
         errors = null
 

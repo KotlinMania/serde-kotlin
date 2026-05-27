@@ -7,7 +7,7 @@ import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.PathSep
 
-public fun thisType(cont: Container): Path {
+fun thisType(cont: Container): Path {
     val remote = cont.attrs.remote()
     return if (remote != null) {
         val thisPath = remote.deepCopy()
@@ -23,7 +23,7 @@ public fun thisType(cont: Container): Path {
     }
 }
 
-public fun thisValue(cont: Container): Path {
+fun thisValue(cont: Container): Path {
     val remote = cont.attrs.remote()
     return if (remote != null) {
         val thisPath = remote.deepCopy()

@@ -25,33 +25,33 @@ import io.github.kotlinmania.syn.Variant as SynVariant
  * A source data structure annotated with derive Serialize and/or derive Deserialize,
  * parsed into an internal representation.
  */
-public class Container(
+class Container(
     /**
      * The struct or enum name, without generics.
      */
-    public val ident: Ident,
+    val ident: Ident,
     /**
      * Attributes on the structure, parsed for Serde.
      */
-    public val attrs: AttrContainer,
+    val attrs: AttrContainer,
     /**
      * The contents of the struct or enum.
      */
-    public var data: Data,
+    var data: Data,
     /**
      * Any generics on the struct or enum.
      */
-    public val generics: Generics,
+    val generics: Generics,
     /**
      * Original input.
      */
-    public val original: DeriveInput,
+    val original: DeriveInput,
 ) {
-    public companion object {
+    companion object {
         /**
          * Convert the raw Syn syntax tree into a parsed container object, collecting errors in `cx`.
          */
-        public fun fromAst(
+        fun fromAst(
             cx: Ctxt,
             item: DeriveInput,
             derive: Derive,
@@ -114,47 +114,47 @@ public class Container(
  *
  * Analogous to `syn.Data`.
  */
-public sealed class Data {
-    public data class Enum(
-        public val variants: List<Variant>,
+sealed class Data {
+    data class Enum(
+        val variants: List<Variant>,
     ) : Data()
 
-    public data class Struct(
-        public val style: Style,
-        public val fields: List<Field>,
+    data class Struct(
+        val style: Style,
+        val fields: List<Field>,
     ) : Data()
 
-    public fun allFields(): Sequence<Field> =
+    fun allFields(): Sequence<Field> =
         when (this) {
             is Enum -> variants.asSequence().flatMap { variant -> variant.fields.asSequence() }
             is Struct -> fields.asSequence()
         }
 
-    public fun hasGetter(): Boolean = allFields().any { field -> field.attrs.getter() != null }
+    fun hasGetter(): Boolean = allFields().any { field -> field.attrs.getter() != null }
 }
 
 /**
  * A variant of an enum.
  */
-public class Variant(
-    public val ident: Ident,
-    public val attrs: AttrVariant,
-    public val style: Style,
-    public val fields: List<Field>,
-    public val original: SynVariant,
+class Variant(
+    val ident: Ident,
+    val attrs: AttrVariant,
+    val style: Style,
+    val fields: List<Field>,
+    val original: SynVariant,
 )
 
 /**
  * A field of a struct.
  */
-public class Field(
-    public val member: Member,
-    public val attrs: AttrField,
-    public val ty: SynType,
-    public val original: SynField,
+class Field(
+    val member: Member,
+    val attrs: AttrField,
+    val ty: SynType,
+    val original: SynField,
 )
 
-public enum class Style {
+enum class Style {
     /**
      * Named fields.
      */

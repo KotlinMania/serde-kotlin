@@ -65,7 +65,7 @@ package io.github.kotlinmania.serde.core.de
  * val s: String = NthElement(3, stringDeserialize).deserialize(deserializer).getOrThrow()
  * ```
  */
-public data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, DeserializeSeed<IgnoredAny> {
+data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, DeserializeSeed<IgnoredAny> {
     override fun expecting(): String = "anything at all"
 
     override fun visitBool(v: Boolean): Result<IgnoredAny> = Result.success(IgnoredAny)

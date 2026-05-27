@@ -7,9 +7,9 @@ package io.github.kotlinmania.serde.core.de
  * `EnumAccess` is created by the `Deserializer` and passed to the `Visitor` in order to identify
  * which variant of an enum to deserialize.
  */
-public interface EnumAccess {
+interface EnumAccess {
     /**
      * `variant` is called to identify which variant to deserialize.
      */
-    public fun <V> variantSeed(seed: DeserializeSeed<V>): Result<Pair<V, VariantAccess>>
+    fun <V> variantSeed(seed: DeserializeSeed<V>): Result<Pair<V, VariantAccess>>
 }

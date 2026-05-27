@@ -10,19 +10,19 @@ import io.github.kotlinmania.serde.core.ser.Error as SerError
 /**
  * Error type used by Serde documentation tests.
  */
-public class Error(
+class Error(
     message: String = "serde documentation test serializer was invoked",
 ) : RuntimeException(message),
     SerError,
     Lib.Debug,
     Lib.Display {
-    public companion object {
-        public fun custom(msg: Any?): Error = Error()
+    companion object {
+        fun custom(_: String): Error = Error()
     }
 
-    public fun description(): String = message.orEmpty()
+    fun description(): String = message.orEmpty()
 
-    public fun fmt(formatter: Appendable): Result<Unit> =
+    fun fmt(formatter: Appendable): Result<Unit> =
         runCatching {
             formatter.append(toString())
             Unit
@@ -32,15 +32,15 @@ public class Error(
 /**
  * Private serialization interface used only inside documentation tests.
  */
-public interface PrivateSerialize {
-    public fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+interface PrivateSerialize {
+    fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
         where E : SerError
 }
 
 /**
  * Serializer method set used only inside documentation tests.
  */
-public interface SerializeDocTestSerializer<Ok, E> : Serializer<Ok, E>
+interface SerializeDocTestSerializer<Ok, E> : Serializer<Ok, E>
     where E : SerError {
     override fun serializeBool(v: Boolean): Result<Ok> = documentationTestError("serializeBool", v)
 

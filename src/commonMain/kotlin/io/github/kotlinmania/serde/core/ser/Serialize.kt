@@ -18,13 +18,13 @@ package io.github.kotlinmania.serde.core.ser
  * example the `linked-hash-map` crate provides a `LinkedHashMap<K, V>` type that is serializable by
  * Serde because the crate provides an implementation of `Serialize` for it.
  */
-public interface Serialize {
+interface Serialize {
     /**
      * Serialize this value into the given Serde serializer.
      *
      * See the Implementing `Serialize` section of the manual for more information about how to
      * implement this method.
      */
-    public fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
         where E : Error
 }

@@ -4,24 +4,24 @@ package io.github.kotlinmania.serde.core.ser
 /**
  * Returned from `Serializer.serializeMap`.
  */
-public interface SerializeMap<Ok, E>
+interface SerializeMap<Ok, E>
     where E : Error {
     /**
      * Serialize a map key.
      */
-    public fun <T> serializeKey(key: T): Result<Unit>
+    fun <T> serializeKey(key: T): Result<Unit>
         where T : Serialize
 
     /**
      * Serialize a map value.
      */
-    public fun <T> serializeValue(value: T): Result<Unit>
+    fun <T> serializeValue(value: T): Result<Unit>
         where T : Serialize
 
     /**
      * Serialize a map entry consisting of a key and a value.
      */
-    public fun <K, V> serializeEntry(
+    fun <K, V> serializeEntry(
         key: K,
         value: V,
     ): Result<Unit>
@@ -35,5 +35,5 @@ public interface SerializeMap<Ok, E>
     /**
      * Finish serializing a map.
      */
-    public fun end(): Result<Ok>
+    fun end(): Result<Ok>
 }

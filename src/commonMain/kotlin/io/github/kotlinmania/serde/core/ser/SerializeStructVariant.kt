@@ -4,12 +4,12 @@ package io.github.kotlinmania.serde.core.ser
 /**
  * Returned from `Serializer.serializeStructVariant`.
  */
-public interface SerializeStructVariant<Ok, E>
+interface SerializeStructVariant<Ok, E>
     where E : Error {
     /**
      * Serialize a class variant field.
      */
-    public fun <T> serializeField(
+    fun <T> serializeField(
         key: String,
         value: T,
     ): Result<Unit>
@@ -20,12 +20,12 @@ public interface SerializeStructVariant<Ok, E>
      *
      * The default implementation does nothing.
      */
-    public fun skipField(key: String): Result<Unit> {
+    fun skipField(_: String): Result<Unit> {
         return Result.success(Unit)
     }
 
     /**
      * Finish serializing a class variant.
      */
-    public fun end(): Result<Ok>
+    fun end(): Result<Ok>
 }

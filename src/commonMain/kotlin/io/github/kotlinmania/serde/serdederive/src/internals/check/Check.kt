@@ -18,7 +18,7 @@ import io.github.kotlinmania.syn.SynType
  * Cross-cutting checks that require looking at more than a single attrs object.
  * Simpler checks should happen when parsing and building the attrs.
  */
-public fun check(
+fun check(
     cx: Ctxt,
     cont: Container,
     derive: Derive,

@@ -1,8 +1,8 @@
 // port-lint: source serde_core/src/ser/fmt.rs
 package io.github.kotlinmania.serde.core.ser
 
-public data object FmtError : Error {
-    public fun custom(msg: Any?): FmtError = this
+data object FmtError : Error {
+    fun custom(_: String): FmtError = this
 }
 
 /**
@@ -30,7 +30,7 @@ public data object FmtError : Error {
  *     serialize(FormatterSerializer(formatter))
  * ```
  */
-public class FormatterSerializer(
+class FormatterSerializer(
     private val formatter: Appendable,
 ) : Serializer<Unit, FmtError> {
     override fun serializeBool(v: Boolean): Result<Unit> = display(v)
@@ -124,12 +124,11 @@ public class FormatterSerializer(
         len: Int,
     ): Result<SerializeStructVariant<Unit, FmtError>> = fmtError()
 
-    override fun collectStr(value: Any?): Result<Unit> = display(value)
+    override fun collectStr(value: String): Result<Unit> = display(value)
 
-    private fun display(value: Any?): Result<Unit> =
+    private fun display(value: String): Result<Unit> =
         runCatching {
-            formatter.append(value.toString())
-            Unit
+            formatter.append(value)
         }
 }
 

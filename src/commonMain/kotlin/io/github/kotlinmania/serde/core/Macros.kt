@@ -23,7 +23,7 @@ import io.github.kotlinmania.serde.core.de.Visitor
  * Implement `deserializeAny` and inherit the rest of the `Deserializer` methods from this
  * interface.
  */
-public interface ForwardToDeserializeAnyDeserializer : Deserializer {
+interface ForwardToDeserializeAnyDeserializer : Deserializer {
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)

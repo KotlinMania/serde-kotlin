@@ -21,20 +21,20 @@ import io.github.kotlinmania.syn.Variant as SynVariant
  * first.
  */
 
-public class Attr<T> private constructor(
+class Attr<T> private constructor(
     private val cx: Ctxt,
     private val name: Symbol,
     private var tokens: TokenStream,
     private var value: T?,
 ) {
-    public companion object {
-        public fun <T> none(
+    companion object {
+        fun <T> none(
             cx: Ctxt,
             name: Symbol,
         ): Attr<T> = Attr(cx, name, TokenStream.new(), null)
     }
 
-    public fun set(
+    fun set(
         obj: Any,
         value: T,
     ) {
@@ -47,7 +47,7 @@ public class Attr<T> private constructor(
         }
     }
 
-    public fun setOpt(
+    fun setOpt(
         obj: Any,
         value: T?,
     ) {
@@ -56,13 +56,13 @@ public class Attr<T> private constructor(
         }
     }
 
-    public fun setIfNone(value: T) {
+    fun setIfNone(value: T) {
         if (this.value == null) {
             this.value = value
         }
     }
 
-    public fun get(): T? = value
+    fun get(): T? = value
 
     internal fun getWithTokens(): Pair<TokenStream, T>? = value?.let { tokens to it }
 }
@@ -84,20 +84,20 @@ private class BoolAttr private constructor(
     fun get(): Boolean = attr.get() != null
 }
 
-public class VecAttr<T> private constructor(
+class VecAttr<T> private constructor(
     private val cx: Ctxt,
     private val name: Symbol,
     private var firstDupTokens: TokenStream,
     private val values: MutableList<T>,
 ) {
-    public companion object {
-        public fun <T> none(
+    companion object {
+        fun <T> none(
             cx: Ctxt,
             name: Symbol,
         ): VecAttr<T> = VecAttr(cx, name, TokenStream.new(), mutableListOf())
     }
 
-    public fun insert(
+    fun insert(
         obj: Any,
         value: T,
     ) {
@@ -107,7 +107,7 @@ public class VecAttr<T> private constructor(
         values += value
     }
 
-    public fun atMostOne(): T? {
+    fun atMostOne(): T? {
         if (values.size > 1) {
             cx.errorSpannedBy(firstDupTokens, "duplicate serde attribute `$name`")
             return null
@@ -115,20 +115,20 @@ public class VecAttr<T> private constructor(
         return values.firstOrNull()
     }
 
-    public fun get(): List<T> = values.toList()
+    fun get(): List<T> = values.toList()
 }
 
 private fun unraw(ident: Ident): Ident = Ident.new(ident.toString().removePrefix("r#"), ident.span())
 
-public data class RenameAllRules(
-    public val serialize: RenameRule,
-    public val deserialize: RenameRule,
+data class RenameAllRules(
+    val serialize: RenameRule,
+    val deserialize: RenameRule,
 ) {
     /**
      * Returns a new [RenameAllRules] with the individual rules of `this` and
      * `otherRules` joined by [RenameRule.or].
      */
-    public fun or(otherRules: RenameAllRules): RenameAllRules =
+    fun or(otherRules: RenameAllRules): RenameAllRules =
         RenameAllRules(
             serialize = serialize.or(otherRules.serialize),
             deserialize = deserialize.or(otherRules.deserialize),
@@ -138,7 +138,7 @@ public data class RenameAllRules(
 /**
  * Represents struct or enum attribute information.
  */
-public class Container private constructor(
+class Container private constructor(
     private val nameValue: MultiName,
     private val transparentValue: Boolean,
     private val denyUnknownFieldsValue: Boolean,
@@ -158,11 +158,11 @@ public class Container private constructor(
     private val expectingValue: String?,
     private val nonExhaustiveValue: Boolean,
 ) {
-    public companion object {
+    companion object {
         /**
          * Extract out the serde attributes from an item.
          */
-        public fun fromAst(
+        fun fromAst(
             cx: Ctxt,
             item: DeriveInput,
         ): Container {
@@ -378,77 +378,77 @@ public class Container private constructor(
         }
     }
 
-    public fun name(): MultiName = nameValue
+    fun name(): MultiName = nameValue
 
-    public fun renameAllRules(): RenameAllRules = renameAllRulesValue
+    fun renameAllRules(): RenameAllRules = renameAllRulesValue
 
-    public fun renameAllFieldsRules(): RenameAllRules = renameAllFieldsRulesValue
+    fun renameAllFieldsRules(): RenameAllRules = renameAllFieldsRulesValue
 
-    public fun transparent(): Boolean = transparentValue
+    fun transparent(): Boolean = transparentValue
 
-    public fun denyUnknownFields(): Boolean = denyUnknownFieldsValue
+    fun denyUnknownFields(): Boolean = denyUnknownFieldsValue
 
-    public fun default(): Default = defaultValue
+    fun default(): Default = defaultValue
 
-    public fun serBound(): List<WherePredicate>? = serBoundValue
+    fun serBound(): List<WherePredicate>? = serBoundValue
 
-    public fun deBound(): List<WherePredicate>? = deBoundValue
+    fun deBound(): List<WherePredicate>? = deBoundValue
 
-    public fun tag(): TagType = tagValue
+    fun tag(): TagType = tagValue
 
-    public fun typeFrom(): SynType? = typeFromValue
+    fun typeFrom(): SynType? = typeFromValue
 
-    public fun typeTryFrom(): SynType? = typeTryFromValue
+    fun typeTryFrom(): SynType? = typeTryFromValue
 
-    public fun typeInto(): SynType? = typeIntoValue
+    fun typeInto(): SynType? = typeIntoValue
 
-    public fun remote(): Path? = remoteValue?.deepCopy()
+    fun remote(): Path? = remoteValue?.deepCopy()
 
-    public fun isPacked(): Boolean = isPackedValue
+    fun isPacked(): Boolean = isPackedValue
 
-    public fun identifier(): Identifier = identifierValue
+    fun identifier(): Identifier = identifierValue
 
-    public fun customSerdePath(): Path? = serdePathValue?.deepCopy()
+    fun customSerdePath(): Path? = serdePathValue?.deepCopy()
 
-    public fun expecting(): String? = expectingValue
+    fun expecting(): String? = expectingValue
 
-    public fun nonExhaustive(): Boolean = nonExhaustiveValue
+    fun nonExhaustive(): Boolean = nonExhaustiveValue
 }
 
 /**
  * Styles of representing an enum.
  */
-public sealed class TagType {
+sealed class TagType {
     /**
      * The default.
      */
-    public data object External : TagType()
+    data object External : TagType()
 
     /**
      * `serde(tag = "type")`.
      */
-    public data class Internal(
-        public val tag: String,
+    data class Internal(
+        val tag: String,
     ) : TagType()
 
     /**
      * `serde(tag = "t", content = "c")`.
      */
-    public data class Adjacent(
-        public val tag: String,
-        public val content: String,
+    data class Adjacent(
+        val tag: String,
+        val content: String,
     ) : TagType()
 
     /**
      * `serde(untagged)`.
      */
-    public data object None : TagType()
+    data object None : TagType()
 }
 
 /**
  * Whether this enum represents the fields of a struct or the variants of an enum.
  */
-public enum class Identifier {
+enum class Identifier {
     /**
      * It does not.
      */
@@ -468,7 +468,7 @@ public enum class Identifier {
     Variant,
     ;
 
-    public fun isSome(): Boolean =
+    fun isSome(): Boolean =
         when (this) {
             No -> false
             Field,
@@ -571,7 +571,7 @@ private fun decideIdentifier(
 /**
  * Represents variant attribute information.
  */
-public class Variant private constructor(
+class Variant private constructor(
     private val nameValue: MultiName,
     private val renameAllRulesValue: RenameAllRules,
     private val serBoundValue: List<WherePredicate>?,
@@ -584,8 +584,8 @@ public class Variant private constructor(
     internal val borrow: BorrowAttribute?,
     private val untaggedValue: Boolean,
 ) {
-    public companion object {
-        public fun fromAst(
+    companion object {
+        fun fromAst(
             cx: Ctxt,
             variant: SynVariant,
         ): Variant {
@@ -706,11 +706,11 @@ public class Variant private constructor(
         }
     }
 
-    public fun name(): MultiName = nameValue
+    fun name(): MultiName = nameValue
 
-    public fun aliases(): List<Name> = nameValue.deserializeAliases()
+    fun aliases(): List<Name> = nameValue.deserializeAliases()
 
-    public fun renameByRules(rules: RenameAllRules) {
+    fun renameByRules(rules: RenameAllRules) {
         if (!nameValue.serializeRenamed) {
             nameValue.serialize.value = rules.serialize.applyToVariant(nameValue.serialize.value)
         }
@@ -720,19 +720,19 @@ public class Variant private constructor(
         nameValue.addDeserializeAlias(nameValue.deserialize.copy())
     }
 
-    public fun renameAllRules(): RenameAllRules = renameAllRulesValue
+    fun renameAllRules(): RenameAllRules = renameAllRulesValue
 
-    public fun serBound(): List<WherePredicate>? = serBoundValue
+    fun serBound(): List<WherePredicate>? = serBoundValue
 
-    public fun deBound(): List<WherePredicate>? = deBoundValue
+    fun deBound(): List<WherePredicate>? = deBoundValue
 
-    public fun skipDeserializing(): Boolean = skipDeserializingValue
+    fun skipDeserializing(): Boolean = skipDeserializingValue
 
-    public fun skipSerializing(): Boolean = skipSerializingValue
+    fun skipSerializing(): Boolean = skipSerializingValue
 
-    public fun other(): Boolean = otherValue
+    fun other(): Boolean = otherValue
 
-    public fun serializeWith(): Expr.Path? =
+    fun serializeWith(): Expr.Path? =
         serializeWithValue?.copy(
             attrs =
                 serializeWithValue.attrs.map {
@@ -741,7 +741,7 @@ public class Variant private constructor(
             path = serializeWithValue.path.deepCopy(),
         )
 
-    public fun deserializeWith(): Expr.Path? =
+    fun deserializeWith(): Expr.Path? =
         deserializeWithValue?.copy(
             attrs =
                 deserializeWithValue.attrs.map {
@@ -750,7 +750,7 @@ public class Variant private constructor(
             path = deserializeWithValue.path.deepCopy(),
         )
 
-    public fun untagged(): Boolean = untaggedValue
+    fun untagged(): Boolean = untaggedValue
 }
 
 internal data class BorrowAttribute(
@@ -761,7 +761,7 @@ internal data class BorrowAttribute(
 /**
  * Represents field attribute information.
  */
-public class Field private constructor(
+class Field private constructor(
     private val nameValue: MultiName,
     private val skipSerializingValue: Boolean,
     private val skipDeserializingValue: Boolean,
@@ -776,11 +776,11 @@ public class Field private constructor(
     private val flattenValue: Boolean,
     private var transparentValue: Boolean,
 ) {
-    public companion object {
+    companion object {
         /**
          * Extract out the serde attributes from a struct field.
          */
-        public fun fromAst(
+        fun fromAst(
             cx: Ctxt,
             index: Int,
             field: SynField,
@@ -932,11 +932,11 @@ public class Field private constructor(
         }
     }
 
-    public fun name(): MultiName = nameValue
+    fun name(): MultiName = nameValue
 
-    public fun aliases(): List<Name> = nameValue.deserializeAliases()
+    fun aliases(): List<Name> = nameValue.deserializeAliases()
 
-    public fun renameByRules(rules: RenameAllRules) {
+    fun renameByRules(rules: RenameAllRules) {
         if (!nameValue.serializeRenamed) {
             nameValue.serialize.value = rules.serialize.applyToField(nameValue.serialize.value)
         }
@@ -946,31 +946,31 @@ public class Field private constructor(
         nameValue.addDeserializeAlias(nameValue.deserialize.copy())
     }
 
-    public fun skipSerializing(): Boolean = skipSerializingValue
+    fun skipSerializing(): Boolean = skipSerializingValue
 
-    public fun skipDeserializing(): Boolean = skipDeserializingValue
+    fun skipDeserializing(): Boolean = skipDeserializingValue
 
-    public fun skipSerializingIf(): Expr.Path? = skipSerializingIfValue
+    fun skipSerializingIf(): Expr.Path? = skipSerializingIfValue
 
-    public fun default(): Default = defaultValue
+    fun default(): Default = defaultValue
 
-    public fun serializeWith(): Expr.Path? = serializeWithValue
+    fun serializeWith(): Expr.Path? = serializeWithValue
 
-    public fun deserializeWith(): Expr.Path? = deserializeWithValue
+    fun deserializeWith(): Expr.Path? = deserializeWithValue
 
-    public fun serBound(): List<WherePredicate>? = serBoundValue
+    fun serBound(): List<WherePredicate>? = serBoundValue
 
-    public fun deBound(): List<WherePredicate>? = deBoundValue
+    fun deBound(): List<WherePredicate>? = deBoundValue
 
-    public fun borrowedLifetimes(): Set<Lifetime> = borrowedLifetimesValue
+    fun borrowedLifetimes(): Set<Lifetime> = borrowedLifetimesValue
 
-    public fun getter(): Expr.Path? = getterValue
+    fun getter(): Expr.Path? = getterValue
 
-    public fun flatten(): Boolean = flattenValue
+    fun flatten(): Boolean = flattenValue
 
-    public fun transparent(): Boolean = transparentValue
+    fun transparent(): Boolean = transparentValue
 
-    public fun markTransparent() {
+    fun markTransparent() {
         transparentValue = true
     }
 }
@@ -978,25 +978,25 @@ public class Field private constructor(
 /**
  * Represents the default to use for a field when deserializing.
  */
-public sealed class Default {
+sealed class Default {
     /**
      * Field must always be specified because it does not have a default.
      */
-    public data object None : Default()
+    data object None : Default()
 
     /**
      * The default is given by `std.default.Default.default`.
      */
-    public data object DefaultValue : Default()
+    data object DefaultValue : Default()
 
     /**
      * The default is given by this function.
      */
-    public data class Path(
-        public val value: Expr.Path,
+    data class Path(
+        val value: Expr.Path,
     ) : Default()
 
-    public fun isNone(): Boolean = this is None
+    fun isNone(): Boolean = this is None
 }
 
 private data class SerAndDe<T>(

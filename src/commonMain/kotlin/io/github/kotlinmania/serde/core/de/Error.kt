@@ -14,19 +14,19 @@ package io.github.kotlinmania.serde.core.de
  * Most deserializers should only need to provide the `custom` method and inherit the default
  * behavior for the other methods.
  */
-public interface Error : StdError {
-    public companion object {
+interface Error : StdError {
+    companion object {
         /**
          * Raised when there is general error when deserializing a type.
          *
          * The message should not be capitalized and should not end with a period.
          */
-        public fun custom(msg: Any?): Throwable = SerdeDeserializationException(msg.toString())
+        fun custom(msg: String): Throwable = SerdeDeserializationException(msg)
 
         /**
          * Raised when a `Deserialize` receives a type different from what it was expecting.
          */
-        public fun invalidType(
+        fun invalidType(
             unexp: Unexpected,
             exp: Expected,
         ): Throwable = custom("invalid type: $unexp, expected ${exp.expecting()}")
@@ -35,7 +35,7 @@ public interface Error : StdError {
          * Raised when a `Deserialize` receives a value of the right type but that is wrong for some
          * other reason.
          */
-        public fun invalidValue(
+        fun invalidValue(
             unexp: Unexpected,
             exp: Expected,
         ): Throwable = custom("invalid value: $unexp, expected ${exp.expecting()}")
@@ -44,7 +44,7 @@ public interface Error : StdError {
          * Raised when deserializing a sequence or map and the input data contains too many or too
          * few elements.
          */
-        public fun invalidLength(
+        fun invalidLength(
             len: Int,
             exp: Expected,
         ): Throwable = custom("invalid length $len, expected ${exp.expecting()}")
@@ -52,7 +52,7 @@ public interface Error : StdError {
         /**
          * Raised when a `Deserialize` enum type received a variant with an unrecognized name.
          */
-        public fun unknownVariant(
+        fun unknownVariant(
             variant: String,
             expected: List<String>,
         ): Throwable =
@@ -65,7 +65,7 @@ public interface Error : StdError {
         /**
          * Raised when a `Deserialize` class type received a field with an unrecognized name.
          */
-        public fun unknownField(
+        fun unknownField(
             field: String,
             expected: List<String>,
         ): Throwable =
@@ -79,11 +79,11 @@ public interface Error : StdError {
          * Raised when a `Deserialize` class type expected to receive a required field with a
          * particular name but that field was not present in the input.
          */
-        public fun missingField(field: String): Throwable = custom("missing field `$field`")
+        fun missingField(field: String): Throwable = custom("missing field `$field`")
 
         /**
          * Raised when a `Deserialize` class type received more than one of the same field.
          */
-        public fun duplicateField(field: String): Throwable = custom("duplicate field `$field`")
+        fun duplicateField(field: String): Throwable = custom("duplicate field `$field`")
     }
 }

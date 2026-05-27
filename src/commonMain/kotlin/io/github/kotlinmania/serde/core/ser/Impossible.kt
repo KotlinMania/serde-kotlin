@@ -25,7 +25,7 @@ package io.github.kotlinmania.serde.core.ser
  * }
  * ```
  */
-public class Impossible<Ok, E> private constructor(
+class Impossible<Ok, E> private constructor(
     private val void: Void,
 ) : SerializeSeq<Ok, E>,
     SerializeTuple<Ok, E>,
