@@ -169,12 +169,29 @@ fun installProjectAndroidSdk(execOperations: ExecOperations) {
 }
 
 // The Android Gradle plugin resolves the SDK location while Gradle builds the
-// task graph, before any task executes, so a project-local Android SDK must
-// already be installed by the time configuration reaches the android target.
-// This configuration-time installer is idempotent and always writes
-// local.properties to this repo's own .android-sdk path.
+// task graph, before any task executes, so a project-local Android SDK path
+// must already be set in local.properties by the time configuration reaches
+// the android target. local.properties is always written.
+//
+// The expensive part is downloading the SDK; gate that on whether any task in
+// `gradle.startParameter.taskNames` looks like it needs Android. macOS / iOS /
+// tvOS / watchOS / Linux / Windows / JS / Wasm / JVM jobs that never touch
+// Android no longer pay the SDK-download tax. The `setupAndroidSdk` task
+// remains the explicit entry point if the SDK has to be installed deliberately.
+val androidTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    val lower = taskName.lowercase()
+    "android" in lower || "aar" in lower
+}
 val androidSdkExecOperations = serviceOf<ExecOperations>()
-installProjectAndroidSdk(androidSdkExecOperations)
+if (androidTaskRequested) {
+    installProjectAndroidSdk(androidSdkExecOperations)
+} else {
+    writeAndroidLocalProperties()
+    println(
+        "setup-android-sdk: skipped install (no Android tasks in start parameter); " +
+            "local.properties -> $projectAndroidSdkDir",
+    )
+}
 
 kotlin {
     applyDefaultHierarchyTemplate()
