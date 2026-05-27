@@ -64,7 +64,7 @@ import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.PathSegment
 import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.Type
+import io.github.kotlinmania.syn.SynType as Type
 import io.github.kotlinmania.syn.Variant as SynVariant
 import io.github.kotlinmania.syn.WherePredicate
 import io.github.kotlinmania.syn.copy

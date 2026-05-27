@@ -12,7 +12,7 @@ import io.github.kotlinmania.serde.serdederive.src.internals.attr.Identifier
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.TagType
 import io.github.kotlinmania.serde.serdederive.src.internals.ungroup
 import io.github.kotlinmania.syn.Member
-import io.github.kotlinmania.syn.Type
+import io.github.kotlinmania.syn.SynType as Type
 
 /**
  * Cross-cutting checks that require looking at more than a single attrs object.

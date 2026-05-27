@@ -18,7 +18,7 @@ import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.Type
+import io.github.kotlinmania.syn.SynType as Type
 import io.github.kotlinmania.syn.Variant as SynVariant
 import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.Comma
