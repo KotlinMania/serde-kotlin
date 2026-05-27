@@ -1,4 +1,4 @@
-name: Build (watchOS)
+name: Build (JVM)
 
 on:
   workflow_call:
@@ -8,8 +8,8 @@ permissions:
 
 jobs:
   build:
-    name: Build and Test (watchOS)
-    runs-on: macos-latest
+    name: Build and Test (JVM)
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -25,25 +25,19 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.1.0
 
-      - name: Build and test watchOS targets
+      - name: Build and test JVM target
         run: >
           ./gradlew
-          watchosArm32Binaries
-          watchosArm32TestBinaries
-          watchosArm64Binaries
-          watchosArm64TestBinaries
-          watchosDeviceArm64Binaries
-          watchosDeviceArm64TestBinaries
-          watchosSimulatorArm64Binaries
-          watchosSimulatorArm64TestBinaries
-          watchosSimulatorArm64Test
+          jvmMainClasses
+          jvmTestClasses
+          jvmTest
           --no-configuration-cache
 
-      - name: Upload test reports (watchOS)
+      - name: Upload test reports (JVM)
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-watchos
+          name: test-reports-jvm
           path: |
             build/reports/tests/
             build/test-results/

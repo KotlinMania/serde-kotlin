@@ -28,8 +28,10 @@ jobs:
       - name: Build and test tvOS targets
         run: >
           ./gradlew
-          compileKotlinTvosArm64
-          compileKotlinTvosSimulatorArm64
+          tvosArm64Binaries
+          tvosArm64TestBinaries
+          tvosSimulatorArm64Binaries
+          tvosSimulatorArm64TestBinaries
           tvosSimulatorArm64Test
           --no-configuration-cache
 
