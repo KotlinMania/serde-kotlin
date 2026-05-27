@@ -322,6 +322,7 @@ rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
     resolution("qs", "6.15.2"); resolution("**/qs", "6.15.2")
     resolution("socket.io-parser", "4.2.6"); resolution("**/socket.io-parser", "4.2.6")
     resolution("ws", "8.20.1"); resolution("**/ws", "8.20.1")
+    resolution("tmp", "0.2.6"); resolution("**/tmp", "0.2.6")
 }
 val patchedKarmaWebpackPackage = rootProject.layout.projectDirectory.dir("gradle/npm/karma-webpack").asFile.absolutePath.replace("\\", "/")
 rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
