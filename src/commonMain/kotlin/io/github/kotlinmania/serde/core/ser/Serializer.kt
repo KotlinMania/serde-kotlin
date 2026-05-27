@@ -53,7 +53,6 @@ public interface Serializer<Ok, E>
      * The default behavior unconditionally returns an error.
      */
     public fun serializeI128(v: String): Result<Ok> {
-        v.hashCode()
         return Result.failure(Error.custom("i128 is not supported"))
     }
 
@@ -92,7 +91,6 @@ public interface Serializer<Ok, E>
      * The default behavior unconditionally returns an error.
      */
     public fun serializeU128(v: String): Result<Ok> {
-        v.hashCode()
         return Result.failure(Error.custom("u128 is not supported"))
     }
 

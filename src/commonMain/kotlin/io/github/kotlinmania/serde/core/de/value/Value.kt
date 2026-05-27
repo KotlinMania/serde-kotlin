@@ -512,8 +512,6 @@ public class U32Deserializer private constructor(
         variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
-        name.hashCode()
-        variants.hashCode()
         return visitor.visitEnum(this)
     }
 
@@ -715,8 +713,6 @@ public class StrDeserializer private constructor(
         variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
-        name.hashCode()
-        variants.hashCode()
         return visitor.visitEnum(this)
     }
 
@@ -822,8 +818,6 @@ public class BorrowedStrDeserializer private constructor(
         variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
-        name.hashCode()
-        variants.hashCode()
         return visitor.visitEnum(this)
     }
 
@@ -931,8 +925,6 @@ public class StringDeserializer private constructor(
         variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
-        name.hashCode()
-        variants.hashCode()
         return visitor.visitEnum(this)
     }
 
@@ -1051,8 +1043,6 @@ public class CowStrDeserializer private constructor(
         variants: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
-        name.hashCode()
-        variants.hashCode()
         return visitor.visitEnum(this)
     }
 
@@ -1628,7 +1618,6 @@ public class MapDeserializer<K, V>(
         len: Int,
         visitor: Visitor<R>,
     ): Result<R> {
-        len.hashCode()
         return deserializeSeq(visitor)
     }
 

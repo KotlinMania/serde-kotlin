@@ -54,72 +54,58 @@ private class TaggedSerializer<Ok, E, S>(
         )
 
     override fun serializeBool(v: Boolean): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Boolean))
     }
 
     override fun serializeI8(v: Byte): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeI16(v: Short): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeI32(v: Int): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeI64(v: Long): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU8(v: UByte): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU16(v: UShort): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU32(v: UInt): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU64(v: ULong): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeF32(v: Float): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Float))
     }
 
     override fun serializeF64(v: Double): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Float))
     }
 
     override fun serializeChar(v: Char): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Char))
     }
 
     override fun serializeStr(v: String): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.String))
     }
 
     override fun serializeBytes(v: ByteArray): Result<Ok> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.ByteArray))
     }
 
@@ -127,7 +113,6 @@ private class TaggedSerializer<Ok, E, S>(
 
     override fun <T> serializeSome(value: T): Result<Ok>
         where T : Serialize {
-        value.hashCode()
         return Result.failure(badType(Unsupported.Optional))
     }
 
@@ -140,7 +125,6 @@ private class TaggedSerializer<Ok, E, S>(
 
     override fun serializeUnitStruct(name: String): Result<Ok> =
         runCatching {
-            name.hashCode()
             val map = delegate.serializeMap(1).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.end().getOrThrow()
@@ -152,8 +136,6 @@ private class TaggedSerializer<Ok, E, S>(
         variant: String,
     ): Result<Ok> =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeEntry(Content.String(variant), Content.Unit).getOrThrow()
@@ -165,7 +147,6 @@ private class TaggedSerializer<Ok, E, S>(
         value: T,
     ): Result<Ok>
         where T : Serialize {
-        name.hashCode()
         return value.serialize(this)
     }
 
@@ -177,8 +158,6 @@ private class TaggedSerializer<Ok, E, S>(
     ): Result<Ok>
         where T : Serialize =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeEntry(Content.String(variant), value).getOrThrow()
@@ -186,12 +165,10 @@ private class TaggedSerializer<Ok, E, S>(
         }
 
     override fun serializeSeq(len: Int?): Result<io.github.kotlinmania.serde.core.ser.SerializeSeq<Ok, E>> {
-        len.hashCode()
         return Result.failure(badType(Unsupported.Sequence))
     }
 
     override fun serializeTuple(len: Int): Result<SerializeTuple<Ok, E>> {
-        len.hashCode()
         return Result.failure(badType(Unsupported.Tuple))
     }
 
@@ -199,8 +176,6 @@ private class TaggedSerializer<Ok, E, S>(
         name: String,
         len: Int,
     ): Result<SerializeTupleStruct<Ok, E>> {
-        name.hashCode()
-        len.hashCode()
         return Result.failure(badType(Unsupported.TupleStruct))
     }
 
@@ -211,8 +186,6 @@ private class TaggedSerializer<Ok, E, S>(
         len: Int,
     ): Result<SerializeTupleVariant<Ok, E>> =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeKey(Content.String(variant)).getOrThrow()
@@ -243,8 +216,6 @@ private class TaggedSerializer<Ok, E, S>(
         len: Int,
     ): Result<SerializeStructVariant<Ok, E>> =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeKey(Content.String(variant)).getOrThrow()
@@ -790,72 +761,58 @@ public class FlatMapSerializer<MOk, E, M>(
     private fun badType(what: Unsupported): Throwable = Error.custom("can only flatten structs and maps (got $what)")
 
     override fun serializeBool(v: Boolean): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Boolean))
     }
 
     override fun serializeI8(v: Byte): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeI16(v: Short): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeI32(v: Int): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeI64(v: Long): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU8(v: UByte): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU16(v: UShort): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU32(v: UInt): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeU64(v: ULong): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Integer))
     }
 
     override fun serializeF32(v: Float): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Float))
     }
 
     override fun serializeF64(v: Double): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Float))
     }
 
     override fun serializeChar(v: Char): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.Char))
     }
 
     override fun serializeStr(v: String): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.String))
     }
 
     override fun serializeBytes(v: ByteArray): Result<Unit> {
-        v.hashCode()
         return Result.failure(badType(Unsupported.ByteArray))
     }
 
@@ -867,7 +824,6 @@ public class FlatMapSerializer<MOk, E, M>(
     override fun serializeUnit(): Result<Unit> = Result.success(Unit)
 
     override fun serializeUnitStruct(name: String): Result<Unit> {
-        name.hashCode()
         return Result.success(Unit)
     }
 
@@ -877,8 +833,6 @@ public class FlatMapSerializer<MOk, E, M>(
         variant: String,
     ): Result<Unit> =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             map.serializeEntry(Content.String(variant), Content.Unit).getOrThrow()
             Unit
         }
@@ -888,7 +842,6 @@ public class FlatMapSerializer<MOk, E, M>(
         value: T,
     ): Result<Unit>
         where T : Serialize {
-        name.hashCode()
         return value.serialize(this)
     }
 
@@ -900,19 +853,15 @@ public class FlatMapSerializer<MOk, E, M>(
     ): Result<Unit>
         where T : Serialize =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             map.serializeEntry(Content.String(variant), value).getOrThrow()
             Unit
         }
 
     override fun serializeSeq(len: Int?): Result<io.github.kotlinmania.serde.core.ser.SerializeSeq<Unit, E>> {
-        len.hashCode()
         return Result.failure(badType(Unsupported.Sequence))
     }
 
     override fun serializeTuple(len: Int): Result<SerializeTuple<Unit, E>> {
-        len.hashCode()
         return Result.failure(badType(Unsupported.Tuple))
     }
 
@@ -920,8 +869,6 @@ public class FlatMapSerializer<MOk, E, M>(
         name: String,
         len: Int,
     ): Result<SerializeTupleStruct<Unit, E>> {
-        name.hashCode()
-        len.hashCode()
         return Result.failure(badType(Unsupported.TupleStruct))
     }
 
@@ -932,15 +879,12 @@ public class FlatMapSerializer<MOk, E, M>(
         len: Int,
     ): Result<SerializeTupleVariant<Unit, E>> =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
             map.serializeKey(Content.String(variant)).getOrThrow()
             FlatMapSerializeTupleVariantAsMapValue(map = map, len = len)
         }
 
     override fun serializeMap(len: Int?): Result<SerializeMap<Unit, E>> =
         runCatching {
-            len.hashCode()
             FlatMapSerializeMap(map)
         }
 
@@ -949,8 +893,6 @@ public class FlatMapSerializer<MOk, E, M>(
         len: Int,
     ): Result<SerializeStruct<Unit, E>> =
         runCatching {
-            name.hashCode()
-            len.hashCode()
             FlatMapSerializeStruct(map)
         }
 
@@ -961,9 +903,6 @@ public class FlatMapSerializer<MOk, E, M>(
         len: Int,
     ): Result<SerializeStructVariant<Unit, E>> =
         runCatching {
-            name.hashCode()
-            variantIndex.hashCode()
-            len.hashCode()
             map.serializeKey(Content.String(variant)).getOrThrow()
             FlatMapSerializeStructVariantAsMapValue(map = map, name = variant)
         }

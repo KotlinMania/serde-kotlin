@@ -121,7 +121,6 @@ public interface Visitor<Value> : Expected {
      */
     public fun <D> visitSome(deserializer: D): Result<Value>
         where D : Deserializer {
-        deserializer.hashCode()
         return Result.failure(Error.invalidType(Unexpected.Option, this))
     }
 
@@ -135,7 +134,6 @@ public interface Visitor<Value> : Expected {
      */
     public fun <D> visitNewtypeStruct(deserializer: D): Result<Value>
         where D : Deserializer {
-        deserializer.hashCode()
         return Result.failure(Error.invalidType(Unexpected.NewtypeStruct, this))
     }
 
@@ -144,7 +142,6 @@ public interface Visitor<Value> : Expected {
      */
     public fun <A> visitSeq(seq: A): Result<Value>
         where A : SeqAccess {
-        seq.hashCode()
         return Result.failure(Error.invalidType(Unexpected.Seq, this))
     }
 
@@ -153,7 +150,6 @@ public interface Visitor<Value> : Expected {
      */
     public fun <A> visitMap(map: A): Result<Value>
         where A : MapAccess {
-        map.hashCode()
         return Result.failure(Error.invalidType(Unexpected.Map, this))
     }
 
@@ -162,7 +158,6 @@ public interface Visitor<Value> : Expected {
      */
     public fun <A> visitEnum(data: A): Result<Value>
         where A : EnumAccess {
-        data.hashCode()
         return Result.failure(Error.invalidType(Unexpected.Enum, this))
     }
 
@@ -171,7 +166,6 @@ public interface Visitor<Value> : Expected {
      */
     public fun <D> privateVisitUntaggedOption(deserializer: D): Result<Value>
         where D : Deserializer {
-        deserializer.hashCode()
         return Result.failure(SerdeDeserializationException("untagged option is absent"))
     }
 }

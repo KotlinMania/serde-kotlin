@@ -21,7 +21,6 @@ public interface SerializeStruct<Ok, E>
      * The default implementation does nothing.
      */
     public fun skipField(key: String): Result<Unit> {
-        key.hashCode()
         return Result.success(Unit)
     }
 

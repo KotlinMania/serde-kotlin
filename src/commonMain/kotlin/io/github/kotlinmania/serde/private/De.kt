@@ -19,7 +19,6 @@ public fun <V> missingField(
         private val name: String,
     ) : Deserializer {
         override fun <T> deserializeAny(visitor: Visitor<T>): Result<T> {
-            visitor.hashCode()
             return Result.failure(Error.missingField(name))
         }
 

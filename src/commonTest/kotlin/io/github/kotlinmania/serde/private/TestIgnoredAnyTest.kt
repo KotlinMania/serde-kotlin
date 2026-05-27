@@ -136,7 +136,6 @@ private class TestEnumDeserializer(
         len: Int,
         visitor: Visitor<V>,
     ): Result<V> {
-        len.hashCode()
         val seq = SeqDeserializer(listOf(1.intoDeserializer(), 2.intoDeserializer()).iterator())
         return visitor.visitSeq(seq)
     }
@@ -145,7 +144,6 @@ private class TestEnumDeserializer(
         fields: List<String>,
         visitor: Visitor<V>,
     ): Result<V> {
-        fields.hashCode()
         val map = MapDeserializer(listOf("a".intoDeserializer() to 10.intoDeserializer()).iterator())
         return visitor.visitMap(map)
     }
