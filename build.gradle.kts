@@ -163,8 +163,26 @@ fun installProjectAndroidSdk(execOperations: ExecOperations) {
     println("setup-android-sdk: done; SDK at $projectAndroidSdkDir")
 }
 
+// Gate the (slow, network-bound) SDK download on whether any task in
+// gradle.startParameter.taskNames looks like it needs Android. local.properties
+// is always written so AGP's config-time sdk.dir resolution still succeeds.
+// macOS / iOS / tvOS / watchOS / Linux / Windows / JS / Wasm / host-JVM
+// invocations no longer pay the SDK-download tax. The `setupAndroidSdk` task
+// remains the explicit entry point when the SDK has to be installed deliberately.
+val androidTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    val lower = taskName.lowercase()
+    "android" in lower || "aar" in lower
+}
 val androidSdkExecOperations = serviceOf<ExecOperations>()
-installProjectAndroidSdk(androidSdkExecOperations)
+if (androidTaskRequested) {
+    installProjectAndroidSdk(androidSdkExecOperations)
+} else {
+    writeAndroidLocalProperties()
+    println(
+        "setup-android-sdk: skipped install (no Android tasks in start parameter); " +
+            "local.properties -> $projectAndroidSdkDir",
+    )
+}
 
 // ============================================================================
 // kotlin { … } — every target Kotlin supports, no per-target source-set forks
