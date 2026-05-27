@@ -12,7 +12,7 @@ import io.github.kotlinmania.serde.serdederive.src.internals.attr.Identifier
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.TagType
 import io.github.kotlinmania.serde.serdederive.src.internals.ungroup
 import io.github.kotlinmania.syn.Member
-import io.github.kotlinmania.syn.SynType as Type
+import io.github.kotlinmania.syn.SynType
 
 /**
  * Cross-cutting checks that require looking at more than a single attrs object.
@@ -468,7 +468,7 @@ private fun memberMessage(member: Member): String =
 
 private fun allowTransparent(field: Field, derive: Derive): Boolean {
     val type = ungroup(field.ty)
-    if (type is Type.Path) {
+    if (type is SynType.Path) {
         val segment = type.path.segments.last()
         if (segment?.ident?.toString() == "PhantomData") {
             return false
