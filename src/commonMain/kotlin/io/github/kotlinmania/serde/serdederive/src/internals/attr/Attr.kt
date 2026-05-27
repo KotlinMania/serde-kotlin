@@ -1,75 +1,16 @@
 // port-lint: source serde_derive/src/internals/attr.rs
 package io.github.kotlinmania.serde.serdederive.src.internals.attr
 
+import io.github.kotlinmania.procmacro2.*
 import io.github.kotlinmania.procmacro2.Ident
-import io.github.kotlinmania.procmacro2.Literal
-import io.github.kotlinmania.procmacro2.Span
-import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.procmacro2.TokenTree
 import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.serde.serdederive.src.internals.ALIAS
-import io.github.kotlinmania.serde.serdederive.src.internals.BORROW
-import io.github.kotlinmania.serde.serdederive.src.internals.BOUND
-import io.github.kotlinmania.serde.serdederive.src.internals.CONTENT
-import io.github.kotlinmania.serde.serdederive.src.internals.CRATE
-import io.github.kotlinmania.serde.serdederive.src.internals.Ctxt
-import io.github.kotlinmania.serde.serdederive.src.internals.DEFAULT
-import io.github.kotlinmania.serde.serdederive.src.internals.DENY_UNKNOWN_FIELDS
-import io.github.kotlinmania.serde.serdederive.src.internals.DESERIALIZE
-import io.github.kotlinmania.serde.serdederive.src.internals.DESERIALIZE_WITH
-import io.github.kotlinmania.serde.serdederive.src.internals.EXPECTING
-import io.github.kotlinmania.serde.serdederive.src.internals.FIELD_IDENTIFIER
-import io.github.kotlinmania.serde.serdederive.src.internals.FLATTEN
-import io.github.kotlinmania.serde.serdederive.src.internals.FROM
-import io.github.kotlinmania.serde.serdederive.src.internals.GETTER
-import io.github.kotlinmania.serde.serdederive.src.internals.INTO
-import io.github.kotlinmania.serde.serdederive.src.internals.NON_EXHAUSTIVE
-import io.github.kotlinmania.serde.serdederive.src.internals.OTHER
-import io.github.kotlinmania.serde.serdederive.src.internals.REMOTE
-import io.github.kotlinmania.serde.serdederive.src.internals.RENAME
-import io.github.kotlinmania.serde.serdederive.src.internals.RENAME_ALL
-import io.github.kotlinmania.serde.serdederive.src.internals.RENAME_ALL_FIELDS
-import io.github.kotlinmania.serde.serdederive.src.internals.REPR
-import io.github.kotlinmania.serde.serdederive.src.internals.SERDE
-import io.github.kotlinmania.serde.serdederive.src.internals.SERIALIZE
-import io.github.kotlinmania.serde.serdederive.src.internals.SERIALIZE_WITH
-import io.github.kotlinmania.serde.serdederive.src.internals.SKIP
-import io.github.kotlinmania.serde.serdederive.src.internals.SKIP_DESERIALIZING
-import io.github.kotlinmania.serde.serdederive.src.internals.SKIP_SERIALIZING
-import io.github.kotlinmania.serde.serdederive.src.internals.SKIP_SERIALIZING_IF
-import io.github.kotlinmania.serde.serdederive.src.internals.Symbol
-import io.github.kotlinmania.serde.serdederive.src.internals.TAG
-import io.github.kotlinmania.serde.serdederive.src.internals.TRANSPARENT
-import io.github.kotlinmania.serde.serdederive.src.internals.TRY_FROM
-import io.github.kotlinmania.serde.serdederive.src.internals.UNTAGGED
-import io.github.kotlinmania.serde.serdederive.src.internals.VARIANT_IDENTIFIER
-import io.github.kotlinmania.serde.serdederive.src.internals.WITH
-import io.github.kotlinmania.serde.serdederive.src.internals.RenameRule
-import io.github.kotlinmania.serde.serdederive.src.internals.eq
-import io.github.kotlinmania.serde.serdederive.src.internals.MultiName
-import io.github.kotlinmania.serde.serdederive.src.internals.Name
-import io.github.kotlinmania.serde.serdederive.src.internals.ungroup
-import io.github.kotlinmania.syn.Attribute
+import io.github.kotlinmania.serde.serdederive.src.internals.*
+import io.github.kotlinmania.syn.*
+import io.github.kotlinmania.syn.token.PathSep
 import io.github.kotlinmania.syn.Data as SynData
-import io.github.kotlinmania.syn.DeriveInput
-import io.github.kotlinmania.syn.Expr
 import io.github.kotlinmania.syn.Field as SynField
 import io.github.kotlinmania.syn.Fields as SynFields
-import io.github.kotlinmania.syn.GenericArgument
-import io.github.kotlinmania.syn.Lifetime
-import io.github.kotlinmania.syn.Lit
-import io.github.kotlinmania.syn.Member
-import io.github.kotlinmania.syn.Meta
-import io.github.kotlinmania.syn.Path
-import io.github.kotlinmania.syn.PathArguments
-import io.github.kotlinmania.syn.PathSegment
-import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.Variant as SynVariant
-import io.github.kotlinmania.syn.WherePredicate
-import io.github.kotlinmania.syn.copy
-import io.github.kotlinmania.syn.token.Comma
-import io.github.kotlinmania.syn.token.PathSep
 
 /**
  * This module handles parsing of serde attributes. The entrypoints are

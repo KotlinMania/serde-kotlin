@@ -1,8 +1,8 @@
 // port-lint: source serde_derive/src/internals/ctxt.rs
 package io.github.kotlinmania.serde.serdederive.src.internals
 
-import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.procmacro2.Span
+import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.SynError
 

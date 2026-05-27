@@ -2,11 +2,7 @@
 package io.github.kotlinmania.serde.serdederive.src
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.serde.serdederive.src.internals.ast.Container
-import io.github.kotlinmania.serde.serdederive.src.internals.ast.Data
-import io.github.kotlinmania.serde.serdederive.src.internals.ast.Field
-import io.github.kotlinmania.serde.serdederive.src.internals.ast.Style
-import io.github.kotlinmania.serde.serdederive.src.internals.ast.Variant
+import io.github.kotlinmania.serde.serdederive.src.internals.ast.*
 import io.github.kotlinmania.syn.GenericParam
 import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.Member

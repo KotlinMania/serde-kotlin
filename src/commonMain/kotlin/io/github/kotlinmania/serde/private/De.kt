@@ -1,24 +1,12 @@
 // port-lint: source serde/src/private/de.rs
 package io.github.kotlinmania.serde.`private`
 
-import io.github.kotlinmania.serde.core.`private`.Content
-import io.github.kotlinmania.serde.core.`private`.cautious
-import io.github.kotlinmania.serde.core.de.Deserialize
-import io.github.kotlinmania.serde.core.de.DeserializeSeed
-import io.github.kotlinmania.serde.core.de.Deserializer
-import io.github.kotlinmania.serde.core.de.EnumAccess
-import io.github.kotlinmania.serde.core.de.Error
-import io.github.kotlinmania.serde.core.de.Expected
-import io.github.kotlinmania.serde.core.de.IgnoredAny
-import io.github.kotlinmania.serde.core.de.MapAccess
-import io.github.kotlinmania.serde.core.de.SeqAccess
-import io.github.kotlinmania.serde.core.de.SerdeDeserializationException
-import io.github.kotlinmania.serde.core.de.Unexpected
-import io.github.kotlinmania.serde.core.de.VariantAccess
-import io.github.kotlinmania.serde.core.de.Visitor
+import io.github.kotlinmania.serde.core.de.*
 import io.github.kotlinmania.serde.core.de.value.BytesDeserializer
 import io.github.kotlinmania.serde.core.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serde.core.de.value.intoDeserializer
+import io.github.kotlinmania.serde.core.private.Content
+import io.github.kotlinmania.serde.core.private.cautious
 
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.

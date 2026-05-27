@@ -1,16 +1,13 @@
 // port-lint: source serde/src/private/ser.rs
 package io.github.kotlinmania.serde.`private`
 
-import io.github.kotlinmania.serde.core.ser.Error
-import io.github.kotlinmania.serde.core.ser.Impossible
-import io.github.kotlinmania.serde.core.ser.Serialize
+import io.github.kotlinmania.serde.core.ser.*
 import io.github.kotlinmania.serde.core.ser.SerializeMap
 import io.github.kotlinmania.serde.core.ser.SerializeStruct
 import io.github.kotlinmania.serde.core.ser.SerializeStructVariant
 import io.github.kotlinmania.serde.core.ser.SerializeTuple
 import io.github.kotlinmania.serde.core.ser.SerializeTupleStruct
 import io.github.kotlinmania.serde.core.ser.SerializeTupleVariant
-import io.github.kotlinmania.serde.core.ser.Serializer
 
 /**
  * Used to check that serde(getter) attributes return the expected type.

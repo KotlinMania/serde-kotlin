@@ -5,23 +5,17 @@ import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.serde.serdederive.src.internals.Ctxt
 import io.github.kotlinmania.serde.serdederive.src.internals.Derive
+import io.github.kotlinmania.serde.serdederive.src.internals.check.check
+import io.github.kotlinmania.syn.*
+import io.github.kotlinmania.syn.token.Comma
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Container as AttrContainer
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Default as AttrDefault
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Field as AttrField
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Variant as AttrVariant
-import io.github.kotlinmania.serde.serdederive.src.internals.check.check
 import io.github.kotlinmania.syn.Data as SynData
-import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Field as SynField
 import io.github.kotlinmania.syn.Fields as SynFields
-import io.github.kotlinmania.syn.Generics
-import io.github.kotlinmania.syn.Index
-import io.github.kotlinmania.syn.Member
-import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.Variant as SynVariant
-import io.github.kotlinmania.syn.copy
-import io.github.kotlinmania.syn.token.Comma
 
 /**
  * A Serde syntax tree, parsed from the Syn syntax tree and ready to generate Rust code.

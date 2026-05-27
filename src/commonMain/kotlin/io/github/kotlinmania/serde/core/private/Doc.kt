@@ -2,15 +2,8 @@
 package io.github.kotlinmania.serde.core.`private`
 
 import io.github.kotlinmania.serde.core.Lib
+import io.github.kotlinmania.serde.core.ser.*
 import io.github.kotlinmania.serde.core.ser.Error as SerError
-import io.github.kotlinmania.serde.core.ser.SerializeMap
-import io.github.kotlinmania.serde.core.ser.SerializeSeq
-import io.github.kotlinmania.serde.core.ser.SerializeStruct
-import io.github.kotlinmania.serde.core.ser.SerializeStructVariant
-import io.github.kotlinmania.serde.core.ser.SerializeTuple
-import io.github.kotlinmania.serde.core.ser.SerializeTupleStruct
-import io.github.kotlinmania.serde.core.ser.SerializeTupleVariant
-import io.github.kotlinmania.serde.core.ser.Serializer
 
 // Used only by Serde documentation tests. Not public API.
 

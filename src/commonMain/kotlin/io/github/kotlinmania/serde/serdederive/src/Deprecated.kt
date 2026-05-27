@@ -2,12 +2,7 @@
 package io.github.kotlinmania.serde.serdederive.src
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.syn.Attribute
-import io.github.kotlinmania.syn.Data
-import io.github.kotlinmania.syn.DeriveInput
-import io.github.kotlinmania.syn.Meta
-import io.github.kotlinmania.syn.parseNestedMeta
-import io.github.kotlinmania.syn.SynResult
+import io.github.kotlinmania.syn.*
 
 public fun allowDeprecated(input: DeriveInput): TokenStream? =
     if (shouldAllowDeprecated(input)) {
