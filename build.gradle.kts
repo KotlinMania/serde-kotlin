@@ -478,14 +478,16 @@ tasks.register("setupAndroidSdk") {
 tasks.register("test") {
     group = "verification"
     description = "Runs the host-portable real test suite (Rust ports only — no smoke tests)."
-    val realTestTasks = listOf(
+    val realTestTasks = mutableListOf(
         "jvmTest",
         "macosArm64Test",
         "jsNodeTest",
         "wasmJsNodeTest",
-        "wasmWasiNodeTest",
-        "testAndroidHostTest",
+        "wasmWasiNodeTest"
     )
+    if (isProjectAndroidSdkInstalled()) {
+        realTestTasks.add("testAndroidHostTest")
+    }
     dependsOn(realTestTasks.mapNotNull { tasks.findByName(it) })
 }
 
@@ -527,6 +529,41 @@ tasks.matching { it.name == "embedSwiftExportForXcode" }.configureEach {
 // don't maintain a hand-curated 100+ line task list that goes stale when
 // the plugin adds new tasks.
 // ============================================================================
+val fullTargetBuildTaskNames = setOf(
+    // Android KMP
+    "compileAndroidMain", "compileAndroidHostTest", "compileAndroidDeviceTest",
+    "assembleAndroidMain", "assembleUnitTest", "assembleAndroidTest",
+    "assembleAndroidDeviceTest", "testAndroidHostTest",
+    // JVM
+    "jvmMainClasses", "jvmTestClasses",
+    // JS / Wasm
+    "jsMainClasses", "jsTestClasses",
+    "wasmJsMainClasses", "wasmJsTestClasses",
+    "wasmWasiMainClasses", "wasmWasiTestClasses",
+    // Native binaries + test binaries
+    "androidNativeArm32Binaries",    "androidNativeArm32TestBinaries",
+    "androidNativeArm64Binaries",    "androidNativeArm64TestBinaries",
+    "androidNativeX64Binaries",      "androidNativeX64TestBinaries",
+    "androidNativeX86Binaries",      "androidNativeX86TestBinaries",
+    "iosArm64Binaries",              "iosArm64TestBinaries",
+    "iosSimulatorArm64Binaries",     "iosSimulatorArm64TestBinaries",
+    "iosX64Binaries",                "iosX64TestBinaries",
+    "linuxArm64Binaries",            "linuxArm64TestBinaries",
+    "linuxX64Binaries",              "linuxX64TestBinaries",
+    "macosArm64Binaries",            "macosArm64TestBinaries",
+    "mingwX64Binaries",              "mingwX64TestBinaries",
+    "tvosArm64Binaries",             "tvosArm64TestBinaries",
+    "tvosSimulatorArm64Binaries",    "tvosSimulatorArm64TestBinaries",
+    "watchosArm64Binaries",          "watchosArm64TestBinaries",
+    "watchosDeviceArm64Binaries",    "watchosDeviceArm64TestBinaries",
+    "watchosSimulatorArm64Binaries", "watchosSimulatorArm64TestBinaries",
+    // Swift Export + XCFramework
+    "embedSwiftExportForXcode",
+    "assembleSerdeXCFramework",
+)
+
+tasks.named("build") { dependsOn(fullTargetBuildTaskNames) }
+
 afterEvaluate {
     tasks.named("build") {
         dependsOn(
