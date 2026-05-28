@@ -7,10 +7,10 @@ import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.PathSep
 
-public fun thisType(cont: Container): Path {
+fun thisType(cont: Container): Path {
     val remote = cont.attrs.remote()
     return if (remote != null) {
-        val thisPath = remote.copy()
+        val thisPath = remote.deepCopy()
         for (segment in thisPath.segments) {
             val arguments = segment.arguments
             if (arguments is PathArguments.AngleBracketed) {
@@ -23,10 +23,10 @@ public fun thisType(cont: Container): Path {
     }
 }
 
-public fun thisValue(cont: Container): Path {
+fun thisValue(cont: Container): Path {
     val remote = cont.attrs.remote()
     return if (remote != null) {
-        val thisPath = remote.copy()
+        val thisPath = remote.deepCopy()
         for (segment in thisPath.segments) {
             val arguments = segment.arguments
             if (arguments is PathArguments.AngleBracketed && arguments.colon2Token == null) {

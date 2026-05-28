@@ -4,16 +4,16 @@ package io.github.kotlinmania.serde.core.ser
 /**
  * Returned from `Serializer.serializeTupleStruct`.
  */
-public interface SerializeTupleStruct<Ok, E>
+interface SerializeTupleStruct<Ok, E>
     where E : Error {
     /**
      * Serialize a tuple class field.
      */
-    public fun <T> serializeField(value: T): Result<Unit>
+    fun <T> serializeField(value: T): Result<Unit>
         where T : Serialize
 
     /**
      * Finish serializing a tuple class.
      */
-    public fun end(): Result<Ok>
+    fun end(): Result<Ok>
 }

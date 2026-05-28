@@ -7,7 +7,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private data object UnitVisitor : Visitor<Unit> {
     override fun expecting(): String = "unit"
@@ -15,13 +15,12 @@ private data object UnitVisitor : Visitor<Unit> {
     override fun visitUnit(): Result<Unit> = Result.success(Unit)
 }
 
-public data object UnitDeserialize : Deserialize<Unit> {
+data object UnitDeserialize : Deserialize<Unit> {
     override fun <D> deserialize(deserializer: D): Result<Unit>
-        where D : Deserializer =
-        deserializer.deserializeUnit(UnitVisitor)
+        where D : Deserializer = deserializer.deserializeUnit(UnitVisitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private data object BoolVisitor : Visitor<Boolean> {
     override fun expecting(): String = "a boolean"
@@ -29,19 +28,23 @@ private data object BoolVisitor : Visitor<Boolean> {
     override fun visitBool(v: Boolean): Result<Boolean> = Result.success(v)
 }
 
-public data object BooleanDeserialize : Deserialize<Boolean> {
+data object BooleanDeserialize : Deserialize<Boolean> {
     override fun <D> deserialize(deserializer: D): Result<Boolean>
         where D : Deserializer =
         deserializer.deserializeBool(BoolVisitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-private fun invalidSigned(v: Long, exp: Expected): Result<Nothing> =
-    Result.failure(Error.invalidValue(Unexpected.Signed(v), exp))
+private fun invalidSigned(
+    v: Long,
+    exp: Expected,
+): Result<Nothing> = Result.failure(Error.invalidValue(Unexpected.Signed(v), exp))
 
-private fun invalidUnsigned(v: ULong, exp: Expected): Result<Nothing> =
-    Result.failure(Error.invalidValue(Unexpected.Unsigned(v), exp))
+private fun invalidUnsigned(
+    v: ULong,
+    exp: Expected,
+): Result<Nothing> = Result.failure(Error.invalidValue(Unexpected.Unsigned(v), exp))
 
 private data object I8Visitor : Visitor<Byte> {
     override fun expecting(): String = "i8"
@@ -70,10 +73,9 @@ private data object I8Visitor : Visitor<Byte> {
         if (v <= Byte.MAX_VALUE.toULong()) Result.success(v.toByte()) else invalidUnsigned(v, this)
 }
 
-public data object I8Deserialize : Deserialize<Byte> {
+data object I8Deserialize : Deserialize<Byte> {
     override fun <D> deserialize(deserializer: D): Result<Byte>
-        where D : Deserializer =
-        deserializer.deserializeI8(I8Visitor)
+        where D : Deserializer = deserializer.deserializeI8(I8Visitor)
 }
 
 private data object I16Visitor : Visitor<Short> {
@@ -101,10 +103,9 @@ private data object I16Visitor : Visitor<Short> {
         if (v <= Short.MAX_VALUE.toULong()) Result.success(v.toShort()) else invalidUnsigned(v, this)
 }
 
-public data object I16Deserialize : Deserialize<Short> {
+data object I16Deserialize : Deserialize<Short> {
     override fun <D> deserialize(deserializer: D): Result<Short>
-        where D : Deserializer =
-        deserializer.deserializeI16(I16Visitor)
+        where D : Deserializer = deserializer.deserializeI16(I16Visitor)
 }
 
 private data object I32Visitor : Visitor<Int> {
@@ -126,14 +127,12 @@ private data object I32Visitor : Visitor<Int> {
     override fun visitU32(v: UInt): Result<Int> =
         if (v <= Int.MAX_VALUE.toUInt()) Result.success(v.toInt()) else invalidUnsigned(v.toULong(), this)
 
-    override fun visitU64(v: ULong): Result<Int> =
-        if (v <= Int.MAX_VALUE.toULong()) Result.success(v.toInt()) else invalidUnsigned(v, this)
+    override fun visitU64(v: ULong): Result<Int> = if (v <= Int.MAX_VALUE.toULong()) Result.success(v.toInt()) else invalidUnsigned(v, this)
 }
 
-public data object I32Deserialize : Deserialize<Int> {
+data object I32Deserialize : Deserialize<Int> {
     override fun <D> deserialize(deserializer: D): Result<Int>
-        where D : Deserializer =
-        deserializer.deserializeI32(I32Visitor)
+        where D : Deserializer = deserializer.deserializeI32(I32Visitor)
 }
 
 private data object I64Visitor : Visitor<Long> {
@@ -157,10 +156,9 @@ private data object I64Visitor : Visitor<Long> {
         if (v <= Long.MAX_VALUE.toULong()) Result.success(v.toLong()) else invalidUnsigned(v, this)
 }
 
-public data object I64Deserialize : Deserialize<Long> {
+data object I64Deserialize : Deserialize<Long> {
     override fun <D> deserialize(deserializer: D): Result<Long>
-        where D : Deserializer =
-        deserializer.deserializeI64(I64Visitor)
+        where D : Deserializer = deserializer.deserializeI64(I64Visitor)
 }
 
 private data object U8Visitor : Visitor<UByte> {
@@ -168,8 +166,7 @@ private data object U8Visitor : Visitor<UByte> {
 
     override fun visitU8(v: UByte): Result<UByte> = Result.success(v)
 
-    override fun visitI8(v: Byte): Result<UByte> =
-        if (v >= 0) Result.success(v.toUByte()) else invalidSigned(v.toLong(), this)
+    override fun visitI8(v: Byte): Result<UByte> = if (v >= 0) Result.success(v.toUByte()) else invalidSigned(v.toLong(), this)
 
     override fun visitI16(v: Short): Result<UByte> =
         if (v in 0..UByte.MAX_VALUE.toInt()) Result.success(v.toUByte()) else invalidSigned(v.toLong(), this)
@@ -190,10 +187,9 @@ private data object U8Visitor : Visitor<UByte> {
         if (v <= UByte.MAX_VALUE.toULong()) Result.success(v.toUByte()) else invalidUnsigned(v, this)
 }
 
-public data object U8Deserialize : Deserialize<UByte> {
+data object U8Deserialize : Deserialize<UByte> {
     override fun <D> deserialize(deserializer: D): Result<UByte>
-        where D : Deserializer =
-        deserializer.deserializeU8(U8Visitor)
+        where D : Deserializer = deserializer.deserializeU8(U8Visitor)
 }
 
 private data object U16Visitor : Visitor<UShort> {
@@ -203,11 +199,9 @@ private data object U16Visitor : Visitor<UShort> {
 
     override fun visitU8(v: UByte): Result<UShort> = Result.success(v.toUShort())
 
-    override fun visitI8(v: Byte): Result<UShort> =
-        if (v >= 0) Result.success(v.toUShort()) else invalidSigned(v.toLong(), this)
+    override fun visitI8(v: Byte): Result<UShort> = if (v >= 0) Result.success(v.toUShort()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI16(v: Short): Result<UShort> =
-        if (v >= 0) Result.success(v.toUShort()) else invalidSigned(v.toLong(), this)
+    override fun visitI16(v: Short): Result<UShort> = if (v >= 0) Result.success(v.toUShort()) else invalidSigned(v.toLong(), this)
 
     override fun visitI32(v: Int): Result<UShort> =
         if (v in 0..UShort.MAX_VALUE.toInt()) Result.success(v.toUShort()) else invalidSigned(v.toLong(), this)
@@ -222,10 +216,9 @@ private data object U16Visitor : Visitor<UShort> {
         if (v <= UShort.MAX_VALUE.toULong()) Result.success(v.toUShort()) else invalidUnsigned(v, this)
 }
 
-public data object U16Deserialize : Deserialize<UShort> {
+data object U16Deserialize : Deserialize<UShort> {
     override fun <D> deserialize(deserializer: D): Result<UShort>
-        where D : Deserializer =
-        deserializer.deserializeU16(U16Visitor)
+        where D : Deserializer = deserializer.deserializeU16(U16Visitor)
 }
 
 private data object U32Visitor : Visitor<UInt> {
@@ -237,14 +230,11 @@ private data object U32Visitor : Visitor<UInt> {
 
     override fun visitU16(v: UShort): Result<UInt> = Result.success(v.toUInt())
 
-    override fun visitI8(v: Byte): Result<UInt> =
-        if (v >= 0) Result.success(v.toUInt()) else invalidSigned(v.toLong(), this)
+    override fun visitI8(v: Byte): Result<UInt> = if (v >= 0) Result.success(v.toUInt()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI16(v: Short): Result<UInt> =
-        if (v >= 0) Result.success(v.toUInt()) else invalidSigned(v.toLong(), this)
+    override fun visitI16(v: Short): Result<UInt> = if (v >= 0) Result.success(v.toUInt()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI32(v: Int): Result<UInt> =
-        if (v >= 0) Result.success(v.toUInt()) else invalidSigned(v.toLong(), this)
+    override fun visitI32(v: Int): Result<UInt> = if (v >= 0) Result.success(v.toUInt()) else invalidSigned(v.toLong(), this)
 
     override fun visitI64(v: Long): Result<UInt> =
         if (v in 0L..UInt.MAX_VALUE.toLong()) Result.success(v.toUInt()) else invalidSigned(v, this)
@@ -253,10 +243,9 @@ private data object U32Visitor : Visitor<UInt> {
         if (v <= UInt.MAX_VALUE.toULong()) Result.success(v.toUInt()) else invalidUnsigned(v, this)
 }
 
-public data object U32Deserialize : Deserialize<UInt> {
+data object U32Deserialize : Deserialize<UInt> {
     override fun <D> deserialize(deserializer: D): Result<UInt>
-        where D : Deserializer =
-        deserializer.deserializeU32(U32Visitor)
+        where D : Deserializer = deserializer.deserializeU32(U32Visitor)
 }
 
 private data object U64Visitor : Visitor<ULong> {
@@ -270,23 +259,18 @@ private data object U64Visitor : Visitor<ULong> {
 
     override fun visitU32(v: UInt): Result<ULong> = Result.success(v.toULong())
 
-    override fun visitI8(v: Byte): Result<ULong> =
-        if (v >= 0) Result.success(v.toULong()) else invalidSigned(v.toLong(), this)
+    override fun visitI8(v: Byte): Result<ULong> = if (v >= 0) Result.success(v.toULong()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI16(v: Short): Result<ULong> =
-        if (v >= 0) Result.success(v.toULong()) else invalidSigned(v.toLong(), this)
+    override fun visitI16(v: Short): Result<ULong> = if (v >= 0) Result.success(v.toULong()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI32(v: Int): Result<ULong> =
-        if (v >= 0) Result.success(v.toULong()) else invalidSigned(v.toLong(), this)
+    override fun visitI32(v: Int): Result<ULong> = if (v >= 0) Result.success(v.toULong()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI64(v: Long): Result<ULong> =
-        if (v >= 0) Result.success(v.toULong()) else invalidSigned(v, this)
+    override fun visitI64(v: Long): Result<ULong> = if (v >= 0) Result.success(v.toULong()) else invalidSigned(v, this)
 }
 
-public data object U64Deserialize : Deserialize<ULong> {
+data object U64Deserialize : Deserialize<ULong> {
     override fun <D> deserialize(deserializer: D): Result<ULong>
-        where D : Deserializer =
-        deserializer.deserializeU64(U64Visitor)
+        where D : Deserializer = deserializer.deserializeU64(U64Visitor)
 }
 
 private data object F32Visitor : Visitor<Float> {
@@ -297,19 +281,25 @@ private data object F32Visitor : Visitor<Float> {
     override fun visitF64(v: Double): Result<Float> = Result.success(v.toFloat())
 
     override fun visitI8(v: Byte): Result<Float> = Result.success(v.toFloat())
+
     override fun visitI16(v: Short): Result<Float> = Result.success(v.toFloat())
+
     override fun visitI32(v: Int): Result<Float> = Result.success(v.toFloat())
+
     override fun visitI64(v: Long): Result<Float> = Result.success(v.toFloat())
+
     override fun visitU8(v: UByte): Result<Float> = Result.success(v.toFloat())
+
     override fun visitU16(v: UShort): Result<Float> = Result.success(v.toFloat())
+
     override fun visitU32(v: UInt): Result<Float> = Result.success(v.toFloat())
+
     override fun visitU64(v: ULong): Result<Float> = Result.success(v.toFloat())
 }
 
-public data object F32Deserialize : Deserialize<Float> {
+data object F32Deserialize : Deserialize<Float> {
     override fun <D> deserialize(deserializer: D): Result<Float>
-        where D : Deserializer =
-        deserializer.deserializeF32(F32Visitor)
+        where D : Deserializer = deserializer.deserializeF32(F32Visitor)
 }
 
 private data object F64Visitor : Visitor<Double> {
@@ -320,28 +310,38 @@ private data object F64Visitor : Visitor<Double> {
     override fun visitF32(v: Float): Result<Double> = Result.success(v.toDouble())
 
     override fun visitI8(v: Byte): Result<Double> = Result.success(v.toDouble())
+
     override fun visitI16(v: Short): Result<Double> = Result.success(v.toDouble())
+
     override fun visitI32(v: Int): Result<Double> = Result.success(v.toDouble())
+
     override fun visitI64(v: Long): Result<Double> = Result.success(v.toDouble())
+
     override fun visitU8(v: UByte): Result<Double> = Result.success(v.toDouble())
+
     override fun visitU16(v: UShort): Result<Double> = Result.success(v.toDouble())
+
     override fun visitU32(v: UInt): Result<Double> = Result.success(v.toDouble())
+
     override fun visitU64(v: ULong): Result<Double> = Result.success(v.toDouble())
 }
 
-public data object F64Deserialize : Deserialize<Double> {
+data object F64Deserialize : Deserialize<Double> {
     override fun <D> deserialize(deserializer: D): Result<Double>
-        where D : Deserializer =
-        deserializer.deserializeF64(F64Visitor)
+        where D : Deserializer = deserializer.deserializeF64(F64Visitor)
 }
 
 private const val I128_MAX_AS_U128: String = "170141183460469231731687303715884105727"
 
-private fun compareUnsignedDecimal(a: String, b: String): Int =
-    if (a.length != b.length) a.length - b.length else a.compareTo(b)
+private fun compareUnsignedDecimal(
+    a: String,
+    b: String,
+): Int = if (a.length != b.length) a.length - b.length else a.compareTo(b)
 
-private fun invalidOther(label: String, exp: Expected): Result<Nothing> =
-    Result.failure(Error.invalidValue(Unexpected.Other(label), exp))
+private fun invalidOther(
+    label: String,
+    exp: Expected,
+): Result<Nothing> = Result.failure(Error.invalidValue(Unexpected.Other(label), exp))
 
 private data object I128Visitor : Visitor<String> {
     override fun expecting(): String = "i128"
@@ -368,10 +368,9 @@ private data object I128Visitor : Visitor<String> {
         if (compareUnsignedDecimal(v, I128_MAX_AS_U128) <= 0) Result.success(v) else invalidOther("u128", this)
 }
 
-public data object I128Deserialize : Deserialize<String> {
+data object I128Deserialize : Deserialize<String> {
     override fun <D> deserialize(deserializer: D): Result<String>
-        where D : Deserializer =
-        deserializer.deserializeI128(I128Visitor)
+        where D : Deserializer = deserializer.deserializeI128(I128Visitor)
 }
 
 private data object U128Visitor : Visitor<String> {
@@ -387,29 +386,23 @@ private data object U128Visitor : Visitor<String> {
 
     override fun visitU64(v: ULong): Result<String> = Result.success(v.toString())
 
-    override fun visitI8(v: Byte): Result<String> =
-        if (v >= 0) Result.success(v.toLong().toString()) else invalidSigned(v.toLong(), this)
+    override fun visitI8(v: Byte): Result<String> = if (v >= 0) Result.success(v.toLong().toString()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI16(v: Short): Result<String> =
-        if (v >= 0) Result.success(v.toLong().toString()) else invalidSigned(v.toLong(), this)
+    override fun visitI16(v: Short): Result<String> = if (v >= 0) Result.success(v.toLong().toString()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI32(v: Int): Result<String> =
-        if (v >= 0) Result.success(v.toLong().toString()) else invalidSigned(v.toLong(), this)
+    override fun visitI32(v: Int): Result<String> = if (v >= 0) Result.success(v.toLong().toString()) else invalidSigned(v.toLong(), this)
 
-    override fun visitI64(v: Long): Result<String> =
-        if (v >= 0) Result.success(v.toString()) else invalidSigned(v, this)
+    override fun visitI64(v: Long): Result<String> = if (v >= 0) Result.success(v.toString()) else invalidSigned(v, this)
 
-    override fun visitI128(v: String): Result<String> =
-        if (!v.startsWith('-')) Result.success(v) else invalidOther("i128", this)
+    override fun visitI128(v: String): Result<String> = if (!v.startsWith('-')) Result.success(v) else invalidOther("i128", this)
 }
 
-public data object U128Deserialize : Deserialize<String> {
+data object U128Deserialize : Deserialize<String> {
     override fun <D> deserialize(deserializer: D): Result<String>
-        where D : Deserializer =
-        deserializer.deserializeU128(U128Visitor)
+        where D : Deserializer = deserializer.deserializeU128(U128Visitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private data object CharVisitor : Visitor<Char> {
     override fun expecting(): String = "a character"
@@ -420,13 +413,12 @@ private data object CharVisitor : Visitor<Char> {
         if (v.length == 1) Result.success(v[0]) else Result.failure(Error.invalidValue(Unexpected.Str(v), this))
 }
 
-public data object CharDeserialize : Deserialize<Char> {
+data object CharDeserialize : Deserialize<Char> {
     override fun <D> deserialize(deserializer: D): Result<Char>
-        where D : Deserializer =
-        deserializer.deserializeChar(CharVisitor)
+        where D : Deserializer = deserializer.deserializeChar(CharVisitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private data object StringVisitor : Visitor<String> {
     override fun expecting(): String = "a string"
@@ -442,17 +434,19 @@ private data object StringVisitor : Visitor<String> {
     override fun visitByteBuf(v: ByteArray): Result<String> = visitBytes(v)
 }
 
-public data object StringDeserialize : Deserialize<String> {
+data object StringDeserialize : Deserialize<String> {
     override fun <D> deserialize(deserializer: D): Result<String>
         where D : Deserializer =
         deserializer.deserializeString(StringVisitor)
 
-    override fun <D> deserializeInPlace(deserializer: D, place: (String) -> Unit): Result<Unit>
-        where D : Deserializer =
-        deserialize(deserializer).map { place(it) }
+    override fun <D> deserializeInPlace(
+        deserializer: D,
+        place: (String) -> Unit,
+    ): Result<Unit>
+        where D : Deserializer = deserialize(deserializer).map { place(it) }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private data object StrVisitor : Visitor<String> {
     override fun expecting(): String = "a borrowed string"
@@ -464,13 +458,12 @@ private data object StrVisitor : Visitor<String> {
             .recoverCatching { throw Error.invalidValue(Unexpected.Bytes(v), this) }
 }
 
-public data object BorrowedStrDeserialize : Deserialize<String> {
+data object BorrowedStrDeserialize : Deserialize<String> {
     override fun <D> deserialize(deserializer: D): Result<String>
-        where D : Deserializer =
-        deserializer.deserializeStr(StrVisitor)
+        where D : Deserializer = deserializer.deserializeStr(StrVisitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private data object BytesVisitor : Visitor<ByteArray> {
     override fun expecting(): String = "a borrowed byte array"
@@ -480,15 +473,15 @@ private data object BytesVisitor : Visitor<ByteArray> {
     override fun visitBorrowedStr(v: String): Result<ByteArray> = Result.success(v.encodeToByteArray())
 }
 
-public data object BorrowedBytesDeserialize : Deserialize<ByteArray> {
+data object BorrowedBytesDeserialize : Deserialize<ByteArray> {
     override fun <D> deserialize(deserializer: D): Result<ByteArray>
         where D : Deserializer =
         deserializer.deserializeBytes(BytesVisitor)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <T> nullableDeserialize(valueDeserialize: Deserialize<T>): Deserialize<T?> =
+fun <T> nullableDeserialize(valueDeserialize: Deserialize<T>): Deserialize<T?> =
     object : Deserialize<T?> {
         override fun <D> deserialize(deserializer: D): Result<T?>
             where D : Deserializer =
@@ -504,24 +497,25 @@ public fun <T> nullableDeserialize(valueDeserialize: Deserialize<T>): Deserializ
                         where D2 : Deserializer =
                         valueDeserialize.deserialize(deserializer).map { it }
 
-                    override fun <D2> privateVisitUntaggedOption(deserializer: D2): Result<T?>
+                    override fun <D2> privateVisitUntaggedOption(
+                        deserializer: D2,
+                    ): Result<T?>
                         where D2 : Deserializer =
                         Result.success(valueDeserialize.deserialize(deserializer).getOrNull())
                 },
             )
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private class SeedFromDeserialize<T>(
     private val deserialize: Deserialize<T>,
 ) : DeserializeSeed<T> {
     override fun <D> deserialize(deserializer: D): Result<T>
-        where D : Deserializer =
-        deserialize.deserialize(deserializer)
+        where D : Deserializer = deserialize.deserialize(deserializer)
 }
 
-public fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<MutableList<T>> =
+fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<MutableList<T>> =
     object : Deserialize<MutableList<T>> {
         override fun <D> deserialize(deserializer: D): Result<MutableList<T>>
             where D : Deserializer =
@@ -529,14 +523,14 @@ public fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deser
                 object : Visitor<MutableList<T>> {
                     override fun expecting(): String = "a sequence"
 
-                    override fun <A> visitSeq(seq: A): Result<MutableList<T>>
+                    override fun <A> visitSeq(access: A): Result<MutableList<T>>
                         where A : SeqAccess =
                         runCatching {
-                            val hint = seq.sizeHint() ?: 0
+                            val hint = access.sizeHint() ?: 0
                             val values = ArrayList<T>(hint)
                             val seed = SeedFromDeserialize(elementDeserialize)
                             while (true) {
-                                val next = seq.nextElementSeed(seed).getOrThrow() ?: break
+                                val next = access.nextElementSeed(seed).getOrThrow() ?: break
                                 values.add(next)
                             }
                             values
@@ -545,9 +539,9 @@ public fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deser
             )
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <K, V> mutableMapDeserialize(
+fun <K, V> mutableMapDeserialize(
     keyDeserialize: Deserialize<K>,
     valueDeserialize: Deserialize<V>,
 ): Deserialize<MutableMap<K, V>> =
@@ -558,15 +552,15 @@ public fun <K, V> mutableMapDeserialize(
                 object : Visitor<MutableMap<K, V>> {
                     override fun expecting(): String = "a map"
 
-                    override fun <A> visitMap(map: A): Result<MutableMap<K, V>>
+                    override fun <A> visitMap(access: A): Result<MutableMap<K, V>>
                         where A : MapAccess =
                         runCatching {
-                            val hint = map.sizeHint() ?: 0
+                            val hint = access.sizeHint() ?: 0
                             val values = LinkedHashMap<K, V>(hint)
                             val keySeed = SeedFromDeserialize(keyDeserialize)
                             val valueSeed = SeedFromDeserialize(valueDeserialize)
                             while (true) {
-                                val entry = map.nextEntrySeed(keySeed, valueSeed).getOrThrow() ?: break
+                                val entry = access.nextEntrySeed(keySeed, valueSeed).getOrThrow() ?: break
                                 values[entry.first] = entry.second
                             }
                             values
@@ -575,9 +569,9 @@ public fun <K, V> mutableMapDeserialize(
             )
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <T0, T1> pairDeserialize(
+fun <T0, T1> pairDeserialize(
     firstDeserialize: Deserialize<T0>,
     secondDeserialize: Deserialize<T1>,
 ): Deserialize<Pair<T0, T1>> =
@@ -589,20 +583,22 @@ public fun <T0, T1> pairDeserialize(
                 object : Visitor<Pair<T0, T1>> {
                     override fun expecting(): String = "a tuple of size 2"
 
-                    override fun <A> visitSeq(seq: A): Result<Pair<T0, T1>>
+                    override fun <A> visitSeq(access: A): Result<Pair<T0, T1>>
                         where A : SeqAccess =
                         runCatching {
-                            val first = seq.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
-                                ?: throw Error.invalidLength(0, this)
-                            val second = seq.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
-                                ?: throw Error.invalidLength(1, this)
+                            val first =
+                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
+                                    ?: throw Error.invalidLength(0, this)
+                            val second =
+                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
+                                    ?: throw Error.invalidLength(1, this)
                             first to second
                         }
                 },
             )
     }
 
-public fun <T0, T1, T2> tripleDeserialize(
+fun <T0, T1, T2> tripleDeserialize(
     firstDeserialize: Deserialize<T0>,
     secondDeserialize: Deserialize<T1>,
     thirdDeserialize: Deserialize<T2>,
@@ -615,24 +611,27 @@ public fun <T0, T1, T2> tripleDeserialize(
                 object : Visitor<Triple<T0, T1, T2>> {
                     override fun expecting(): String = "a tuple of size 3"
 
-                    override fun <A> visitSeq(seq: A): Result<Triple<T0, T1, T2>>
+                    override fun <A> visitSeq(access: A): Result<Triple<T0, T1, T2>>
                         where A : SeqAccess =
                         runCatching {
-                            val first = seq.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
-                                ?: throw Error.invalidLength(0, this)
-                            val second = seq.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
-                                ?: throw Error.invalidLength(1, this)
-                            val third = seq.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow()
-                                ?: throw Error.invalidLength(2, this)
+                            val first =
+                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
+                                    ?: throw Error.invalidLength(0, this)
+                            val second =
+                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
+                                    ?: throw Error.invalidLength(1, this)
+                            val third =
+                                access.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow()
+                                    ?: throw Error.invalidLength(2, this)
                             Triple(first, second, third)
                         }
                 },
             )
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public data object DurationDeserialize : Deserialize<Duration> {
+data object DurationDeserialize : Deserialize<Duration> {
     override fun <D> deserialize(deserializer: D): Result<Duration>
         where D : Deserializer =
         deserializer.deserializeStruct(
@@ -641,37 +640,40 @@ public data object DurationDeserialize : Deserialize<Duration> {
             object : Visitor<Duration> {
                 override fun expecting(): String = "struct Duration"
 
-                override fun <A> visitSeq(seq: A): Result<Duration>
+                override fun <A> visitSeq(access: A): Result<Duration>
                     where A : SeqAccess =
                     runCatching {
-                        val secs = seq.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
-                            ?: throw Error.invalidLength(0, this)
-                        val nanos = seq.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
-                            ?: throw Error.invalidLength(1, this)
+                        val secs =
+                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                                ?: throw Error.invalidLength(0, this)
+                        val nanos =
+                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                                ?: throw Error.invalidLength(1, this)
                         secs.toLong().seconds + nanos.toLong().nanoseconds
                     }
 
-                override fun <A> visitMap(map: A): Result<Duration>
+                override fun <A> visitMap(access: A): Result<Duration>
                     where A : MapAccess =
                     runCatching {
                         var secs: ULong? = null
                         var nanos: UInt? = null
-                        val fieldSeed = SeedFromDeserialize(
-                            fieldIdentifierDeserialize(
-                                expectingMessage = "`secs` or `nanos`",
-                                fields = listOf("secs", "nanos"),
-                            ),
-                        )
+                        val fieldSeed =
+                            SeedFromDeserialize(
+                                fieldIdentifierDeserialize(
+                                    expectingMessage = "`secs` or `nanos`",
+                                    fields = listOf("secs", "nanos"),
+                                ),
+                            )
                         while (true) {
-                            val key = map.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                            val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
                             when (key) {
                                 "secs" -> {
                                     if (secs != null) throw Error.duplicateField("secs")
-                                    secs = map.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                                    secs = access.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
                                 }
                                 "nanos" -> {
                                     if (nanos != null) throw Error.duplicateField("nanos")
-                                    nanos = map.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                                    nanos = access.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 }
                                 else -> throw Error.unknownField(key, listOf("secs", "nanos"))
                             }
@@ -684,9 +686,9 @@ public data object DurationDeserialize : Deserialize<Duration> {
         )
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public data object SystemTimeDeserialize : Deserialize<Instant> {
+data object SystemTimeDeserialize : Deserialize<Instant> {
     override fun <D> deserialize(deserializer: D): Result<Instant>
         where D : Deserializer =
         deserializer.deserializeStruct(
@@ -695,37 +697,40 @@ public data object SystemTimeDeserialize : Deserialize<Instant> {
             object : Visitor<Instant> {
                 override fun expecting(): String = "struct SystemTime"
 
-                override fun <A> visitSeq(seq: A): Result<Instant>
+                override fun <A> visitSeq(access: A): Result<Instant>
                     where A : SeqAccess =
                     runCatching {
-                        val secs = seq.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
-                            ?: throw Error.invalidLength(0, this)
-                        val nanos = seq.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
-                            ?: throw Error.invalidLength(1, this)
+                        val secs =
+                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                                ?: throw Error.invalidLength(0, this)
+                        val nanos =
+                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                                ?: throw Error.invalidLength(1, this)
                         Instant.fromEpochSeconds(secs.toLong(), nanos.toInt())
                     }
 
-                override fun <A> visitMap(map: A): Result<Instant>
+                override fun <A> visitMap(access: A): Result<Instant>
                     where A : MapAccess =
                     runCatching {
                         var secs: ULong? = null
                         var nanos: UInt? = null
-                        val fieldSeed = SeedFromDeserialize(
-                            fieldIdentifierDeserialize(
-                                expectingMessage = "`secs_since_epoch` or `nanos_since_epoch`",
-                                fields = listOf("secs_since_epoch", "nanos_since_epoch"),
-                            ),
-                        )
+                        val fieldSeed =
+                            SeedFromDeserialize(
+                                fieldIdentifierDeserialize(
+                                    expectingMessage = "`secs_since_epoch` or `nanos_since_epoch`",
+                                    fields = listOf("secs_since_epoch", "nanos_since_epoch"),
+                                ),
+                            )
                         while (true) {
-                            val key = map.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                            val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
                             when (key) {
                                 "secs_since_epoch" -> {
                                     if (secs != null) throw Error.duplicateField("secs_since_epoch")
-                                    secs = map.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
+                                    secs = access.nextValueSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
                                 }
                                 "nanos_since_epoch" -> {
                                     if (nanos != null) throw Error.duplicateField("nanos_since_epoch")
-                                    nanos = map.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
+                                    nanos = access.nextValueSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 }
                                 else -> throw Error.unknownField(
                                     key,
@@ -741,7 +746,7 @@ public data object SystemTimeDeserialize : Deserialize<Instant> {
         )
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private fun fieldIdentifierDeserialize(
     expectingMessage: String,

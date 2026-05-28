@@ -3,12 +3,12 @@ package io.github.kotlinmania.serde.serdederive.src.internals
 
 import io.github.kotlinmania.syn.SynType
 
-public enum class Derive {
+enum class Derive {
     Serialize,
     Deserialize,
 }
 
-public tailrec fun ungroup(ty: SynType): SynType =
+tailrec fun ungroup(ty: SynType): SynType =
     when (ty) {
         is SynType.Group -> ungroup(ty.elem)
         else -> ty

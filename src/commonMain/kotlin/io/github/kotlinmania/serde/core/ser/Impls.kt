@@ -5,92 +5,77 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E> Boolean.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeBool(this)
+fun <Ok, E> Boolean.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeBool(this)
 
-public fun <Ok, E> Byte.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeI8(this)
+fun <Ok, E> Byte.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeI8(this)
 
-public fun <Ok, E> Short.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeI16(this)
+fun <Ok, E> Short.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeI16(this)
 
-public fun <Ok, E> Int.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeI32(this)
+fun <Ok, E> Int.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeI32(this)
 
-public fun <Ok, E> Long.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeI64(this)
+fun <Ok, E> Long.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeI64(this)
 
-public fun <Ok, E> UByte.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeU8(this)
+fun <Ok, E> UByte.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeU8(this)
 
-public fun <Ok, E> UShort.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeU16(this)
+fun <Ok, E> UShort.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeU16(this)
 
-public fun <Ok, E> UInt.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeU32(this)
+fun <Ok, E> UInt.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeU32(this)
 
-public fun <Ok, E> ULong.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeU64(this)
+fun <Ok, E> ULong.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeU64(this)
 
-public fun <Ok, E> Float.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeF32(this)
+fun <Ok, E> Float.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeF32(this)
 
-public fun <Ok, E> Double.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeF64(this)
+fun <Ok, E> Double.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeF64(this)
 
-public fun <Ok, E> Char.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeChar(this)
+fun <Ok, E> Char.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeChar(this)
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E> String.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeStr(this)
+fun <Ok, E> String.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeStr(this)
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E> ByteArray.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeBytes(this)
+fun <Ok, E> ByteArray.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeBytes(this)
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E> Unit.serialize(serializer: Serializer<Ok, E>): Result<Ok>
-    where E : Error =
-    serializer.serializeUnit()
+fun <Ok, E> Unit.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    where E : Error = serializer.serializeUnit()
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error,
           T : Serialize =
     if (this != null) serializer.serializeSome(this) else serializer.serializeNone()
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public data object PhantomData : Serialize {
+data object PhantomData : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
         where E : Error =
         serializer.serializeUnitStruct("PhantomData")
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error,
           T : Serialize =
     runCatching {
@@ -101,22 +86,26 @@ public fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<
         tuple.end().getOrThrow()
     }
 
-public fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error,
           T : Serialize =
     serializer.collectSeq(this)
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E, K, V> Map<K, V>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, K, V> Map<K, V>.serialize(
+    serializer: Serializer<Ok, E>,
+): Result<Ok>
     where E : Error,
           K : Serialize,
           V : Serialize =
     serializer.collectMap(this.entries.asIterable().map { it.key to it.value })
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(
+    serializer: Serializer<Ok, E>,
+): Result<Ok>
     where E : Error,
           T0 : Serialize,
           T1 : Serialize =
@@ -127,7 +116,9 @@ public fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(serializer: Serializer<Ok, E>)
         tuple.end().getOrThrow()
     }
 
-public fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(
+    serializer: Serializer<Ok, E>,
+): Result<Ok>
     where E : Error,
           T0 : Serialize,
           T1 : Serialize,
@@ -140,9 +131,9 @@ public fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(serializer: Serializ
         tuple.end().getOrThrow()
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error =
     runCatching {
         if (this < Duration.ZERO || this == Duration.INFINITE) {
@@ -156,9 +147,9 @@ public fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): Result<Ok>
         state.end().getOrThrow()
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public fun <Ok, E> Instant.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Instant.serialize(serializer: Serializer<Ok, E>): Result<Ok>
     where E : Error =
     runCatching {
         if (epochSeconds < 0) {
@@ -170,7 +161,7 @@ public fun <Ok, E> Instant.serialize(serializer: Serializer<Ok, E>): Result<Ok>
         state.end().getOrThrow()
     }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 private val DEC_DIGITS_LUT: ByteArray =
     (
@@ -181,7 +172,10 @@ private val DEC_DIGITS_LUT: ByteArray =
             "8081828384858687888990919293949596979899"
     ).encodeToByteArray()
 
-internal fun formatU8(n: UByte, out: ByteArray): Int {
+internal fun formatU8(
+    n: UByte,
+    out: ByteArray,
+): Int {
     var value = n.toInt()
     return if (value >= 100) {
         val d1 = ((value % 100) shl 1)
@@ -201,44 +195,39 @@ internal fun formatU8(n: UByte, out: ByteArray): Int {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-public data class Wrapping<T : Serialize>(
-    public val value: T,
+data class Wrapping<T : Serialize>(
+    val value: T,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        value.serialize(serializer)
+        where E : Error = value.serialize(serializer)
 }
 
-public data class Saturating<T : Serialize>(
-    public val value: T,
+data class Saturating<T : Serialize>(
+    val value: T,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        value.serialize(serializer)
+        where E : Error = value.serialize(serializer)
 }
 
-public data class Reverse<T : Serialize>(
-    public val value: T,
+data class Reverse<T : Serialize>(
+    val value: T,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        value.serialize(serializer)
+        where E : Error = value.serialize(serializer)
 }
 
 private data class ULongSerialize(
     private val value: ULong,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        serializer.serializeU64(value)
+        where E : Error = serializer.serializeU64(value)
 }
 
 private data class UIntSerialize(
     private val value: UInt,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        serializer.serializeU32(value)
+        where E : Error = serializer.serializeU32(value)
 }

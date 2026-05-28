@@ -12,13 +12,12 @@ internal class Buf private constructor(
         fun new(bytes: ByteArray): Buf = Buf(bytes)
     }
 
-    fun asStr(): String {
-        return bytes.decodeToString(
+    fun asStr(): String =
+        bytes.decodeToString(
             startIndex = 0,
             endIndex = offset,
             throwOnInvalidSequence = false,
         )
-    }
 
     fun writeStr(s: String): Result<Unit> {
         val stringBytes = s.encodeToByteArray()

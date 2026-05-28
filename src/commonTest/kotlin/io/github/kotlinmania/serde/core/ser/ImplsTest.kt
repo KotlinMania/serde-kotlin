@@ -59,10 +59,11 @@ public class ImplsTest {
 
     @Test
     public fun arraysSerializeAsTuples() {
-        val serialized = arrayOf(
-            ImplsLiteralSerialize("a"),
-            ImplsLiteralSerialize("b"),
-        ).serialize(TupleRecordingSerializer()).getOrThrow()
+        val serialized =
+            arrayOf(
+                ImplsLiteralSerialize("a"),
+                ImplsLiteralSerialize("b"),
+            ).serialize(TupleRecordingSerializer()).getOrThrow()
 
         assertEquals("Tuple2(a,b)", serialized)
     }
@@ -71,37 +72,58 @@ public class ImplsTest {
 private data object TestError : Error
 
 private open class FailingSerializer : Serializer<String, TestError> {
-    protected fun <T> unexpected(): Result<T> =
-        Result.failure(AssertionError("unexpected serializer method"))
+    protected fun <T> unexpected(): Result<T> = Result.failure(AssertionError("unexpected serializer method"))
 
     override fun serializeBool(v: Boolean): Result<String> = unexpected()
+
     override fun serializeI8(v: Byte): Result<String> = unexpected()
+
     override fun serializeI16(v: Short): Result<String> = unexpected()
+
     override fun serializeI32(v: Int): Result<String> = unexpected()
+
     override fun serializeI64(v: Long): Result<String> = unexpected()
-    override fun serializeI128(v: String): Result<String> = unexpected()
+
+    override fun serializeI128(value: String): Result<String> = unexpected()
+
     override fun serializeU8(v: UByte): Result<String> = unexpected()
+
     override fun serializeU16(v: UShort): Result<String> = unexpected()
+
     override fun serializeU32(v: UInt): Result<String> = unexpected()
+
     override fun serializeU64(v: ULong): Result<String> = unexpected()
+
     override fun serializeF32(v: Float): Result<String> = unexpected()
+
     override fun serializeF64(v: Double): Result<String> = unexpected()
+
     override fun serializeChar(v: Char): Result<String> = unexpected()
+
     override fun serializeStr(v: String): Result<String> = unexpected()
+
     override fun serializeBytes(v: ByteArray): Result<String> = unexpected()
+
     override fun serializeNone(): Result<String> = unexpected()
 
     override fun <T> serializeSome(value: T): Result<String>
-        where T : Serialize =
-        unexpected()
+        where T : Serialize = unexpected()
 
     override fun serializeUnit(): Result<String> = unexpected()
-    override fun serializeUnitStruct(name: String): Result<String> = unexpected()
-    override fun serializeUnitVariant(name: String, variantIndex: UInt, variant: String): Result<String> = unexpected()
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<String>
-        where T : Serialize =
-        unexpected()
+    override fun serializeUnitStruct(name: String): Result<String> = unexpected()
+
+    override fun serializeUnitVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+    ): Result<String> = unexpected()
+
+    override fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<String>
+        where T : Serialize = unexpected()
 
     override fun <T> serializeNewtypeVariant(
         name: String,
@@ -109,12 +131,16 @@ private open class FailingSerializer : Serializer<String, TestError> {
         variant: String,
         value: T,
     ): Result<String>
-        where T : Serialize =
-        unexpected()
+        where T : Serialize = unexpected()
 
     override fun serializeSeq(len: Int?): Result<SerializeSeq<String, TestError>> = unexpected()
+
     override fun serializeTuple(len: Int): Result<SerializeTuple<String, TestError>> = unexpected()
-    override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<String, TestError>> = unexpected()
+
+    override fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<String, TestError>> = unexpected()
 
     override fun serializeTupleVariant(
         name: String,
@@ -124,7 +150,11 @@ private open class FailingSerializer : Serializer<String, TestError> {
     ): Result<SerializeTupleVariant<String, TestError>> = unexpected()
 
     override fun serializeMap(len: Int?): Result<SerializeMap<String, TestError>> = unexpected()
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<String, TestError>> = unexpected()
+
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<String, TestError>> = unexpected()
 
     override fun serializeStructVariant(
         name: String,
@@ -135,19 +165,22 @@ private open class FailingSerializer : Serializer<String, TestError> {
 }
 
 private class StructRecordingSerializer : FailingSerializer() {
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<String, TestError>> =
-        Result.success(RecordingStruct(name, len))
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<String, TestError>> = Result.success(RecordingStruct(name, len))
 }
 
 private class FieldRecordingSerializer : FailingSerializer() {
     override fun serializeStr(v: String): Result<String> = Result.success(v)
+
     override fun serializeU32(v: UInt): Result<String> = Result.success(v.toString())
+
     override fun serializeU64(v: ULong): Result<String> = Result.success(v.toString())
 }
 
 private class TupleRecordingSerializer : FailingSerializer() {
-    override fun serializeTuple(len: Int): Result<SerializeTuple<String, TestError>> =
-        Result.success(RecordingTuple(len))
+    override fun serializeTuple(len: Int): Result<SerializeTuple<String, TestError>> = Result.success(RecordingTuple(len))
 }
 
 private class RecordingTuple(
@@ -164,8 +197,7 @@ private class RecordingTuple(
             elements += value.serialize(FieldRecordingSerializer()).getOrThrow()
         }
 
-    override fun end(): Result<String> =
-        Result.success(elements.joinToString(separator = ",", prefix = "Tuple$len(", postfix = ")"))
+    override fun end(): Result<String> = Result.success(elements.joinToString(separator = ",", prefix = "Tuple$len(", postfix = ")"))
 }
 
 private class RecordingStruct(
@@ -174,7 +206,10 @@ private class RecordingStruct(
 ) : SerializeStruct<String, TestError> {
     private val fields = mutableListOf<Pair<String, String>>()
 
-    override fun <T> serializeField(key: String, value: T): Result<Unit>
+    override fun <T> serializeField(
+        key: String,
+        value: T,
+    ): Result<Unit>
         where T : Serialize =
         runCatching {
             if (fields.size == len) {
@@ -197,6 +232,5 @@ private data class ImplsLiteralSerialize(
     private val text: String,
 ) : Serialize {
     override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
-        where E : Error =
-        serializer.serializeStr(text)
+        where E : Error = serializer.serializeStr(text)
 }

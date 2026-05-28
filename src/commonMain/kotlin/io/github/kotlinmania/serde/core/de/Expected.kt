@@ -10,9 +10,9 @@ package io.github.kotlinmania.serde.core.de
  * "an integer between 0 and 64". The message should not be capitalized and should not end with a
  * period.
  */
-public fun interface Expected {
+fun interface Expected {
     /**
      * Format an explanation of what data was being expected.
      */
-    public fun expecting(): String
+    fun expecting(): String
 }

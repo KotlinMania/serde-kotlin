@@ -4,9 +4,9 @@ package io.github.kotlinmania.serde.core.de
 /**
  * Converts an existing value into a `Deserializer` from which other values can be deserialized.
  */
-public interface IntoDeserializer {
+interface IntoDeserializer {
     /**
      * Convert this value into a deserializer.
      */
-    public fun intoDeserializer(): Deserializer
+    fun intoDeserializer(): Deserializer
 }

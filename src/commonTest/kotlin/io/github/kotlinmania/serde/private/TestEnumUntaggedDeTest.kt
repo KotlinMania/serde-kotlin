@@ -1,11 +1,11 @@
 // port-lint: source test_suite/tests/test_enum_untagged.rs
 package io.github.kotlinmania.serde.`private`
 
-import io.github.kotlinmania.serde.core.`private`.Content
 import io.github.kotlinmania.serde.core.de.DeserializeSeed
 import io.github.kotlinmania.serde.core.de.Deserializer
 import io.github.kotlinmania.serde.core.de.EnumAccess
 import io.github.kotlinmania.serde.core.de.Visitor
+import io.github.kotlinmania.serde.core.`private`.Content
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -87,7 +87,9 @@ private data object StringVisitor : Visitor<String> {
     override fun expecting(): String = "a string"
 
     override fun visitStr(v: String): Result<String> = Result.success(v)
+
     override fun visitBorrowedStr(v: String): Result<String> = Result.success(v)
+
     override fun visitString(v: String): Result<String> = Result.success(v)
 }
 
@@ -101,6 +103,7 @@ private data object NullableUIntVisitor : Visitor<UInt?> {
     override fun expecting(): String = "an optional `UInt` value"
 
     override fun visitNone(): Result<UInt?> = Result.success(null)
+
     override fun visitUnit(): Result<UInt?> = Result.success(null)
 
     override fun <D> visitSome(deserializer: D): Result<UInt?>
@@ -119,19 +122,21 @@ private data object NewtypeUIntVisitor : Visitor<UInt> {
 private data object EnumNewtypeVisitor : Visitor<Pair<String, UInt>> {
     override fun expecting(): String = "an enum"
 
-    override fun <A> visitEnum(data: A): Result<Pair<String, UInt>>
+    override fun <A> visitEnum(access: A): Result<Pair<String, UInt>>
         where A : EnumAccess =
         runCatching {
             val (variant, variantAccess) =
-                data.variantSeed(seed { deserializer ->
-                    deserializer.deserializeString(StringVisitor)
-                }).getOrThrow()
+                access.variantSeed(
+                        seed { deserializer ->
+                            deserializer.deserializeString(StringVisitor)
+                        },
+                    ).getOrThrow()
             val value =
                 variantAccess.newtypeVariantSeed(
-                    seed { deserializer ->
-                        deserializer.deserializeU32(UIntVisitor)
-                    },
-                ).getOrThrow()
+                        seed { deserializer ->
+                            deserializer.deserializeU32(UIntVisitor)
+                        },
+                    ).getOrThrow()
             variant to value
         }
 }
@@ -139,7 +144,5 @@ private data object EnumNewtypeVisitor : Visitor<Pair<String, UInt>> {
 private fun <T> seed(block: (Deserializer) -> Result<T>): DeserializeSeed<T> =
     object : DeserializeSeed<T> {
         override fun <D> deserialize(deserializer: D): Result<T>
-            where D : Deserializer =
-            block(deserializer)
+            where D : Deserializer = block(deserializer)
     }
-

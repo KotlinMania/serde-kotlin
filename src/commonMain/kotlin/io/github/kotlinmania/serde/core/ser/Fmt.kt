@@ -1,10 +1,8 @@
 // port-lint: source serde_core/src/ser/fmt.rs
 package io.github.kotlinmania.serde.core.ser
 
-public data object FmtError : Error {
-    public fun custom(msg: Any?): FmtError {
-        return this
-    }
+data object FmtError : Error {
+    fun custom(msg: String): FmtError = this
 }
 
 /**
@@ -32,84 +30,61 @@ public data object FmtError : Error {
  *     serialize(FormatterSerializer(formatter))
  * ```
  */
-public class FormatterSerializer(
+class FormatterSerializer(
     private val formatter: Appendable,
 ) : Serializer<Unit, FmtError> {
-    override fun serializeBool(v: Boolean): Result<Unit> =
-        display(v)
+    override fun serializeBool(v: Boolean): Result<Unit> = display(v.toString())
 
-    override fun serializeI8(v: Byte): Result<Unit> =
-        display(v)
+    override fun serializeI8(v: Byte): Result<Unit> = display(v.toString())
 
-    override fun serializeI16(v: Short): Result<Unit> =
-        display(v)
+    override fun serializeI16(v: Short): Result<Unit> = display(v.toString())
 
-    override fun serializeI32(v: Int): Result<Unit> =
-        display(v)
+    override fun serializeI32(v: Int): Result<Unit> = display(v.toString())
 
-    override fun serializeI64(v: Long): Result<Unit> =
-        display(v)
+    override fun serializeI64(v: Long): Result<Unit> = display(v.toString())
 
-    override fun serializeI128(v: String): Result<Unit> =
-        display(v)
+    override fun serializeI128(value: String): Result<Unit> = display(value)
 
-    override fun serializeU8(v: UByte): Result<Unit> =
-        display(v)
+    override fun serializeU8(v: UByte): Result<Unit> = display(v.toString())
 
-    override fun serializeU16(v: UShort): Result<Unit> =
-        display(v)
+    override fun serializeU16(v: UShort): Result<Unit> = display(v.toString())
 
-    override fun serializeU32(v: UInt): Result<Unit> =
-        display(v)
+    override fun serializeU32(v: UInt): Result<Unit> = display(v.toString())
 
-    override fun serializeU64(v: ULong): Result<Unit> =
-        display(v)
+    override fun serializeU64(v: ULong): Result<Unit> = display(v.toString())
 
-    override fun serializeU128(v: String): Result<Unit> =
-        display(v)
+    override fun serializeU128(value: String): Result<Unit> = display(value)
 
-    override fun serializeF32(v: Float): Result<Unit> =
-        display(rustDisplayFloat(v))
+    override fun serializeF32(v: Float): Result<Unit> = display(rustDisplayFloat(v))
 
-    override fun serializeF64(v: Double): Result<Unit> =
-        display(rustDisplayFloat(v))
+    override fun serializeF64(v: Double): Result<Unit> = display(rustDisplayFloat(v))
 
-    override fun serializeChar(v: Char): Result<Unit> =
-        display(v)
+    override fun serializeChar(v: Char): Result<Unit> = display(v.toString())
 
-    override fun serializeStr(v: String): Result<Unit> =
-        display(v)
+    override fun serializeStr(v: String): Result<Unit> = display(v)
 
-    override fun serializeUnitStruct(name: String): Result<Unit> =
-        display(name)
+    override fun serializeUnitStruct(name: String): Result<Unit> = display(name)
 
     override fun serializeUnitVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Unit> {
-        return display(variant)
-    }
+    ): Result<Unit> = display(variant)
 
-    override fun <T> serializeNewtypeStruct(name: String, value: T): Result<Unit>
-        where T : Serialize {
-        return value.serialize(this)
-    }
+    override fun <T> serializeNewtypeStruct(
+        name: String,
+        value: T,
+    ): Result<Unit>
+        where T : Serialize = value.serialize(this)
 
-    override fun serializeBytes(v: ByteArray): Result<Unit> {
-        return fmtError()
-    }
+    override fun serializeBytes(v: ByteArray): Result<Unit> = fmtError()
 
-    override fun serializeNone(): Result<Unit> =
-        fmtError()
+    override fun serializeNone(): Result<Unit> = fmtError()
 
     override fun <T> serializeSome(value: T): Result<Unit>
-        where T : Serialize {
-        return fmtError()
-    }
+        where T : Serialize = fmtError()
 
-    override fun serializeUnit(): Result<Unit> =
-        fmtError()
+    override fun serializeUnit(): Result<Unit> = fmtError()
 
     override fun <T> serializeNewtypeVariant(
         name: String,
@@ -117,60 +92,47 @@ public class FormatterSerializer(
         variant: String,
         value: T,
     ): Result<Unit>
-        where T : Serialize {
-        return fmtError()
-    }
+        where T : Serialize = fmtError()
 
-    override fun serializeSeq(len: Int?): Result<SerializeSeq<Unit, FmtError>> {
-        return fmtError()
-    }
+    override fun serializeSeq(len: Int?): Result<SerializeSeq<Unit, FmtError>> = fmtError()
 
-    override fun serializeTuple(len: Int): Result<SerializeTuple<Unit, FmtError>> {
-        return fmtError()
-    }
+    override fun serializeTuple(len: Int): Result<SerializeTuple<Unit, FmtError>> = fmtError()
 
-    override fun serializeTupleStruct(name: String, len: Int): Result<SerializeTupleStruct<Unit, FmtError>> {
-        return fmtError()
-    }
+    override fun serializeTupleStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeTupleStruct<Unit, FmtError>> = fmtError()
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Unit, FmtError>> {
-        return fmtError()
-    }
+    ): Result<SerializeTupleVariant<Unit, FmtError>> = fmtError()
 
-    override fun serializeMap(len: Int?): Result<SerializeMap<Unit, FmtError>> {
-        return fmtError()
-    }
+    override fun serializeMap(len: Int?): Result<SerializeMap<Unit, FmtError>> = fmtError()
 
-    override fun serializeStruct(name: String, len: Int): Result<SerializeStruct<Unit, FmtError>> {
-        return fmtError()
-    }
+    override fun serializeStruct(
+        name: String,
+        len: Int,
+    ): Result<SerializeStruct<Unit, FmtError>> = fmtError()
 
     override fun serializeStructVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Unit, FmtError>> {
-        return fmtError()
-    }
+    ): Result<SerializeStructVariant<Unit, FmtError>> = fmtError()
 
-    override fun collectStr(value: Any?): Result<Unit> =
-        display(value)
+    override fun collectStr(value: String): Result<Unit> = display(value)
 
-    private fun display(value: Any?): Result<Unit> =
+    private fun display(value: String): Result<Unit> =
         runCatching {
-            formatter.append(value.toString())
-            Unit
+            formatter.append(value)
         }
 }
 
-private fun <T> fmtError(): Result<T> =
-    Result.failure(SerdeSerializationException("formatting error"))
+private fun <T> fmtError(): Result<T> = Result.failure(SerdeSerializationException("formatting error"))
 
 private fun rustDisplayFloat(value: Float): String =
     when {
@@ -202,7 +164,10 @@ private fun rustDisplayDecimal(text: String): String {
     return expandScientificDecimal(mantissa, exponent)
 }
 
-private fun expandScientificDecimal(mantissa: String, exponent: Int): String {
+private fun expandScientificDecimal(
+    mantissa: String,
+    exponent: Int,
+): String {
     val negative = mantissa.startsWith("-")
     val unsignedMantissa = if (negative) mantissa.drop(1) else mantissa
     val pointIndex = unsignedMantissa.indexOf('.')
