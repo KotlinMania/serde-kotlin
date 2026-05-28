@@ -5,7 +5,7 @@ package io.github.kotlinmania.serde.core.de
  * A **data format** that can deserialize any data structure supported by Serde.
  *
  * The role of this interface is to define the deserialization half of the Serde data model, which
- * is a way to categorize every Rust data type into one of 29 possible types. Each method of the
+ * is a way to categorize every data type into one of 29 possible types. Each method of the
  * `Deserializer` interface corresponds to one of the types of the data model.
  */
 interface Deserializer {

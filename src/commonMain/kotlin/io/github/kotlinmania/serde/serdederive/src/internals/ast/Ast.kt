@@ -18,7 +18,7 @@ import io.github.kotlinmania.syn.Fields as SynFields
 import io.github.kotlinmania.syn.Variant as SynVariant
 
 /**
- * A Serde syntax tree, parsed from the Syn syntax tree and ready to generate Rust code.
+ * A Serde syntax tree, parsed from the Syn syntax tree and ready to generate output code.
  */
 
 /**

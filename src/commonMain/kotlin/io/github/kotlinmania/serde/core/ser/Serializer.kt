@@ -5,7 +5,7 @@ package io.github.kotlinmania.serde.core.ser
  * A **data format** that can serialize any data structure supported by Serde.
  *
  * The role of this interface is to define the serialization half of the Serde data model, which is
- * a way to categorize every Rust data structure into one of 29 possible types. Each method of the
+ * a way to categorize every data structure into one of 29 possible types. Each method of the
  * `Serializer` interface corresponds to one of the types of the data model.
  *
  * Implementations of `Serialize` map themselves into this data model by invoking exactly one of the

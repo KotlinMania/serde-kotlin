@@ -2,7 +2,7 @@
 package io.github.kotlinmania.serde.core
 
 /**
- * Serde is a framework for ***ser***ializing and ***de***serializing Rust data structures
+ * Serde is a framework for ***ser***ializing and ***de***serializing data structures
  * efficiently and generically.
  *
  * The Serde core crate contains Serde's trait definitions with **no support for `derive()`**.

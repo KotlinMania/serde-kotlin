@@ -4,7 +4,7 @@ package io.github.kotlinmania.serde
 /**
  * # Serde
  *
- * Serde is a framework for ***ser***ializing and ***de***serializing Rust data structures
+ * Serde is a framework for ***ser***ializing and ***de***serializing data structures
  * efficiently and generically.
  *
  * The Serde ecosystem consists of data structures that know how to serialize and deserialize
@@ -42,16 +42,16 @@ package io.github.kotlinmania.serde
  * - [URL] query strings, in the x-www-form-urlencoded format.
  * - [Starlark], the format used for describing build targets by the Bazel and Buck build systems.
  *   *(serialization only)*
- * - [Envy], a way to deserialize environment variables into Rust structs.
+ * - [Envy], a way to deserialize environment variables into data structures.
  *   *(deserialization only)*
- * - [Envy Store], a way to deserialize AWS Parameter Store parameters into Rust structs.
+ * - [Envy Store], a way to deserialize AWS Parameter Store parameters into data structures.
  *   *(deserialization only)*
  * - [S-expressions], the textual representation of code and data used by the Lisp language
  *   family.
  * - [D-Bus]'s binary wire format.
  * - [FlexBuffers], the schemaless cousin of Google's FlatBuffers zero-copy serialization format.
  * - [Bencode], a simple binary format used in the BitTorrent protocol.
- * - [Token streams], for processing Rust procedural macro input. *(deserialization only)*
+ * - [Token streams], for processing procedural macro input. *(deserialization only)*
  * - [DynamoDB Items], the format used by `rusoto_dynamodb` to transfer data to and from DynamoDB.
  * - [Hjson], a syntax extension to JSON designed around human reading and editing.
  *   *(deserialization only)*

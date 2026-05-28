@@ -781,7 +781,7 @@ class ContentDeserializer(
     ): Result<V> =
         when (content) {
             // As a special case, allow deserializing an untagged newtype variant containing a
-            // unit struct.
+            // unit-like data structure.
             //
             // This supports self-describing formats in which a unit-struct-like newtype variant may
             // be represented as an empty object or empty sequence when only the tag is present.
@@ -1898,7 +1898,7 @@ private class FlatMapAccess(
     override fun <K> nextKeySeed(seed: DeserializeSeed<K>): Result<K?> =
         runCatching {
             for (item in iter) {
-                // Items in the vector are nulled out when used by a struct.
+                // Items in the vector are nulled out when used by a data structure.
                 val entry = item ?: continue
                 // Do not take(), instead borrow this entry. The internally tagged
                 // enum does its own buffering so we can't tell whether this entry
