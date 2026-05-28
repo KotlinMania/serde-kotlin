@@ -1,26 +1,17 @@
 // port-lint: source serde/src/private/mod.rs
 package io.github.kotlinmania.serde.`private`
 
-// Tracking file for upstream `serde/src/private/mod.rs`.
+// Tracking file for upstream serde/src/private/mod.rs.
 //
-// Upstream module declarations:
-// `#[cfg(not(no_serde_derive))]`
-// `pub mod de;`
-// `#[cfg(not(no_serde_derive))]`
-// `pub mod ser;`
+// Upstream module declarations (translated from Rust cfg attributes):
+//   Module `de` is included when serde derive is enabled.
+//   Module `ser` is included when serde derive is enabled.
 //
-// Upstream re-export lines:
-// `pub use crate::lib::clone::Clone;`
-// `pub use crate::lib::convert::{From, Into, TryFrom};`
-// `pub use crate::lib::default::Default;`
-// `pub use crate::lib::fmt::{self, Formatter};`
-// `pub use crate::lib::marker::PhantomData;`
-// `pub use crate::lib::option::Option::{self, None, Some};`
-// `pub use crate::lib::ptr;`
-// `pub use crate::lib::result::Result::{self, Err, Ok};`
-// `pub use crate::serde_core_private::string::from_utf8_lossy;`
-// `#[cfg(any(feature = "alloc", feature = "std"))]`
-// `pub use crate::lib::{ToString, Vec};`
+// Upstream re-exports (translated from Rust use paths):
+//   Re-exports Clone, From, Into, TryFrom, Default, Formatter, PhantomData
+//   Re-exports Option, None, Some, Result, Err, Ok, ptr
+//   Re-exports fromUtf8Lossy from the serdeCore private module
+//   When alloc or std features are enabled: re-exports ToString and Vec
 //
 // Callers migrated:
 // (none)

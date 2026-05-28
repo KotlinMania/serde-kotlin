@@ -1004,7 +1004,7 @@ data class AdjacentlyTaggedEnumVariant(
         serializer.serializeUnitVariant(enumName, variantIndex, variantName)
 }
 
-// Error when Serialize for a non_exhaustive remote enum encounters a variant
+// Error when Serialize for a nonExhaustive remote enum encounters a variant
 // that is not recognized.
 data class CannotSerializeVariant<T>(
     val value: T,

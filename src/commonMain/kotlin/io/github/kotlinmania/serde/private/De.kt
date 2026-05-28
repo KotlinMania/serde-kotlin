@@ -1475,7 +1475,7 @@ private class VariantDeserializer(
 // //////////////////////////////////////////////////////////////////////////////
 
 // Like `IntoDeserializer` but also implemented for `ByteArray`. This is used for
-// the newtype fallthrough case of `field_identifier`.
+// the newtype fallthrough case of fieldIdentifier.
 //
 // Consider a field-identifier enum with a fallback string case, conceptually:
 //

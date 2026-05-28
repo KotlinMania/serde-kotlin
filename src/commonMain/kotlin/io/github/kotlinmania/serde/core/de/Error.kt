@@ -9,7 +9,7 @@ import io.github.kotlinmania.serde.SerdeError
  *
  * Every `Deserializer` declares an `Error` type that encompasses both general-purpose
  * deserialization errors as well as errors specific to the particular deserialization format. For
- * example the `Error` type of `serde_json` can represent errors like an invalid JSON escape
+ * example the `Error` type of a JSON library can represent errors like an invalid JSON escape
  * sequence or an unterminated string literal, in addition to the error cases that are part of this
  * interface.
  *
