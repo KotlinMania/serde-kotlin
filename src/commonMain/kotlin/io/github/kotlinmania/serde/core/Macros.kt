@@ -7,6 +7,7 @@ import io.github.kotlinmania.serde.core.de.Visitor
 // Super explicit first paragraph because this shows up at the top level and
 // trips up people who are just looking for basic Serialize / Deserialize
 // documentation.
+
 /**
  * Helper when implementing the `Deserializer` part of a new data format for Serde.
  *
@@ -22,7 +23,7 @@ import io.github.kotlinmania.serde.core.de.Visitor
  * Implement `deserializeAny` and inherit the rest of the `Deserializer` methods from this
  * interface.
  */
-public interface ForwardToDeserializeAnyDeserializer : Deserializer {
+interface ForwardToDeserializeAnyDeserializer : Deserializer {
     override fun <V> deserializeBool(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeI8(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
@@ -63,33 +64,42 @@ public interface ForwardToDeserializeAnyDeserializer : Deserializer {
 
     override fun <V> deserializeUnit(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
-    override fun <V> deserializeUnitStruct(name: String, visitor: Visitor<V>): Result<V> {
-        return deserializeAny(visitor)
-    }
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
 
-    override fun <V> deserializeNewtypeStruct(name: String, visitor: Visitor<V>): Result<V> {
-        return deserializeAny(visitor)
-    }
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeSeq(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
-    override fun <V> deserializeTuple(len: Int, visitor: Visitor<V>): Result<V> {
-        return deserializeAny(visitor)
-    }
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
 
-    override fun <V> deserializeTupleStruct(name: String, len: Int, visitor: Visitor<V>): Result<V> {
-        return deserializeAny(visitor)
-    }
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeMap(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 
-    override fun <V> deserializeStruct(name: String, fields: List<String>, visitor: Visitor<V>): Result<V> {
-        return deserializeAny(visitor)
-    }
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
 
-    override fun <V> deserializeEnum(name: String, variants: List<String>, visitor: Visitor<V>): Result<V> {
-        return deserializeAny(visitor)
-    }
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): Result<V> = deserializeAny(visitor)
 
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): Result<V> = deserializeAny(visitor)
 

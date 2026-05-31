@@ -5,59 +5,53 @@ import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.serde.serdederive.src.internals.Ctxt
 import io.github.kotlinmania.serde.serdederive.src.internals.Derive
+import io.github.kotlinmania.serde.serdederive.src.internals.check.check
+import io.github.kotlinmania.syn.*
+import io.github.kotlinmania.syn.token.Comma
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Container as AttrContainer
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Default as AttrDefault
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Field as AttrField
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Variant as AttrVariant
-import io.github.kotlinmania.serde.serdederive.src.internals.check.check
 import io.github.kotlinmania.syn.Data as SynData
-import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Field as SynField
 import io.github.kotlinmania.syn.Fields as SynFields
-import io.github.kotlinmania.syn.Generics
-import io.github.kotlinmania.syn.Index
-import io.github.kotlinmania.syn.Member
-import io.github.kotlinmania.syn.Punctuated
-import io.github.kotlinmania.syn.Type
 import io.github.kotlinmania.syn.Variant as SynVariant
-import io.github.kotlinmania.syn.copy
-import io.github.kotlinmania.syn.token.Comma
 
 /**
- * A Serde syntax tree, parsed from the Syn syntax tree and ready to generate Rust code.
+ * A Serde syntax tree, parsed from the Syn syntax tree and ready to generate output code.
  */
 
 /**
  * A source data structure annotated with derive Serialize and/or derive Deserialize,
  * parsed into an internal representation.
  */
-public class Container(
+class Container(
     /**
      * The struct or enum name, without generics.
      */
-    public val ident: Ident,
+    val ident: Ident,
     /**
      * Attributes on the structure, parsed for Serde.
      */
-    public val attrs: AttrContainer,
+    val attrs: AttrContainer,
     /**
      * The contents of the struct or enum.
      */
-    public var data: Data,
+    var data: Data,
     /**
      * Any generics on the struct or enum.
      */
-    public val generics: Generics,
+    val generics: Generics,
     /**
      * Original input.
      */
-    public val original: DeriveInput,
+    val original: DeriveInput,
 ) {
-    public companion object {
+    companion object {
         /**
          * Convert the raw Syn syntax tree into a parsed container object, collecting errors in `cx`.
          */
-        public fun fromAst(
+        fun fromAst(
             cx: Ctxt,
             item: DeriveInput,
             derive: Derive,
@@ -120,42 +114,47 @@ public class Container(
  *
  * Analogous to `syn.Data`.
  */
-public sealed class Data {
-    public data class Enum(public val variants: List<Variant>) : Data()
-    public data class Struct(public val style: Style, public val fields: List<Field>) : Data()
+sealed class Data {
+    data class Enum(
+        val variants: List<Variant>,
+    ) : Data()
 
-    public fun allFields(): Sequence<Field> =
+    data class Struct(
+        val style: Style,
+        val fields: List<Field>,
+    ) : Data()
+
+    fun allFields(): Sequence<Field> =
         when (this) {
             is Enum -> variants.asSequence().flatMap { variant -> variant.fields.asSequence() }
             is Struct -> fields.asSequence()
         }
 
-    public fun hasGetter(): Boolean =
-        allFields().any { field -> field.attrs.getter() != null }
+    fun hasGetter(): Boolean = allFields().any { field -> field.attrs.getter() != null }
 }
 
 /**
  * A variant of an enum.
  */
-public class Variant(
-    public val ident: Ident,
-    public val attrs: AttrVariant,
-    public val style: Style,
-    public val fields: List<Field>,
-    public val original: SynVariant,
+class Variant(
+    val ident: Ident,
+    val attrs: AttrVariant,
+    val style: Style,
+    val fields: List<Field>,
+    val original: SynVariant,
 )
 
 /**
  * A field of a struct.
  */
-public class Field(
-    public val member: Member,
-    public val attrs: AttrField,
-    public val ty: Type,
-    public val original: SynField,
+class Field(
+    val member: Member,
+    val attrs: AttrField,
+    val ty: SynType,
+    val original: SynField,
 )
 
-public enum class Style {
+enum class Style {
     /**
      * Named fields.
      */
@@ -272,6 +271,6 @@ private fun fieldsFromAst(
 
 private fun SynField.tySpan(): Span =
     when (val type = ty) {
-        is Type.Path -> type.path.getIdent()?.span() ?: Span.callSite()
+        is SynType.Path -> type.path.getIdent()?.span() ?: Span.callSite()
         else -> Span.callSite()
     }

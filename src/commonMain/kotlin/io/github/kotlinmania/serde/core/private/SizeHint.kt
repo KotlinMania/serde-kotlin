@@ -1,15 +1,13 @@
 // port-lint: source serde_core/src/private/size_hint.rs
 package io.github.kotlinmania.serde.core.`private`
 
-public interface IteratorWithSizeHint<out T> : Iterator<T> {
-    public fun sizeHint(): Pair<Int, Int?>
+interface IteratorWithSizeHint<out T> : Iterator<T> {
+    fun sizeHint(): Pair<Int, Int?>
 }
 
-public fun fromBounds(iter: IteratorWithSizeHint<*>): Int? {
-    return helper(iter.sizeHint())
-}
+fun fromBounds(iter: IteratorWithSizeHint<*>): Int? = helper(iter.sizeHint())
 
-public inline fun <reified Element> cautious(hint: Int?): Int {
+inline fun <reified Element> cautious(hint: Int?): Int {
     val maxPreallocBytes = 1024 * 1024
 
     return if (sizeOf<Element>() == 0) {

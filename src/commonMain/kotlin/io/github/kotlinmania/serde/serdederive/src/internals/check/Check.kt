@@ -12,13 +12,17 @@ import io.github.kotlinmania.serde.serdederive.src.internals.attr.Identifier
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.TagType
 import io.github.kotlinmania.serde.serdederive.src.internals.ungroup
 import io.github.kotlinmania.syn.Member
-import io.github.kotlinmania.syn.Type
+import io.github.kotlinmania.syn.SynType
 
 /**
  * Cross-cutting checks that require looking at more than a single attrs object.
  * Simpler checks should happen when parsing and building the attrs.
  */
-public fun check(cx: Ctxt, cont: Container, derive: Derive) {
+fun check(
+    cx: Ctxt,
+    cont: Container,
+    derive: Derive,
+) {
     checkDefaultOnTuple(cx, cont)
     checkRemoteGeneric(cx, cont)
     checkGetter(cx, cont)
@@ -39,7 +43,10 @@ public fun check(cx: Ctxt, cont: Container, derive: Derive) {
  * all subsequent fields will fail to deserialize if they don't have their own
  * default.
  */
-private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
+private fun checkDefaultOnTuple(
+    cx: Ctxt,
+    cont: Container,
+) {
     if (cont.attrs.default() is Default.None) {
         val data = cont.data
         if (data is Data.Struct && data.style == Style.Tuple) {
@@ -79,7 +86,10 @@ private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
  *     serde(remote = "Generic<T>")
  *     class ConcreteDef
  */
-private fun checkRemoteGeneric(cx: Ctxt, cont: Container) {
+private fun checkRemoteGeneric(
+    cx: Ctxt,
+    cont: Container,
+) {
     val remote = cont.attrs.remote() ?: return
     val localHasGeneric = !cont.generics.params.isEmpty()
     val remoteLast = remote.segments.last()
@@ -93,7 +103,10 @@ private fun checkRemoteGeneric(cx: Ctxt, cont: Container) {
  * Getters are only allowed inside structs, not enums, with the `remote`
  * attribute.
  */
-private fun checkGetter(cx: Ctxt, cont: Container) {
+private fun checkGetter(
+    cx: Ctxt,
+    cont: Container,
+) {
     when (cont.data) {
         is Data.Enum -> {
             if (cont.data.hasGetter()) {
@@ -118,7 +131,10 @@ private fun checkGetter(cx: Ctxt, cont: Container) {
 /**
  * Flattening has some restrictions we can test.
  */
-private fun checkFlatten(cx: Ctxt, cont: Container) {
+private fun checkFlatten(
+    cx: Ctxt,
+    cont: Container,
+) {
     when (val data = cont.data) {
         is Data.Enum -> {
             for (variant in data.variants) {
@@ -136,7 +152,11 @@ private fun checkFlatten(cx: Ctxt, cont: Container) {
     }
 }
 
-private fun checkFlattenField(cx: Ctxt, style: Style, field: Field) {
+private fun checkFlattenField(
+    cx: Ctxt,
+    style: Style,
+    field: Field,
+) {
     if (!field.attrs.flatten()) {
         return
     }
@@ -167,7 +187,10 @@ private fun checkFlattenField(cx: Ctxt, style: Style, field: Field) {
  * field identifier all but possibly one variant must be unit variants. The
  * last variant may be a newtype variant which is an implicit "other" case.
  */
-private fun checkIdentifier(cx: Ctxt, cont: Container) {
+private fun checkIdentifier(
+    cx: Ctxt,
+    cont: Container,
+) {
     val variants =
         when (val data = cont.data) {
             is Data.Enum -> data.variants
@@ -235,7 +258,10 @@ private fun checkIdentifier(cx: Ctxt, cont: Container) {
  * Skip-(de)serializing attributes are not allowed on variants marked
  * serialize-with or deserialize-with.
  */
-private fun checkVariantSkipAttrs(cx: Ctxt, cont: Container) {
+private fun checkVariantSkipAttrs(
+    cx: Ctxt,
+    cont: Container,
+) {
     val variants =
         when (val data = cont.data) {
             is Data.Enum -> data.variants
@@ -297,7 +323,10 @@ private fun checkVariantSkipAttrs(cx: Ctxt, cont: Container) {
  * one of its fields, as this would result in duplicate keys in the serialized
  * output and/or ambiguity in the to-be-deserialized input.
  */
-private fun checkInternalTagFieldNameConflict(cx: Ctxt, cont: Container) {
+private fun checkInternalTagFieldNameConflict(
+    cx: Ctxt,
+    cont: Container,
+) {
     val variants =
         when (val data = cont.data) {
             is Data.Enum -> data.variants
@@ -360,7 +389,10 @@ private fun checkInternalTagFieldNameConflict(cx: Ctxt, cont: Container) {
  * In the case of adjacently-tagged enums, the type and the contents tag must
  * differ, for the same reason.
  */
-private fun checkAdjacentTagConflict(cx: Ctxt, cont: Container) {
+private fun checkAdjacentTagConflict(
+    cx: Ctxt,
+    cont: Container,
+) {
     val tagType = cont.attrs.tag()
     if (tagType !is TagType.Adjacent) {
         return
@@ -377,7 +409,11 @@ private fun checkAdjacentTagConflict(cx: Ctxt, cont: Container) {
 /**
  * Enums and unit structs cannot be transparent.
  */
-private fun checkTransparent(cx: Ctxt, cont: Container, derive: Derive) {
+private fun checkTransparent(
+    cx: Ctxt,
+    cont: Container,
+    derive: Derive,
+) {
     if (!cont.attrs.transparent()) {
         return
     }
@@ -466,9 +502,12 @@ private fun memberMessage(member: Member): String =
         is Member.Unnamed -> "#${member.index.index}"
     }
 
-private fun allowTransparent(field: Field, derive: Derive): Boolean {
+private fun allowTransparent(
+    field: Field,
+    derive: Derive,
+): Boolean {
     val type = ungroup(field.ty)
-    if (type is Type.Path) {
+    if (type is SynType.Path) {
         val segment = type.path.segments.last()
         if (segment?.ident?.toString() == "PhantomData") {
             return false
@@ -481,7 +520,10 @@ private fun allowTransparent(field: Field, derive: Derive): Boolean {
     }
 }
 
-private fun checkFromAndTryFrom(cx: Ctxt, cont: Container) {
+private fun checkFromAndTryFrom(
+    cx: Ctxt,
+    cont: Container,
+) {
     if (cont.attrs.typeFrom() != null && cont.attrs.typeTryFrom() != null) {
         cx.errorSpannedBy(
             cont.original,

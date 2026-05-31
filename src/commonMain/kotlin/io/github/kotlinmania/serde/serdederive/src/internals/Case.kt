@@ -9,7 +9,7 @@ package io.github.kotlinmania.serde.serdederive.src.internals
 /**
  * The different possible ways to change case of fields in a class, or variants in a sealed type.
  */
-public enum class RenameRule {
+enum class RenameRule {
     /**
      * Don't apply a default rename rule.
      */
@@ -59,7 +59,7 @@ public enum class RenameRule {
     /**
      * Apply a renaming rule to an enum variant, returning the version expected in the source.
      */
-    public fun applyToVariant(variant: String): String =
+    fun applyToVariant(variant: String): String =
         when (this) {
             None,
             PascalCase,
@@ -68,14 +68,15 @@ public enum class RenameRule {
             LowerCase -> variant.toAsciiLowercase()
             UpperCase -> variant.toAsciiUppercase()
             CamelCase -> variant.substring(0, 1).toAsciiLowercase() + variant.substring(1)
-            SnakeCase -> buildString {
-                for ((index, ch) in variant.withIndex()) {
-                    if (index > 0 && ch.isAsciiUppercase()) {
-                        append('_')
+            SnakeCase ->
+                buildString {
+                    for ((index, ch) in variant.withIndex()) {
+                        if (index > 0 && ch.isAsciiUppercase()) {
+                            append('_')
+                        }
+                        append(ch.toAsciiLowercase())
                     }
-                    append(ch.toAsciiLowercase())
                 }
-            }
 
             ScreamingSnakeCase -> SnakeCase.applyToVariant(variant).toAsciiUppercase()
             KebabCase -> SnakeCase.applyToVariant(variant).replace('_', '-')
@@ -85,7 +86,7 @@ public enum class RenameRule {
     /**
      * Apply a renaming rule to a class field, returning the version expected in the source.
      */
-    public fun applyToField(field: String): String =
+    fun applyToField(field: String): String =
         when (this) {
             None,
             LowerCase,
@@ -93,19 +94,20 @@ public enum class RenameRule {
             -> field
 
             UpperCase -> field.toAsciiUppercase()
-            PascalCase -> buildString {
-                var capitalize = true
-                for (ch in field) {
-                    if (ch == '_') {
-                        capitalize = true
-                    } else if (capitalize) {
-                        append(ch.toAsciiUppercase())
-                        capitalize = false
-                    } else {
-                        append(ch)
+            PascalCase ->
+                buildString {
+                    var capitalize = true
+                    for (ch in field) {
+                        if (ch == '_') {
+                            capitalize = true
+                        } else if (capitalize) {
+                            append(ch.toAsciiUppercase())
+                            capitalize = false
+                        } else {
+                            append(ch)
+                        }
                     }
                 }
-            }
 
             CamelCase -> {
                 val pascal = PascalCase.applyToField(field)
@@ -120,14 +122,14 @@ public enum class RenameRule {
     /**
      * Returns this `RenameRule` if it is not `None`, `ruleB` otherwise.
      */
-    public fun or(ruleB: RenameRule): RenameRule =
+    fun or(ruleB: RenameRule): RenameRule =
         when (this) {
             None -> ruleB
             else -> this
         }
 
-    public companion object {
-        public fun fromStr(renameAllStr: String): Result<RenameRule> {
+    companion object {
+        fun fromStr(renameAllStr: String): Result<RenameRule> {
             for ((name, rule) in RENAME_RULES) {
                 if (renameAllStr == name) {
                     return Result.success(rule)
@@ -150,8 +152,8 @@ private val RENAME_RULES: List<Pair<String, RenameRule>> =
         "SCREAMING-KEBAB-CASE" to RenameRule.ScreamingKebabCase,
     )
 
-public class ParseError(
-    public val unknown: String,
+class ParseError(
+    val unknown: String,
 ) : IllegalArgumentException() {
     override val message: String
         get() =
@@ -167,7 +169,7 @@ public class ParseError(
                 }
             }
 
-    public fun fmt(formatter: Appendable): Result<Unit> =
+    fun fmt(formatter: Appendable): Result<Unit> =
         runCatching {
             formatter.append(message)
             Unit

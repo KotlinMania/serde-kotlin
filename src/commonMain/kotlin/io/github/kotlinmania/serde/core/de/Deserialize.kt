@@ -4,11 +4,11 @@ package io.github.kotlinmania.serde.core.de
 /**
  * A **data structure** that can be deserialized from any data format supported by Serde.
  */
-public interface Deserialize<T> {
+interface Deserialize<T> {
     /**
      * Deserialize this value from the given Serde deserializer.
      */
-    public fun <D> deserialize(deserializer: D): Result<T>
+    fun <D> deserialize(deserializer: D): Result<T>
         where D : Deserializer
 
     /**
@@ -19,7 +19,10 @@ public interface Deserialize<T> {
      * parts of the struct have been overwritten. Although whatever state that is will be
      * memory-safe.
      */
-    public fun <D> deserializeInPlace(deserializer: D, place: (T) -> Unit): Result<Unit>
+    fun <D> deserializeInPlace(
+        deserializer: D,
+        place: (T) -> Unit,
+    ): Result<Unit>
         where D : Deserializer =
         runCatching {
             place(deserialize(deserializer).getOrThrow())

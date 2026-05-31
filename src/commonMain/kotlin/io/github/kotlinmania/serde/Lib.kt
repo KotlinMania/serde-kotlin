@@ -4,7 +4,7 @@ package io.github.kotlinmania.serde
 /**
  * # Serde
  *
- * Serde is a framework for ***ser***ializing and ***de***serializing Rust data structures
+ * Serde is a framework for ***ser***ializing and ***de***serializing data structures
  * efficiently and generically.
  *
  * The Serde ecosystem consists of data structures that know how to serialize and deserialize
@@ -17,13 +17,10 @@ package io.github.kotlinmania.serde
  * ## Design
  *
  * Where many other languages rely on runtime reflection for serializing data, Serde is instead
- * built on Rust's powerful trait system. A data structure that knows how to serialize and
- * deserialize itself is one that implements Serde's `Serialize` and `Deserialize` traits (or uses
+ * built on compile-time code generation. A data structure that knows how to serialize and
+ * deserialize itself is one that implements Serde's `Serialize` and `Deserialize` interfaces (or uses
  * Serde's derive attribute to automatically generate implementations at compile time). This avoids
- * any overhead of reflection or runtime type information. In fact in many situations the
- * interaction between data structure and data format can be completely optimized away by the Rust
- * compiler, leaving Serde serialization to perform the same speed as a handwritten serializer for
- * the specific selection of data structure and data format.
+ * any overhead of reflection or runtime type information.
  *
  * ## Data formats
  *
@@ -45,16 +42,16 @@ package io.github.kotlinmania.serde
  * - [URL] query strings, in the x-www-form-urlencoded format.
  * - [Starlark], the format used for describing build targets by the Bazel and Buck build systems.
  *   *(serialization only)*
- * - [Envy], a way to deserialize environment variables into Rust structs.
+ * - [Envy], a way to deserialize environment variables into data structures.
  *   *(deserialization only)*
- * - [Envy Store], a way to deserialize AWS Parameter Store parameters into Rust structs.
+ * - [Envy Store], a way to deserialize AWS Parameter Store parameters into data structures.
  *   *(deserialization only)*
  * - [S-expressions], the textual representation of code and data used by the Lisp language
  *   family.
  * - [D-Bus]'s binary wire format.
  * - [FlexBuffers], the schemaless cousin of Google's FlatBuffers zero-copy serialization format.
  * - [Bencode], a simple binary format used in the BitTorrent protocol.
- * - [Token streams], for processing Rust procedural macro input. *(deserialization only)*
+ * - [Token streams], for processing procedural macro input. *(deserialization only)*
  * - [DynamoDB Items], the format used by `rusoto_dynamodb` to transfer data to and from DynamoDB.
  * - [Hjson], a syntax extension to JSON designed around human reading and editing.
  *   *(deserialization only)*
@@ -88,30 +85,21 @@ package io.github.kotlinmania.serde
  * [CSV]: https://docs.rs/csv
  */
 
-// Serde types in rustdoc of other crates get linked to the upstream.
-// `#![doc(html_root_url = "...")]`
-//
-// Support using Serde without the standard library!
-// `#![cfg_attr(not(feature = "std"), no_std)]`
-//
-// The upstream `serde/src/lib.rs` `crate_root!()` macro emits, from `serde_core`:
-//   `pub use serde_core::{de, forward_to_deserialize_any, ser, Deserialize, Deserializer, Serialize, Serializer};`
-//
-// Per the workspace `mod.rs`/root re-export rule (CLAUDE.md `## Re-exports from upstream
-// `mod.rs` files`), no Kotlin `typealias` is introduced for these names. Callers target the
-// upstream symbol directly:
-//   `Deserialize`  -> `io.github.kotlinmania.serde.core.de.Deserialize`
-//   `Deserializer` -> `io.github.kotlinmania.serde.core.de.Deserializer`
-//   `Serialize`    -> `io.github.kotlinmania.serde.core.ser.Serialize`
-//   `Serializer`   -> `io.github.kotlinmania.serde.core.ser.Serializer`
-// optionally with `import <fqn> as <Name>` if the caller wants to keep the bare name.
+// The upstream lib.rs re-exports core serde types from the serdeCore module.
+// Per the workspace mod.rs/root re-export rule, no Kotlin typealias is introduced.
+// Callers target the upstream symbol directly:
+//   Deserialize  -> io.github.kotlinmania.serde.core.de.Deserialize
+//   Deserializer -> io.github.kotlinmania.serde.core.de.Deserializer
+//   Serialize    -> io.github.kotlinmania.serde.core.ser.Serialize
+//   Serializer   -> io.github.kotlinmania.serde.core.ser.Serializer
+// optionally with `import <fqn> as <Name>` if the caller wants the bare name.
 //
 // Callers migrated:
 //   (none — workspace audit confirmed zero Kotlin callers held imports of
-//   `io.github.kotlinmania.serde.{Deserialize,Deserializer,Serialize,Serializer}` at the time
+//   io.github.kotlinmania.serde.{Deserialize,Deserializer,Serialize,Serializer} at the time
 //   the typealiases were retired.)
 
-// Re-export `__require_serde_not_serde_core! {}`.
-public fun __requireSerdeNotSerdeCore() {
+// Require that serde and serdeCore are not used interchangeably.
+fun __requireSerdeNotSerdeCore() {
     // No-op in Kotlin.
 }

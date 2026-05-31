@@ -7,36 +7,40 @@ import io.github.kotlinmania.quote.toTokens
 import io.github.kotlinmania.syn.token.Brace
 import io.github.kotlinmania.syn.token.Comma
 
-public sealed class Fragment {
+sealed class Fragment {
     /**
      * Tokens that can be used as an expression.
      */
-    public data class Expr(public val expr: TokenStream) : Fragment()
+    data class Expr(
+        val expr: TokenStream,
+    ) : Fragment()
 
     /**
      * Tokens that can be used inside a block. The surrounding curly braces are not part of these
      * tokens.
      */
-    public data class Block(public val block: TokenStream) : Fragment()
+    data class Block(
+        val block: TokenStream,
+    ) : Fragment()
 
-    public fun asRef(): TokenStream =
+    fun asRef(): TokenStream =
         when (this) {
             is Expr -> expr
             is Block -> block
         }
 }
 
-public fun quoteExpr(tokens: TokenStream): Fragment =
-    Fragment.Expr(tokens)
+fun quoteExpr(tokens: TokenStream): Fragment = Fragment.Expr(tokens)
 
-public fun quoteBlock(tokens: TokenStream): Fragment =
-    Fragment.Block(tokens)
+fun quoteBlock(tokens: TokenStream): Fragment = Fragment.Block(tokens)
 
 /**
  * Interpolate a fragment in place of an expression. This involves surrounding `Block` fragments in
  * curly braces.
  */
-public data class Expr(public val fragment: Fragment) : ToTokens {
+data class Expr(
+    val fragment: Fragment,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         when (val current = fragment) {
             is Fragment.Expr -> current.expr.toTokens(tokens)
@@ -52,7 +56,9 @@ public data class Expr(public val fragment: Fragment) : ToTokens {
 /**
  * Interpolate a fragment as the statements of a block.
  */
-public data class Stmts(public val fragment: Fragment) : ToTokens {
+data class Stmts(
+    val fragment: Fragment,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         when (val current = fragment) {
             is Fragment.Expr -> current.expr.toTokens(tokens)
@@ -65,7 +71,9 @@ public data class Stmts(public val fragment: Fragment) : ToTokens {
  * Interpolate a fragment as the value part of a `when` expression. This involves putting a comma
  * after expressions and curly braces around blocks.
  */
-public data class Match(public val fragment: Fragment) : ToTokens {
+data class Match(
+    val fragment: Fragment,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         when (val current = fragment) {
             is Fragment.Expr -> {
