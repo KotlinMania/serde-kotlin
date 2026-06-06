@@ -30,10 +30,8 @@ jobs:
         # on x64 hosts (no test execution — needs an arm64 runner or qemu).
         run: >
           ./gradlew
-          linuxArm64Binaries
-          linuxArm64TestBinaries
-          linuxX64Binaries
-          linuxX64TestBinaries
+          compileKotlinLinuxX64
+          compileKotlinLinuxArm64
           linuxX64Test
           --no-configuration-cache
 
