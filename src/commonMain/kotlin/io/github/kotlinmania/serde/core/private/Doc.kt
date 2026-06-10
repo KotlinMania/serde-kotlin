@@ -28,8 +28,7 @@ class Error(
     fun fmt(formatter: Appendable): SerdeResult<Unit> =
         serdeCatching {
             formatter.append(toString())
-            Unit
-        }
+        }.map { }
 }
 
 /**

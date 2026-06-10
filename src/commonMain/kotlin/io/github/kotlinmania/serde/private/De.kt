@@ -946,9 +946,7 @@ private class SeqDeserializer(
     fun end(): SerdeResult<Unit> =
         serdeCatching {
             val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining == 0) {
-                Unit
-            } else {
+            if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
                 throw SerdeException(Error.invalidLength(count + remaining, ExpectedInSeq(count)))
@@ -1084,9 +1082,7 @@ private class MapDeserializer(
     fun end(): SerdeResult<Unit> =
         serdeCatching {
             val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining == 0) {
-                Unit
-            } else {
+            if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
                 throw SerdeException(Error.invalidLength(count + remaining, ExpectedInMap(count)))
@@ -1410,7 +1406,7 @@ private class VariantDeserializer(
     override fun unitVariant(): SerdeResult<Unit> =
         when (val v = value) {
             null -> SerdeResult.success(Unit)
-            else -> IgnoredAny.deserialize(ContentDeserializer.new(v)).map { Unit }
+            else -> IgnoredAny.deserialize(ContentDeserializer.new(v)).map { }
         }
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
@@ -2310,9 +2306,7 @@ private class SeqRefDeserializer(
     fun end(): SerdeResult<Unit> =
         serdeCatching {
             val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining == 0) {
-                Unit
-            } else {
+            if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
                 throw SerdeException(Error.invalidLength(count + remaining, ExpectedInSeq(count)))
@@ -2437,9 +2431,7 @@ private class MapRefDeserializer(
     fun end(): SerdeResult<Unit> =
         serdeCatching {
             val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining == 0) {
-                Unit
-            } else {
+            if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
                 throw SerdeException(Error.invalidLength(count + remaining, ExpectedInMap(count)))
@@ -2745,7 +2737,7 @@ private class VariantRefDeserializer(
     override fun unitVariant(): SerdeResult<Unit> =
         when (val v = value) {
             null -> SerdeResult.success(Unit)
-            else -> IgnoredAny.deserialize(ContentRefDeserializer.new(v)).map { Unit }
+            else -> IgnoredAny.deserialize(ContentRefDeserializer.new(v)).map { }
         }
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =

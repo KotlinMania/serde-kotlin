@@ -535,8 +535,7 @@ private class SerializeSeq<E>(
         where T : Serialize =
         serdeCatching {
             elements.add(value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Seq(elements))
 }
@@ -551,8 +550,7 @@ private class SerializeTuple<E>(
         where T : Serialize =
         serdeCatching {
             elements.add(value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Tuple(elements))
 }
@@ -568,8 +566,7 @@ private class SerializeTupleStruct<E>(
         where T : Serialize =
         serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.TupleStruct(name, fields))
 }
@@ -587,8 +584,7 @@ private class SerializeTupleVariant<E>(
         where T : Serialize =
         serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.TupleVariant(name, variantIndex, variant, fields))
 }
@@ -604,8 +600,7 @@ private class SerializeMap<E>(
         where T : Serialize =
         serdeCatching {
             this.key = key.serialize(ContentSerializer<E>()).getOrThrow()
-            Unit
-        }
+        }.map { }
 
     override fun <T> serializeValue(value: T): SerdeResult<Unit>
         where T : Serialize =
@@ -614,8 +609,7 @@ private class SerializeMap<E>(
             key = null
             val contentValue = value.serialize(ContentSerializer<E>()).getOrThrow()
             entries.add(storedKey to contentValue)
-            Unit
-        }
+        }.map { }
 
     override fun <K, V> serializeEntry(
         key: K,
@@ -627,8 +621,7 @@ private class SerializeMap<E>(
             val contentKey = key.serialize(ContentSerializer<E>()).getOrThrow()
             val contentValue = value.serialize(ContentSerializer<E>()).getOrThrow()
             entries.add(contentKey to contentValue)
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Map(entries))
 }
@@ -647,8 +640,7 @@ private class SerializeStruct<E>(
         where T : Serialize =
         serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Struct(name, fields))
 }
@@ -669,8 +661,7 @@ private class SerializeStructVariant<E>(
         where T : Serialize =
         serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.StructVariant(name, variantIndex, variant, fields))
 }
@@ -688,8 +679,7 @@ private class SerializeTupleVariantAsMapValue<Ok, E, M>(
         where T : Serialize =
         serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Ok> =
         serdeCatching {
@@ -714,8 +704,7 @@ private class SerializeStructVariantAsMapValue<Ok, E, M>(
         where T : Serialize =
         serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Ok> =
         serdeCatching {
@@ -775,8 +764,7 @@ class FlatMapSerializer<MOk, E, M>(
     ): SerdeResult<Unit> =
         serdeCatching {
             map.serializeEntry(Content.String(variant), Content.Unit).getOrThrow()
-            Unit
-        }
+        }.map { }
 
     override fun <T> serializeNewtypeStruct(
         name: String,
@@ -793,8 +781,7 @@ class FlatMapSerializer<MOk, E, M>(
         where T : Serialize =
         serdeCatching {
             map.serializeEntry(Content.String(variant), value).getOrThrow()
-            Unit
-        }
+        }.map { }
 
     override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Unit, E>> =
         SerdeResult.failure(badType(Unsupported.Sequence))
@@ -889,14 +876,12 @@ private class FlatMapSerializeTupleVariantAsMapValue<MOk, E, M>(
         where T : Serialize =
         serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Unit> =
         serdeCatching {
             map.serializeValue(Content.Seq(fields)).getOrThrow()
-            Unit
-        }
+        }.map { }
 }
 
 private class FlatMapSerializeStructVariantAsMapValue<MOk, E, M>(
@@ -914,14 +899,12 @@ private class FlatMapSerializeStructVariantAsMapValue<MOk, E, M>(
         where T : Serialize =
         serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<Unit> =
         serdeCatching {
             map.serializeValue(Content.Struct(name, fields)).getOrThrow()
-            Unit
-        }
+        }.map { }
 }
 
 data class AdjacentlyTaggedEnumVariant(
