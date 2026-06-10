@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/de/mod.rs
 package io.github.kotlinmania.serde.core.de
 
+import io.github.kotlinmania.serde.SerdeResult
+
 /**
  * Provides a `Visitor` access to the data of an enum in the input.
  *
@@ -11,5 +13,5 @@ interface EnumAccess {
     /**
      * `variant` is called to identify which variant to deserialize.
      */
-    fun <V> variantSeed(seed: DeserializeSeed<V>): Result<Pair<V, VariantAccess>>
+    fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>>
 }

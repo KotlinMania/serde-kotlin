@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/de/mod.rs
 package io.github.kotlinmania.serde.core.de
 
+import io.github.kotlinmania.serde.SerdeResult
+
 /**
  * Provides a `Visitor` access to each element of a sequence in the input.
  *
@@ -9,16 +11,16 @@ package io.github.kotlinmania.serde.core.de
  */
 interface SeqAccess {
     /**
-     * This returns `Result.success(value)` for the next value in the sequence, or
-     * `Result.success(null)` if there are no more remaining items.
+     * This returns `SerdeResult.success(value)` for the next value in the sequence, or
+     * `SerdeResult.success(null)` if there are no more remaining items.
      */
-    fun <T> nextElementSeed(seed: DeserializeSeed<T>): Result<T?>
+    fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?>
 
     /**
-     * This returns `Result.success(value)` for the next value in the sequence, or
-     * `Result.success(null)` if there are no more remaining items.
+     * This returns `SerdeResult.success(value)` for the next value in the sequence, or
+     * `SerdeResult.success(null)` if there are no more remaining items.
      */
-    fun <T> nextElement(seed: DeserializeSeed<T>): Result<T?> = nextElementSeed(seed)
+    fun <T> nextElement(seed: DeserializeSeed<T>): SerdeResult<T?> = nextElementSeed(seed)
 
     /**
      * Returns the number of elements remaining in the sequence, if known.

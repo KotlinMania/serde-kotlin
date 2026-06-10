@@ -1,74 +1,183 @@
-@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
-
 package io.github.kotlinmania.serde
-
-import kotlin.native.HiddenFromObjC
 
 /**
  * The result of a serde serialization or deserialization operation.
  *
- * Upstream carries typed errors via `Result<Ok, Error>` where `Ok` and
- * `Error` are associated types on the `Serializer`/`Deserializer` traits.
- * Kotlin's stdlib `Result<T>` erases the error type to `Throwable`, which
- * produces an unchecked-cast bridge under Swift export. `SerdeResult`
- * keeps the error typed, avoiding that hazard.
+ * Upstream serde returns `Result<S::Ok, S::Error>`, where `Ok` and `Error`
+ * are associated types projected from the concrete `Serializer`/`Deserializer`.
+ * Kotlin has no associated types, and the original port modeled the return as
+ * the stdlib `kotlin.Result<Ok>` — an inline value class over `Any?` whose
+ * error is erased to `Throwable`. Swift Export cannot bridge that nominally:
+ * it erases the value to `Any?` and emits unchecked casts into the generated
+ * `KotlinStdlib.kt`, which fail under `allWarningsAsErrors = true`.
  *
- * Named `SerdeResult` to avoid colliding with Swift's built-in `Result`
- * type.
+ * `SerdeResult` is a concrete, serde-owned nominal type. It is strongly typed
+ * over the success value [T] and carries a concrete, non-`Throwable` [SerdeError]
+ * in the failure case, so Swift Export can bridge it by construction — no
+ * `@HiddenFromObjC`, no stdlib erasure.
+ *
+ * Named `SerdeResult` (not `Result`) so it does not collide with Swift's
+ * built-in `Result` type nor with `kotlin.Result`.
  */
-@HiddenFromObjC
-sealed class SerdeResult<out V, out E> {
+sealed class SerdeResult<out T> {
     /** Successful result carrying the serialized/deserialized value. */
-    @HiddenFromObjC
-    data class Success<out V, out E>(val value: V) : SerdeResult<V, E>()
+    class Success<out T>(
+        val value: T,
+    ) : SerdeResult<T>() {
+        override fun equals(other: Any?): Boolean = other is Success<*> && other.value == value
 
-    /** Failed result carrying a typed error. */
-    @HiddenFromObjC
-    data class Failure<out V, out E>(val error: @UnsafeVariance E) : SerdeResult<V, E>()
+        override fun hashCode(): Int = value?.hashCode() ?: 0
 
+        override fun toString(): String = "SerdeResult.Success($value)"
+    }
+
+    /** Failed result carrying a typed, non-`Throwable` error. */
+    class Failure(
+        val error: SerdeError,
+    ) : SerdeResult<Nothing>() {
+        override fun equals(other: Any?): Boolean = other is Failure && other.error == error
+
+        override fun hashCode(): Int = error.hashCode()
+
+        override fun toString(): String = "SerdeResult.Failure($error)"
+    }
+
+    /** Returns `true` when this result is a [Success]. */
     val isSuccess: Boolean get() = this is Success
+
+    /** Returns `true` when this result is a [Failure]. */
     val isFailure: Boolean get() = this is Failure
 
-    fun getOrThrow(): V = when (this) {
-        is Success -> value
-        is Failure -> throw IllegalStateException(error.toString())
+    /** Returns the success value, or throws [SerdeException] carrying the [SerdeError]. */
+    fun getOrThrow(): T =
+        when (this) {
+            is Success -> value
+            is Failure -> throw SerdeException(error)
+        }
+
+    /** Returns the success value, or `null` when this is a [Failure]. */
+    fun getOrNull(): T? = (this as? Success)?.value
+
+    /** Returns the [SerdeError], or `null` when this is a [Success]. */
+    fun exceptionOrNull(): SerdeError? = (this as? Failure)?.error
+
+    /** Returns the success value, or [default] when this is a [Failure]. */
+    fun getOrDefault(default: @UnsafeVariance T): T =
+        when (this) {
+            is Success -> value
+            is Failure -> default
+        }
+
+    /** Returns the success value, or the result of [onFailure] applied to the error. */
+    inline fun getOrElse(onFailure: (SerdeError) -> @UnsafeVariance T): T =
+        when (this) {
+            is Success -> value
+            is Failure -> onFailure(error)
+        }
+
+    /** Folds this result into a single value of type [R]. */
+    inline fun <R> fold(
+        onSuccess: (T) -> R,
+        onFailure: (SerdeError) -> R,
+    ): R =
+        when (this) {
+            is Success -> onSuccess(value)
+            is Failure -> onFailure(error)
+        }
+
+    /** Maps the success value with [transform], propagating a [Failure] unchanged. */
+    inline fun <R> map(transform: (T) -> R): SerdeResult<R> =
+        when (this) {
+            is Success -> Success(transform(value))
+            is Failure -> this
+        }
+
+    /** Maps the success value to another [SerdeResult] with [transform] (monadic bind). */
+    inline fun <R> flatMap(transform: (T) -> SerdeResult<R>): SerdeResult<R> =
+        when (this) {
+            is Success -> transform(value)
+            is Failure -> this
+        }
+
+    /** Runs [action] on the success value, returning this result unchanged. */
+    inline fun onSuccess(action: (T) -> Unit): SerdeResult<T> {
+        if (this is Success) action(value)
+        return this
     }
 
-    fun getOrNull(): V? = (this as? Success)?.value
-
-    fun exceptionOrNull(): E? = (this as? Failure)?.error
-
-    fun getOrElse(onFailure: (E) -> @UnsafeVariance V): V = when (this) {
-        is Success -> value
-        is Failure -> onFailure(error)
+    /** Runs [action] on the error, returning this result unchanged. */
+    inline fun onFailure(action: (SerdeError) -> Unit): SerdeResult<T> {
+        if (this is Failure) action(error)
+        return this
     }
 
-    fun <R> fold(onSuccess: (V) -> R, onFailure: (E) -> R): R = when (this) {
-        is Success -> onSuccess(value)
-        is Failure -> onFailure(error)
-    }
-
-    fun <R> map(transform: (V) -> R): SerdeResult<R, E> = when (this) {
-        is Success -> Success(transform(value))
-        is Failure -> Failure(error)
-    }
+    /**
+     * Recovers from a [Failure] by computing a replacement value with [transform],
+     * capturing any exception [transform] throws as a new [Failure].
+     *
+     * Replacement for `kotlin.Result.recoverCatching`.
+     */
+    inline fun recoverCatching(transform: (SerdeError) -> @UnsafeVariance T): SerdeResult<T> =
+        when (this) {
+            is Success -> this
+            is Failure -> serdeCatching { transform(error) }
+        }
 
     companion object {
-        fun <T> success(value: T): SerdeResult<T, Nothing> = Success(value)
-        fun <T, Err> failure(error: Err): SerdeResult<T, Err> = Failure(error)
+        /** Builds a successful result. */
+        fun <T> success(value: T): SerdeResult<T> = Success(value)
+
+        /** Builds a failed result from a [SerdeError]. */
+        fun failure(error: SerdeError): SerdeResult<Nothing> = Failure(error)
     }
 }
 
 /**
+ * Runs [block], capturing any thrown exception as a [SerdeResult.Failure].
+ *
+ * Replacement for `kotlin.runCatching`, which returns a `kotlin.Result`.
+ * A [SerdeException] is unwrapped to its underlying [SerdeError]; any other
+ * throwable is wrapped in a fresh [SerdeError] carrying its message.
+ */
+inline fun <T> serdeCatching(block: () -> T): SerdeResult<T> =
+    try {
+        SerdeResult.success(block())
+    } catch (e: SerdeException) {
+        SerdeResult.failure(e.error)
+    } catch (e: Throwable) {
+        SerdeResult.failure(SerdeError(e.message ?: e.toString()))
+    }
+
+/**
  * A generic serde error carrying a human-readable message.
  *
- * Not a `Throwable` subclass — Swift export's Class Stdlib hazard
- * (unchecked-cast bridge on `Throwable.getStackTrace()`) makes any
- * `Throwable` subclass unsafe in a public `SerdeResult` failure position.
- * When `getOrThrow()` is called on a `SerdeResult.Failure<SerdeError>`,
- * it throws `IllegalStateException(message)`.
+ * Intentionally **not** a `Throwable` subclass. Swift Export's Class-Stdlib
+ * hazard drags the `Throwable.getStackTrace()` → `Array` bridge into the
+ * generated `KotlinStdlib.kt` for any public `Throwable` subtype, which fails
+ * under `allWarningsAsErrors = true`. Keeping `SerdeError` a plain class makes
+ * it bridgeable, so it can sit in a public [SerdeResult.Failure] position.
+ *
+ * Kotlin callers that need to throw an error wrap it at the throw site via
+ * [SerdeException] (see [SerdeResult.getOrThrow]).
  */
-@HiddenFromObjC
-class SerdeError(message: String) : IllegalStateException(message) {
-    override fun toString(): String = message ?: "null"
+class SerdeError(
+    val message: String,
+    val source: SerdeError? = null,
+) {
+    override fun equals(other: Any?): Boolean = other is SerdeError && other.message == message && other.source == source
+
+    override fun hashCode(): Int = message.hashCode() * 31 + (source?.hashCode() ?: 0)
+
+    override fun toString(): String = message
 }
+
+/**
+ * Throwable wrapper used at Kotlin throw sites for a [SerdeError].
+ *
+ * This type only ever appears as a thrown exception — never in a public,
+ * Swift-exported signature position — so its `Throwable` ancestry does not
+ * reach the Swift Export bridge.
+ */
+class SerdeException(
+    val error: SerdeError,
+) : IllegalStateException(error.message)

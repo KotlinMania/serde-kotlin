@@ -13,12 +13,11 @@ package io.github.kotlinmania.serde.core.`private`
 
 // FIXME: Upstream gates doctest support on a resolved compiler issue.
 
-
 // Callers migrated:
 //   (none — workspace audit confirmed zero Kotlin callers held a direct or wildcard import of
 //    `io.github.kotlinmania.serde.core.private.Result` at the time the typealias was retired.
-//    The only same-package consumer was Seed.kt; with the typealias gone, its bare `Result<Unit>`
-//    resolves to the auto-imported `kotlin.Result<Unit>` — same target, no source change.)
+//    The only same-package consumer was Seed.kt; with the typealias gone, its bare `SerdeResult<Unit>`
+//    resolves to the auto-imported `kotlin.SerdeResult<Unit>` — same target, no source change.)
 
 // Projected callers:
 //   workspace_dep_graph.json shows zero kotlinmania repos importing

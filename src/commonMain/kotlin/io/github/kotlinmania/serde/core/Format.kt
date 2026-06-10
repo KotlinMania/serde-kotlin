@@ -1,6 +1,9 @@
 // port-lint: source serde_core/src/format.rs
 package io.github.kotlinmania.serde.core
 
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
+
 internal class FormatError : RuntimeException()
 
 internal class Buf private constructor(
@@ -19,14 +22,14 @@ internal class Buf private constructor(
             throwOnInvalidSequence = false,
         )
 
-    fun writeStr(s: String): Result<Unit> {
+    fun writeStr(s: String): SerdeResult<Unit> {
         val stringBytes = s.encodeToByteArray()
         return if (offset + stringBytes.size > bytes.size) {
-            Result.failure(FormatError())
+            SerdeResult.failure(SerdeError("serde format buffer overflow"))
         } else {
             stringBytes.copyInto(bytes, destinationOffset = offset)
             offset += stringBytes.size
-            Result.success(Unit)
+            SerdeResult.success(Unit)
         }
     }
 }

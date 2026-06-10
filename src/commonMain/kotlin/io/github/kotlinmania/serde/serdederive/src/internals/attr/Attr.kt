@@ -4,6 +4,8 @@ package io.github.kotlinmania.serde.serdederive.src.internals.attr
 import io.github.kotlinmania.procmacro2.*
 import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.quote.ToTokens
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdederive.src.internals.*
 import io.github.kotlinmania.syn.*
 import io.github.kotlinmania.syn.token.PathSep
@@ -1225,14 +1227,14 @@ private fun borrowableLifetimes(
     cx: Ctxt,
     name: Name,
     field: SynField,
-): Result<Set<Lifetime>> {
+): SerdeResult<Set<Lifetime>> {
     val lifetimes = mutableSetOf<Lifetime>()
     collectLifetimes(field.ty, lifetimes)
     return if (lifetimes.isEmpty()) {
         cx.errorSpannedBy(field, "field `$name` has no lifetimes to borrow")
-        Result.failure(IllegalArgumentException("no borrowable lifetimes"))
+        SerdeResult.failure(SerdeError("no borrowable lifetimes"))
     } else {
-        Result.success(lifetimes)
+        SerdeResult.success(lifetimes)
     }
 }
 

@@ -1,6 +1,7 @@
 // port-lint: source serde_core/src/ser/fmt.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -54,7 +55,7 @@ public class FmtTest {
     }
 }
 
-private fun format(block: FormatterSerializer.() -> Result<Unit>): String {
+private fun format(block: FormatterSerializer.() -> SerdeResult<Unit>): String {
     val builder = StringBuilder()
     FormatterSerializer(builder).block().getOrThrow()
     return builder.toString()
@@ -63,6 +64,6 @@ private fun format(block: FormatterSerializer.() -> Result<Unit>): String {
 private data class LiteralSerialize(
     private val text: String,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = serializer.serializeStr(text)
 }

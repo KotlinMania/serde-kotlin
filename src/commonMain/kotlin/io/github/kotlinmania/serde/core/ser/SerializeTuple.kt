@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/ser/mod.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeResult
+
 /**
  * Returned from `Serializer.serializeTuple`.
  */
@@ -9,11 +11,11 @@ interface SerializeTuple<Ok, E>
     /**
      * Serialize a tuple element.
      */
-    fun <T> serializeElement(value: T): Result<Unit>
+    fun <T> serializeElement(value: T): SerdeResult<Unit>
         where T : Serialize
 
     /**
      * Finish serializing a tuple.
      */
-    fun end(): Result<Ok>
+    fun end(): SerdeResult<Ok>
 }

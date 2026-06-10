@@ -5,6 +5,8 @@ import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.Attr
 import io.github.kotlinmania.serde.serdederive.src.internals.attr.VecAttr
 import io.github.kotlinmania.syn.LitStr
@@ -93,8 +95,8 @@ class Name(
 
     override fun hashCode(): Int = value.hashCode()
 
-    fun fmt(formatter: Appendable): Result<Unit> =
-        runCatching {
+    fun fmt(formatter: Appendable): SerdeResult<Unit> =
+        serdeCatching {
             formatter.append(value)
             Unit
         }

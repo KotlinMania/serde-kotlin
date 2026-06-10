@@ -1,6 +1,9 @@
 // port-lint: source serde_core/src/ser/mod.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
+
 /**
  * A **data format** that can serialize any data structure supported by Serde.
  *
@@ -16,7 +19,7 @@ interface Serializer<Ok, E>
     /**
      * Serialize a `Boolean` value.
      */
-    fun serializeBool(v: Boolean): Result<Ok>
+    fun serializeBool(v: Boolean): SerdeResult<Ok>
 
     /**
      * Serialize a `Byte` value.
@@ -24,7 +27,7 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `Byte` and `Long`, a reasonable implementation
      * would be to cast the value to `Long` and forward to `serializeI64`.
      */
-    fun serializeI8(v: Byte): Result<Ok>
+    fun serializeI8(v: Byte): SerdeResult<Ok>
 
     /**
      * Serialize a `Short` value.
@@ -32,7 +35,7 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `Short` and `Long`, a reasonable implementation
      * would be to cast the value to `Long` and forward to `serializeI64`.
      */
-    fun serializeI16(v: Short): Result<Ok>
+    fun serializeI16(v: Short): SerdeResult<Ok>
 
     /**
      * Serialize an `Int` value.
@@ -40,21 +43,19 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `Int` and `Long`, a reasonable implementation
      * would be to cast the value to `Long` and forward to `serializeI64`.
      */
-    fun serializeI32(v: Int): Result<Ok>
+    fun serializeI32(v: Int): SerdeResult<Ok>
 
     /**
      * Serialize a `Long` value.
      */
-    fun serializeI64(v: Long): Result<Ok>
+    fun serializeI64(v: Long): SerdeResult<Ok>
 
     /**
      * Serialize an `i128` value.
      *
      * The default behavior unconditionally returns an error.
      */
-    fun serializeI128(value: String): Result<Ok> {
-        return Result.failure(Error.custom("i128 is not supported"))
-    }
+    fun serializeI128(value: String): SerdeResult<Ok> = SerdeResult.failure(Error.custom("i128 is not supported"))
 
     /**
      * Serialize a `UByte` value.
@@ -62,7 +63,7 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `UByte` and `ULong`, a reasonable implementation
      * would be to cast the value to `ULong` and forward to `serializeU64`.
      */
-    fun serializeU8(v: UByte): Result<Ok>
+    fun serializeU8(v: UByte): SerdeResult<Ok>
 
     /**
      * Serialize a `UShort` value.
@@ -70,7 +71,7 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `UShort` and `ULong`, a reasonable implementation
      * would be to cast the value to `ULong` and forward to `serializeU64`.
      */
-    fun serializeU16(v: UShort): Result<Ok>
+    fun serializeU16(v: UShort): SerdeResult<Ok>
 
     /**
      * Serialize a `UInt` value.
@@ -78,21 +79,19 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `UInt` and `ULong`, a reasonable implementation
      * would be to cast the value to `ULong` and forward to `serializeU64`.
      */
-    fun serializeU32(v: UInt): Result<Ok>
+    fun serializeU32(v: UInt): SerdeResult<Ok>
 
     /**
      * Serialize a `ULong` value.
      */
-    fun serializeU64(v: ULong): Result<Ok>
+    fun serializeU64(v: ULong): SerdeResult<Ok>
 
     /**
      * Serialize a `u128` value.
      *
      * The default behavior unconditionally returns an error.
      */
-    fun serializeU128(value: String): Result<Ok> {
-        return Result.failure(Error.custom("u128 is not supported"))
-    }
+    fun serializeU128(value: String): SerdeResult<Ok> = SerdeResult.failure(Error.custom("u128 is not supported"))
 
     /**
      * Serialize a `Float` value.
@@ -100,12 +99,12 @@ interface Serializer<Ok, E>
      * If the format does not differentiate between `Float` and `Double`, a reasonable
      * implementation would be to cast the value to `Double` and forward to `serializeF64`.
      */
-    fun serializeF32(v: Float): Result<Ok>
+    fun serializeF32(v: Float): SerdeResult<Ok>
 
     /**
      * Serialize a `Double` value.
      */
-    fun serializeF64(v: Double): Result<Ok>
+    fun serializeF64(v: Double): SerdeResult<Ok>
 
     /**
      * Serialize a character.
@@ -113,38 +112,38 @@ interface Serializer<Ok, E>
      * If the format does not support characters, it is reasonable to serialize it as a single
      * element `String` or a `UInt`.
      */
-    fun serializeChar(v: Char): Result<Ok>
+    fun serializeChar(v: Char): SerdeResult<Ok>
 
     /**
      * Serialize a `String`.
      */
-    fun serializeStr(v: String): Result<Ok>
+    fun serializeStr(v: String): SerdeResult<Ok>
 
     /**
      * Serialize a chunk of raw byte data.
      */
-    fun serializeBytes(v: ByteArray): Result<Ok>
+    fun serializeBytes(v: ByteArray): SerdeResult<Ok>
 
     /**
      * Serialize a `null` value.
      */
-    fun serializeNone(): Result<Ok>
+    fun serializeNone(): SerdeResult<Ok>
 
     /**
      * Serialize a non-null optional value.
      */
-    fun <T> serializeSome(value: T): Result<Ok>
+    fun <T> serializeSome(value: T): SerdeResult<Ok>
         where T : Serialize
 
     /**
      * Serialize a `Unit` value.
      */
-    fun serializeUnit(): Result<Ok>
+    fun serializeUnit(): SerdeResult<Ok>
 
     /**
      * Serialize a unit class like `object Unit` or `PhantomData<T>`.
      */
-    fun serializeUnitStruct(name: String): Result<Ok>
+    fun serializeUnitStruct(name: String): SerdeResult<Ok>
 
     /**
      * Serialize a unit variant like `E.A` in `sealed class E { data object A : E(); data object B :
@@ -154,7 +153,7 @@ interface Serializer<Ok, E>
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Ok>
+    ): SerdeResult<Ok>
 
     /**
      * Serialize a newtype class like `value class Millimeters(val value: UByte)`.
@@ -162,7 +161,7 @@ interface Serializer<Ok, E>
     fun <T> serializeNewtypeStruct(
         name: String,
         value: T,
-    ): Result<Ok>
+    ): SerdeResult<Ok>
         where T : Serialize
 
     /**
@@ -174,20 +173,20 @@ interface Serializer<Ok, E>
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<Ok>
+    ): SerdeResult<Ok>
         where T : Serialize
 
     /**
      * Begin to serialize a variably sized sequence. This call must be followed by zero or more calls
      * to `serializeElement`, then a call to `end`.
      */
-    fun serializeSeq(len: Int?): Result<SerializeSeq<Ok, E>>
+    fun serializeSeq(len: Int?): SerdeResult<SerializeSeq<Ok, E>>
 
     /**
      * Begin to serialize a statically sized sequence whose length will be known at deserialization
      * time without looking at the serialized data.
      */
-    fun serializeTuple(len: Int): Result<SerializeTuple<Ok, E>>
+    fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Ok, E>>
 
     /**
      * Begin to serialize a tuple class like `data class Rgb(val red: UByte, val green: UByte, val
@@ -196,7 +195,7 @@ interface Serializer<Ok, E>
     fun serializeTupleStruct(
         name: String,
         len: Int,
-    ): Result<SerializeTupleStruct<Ok, E>>
+    ): SerdeResult<SerializeTupleStruct<Ok, E>>
 
     /**
      * Begin to serialize a tuple variant like `E.T` in `sealed class E { data class T(val first:
@@ -207,12 +206,12 @@ interface Serializer<Ok, E>
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Ok, E>>
+    ): SerdeResult<SerializeTupleVariant<Ok, E>>
 
     /**
      * Begin to serialize a map.
      */
-    fun serializeMap(len: Int?): Result<SerializeMap<Ok, E>>
+    fun serializeMap(len: Int?): SerdeResult<SerializeMap<Ok, E>>
 
     /**
      * Begin to serialize a class like `data class Rgb(val red: UByte, val green: UByte, val blue:
@@ -221,7 +220,7 @@ interface Serializer<Ok, E>
     fun serializeStruct(
         name: String,
         len: Int,
-    ): Result<SerializeStruct<Ok, E>>
+    ): SerdeResult<SerializeStruct<Ok, E>>
 
     /**
      * Begin to serialize a class variant like `E.S` in `sealed class E { data class S(val red:
@@ -232,14 +231,14 @@ interface Serializer<Ok, E>
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Ok, E>>
+    ): SerdeResult<SerializeStructVariant<Ok, E>>
 
     /**
      * Collect an iterator as a sequence.
      */
-    fun <T> collectSeq(iter: Iterable<T>): Result<Ok>
+    fun <T> collectSeq(iter: Iterable<T>): SerdeResult<Ok>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             val serializer = serializeSeq(iteratorLenHint(iter)).getOrThrow()
             for (item in iter) {
                 serializer.serializeElement(item).getOrThrow()
@@ -250,10 +249,10 @@ interface Serializer<Ok, E>
     /**
      * Collect an iterator as a map.
      */
-    fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): Result<Ok>
+    fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): SerdeResult<Ok>
         where K : Serialize,
               V : Serialize =
-        runCatching {
+        serdeCatching {
             val serializer = serializeMap(iteratorLenHint(iter)).getOrThrow()
             for ((key, value) in iter) {
                 serializer.serializeEntry(key, value).getOrThrow()
@@ -264,7 +263,7 @@ interface Serializer<Ok, E>
     /**
      * Serialize a string produced by an implementation of `toString`.
      */
-    fun collectStr(value: String): Result<Ok> = serializeStr(value)
+    fun collectStr(value: String): SerdeResult<Ok> = serializeStr(value)
 
     /**
      * Determine whether `Serialize` implementations should serialize in human-readable form.

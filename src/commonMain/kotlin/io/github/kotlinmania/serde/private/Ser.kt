@@ -1,6 +1,8 @@
 // port-lint: source serde/src/private/ser.rs
 package io.github.kotlinmania.serde.`private`
 
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.core.ser.*
 import io.github.kotlinmania.serde.core.ser.SerializeMap
 import io.github.kotlinmania.serde.core.ser.SerializeStruct
@@ -8,6 +10,7 @@ import io.github.kotlinmania.serde.core.ser.SerializeStructVariant
 import io.github.kotlinmania.serde.core.ser.SerializeTuple
 import io.github.kotlinmania.serde.core.ser.SerializeTupleStruct
 import io.github.kotlinmania.serde.core.ser.SerializeTupleVariant
+import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * Used to check that serde(getter) attributes return the expected type.
@@ -25,7 +28,7 @@ fun <Ok, E, S, T> serializeTaggedNewtype(
     tag: String,
     variantName: String,
     value: T,
-): Result<Ok>
+): SerdeResult<Ok>
     where E : Error,
           S : Serializer<Ok, E>,
           T : Serialize =
@@ -48,83 +51,54 @@ private class TaggedSerializer<Ok, E, S>(
 ) : Serializer<Ok, E>
     where E : Error,
           S : Serializer<Ok, E> {
-    private fun badType(what: Unsupported): Throwable =
+    private fun badType(what: Unsupported): SerdeError =
         Error.custom(
             "cannot serialize tagged newtype variant $typeIdent::$variantIdent containing $what",
         )
 
-    override fun serializeBool(v: Boolean): Result<Ok> {
-        return Result.failure(badType(Unsupported.Boolean))
-    }
+    override fun serializeBool(v: Boolean): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Boolean))
 
-    override fun serializeI8(v: Byte): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI8(v: Byte): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeI16(v: Short): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI16(v: Short): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeI32(v: Int): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI32(v: Int): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeI64(v: Long): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI64(v: Long): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU8(v: UByte): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU8(v: UByte): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU16(v: UShort): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU16(v: UShort): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU32(v: UInt): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU32(v: UInt): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU64(v: ULong): Result<Ok> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU64(v: ULong): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeF32(v: Float): Result<Ok> {
-        return Result.failure(badType(Unsupported.Float))
-    }
+    override fun serializeF32(v: Float): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Float))
 
-    override fun serializeF64(v: Double): Result<Ok> {
-        return Result.failure(badType(Unsupported.Float))
-    }
+    override fun serializeF64(v: Double): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Float))
 
-    override fun serializeChar(v: Char): Result<Ok> {
-        return Result.failure(badType(Unsupported.Char))
-    }
+    override fun serializeChar(v: Char): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Char))
 
-    override fun serializeStr(v: String): Result<Ok> {
-        return Result.failure(badType(Unsupported.String))
-    }
+    override fun serializeStr(v: String): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.String))
 
-    override fun serializeBytes(v: ByteArray): Result<Ok> {
-        return Result.failure(badType(Unsupported.ByteArray))
-    }
+    override fun serializeBytes(v: ByteArray): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.ByteArray))
 
-    override fun serializeNone(): Result<Ok> = Result.failure(badType(Unsupported.Optional))
+    override fun serializeNone(): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.Optional))
 
-    override fun <T> serializeSome(value: T): Result<Ok>
-        where T : Serialize {
-        return Result.failure(badType(Unsupported.Optional))
-    }
+    override fun <T> serializeSome(value: T): SerdeResult<Ok>
+        where T : Serialize =
+        SerdeResult.failure(badType(Unsupported.Optional))
 
-    override fun serializeUnit(): Result<Ok> =
-        runCatching {
+    override fun serializeUnit(): SerdeResult<Ok> =
+        serdeCatching {
             val map = delegate.serializeMap(1).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.end().getOrThrow()
         }
 
-    override fun serializeUnitStruct(name: String): Result<Ok> =
-        runCatching {
+    override fun serializeUnitStruct(name: String): SerdeResult<Ok> =
+        serdeCatching {
             val map = delegate.serializeMap(1).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.end().getOrThrow()
@@ -134,8 +108,8 @@ private class TaggedSerializer<Ok, E, S>(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Ok> =
-        runCatching {
+    ): SerdeResult<Ok> =
+        serdeCatching {
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeEntry(Content.String(variant), Content.Unit).getOrThrow()
@@ -145,55 +119,48 @@ private class TaggedSerializer<Ok, E, S>(
     override fun <T> serializeNewtypeStruct(
         name: String,
         value: T,
-    ): Result<Ok>
-        where T : Serialize {
-        return value.serialize(this)
-    }
+    ): SerdeResult<Ok>
+        where T : Serialize = value.serialize(this)
 
     override fun <T> serializeNewtypeVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<Ok>
+    ): SerdeResult<Ok>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeEntry(Content.String(variant), value).getOrThrow()
             map.end().getOrThrow()
         }
 
-    override fun serializeSeq(len: Int?): Result<io.github.kotlinmania.serde.core.ser.SerializeSeq<Ok, E>> {
-        return Result.failure(badType(Unsupported.Sequence))
-    }
+    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Ok, E>> =
+        SerdeResult.failure(badType(Unsupported.Sequence))
 
-    override fun serializeTuple(len: Int): Result<SerializeTuple<Ok, E>> {
-        return Result.failure(badType(Unsupported.Tuple))
-    }
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Ok, E>> = SerdeResult.failure(badType(Unsupported.Tuple))
 
     override fun serializeTupleStruct(
         name: String,
         len: Int,
-    ): Result<SerializeTupleStruct<Ok, E>> {
-        return Result.failure(badType(Unsupported.TupleStruct))
-    }
+    ): SerdeResult<SerializeTupleStruct<Ok, E>> = SerdeResult.failure(badType(Unsupported.TupleStruct))
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Ok, E>> =
-        runCatching {
+    ): SerdeResult<SerializeTupleVariant<Ok, E>> =
+        serdeCatching {
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeKey(Content.String(variant)).getOrThrow()
             SerializeTupleVariantAsMapValue(map = map, name = variant, len = len)
         }
 
-    override fun serializeMap(len: Int?): Result<SerializeMap<Ok, E>> =
-        runCatching {
+    override fun serializeMap(len: Int?): SerdeResult<SerializeMap<Ok, E>> =
+        serdeCatching {
             val map = delegate.serializeMap(len?.plus(1)).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map
@@ -202,8 +169,8 @@ private class TaggedSerializer<Ok, E, S>(
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): Result<SerializeStruct<Ok, E>> =
-        runCatching {
+    ): SerdeResult<SerializeStruct<Ok, E>> =
+        serdeCatching {
             val state = delegate.serializeStruct(name, len + 1).getOrThrow()
             state.serializeField(tag, Content.String(variantName)).getOrThrow()
             state
@@ -214,15 +181,15 @@ private class TaggedSerializer<Ok, E, S>(
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Ok, E>> =
-        runCatching {
+    ): SerdeResult<SerializeStructVariant<Ok, E>> =
+        serdeCatching {
             val map = delegate.serializeMap(2).getOrThrow()
             map.serializeEntry(Content.String(tag), Content.String(variantName)).getOrThrow()
             map.serializeKey(Content.String(variant)).getOrThrow()
             SerializeStructVariantAsMapValue(map = map, name = variant, len = len)
         }
 
-    override fun collectStr(value: String): Result<Ok> = Result.failure(badType(Unsupported.String))
+    override fun collectStr(value: String): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.String))
 }
 
 private enum class Unsupported {
@@ -382,7 +349,7 @@ private sealed class Content : Serialize {
         val fields: List<Pair<kotlin.String, Content>>,
     ) : Content()
 
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error =
         when (this) {
             is Bool -> serializer.serializeBool(value)
@@ -410,7 +377,7 @@ private sealed class Content : Serialize {
             is Seq ->
                 serializer.collectSeq(elements)
             is Tuple ->
-                runCatching {
+                serdeCatching {
                     val tuple = serializer.serializeTuple(elements.size).getOrThrow()
                     for (element in elements) {
                         tuple.serializeElement(element).getOrThrow()
@@ -418,7 +385,7 @@ private sealed class Content : Serialize {
                     tuple.end().getOrThrow()
                 }
             is TupleStruct ->
-                runCatching {
+                serdeCatching {
                     val tupleStruct = serializer.serializeTupleStruct(name, fields.size).getOrThrow()
                     for (field in fields) {
                         tupleStruct.serializeField(field).getOrThrow()
@@ -426,7 +393,7 @@ private sealed class Content : Serialize {
                     tupleStruct.end().getOrThrow()
                 }
             is TupleVariant ->
-                runCatching {
+                serdeCatching {
                     val tupleVariant =
                         serializer.serializeTupleVariant(name, variantIndex, variant, fields.size).getOrThrow()
                     for (field in fields) {
@@ -435,7 +402,7 @@ private sealed class Content : Serialize {
                     tupleVariant.end().getOrThrow()
                 }
             is Map ->
-                runCatching {
+                serdeCatching {
                     val map = serializer.serializeMap(entries.size).getOrThrow()
                     for ((k, v) in entries) {
                         map.serializeEntry(k, v).getOrThrow()
@@ -443,7 +410,7 @@ private sealed class Content : Serialize {
                     map.end().getOrThrow()
                 }
             is Struct ->
-                runCatching {
+                serdeCatching {
                     val struct = serializer.serializeStruct(name, fields.size).getOrThrow()
                     for ((k, v) in fields) {
                         struct.serializeField(k, v).getOrThrow()
@@ -451,7 +418,7 @@ private sealed class Content : Serialize {
                     struct.end().getOrThrow()
                 }
             is StructVariant ->
-                runCatching {
+                serdeCatching {
                     val structVariant =
                         serializer.serializeStructVariant(name, variantIndex, variant, fields.size).getOrThrow()
                     for ((k, v) in fields) {
@@ -464,98 +431,98 @@ private sealed class Content : Serialize {
 
 private class ContentSerializer<E> : Serializer<Content, E>
     where E : Error {
-    override fun serializeBool(v: Boolean): Result<Content> = Result.success(Content.Bool(v))
+    override fun serializeBool(v: Boolean): SerdeResult<Content> = SerdeResult.success(Content.Bool(v))
 
-    override fun serializeI8(v: Byte): Result<Content> = Result.success(Content.I8(v))
+    override fun serializeI8(v: Byte): SerdeResult<Content> = SerdeResult.success(Content.I8(v))
 
-    override fun serializeI16(v: Short): Result<Content> = Result.success(Content.I16(v))
+    override fun serializeI16(v: Short): SerdeResult<Content> = SerdeResult.success(Content.I16(v))
 
-    override fun serializeI32(v: Int): Result<Content> = Result.success(Content.I32(v))
+    override fun serializeI32(v: Int): SerdeResult<Content> = SerdeResult.success(Content.I32(v))
 
-    override fun serializeI64(v: Long): Result<Content> = Result.success(Content.I64(v))
+    override fun serializeI64(v: Long): SerdeResult<Content> = SerdeResult.success(Content.I64(v))
 
-    override fun serializeU8(v: UByte): Result<Content> = Result.success(Content.U8(v))
+    override fun serializeU8(v: UByte): SerdeResult<Content> = SerdeResult.success(Content.U8(v))
 
-    override fun serializeU16(v: UShort): Result<Content> = Result.success(Content.U16(v))
+    override fun serializeU16(v: UShort): SerdeResult<Content> = SerdeResult.success(Content.U16(v))
 
-    override fun serializeU32(v: UInt): Result<Content> = Result.success(Content.U32(v))
+    override fun serializeU32(v: UInt): SerdeResult<Content> = SerdeResult.success(Content.U32(v))
 
-    override fun serializeU64(v: ULong): Result<Content> = Result.success(Content.U64(v))
+    override fun serializeU64(v: ULong): SerdeResult<Content> = SerdeResult.success(Content.U64(v))
 
-    override fun serializeF32(v: Float): Result<Content> = Result.success(Content.F32(v))
+    override fun serializeF32(v: Float): SerdeResult<Content> = SerdeResult.success(Content.F32(v))
 
-    override fun serializeF64(v: Double): Result<Content> = Result.success(Content.F64(v))
+    override fun serializeF64(v: Double): SerdeResult<Content> = SerdeResult.success(Content.F64(v))
 
-    override fun serializeChar(v: Char): Result<Content> = Result.success(Content.Char(v))
+    override fun serializeChar(v: Char): SerdeResult<Content> = SerdeResult.success(Content.Char(v))
 
-    override fun serializeStr(v: String): Result<Content> = Result.success(Content.String(v))
+    override fun serializeStr(v: String): SerdeResult<Content> = SerdeResult.success(Content.String(v))
 
-    override fun serializeBytes(v: ByteArray): Result<Content> = Result.success(Content.Bytes(v))
+    override fun serializeBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.Bytes(v))
 
-    override fun serializeNone(): Result<Content> = Result.success(Content.None)
+    override fun serializeNone(): SerdeResult<Content> = SerdeResult.success(Content.None)
 
-    override fun <T> serializeSome(value: T): Result<Content>
+    override fun <T> serializeSome(value: T): SerdeResult<Content>
         where T : Serialize =
-        runCatching { Content.Some(value.serialize(ContentSerializer<E>()).getOrThrow()) }
+        serdeCatching { Content.Some(value.serialize(ContentSerializer<E>()).getOrThrow()) }
 
-    override fun serializeUnit(): Result<Content> = Result.success(Content.Unit)
+    override fun serializeUnit(): SerdeResult<Content> = SerdeResult.success(Content.Unit)
 
-    override fun serializeUnitStruct(name: String): Result<Content> = Result.success(Content.UnitStruct(name))
+    override fun serializeUnitStruct(name: String): SerdeResult<Content> = SerdeResult.success(Content.UnitStruct(name))
 
     override fun serializeUnitVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Content> = Result.success(Content.UnitVariant(name, variantIndex, variant))
+    ): SerdeResult<Content> = SerdeResult.success(Content.UnitVariant(name, variantIndex, variant))
 
     override fun <T> serializeNewtypeStruct(
         name: String,
         value: T,
-    ): Result<Content>
+    ): SerdeResult<Content>
         where T : Serialize =
-        runCatching { Content.NewtypeStruct(name, value.serialize(ContentSerializer<E>()).getOrThrow()) }
+        serdeCatching { Content.NewtypeStruct(name, value.serialize(ContentSerializer<E>()).getOrThrow()) }
 
     override fun <T> serializeNewtypeVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<Content>
+    ): SerdeResult<Content>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             Content.NewtypeVariant(name, variantIndex, variant, value.serialize(ContentSerializer<E>()).getOrThrow())
         }
 
-    override fun serializeSeq(len: Int?): Result<io.github.kotlinmania.serde.core.ser.SerializeSeq<Content, E>> =
-        Result.success(SerializeSeq(len))
+    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Content, E>> =
+        SerdeResult.success(SerializeSeq(len))
 
-    override fun serializeTuple(len: Int): Result<SerializeTuple<Content, E>> = Result.success(SerializeTuple(len))
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Content, E>> = SerdeResult.success(SerializeTuple(len))
 
     override fun serializeTupleStruct(
         name: String,
         len: Int,
-    ): Result<SerializeTupleStruct<Content, E>> = Result.success(SerializeTupleStruct(name, len))
+    ): SerdeResult<SerializeTupleStruct<Content, E>> = SerdeResult.success(SerializeTupleStruct(name, len))
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Content, E>> = Result.success(SerializeTupleVariant(name, variantIndex, variant, len))
+    ): SerdeResult<SerializeTupleVariant<Content, E>> = SerdeResult.success(SerializeTupleVariant(name, variantIndex, variant, len))
 
-    override fun serializeMap(len: Int?): Result<SerializeMap<Content, E>> = Result.success(SerializeMap(len))
+    override fun serializeMap(len: Int?): SerdeResult<SerializeMap<Content, E>> = SerdeResult.success(SerializeMap(len))
 
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): Result<SerializeStruct<Content, E>> = Result.success(SerializeStruct(name, len))
+    ): SerdeResult<SerializeStruct<Content, E>> = SerdeResult.success(SerializeStruct(name, len))
 
     override fun serializeStructVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Content, E>> = Result.success(SerializeStructVariant(name, variantIndex, variant, len))
+    ): SerdeResult<SerializeStructVariant<Content, E>> = SerdeResult.success(SerializeStructVariant(name, variantIndex, variant, len))
 }
 
 private class SerializeSeq<E>(
@@ -564,14 +531,14 @@ private class SerializeSeq<E>(
     where E : Error {
     private val elements: MutableList<Content> = ArrayList(len ?: 0)
 
-    override fun <T> serializeElement(value: T): Result<Unit>
+    override fun <T> serializeElement(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             elements.add(value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.Seq(elements))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Seq(elements))
 }
 
 private class SerializeTuple<E>(
@@ -580,14 +547,14 @@ private class SerializeTuple<E>(
     where E : Error {
     private val elements: MutableList<Content> = ArrayList(len)
 
-    override fun <T> serializeElement(value: T): Result<Unit>
+    override fun <T> serializeElement(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             elements.add(value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.Tuple(elements))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Tuple(elements))
 }
 
 private class SerializeTupleStruct<E>(
@@ -597,14 +564,14 @@ private class SerializeTupleStruct<E>(
     where E : Error {
     private val fields: MutableList<Content> = ArrayList(len)
 
-    override fun <T> serializeField(value: T): Result<Unit>
+    override fun <T> serializeField(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.TupleStruct(name, fields))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.TupleStruct(name, fields))
 }
 
 private class SerializeTupleVariant<E>(
@@ -616,14 +583,14 @@ private class SerializeTupleVariant<E>(
     where E : Error {
     private val fields: MutableList<Content> = ArrayList(len)
 
-    override fun <T> serializeField(value: T): Result<Unit>
+    override fun <T> serializeField(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.TupleVariant(name, variantIndex, variant, fields))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.TupleVariant(name, variantIndex, variant, fields))
 }
 
 private class SerializeMap<E>(
@@ -633,16 +600,16 @@ private class SerializeMap<E>(
     private val entries: MutableList<Pair<Content, Content>> = ArrayList(len ?: 0)
     private var key: Content? = null
 
-    override fun <T> serializeKey(key: T): Result<Unit>
+    override fun <T> serializeKey(key: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             this.key = key.serialize(ContentSerializer<E>()).getOrThrow()
             Unit
         }
 
-    override fun <T> serializeValue(value: T): Result<Unit>
+    override fun <T> serializeValue(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             val storedKey = checkNotNull(key) { "serializeValue called before serializeKey" }
             key = null
             val contentValue = value.serialize(ContentSerializer<E>()).getOrThrow()
@@ -653,17 +620,17 @@ private class SerializeMap<E>(
     override fun <K, V> serializeEntry(
         key: K,
         value: V,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where K : Serialize,
               V : Serialize =
-        runCatching {
+        serdeCatching {
             val contentKey = key.serialize(ContentSerializer<E>()).getOrThrow()
             val contentValue = value.serialize(ContentSerializer<E>()).getOrThrow()
             entries.add(contentKey to contentValue)
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.Map(entries))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Map(entries))
 }
 
 private class SerializeStruct<E>(
@@ -676,14 +643,14 @@ private class SerializeStruct<E>(
     override fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.Struct(name, fields))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Struct(name, fields))
 }
 
 private class SerializeStructVariant<E>(
@@ -698,14 +665,14 @@ private class SerializeStructVariant<E>(
     override fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Content> = Result.success(Content.StructVariant(name, variantIndex, variant, fields))
+    override fun end(): SerdeResult<Content> = SerdeResult.success(Content.StructVariant(name, variantIndex, variant, fields))
 }
 
 private class SerializeTupleVariantAsMapValue<Ok, E, M>(
@@ -717,15 +684,15 @@ private class SerializeTupleVariantAsMapValue<Ok, E, M>(
           M : SerializeMap<Ok, E> {
     private val fields: MutableList<Content> = ArrayList(len)
 
-    override fun <T> serializeField(value: T): Result<Unit>
+    override fun <T> serializeField(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Ok> =
-        runCatching {
+    override fun end(): SerdeResult<Ok> =
+        serdeCatching {
             map.serializeValue(Content.TupleStruct(name, fields)).getOrThrow()
             map.end().getOrThrow()
         }
@@ -743,15 +710,15 @@ private class SerializeStructVariantAsMapValue<Ok, E, M>(
     override fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Ok> =
-        runCatching {
+    override fun end(): SerdeResult<Ok> =
+        serdeCatching {
             map.serializeValue(Content.Struct(name, fields)).getOrThrow()
             map.end().getOrThrow()
         }
@@ -762,81 +729,51 @@ class FlatMapSerializer<MOk, E, M>(
 ) : Serializer<Unit, E>
     where E : Error,
           M : SerializeMap<MOk, E> {
-    private fun badType(what: Unsupported): Throwable = Error.custom("can only flatten structs and maps (got $what)")
+    private fun badType(what: Unsupported): SerdeError = Error.custom("can only flatten structs and maps (got $what)")
 
-    override fun serializeBool(v: Boolean): Result<Unit> {
-        return Result.failure(badType(Unsupported.Boolean))
-    }
+    override fun serializeBool(v: Boolean): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Boolean))
 
-    override fun serializeI8(v: Byte): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI8(v: Byte): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeI16(v: Short): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI16(v: Short): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeI32(v: Int): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI32(v: Int): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeI64(v: Long): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeI64(v: Long): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU8(v: UByte): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU8(v: UByte): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU16(v: UShort): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU16(v: UShort): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU32(v: UInt): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU32(v: UInt): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeU64(v: ULong): Result<Unit> {
-        return Result.failure(badType(Unsupported.Integer))
-    }
+    override fun serializeU64(v: ULong): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Integer))
 
-    override fun serializeF32(v: Float): Result<Unit> {
-        return Result.failure(badType(Unsupported.Float))
-    }
+    override fun serializeF32(v: Float): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Float))
 
-    override fun serializeF64(v: Double): Result<Unit> {
-        return Result.failure(badType(Unsupported.Float))
-    }
+    override fun serializeF64(v: Double): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Float))
 
-    override fun serializeChar(v: Char): Result<Unit> {
-        return Result.failure(badType(Unsupported.Char))
-    }
+    override fun serializeChar(v: Char): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.Char))
 
-    override fun serializeStr(v: String): Result<Unit> {
-        return Result.failure(badType(Unsupported.String))
-    }
+    override fun serializeStr(v: String): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.String))
 
-    override fun serializeBytes(v: ByteArray): Result<Unit> {
-        return Result.failure(badType(Unsupported.ByteArray))
-    }
+    override fun serializeBytes(v: ByteArray): SerdeResult<Unit> = SerdeResult.failure(badType(Unsupported.ByteArray))
 
-    override fun serializeNone(): Result<Unit> = Result.success(Unit)
+    override fun serializeNone(): SerdeResult<Unit> = SerdeResult.success(Unit)
 
-    override fun <T> serializeSome(value: T): Result<Unit>
+    override fun <T> serializeSome(value: T): SerdeResult<Unit>
         where T : Serialize = value.serialize(this)
 
-    override fun serializeUnit(): Result<Unit> = Result.success(Unit)
+    override fun serializeUnit(): SerdeResult<Unit> = SerdeResult.success(Unit)
 
-    override fun serializeUnitStruct(name: String): Result<Unit> {
-        return Result.success(Unit)
-    }
+    override fun serializeUnitStruct(name: String): SerdeResult<Unit> = SerdeResult.success(Unit)
 
     override fun serializeUnitVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<Unit> =
-        runCatching {
+    ): SerdeResult<Unit> =
+        serdeCatching {
             map.serializeEntry(Content.String(variant), Content.Unit).getOrThrow()
             Unit
         }
@@ -844,59 +781,52 @@ class FlatMapSerializer<MOk, E, M>(
     override fun <T> serializeNewtypeStruct(
         name: String,
         value: T,
-    ): Result<Unit>
-        where T : Serialize {
-        return value.serialize(this)
-    }
+    ): SerdeResult<Unit>
+        where T : Serialize = value.serialize(this)
 
     override fun <T> serializeNewtypeVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             map.serializeEntry(Content.String(variant), value).getOrThrow()
             Unit
         }
 
-    override fun serializeSeq(len: Int?): Result<io.github.kotlinmania.serde.core.ser.SerializeSeq<Unit, E>> {
-        return Result.failure(badType(Unsupported.Sequence))
-    }
+    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Unit, E>> =
+        SerdeResult.failure(badType(Unsupported.Sequence))
 
-    override fun serializeTuple(len: Int): Result<SerializeTuple<Unit, E>> {
-        return Result.failure(badType(Unsupported.Tuple))
-    }
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Unit, E>> = SerdeResult.failure(badType(Unsupported.Tuple))
 
     override fun serializeTupleStruct(
         name: String,
         len: Int,
-    ): Result<SerializeTupleStruct<Unit, E>> {
-        return Result.failure(badType(Unsupported.TupleStruct))
-    }
+    ): SerdeResult<SerializeTupleStruct<Unit, E>> = SerdeResult.failure(badType(Unsupported.TupleStruct))
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<Unit, E>> =
-        runCatching {
+    ): SerdeResult<SerializeTupleVariant<Unit, E>> =
+        serdeCatching {
             map.serializeKey(Content.String(variant)).getOrThrow()
             FlatMapSerializeTupleVariantAsMapValue(map = map, len = len)
         }
 
-    override fun serializeMap(len: Int?): Result<SerializeMap<Unit, E>> =
-        runCatching {
+    override fun serializeMap(len: Int?): SerdeResult<SerializeMap<Unit, E>> =
+        serdeCatching {
             FlatMapSerializeMap(map)
         }
 
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): Result<SerializeStruct<Unit, E>> =
-        runCatching {
+    ): SerdeResult<SerializeStruct<Unit, E>> =
+        serdeCatching {
             FlatMapSerializeStruct(map)
         }
 
@@ -905,8 +835,8 @@ class FlatMapSerializer<MOk, E, M>(
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<Unit, E>> =
-        runCatching {
+    ): SerdeResult<SerializeStructVariant<Unit, E>> =
+        serdeCatching {
             map.serializeKey(Content.String(variant)).getOrThrow()
             FlatMapSerializeStructVariantAsMapValue(map = map, name = variant)
         }
@@ -917,20 +847,20 @@ private class FlatMapSerializeMap<MOk, E, M>(
 ) : SerializeMap<Unit, E>
     where E : Error,
           M : SerializeMap<MOk, E> {
-    override fun <T> serializeKey(key: T): Result<Unit>
+    override fun <T> serializeKey(key: T): SerdeResult<Unit>
         where T : Serialize = map.serializeKey(key)
 
-    override fun <T> serializeValue(value: T): Result<Unit>
+    override fun <T> serializeValue(value: T): SerdeResult<Unit>
         where T : Serialize = map.serializeValue(value)
 
     override fun <K, V> serializeEntry(
         key: K,
         value: V,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where K : Serialize,
               V : Serialize = map.serializeEntry(key, value)
 
-    override fun end(): Result<Unit> = Result.success(Unit)
+    override fun end(): SerdeResult<Unit> = SerdeResult.success(Unit)
 }
 
 private class FlatMapSerializeStruct<MOk, E, M>(
@@ -941,10 +871,10 @@ private class FlatMapSerializeStruct<MOk, E, M>(
     override fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize = map.serializeEntry(Content.String(key), value)
 
-    override fun end(): Result<Unit> = Result.success(Unit)
+    override fun end(): SerdeResult<Unit> = SerdeResult.success(Unit)
 }
 
 private class FlatMapSerializeTupleVariantAsMapValue<MOk, E, M>(
@@ -955,15 +885,15 @@ private class FlatMapSerializeTupleVariantAsMapValue<MOk, E, M>(
           M : SerializeMap<MOk, E> {
     private val fields: MutableList<Content> = ArrayList(len)
 
-    override fun <T> serializeField(value: T): Result<Unit>
+    override fun <T> serializeField(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Unit> =
-        runCatching {
+    override fun end(): SerdeResult<Unit> =
+        serdeCatching {
             map.serializeValue(Content.Seq(fields)).getOrThrow()
             Unit
         }
@@ -980,15 +910,15 @@ private class FlatMapSerializeStructVariantAsMapValue<MOk, E, M>(
     override fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             fields.add(key to value.serialize(ContentSerializer<E>()).getOrThrow())
             Unit
         }
 
-    override fun end(): Result<Unit> =
-        runCatching {
+    override fun end(): SerdeResult<Unit> =
+        serdeCatching {
             map.serializeValue(Content.Struct(name, fields)).getOrThrow()
             Unit
         }
@@ -999,7 +929,7 @@ data class AdjacentlyTaggedEnumVariant(
     val variantIndex: UInt,
     val variantName: String,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error =
         serializer.serializeUnitVariant(enumName, variantIndex, variantName)
 }

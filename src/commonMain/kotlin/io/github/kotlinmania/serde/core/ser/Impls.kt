@@ -1,66 +1,69 @@
 // port-lint: source serde_core/src/ser/impls.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeException
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E> Boolean.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Boolean.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeBool(this)
 
-fun <Ok, E> Byte.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Byte.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeI8(this)
 
-fun <Ok, E> Short.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Short.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeI16(this)
 
-fun <Ok, E> Int.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Int.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeI32(this)
 
-fun <Ok, E> Long.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Long.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeI64(this)
 
-fun <Ok, E> UByte.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> UByte.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeU8(this)
 
-fun <Ok, E> UShort.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> UShort.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeU16(this)
 
-fun <Ok, E> UInt.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> UInt.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeU32(this)
 
-fun <Ok, E> ULong.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> ULong.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeU64(this)
 
-fun <Ok, E> Float.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Float.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeF32(this)
 
-fun <Ok, E> Double.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Double.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeF64(this)
 
-fun <Ok, E> Char.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Char.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeChar(this)
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E> String.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> String.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeStr(this)
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E> ByteArray.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> ByteArray.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeBytes(this)
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E> Unit.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Unit.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error = serializer.serializeUnit()
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error,
           T : Serialize =
     if (this != null) serializer.serializeSome(this) else serializer.serializeNone()
@@ -68,17 +71,17 @@ fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok, E>): Result<Ok>
 // //////////////////////////////////////////////////////////////////////////////
 
 data object PhantomData : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error =
         serializer.serializeUnitStruct("PhantomData")
 }
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error,
           T : Serialize =
-    runCatching {
+    serdeCatching {
         val tuple = serializer.serializeTuple(size).getOrThrow()
         for (element in this) {
             tuple.serializeElement(element).getOrThrow()
@@ -86,7 +89,7 @@ fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
         tuple.end().getOrThrow()
     }
 
-fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error,
           T : Serialize =
     serializer.collectSeq(this)
@@ -95,7 +98,7 @@ fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok, E>): Result<Ok>
 
 fun <Ok, E, K, V> Map<K, V>.serialize(
     serializer: Serializer<Ok, E>,
-): Result<Ok>
+): SerdeResult<Ok>
     where E : Error,
           K : Serialize,
           V : Serialize =
@@ -105,11 +108,11 @@ fun <Ok, E, K, V> Map<K, V>.serialize(
 
 fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(
     serializer: Serializer<Ok, E>,
-): Result<Ok>
+): SerdeResult<Ok>
     where E : Error,
           T0 : Serialize,
           T1 : Serialize =
-    runCatching {
+    serdeCatching {
         val tuple = serializer.serializeTuple(2).getOrThrow()
         tuple.serializeElement(first).getOrThrow()
         tuple.serializeElement(second).getOrThrow()
@@ -118,12 +121,12 @@ fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(
 
 fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(
     serializer: Serializer<Ok, E>,
-): Result<Ok>
+): SerdeResult<Ok>
     where E : Error,
           T0 : Serialize,
           T1 : Serialize,
           T2 : Serialize =
-    runCatching {
+    serdeCatching {
         val tuple = serializer.serializeTuple(3).getOrThrow()
         tuple.serializeElement(first).getOrThrow()
         tuple.serializeElement(second).getOrThrow()
@@ -133,11 +136,11 @@ fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error =
-    runCatching {
+    serdeCatching {
         if (this < Duration.ZERO || this == Duration.INFINITE) {
-            throw Error.custom("duration must be finite and non-negative")
+            throw SerdeException(Error.custom("duration must be finite and non-negative"))
         }
         val secs = inWholeSeconds
         val nanos = (this - secs.seconds).inWholeNanoseconds
@@ -149,11 +152,11 @@ fun <Ok, E> Duration.serialize(serializer: Serializer<Ok, E>): Result<Ok>
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E> Instant.serialize(serializer: Serializer<Ok, E>): Result<Ok>
+fun <Ok, E> Instant.serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
     where E : Error =
-    runCatching {
+    serdeCatching {
         if (epochSeconds < 0) {
-            throw Error.custom("SystemTime must be later than UNIX_EPOCH")
+            throw SerdeException(Error.custom("SystemTime must be later than UNIX_EPOCH"))
         }
         val state = serializer.serializeStruct("SystemTime", 2).getOrThrow()
         state.serializeField("secs_since_epoch", ULongSerialize(epochSeconds.toULong())).getOrThrow()
@@ -200,34 +203,34 @@ internal fun formatU8(
 data class Wrapping<T : Serialize>(
     val value: T,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = value.serialize(serializer)
 }
 
 data class Saturating<T : Serialize>(
     val value: T,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = value.serialize(serializer)
 }
 
 data class Reverse<T : Serialize>(
     val value: T,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = value.serialize(serializer)
 }
 
 private data class ULongSerialize(
     private val value: ULong,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = serializer.serializeU64(value)
 }
 
 private data class UIntSerialize(
     private val value: UInt,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = serializer.serializeU32(value)
 }

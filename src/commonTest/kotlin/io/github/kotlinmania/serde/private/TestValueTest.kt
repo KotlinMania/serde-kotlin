@@ -1,6 +1,8 @@
 // port-lint: source test_suite/tests/test_value.rs
 package io.github.kotlinmania.serde.`private`
 
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.core.de.Deserialize
 import io.github.kotlinmania.serde.core.de.DeserializeSeed
 import io.github.kotlinmania.serde.core.de.Deserializer
@@ -16,6 +18,7 @@ import io.github.kotlinmania.serde.core.de.value.MapDeserializer
 import io.github.kotlinmania.serde.core.de.value.StrDeserializer
 import io.github.kotlinmania.serde.core.de.value.U128Deserializer
 import io.github.kotlinmania.serde.core.de.value.intoDeserializer
+import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,7 +28,7 @@ private enum class E {
     ;
 
     companion object : Deserialize<E> {
-        override fun <D> deserialize(deserializer: D): Result<E>
+        override fun <D> deserialize(deserializer: D): SerdeResult<E>
             where D : Deserializer =
             deserializer.deserializeEnum("E", listOf("A", "B"), EVisitor)
     }
@@ -34,9 +37,9 @@ private enum class E {
 private data object EVisitor : Visitor<E> {
     override fun expecting(): String = "enum E"
 
-    override fun <A> visitEnum(access: A): Result<E>
+    override fun <A> visitEnum(access: A): SerdeResult<E>
         where A : EnumAccess =
-        runCatching {
+        serdeCatching {
             val (variant, access) = access.variantSeed(EVariantSeed).getOrThrow()
             access.unitVariant().getOrThrow()
             variant
@@ -44,7 +47,7 @@ private data object EVisitor : Visitor<E> {
 }
 
 private data object EVariantSeed : DeserializeSeed<E> {
-    override fun <D> deserialize(deserializer: D): Result<E>
+    override fun <D> deserialize(deserializer: D): SerdeResult<E>
         where D : Deserializer =
         deserializer.deserializeIdentifier(EVariantVisitor)
 }
@@ -52,20 +55,20 @@ private data object EVariantSeed : DeserializeSeed<E> {
 private data object EVariantVisitor : Visitor<E> {
     override fun expecting(): String = "variant identifier"
 
-    override fun visitU32(v: UInt): Result<E> =
+    override fun visitU32(v: UInt): SerdeResult<E> =
         when (v) {
-            0u -> Result.success(E.A)
-            1u -> Result.success(E.B)
-            else -> Result.failure(IllegalStateException("variant index $v out of range for E"))
+            0u -> SerdeResult.success(E.A)
+            1u -> SerdeResult.success(E.B)
+            else -> SerdeResult.failure(SerdeError("variant index $v out of range for E"))
         }
 
-    override fun visitU64(v: ULong): Result<E> = visitU32(v.toUInt())
+    override fun visitU64(v: ULong): SerdeResult<E> = visitU32(v.toUInt())
 
-    override fun visitStr(v: String): Result<E> =
+    override fun visitStr(v: String): SerdeResult<E> =
         when (v) {
-            "A" -> Result.success(E.A)
-            "B" -> Result.success(E.B)
-            else -> Result.failure(IllegalStateException("unknown variant name $v"))
+            "A" -> SerdeResult.success(E.A)
+            "B" -> SerdeResult.success(E.B)
+            else -> SerdeResult.failure(SerdeError("unknown variant name $v"))
         }
 }
 
@@ -73,7 +76,7 @@ private data class Airebo(
     val ljSigma: Double,
 ) {
     companion object : Deserialize<Airebo> {
-        override fun <D> deserialize(deserializer: D): Result<Airebo>
+        override fun <D> deserialize(deserializer: D): SerdeResult<Airebo>
             where D : Deserializer =
             deserializer.deserializeStruct("Airebo", listOf("lj_sigma"), AireboVisitor)
     }
@@ -82,9 +85,9 @@ private data class Airebo(
 private data object AireboVisitor : Visitor<Airebo> {
     override fun expecting(): String = "struct Airebo"
 
-    override fun <A> visitMap(access: A): Result<Airebo>
+    override fun <A> visitMap(access: A): SerdeResult<Airebo>
         where A : MapAccess =
-        runCatching {
+        serdeCatching {
             var ljSigma: Double? = null
             while (true) {
                 val key = access.nextKeySeed(AireboFieldSeed).getOrThrow() ?: break
@@ -99,7 +102,7 @@ private data object AireboVisitor : Visitor<Airebo> {
 private enum class AireboField { LjSigma }
 
 private data object AireboFieldSeed : DeserializeSeed<AireboField> {
-    override fun <D> deserialize(deserializer: D): Result<AireboField>
+    override fun <D> deserialize(deserializer: D): SerdeResult<AireboField>
         where D : Deserializer =
         deserializer.deserializeIdentifier(AireboFieldVisitor)
 }
@@ -107,22 +110,23 @@ private data object AireboFieldSeed : DeserializeSeed<AireboField> {
 private data object AireboFieldVisitor : Visitor<AireboField> {
     override fun expecting(): String = "field identifier"
 
-    override fun visitStr(v: String): Result<AireboField> =
+    override fun visitStr(v: String): SerdeResult<AireboField> =
         when (v) {
-            "lj_sigma" -> Result.success(AireboField.LjSigma)
-            else -> Result.failure(IllegalStateException("unknown field $v"))
+            "lj_sigma" -> SerdeResult.success(AireboField.LjSigma)
+            else -> SerdeResult.failure(SerdeError("unknown field $v"))
         }
 }
 
 private data object F64Seed : DeserializeSeed<Double> {
-    override fun <D> deserialize(deserializer: D): Result<Double>
-        where D : Deserializer = deserializer.deserializeF64(F64Capture)
+    override fun <D> deserialize(deserializer: D): SerdeResult<Double>
+        where D : Deserializer =
+        deserializer.deserializeF64(F64Capture)
 }
 
 private data object F64Capture : Visitor<Double> {
     override fun expecting(): String = "f64"
 
-    override fun visitF64(v: Double): Result<Double> = Result.success(v)
+    override fun visitF64(v: Double): SerdeResult<Double> = SerdeResult.success(v)
 }
 
 private sealed class PotentialKind {
@@ -131,7 +135,7 @@ private sealed class PotentialKind {
     ) : PotentialKind()
 
     companion object : Deserialize<PotentialKind> {
-        override fun <D> deserialize(deserializer: D): Result<PotentialKind>
+        override fun <D> deserialize(deserializer: D): SerdeResult<PotentialKind>
             where D : Deserializer =
             deserializer.deserializeEnum("PotentialKind", listOf("Airebo"), PotentialKindVisitor)
     }
@@ -140,9 +144,9 @@ private sealed class PotentialKind {
 private data object PotentialKindVisitor : Visitor<PotentialKind> {
     override fun expecting(): String = "enum PotentialKind"
 
-    override fun <A> visitEnum(access: A): Result<PotentialKind>
+    override fun <A> visitEnum(access: A): SerdeResult<PotentialKind>
         where A : EnumAccess =
-        runCatching {
+        serdeCatching {
             val (variant, access) = access.variantSeed(PotentialKindVariantSeed).getOrThrow()
             when (variant) {
                 PotentialKindVariant.Airebo ->
@@ -154,7 +158,7 @@ private data object PotentialKindVisitor : Visitor<PotentialKind> {
 private enum class PotentialKindVariant { Airebo }
 
 private data object PotentialKindVariantSeed : DeserializeSeed<PotentialKindVariant> {
-    override fun <D> deserialize(deserializer: D): Result<PotentialKindVariant>
+    override fun <D> deserialize(deserializer: D): SerdeResult<PotentialKindVariant>
         where D : Deserializer =
         deserializer.deserializeIdentifier(PotentialKindVariantVisitor)
 }
@@ -162,15 +166,15 @@ private data object PotentialKindVariantSeed : DeserializeSeed<PotentialKindVari
 private data object PotentialKindVariantVisitor : Visitor<PotentialKindVariant> {
     override fun expecting(): String = "variant identifier"
 
-    override fun visitStr(v: String): Result<PotentialKindVariant> =
+    override fun visitStr(v: String): SerdeResult<PotentialKindVariant> =
         when (v) {
-            "Airebo" -> Result.success(PotentialKindVariant.Airebo)
-            else -> Result.failure(IllegalStateException("unknown variant $v"))
+            "Airebo" -> SerdeResult.success(PotentialKindVariant.Airebo)
+            else -> SerdeResult.failure(SerdeError("unknown variant $v"))
         }
 }
 
 private data object AireboDeserializeSeed : DeserializeSeed<Airebo> {
-    override fun <D> deserialize(deserializer: D): Result<Airebo>
+    override fun <D> deserialize(deserializer: D): SerdeResult<Airebo>
         where D : Deserializer = Airebo.deserialize(deserializer)
 }
 
@@ -178,7 +182,7 @@ private data class Potential(
     val kind: PotentialKind,
 ) {
     companion object : Deserialize<Potential> {
-        override fun <D> deserialize(deserializer: D): Result<Potential>
+        override fun <D> deserialize(deserializer: D): SerdeResult<Potential>
             where D : Deserializer =
             deserializer.deserializeAny(PotentialVisitor)
     }
@@ -187,7 +191,7 @@ private data class Potential(
 private data object PotentialVisitor : Visitor<Potential> {
     override fun expecting(): String = "a map"
 
-    override fun <A> visitMap(access: A): Result<Potential>
+    override fun <A> visitMap(access: A): SerdeResult<Potential>
         where A : MapAccess =
         PotentialKind.deserialize(MapAccessDeserializer.new(access)).map { Potential(it) }
 }

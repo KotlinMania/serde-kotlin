@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/ser/mod.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeResult
+
 /**
  * A **data structure** that can be serialized into any data format supported by Serde.
  *
@@ -25,6 +27,6 @@ interface Serialize {
      * See the Implementing `Serialize` section of the manual for more information about how to
      * implement this method.
      */
-    fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error
 }

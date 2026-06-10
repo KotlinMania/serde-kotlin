@@ -1,6 +1,9 @@
 // port-lint: source serde_core/src/ser/mod.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
+
 /**
  * Returned from `Serializer.serializeMap`.
  */
@@ -9,13 +12,13 @@ interface SerializeMap<Ok, E>
     /**
      * Serialize a map key.
      */
-    fun <T> serializeKey(key: T): Result<Unit>
+    fun <T> serializeKey(key: T): SerdeResult<Unit>
         where T : Serialize
 
     /**
      * Serialize a map value.
      */
-    fun <T> serializeValue(value: T): Result<Unit>
+    fun <T> serializeValue(value: T): SerdeResult<Unit>
         where T : Serialize
 
     /**
@@ -24,10 +27,10 @@ interface SerializeMap<Ok, E>
     fun <K, V> serializeEntry(
         key: K,
         value: V,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where K : Serialize,
               V : Serialize =
-        runCatching {
+        serdeCatching {
             serializeKey(key).getOrThrow()
             serializeValue(value).getOrThrow()
         }
@@ -35,5 +38,5 @@ interface SerializeMap<Ok, E>
     /**
      * Finish serializing a map.
      */
-    fun end(): Result<Ok>
+    fun end(): SerdeResult<Ok>
 }
