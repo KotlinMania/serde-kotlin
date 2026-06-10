@@ -1,6 +1,7 @@
 // port-lint: source serde_core/src/private/seed.rs
 package io.github.kotlinmania.serde.core.`private`
 
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.core.de.Deserialize
 import io.github.kotlinmania.serde.core.de.DeserializeSeed
 import io.github.kotlinmania.serde.core.de.Deserializer
@@ -13,7 +14,7 @@ import io.github.kotlinmania.serde.core.de.Deserializer
 class InPlaceSeed<T>(
     var value: T,
 ) : DeserializeSeed<Unit> where T : Deserialize<T> {
-    override fun <D> deserialize(deserializer: D): Result<Unit>
+    override fun <D> deserialize(deserializer: D): SerdeResult<Unit>
         where D : Deserializer =
         value.deserializeInPlace(deserializer) { value = it }
 }

@@ -4,6 +4,8 @@ package io.github.kotlinmania.serde.serdederive.src.internals
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.syn.SynError
 
 /**
@@ -64,13 +66,13 @@ class Ctxt private constructor(
     /**
      * Consume this object, producing a formatted error string if there are errors.
      */
-    fun check(): Result<Unit> {
+    fun check(): SerdeResult<Unit> {
         val collected = requireNotNull(errors)
         errors = null
 
         val iterator = collected.iterator()
         if (!iterator.hasNext()) {
-            return Result.success(Unit)
+            return SerdeResult.success(Unit)
         }
 
         val combined = iterator.next()
@@ -78,6 +80,6 @@ class Ctxt private constructor(
             combined.combine(rest)
         }
 
-        return Result.failure(combined)
+        return SerdeResult.failure(SerdeError(combined.message ?: combined.toString()))
     }
 }

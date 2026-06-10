@@ -1,6 +1,9 @@
 // port-lint: source serde_core/src/ser/impls.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -72,57 +75,57 @@ public class ImplsTest {
 private data object TestError : Error
 
 private open class FailingSerializer : Serializer<String, TestError> {
-    protected fun <T> unexpected(): Result<T> = Result.failure(AssertionError("unexpected serializer method"))
+    protected fun <T> unexpected(): SerdeResult<T> = SerdeResult.failure(SerdeError("unexpected serializer method"))
 
-    override fun serializeBool(v: Boolean): Result<String> = unexpected()
+    override fun serializeBool(v: Boolean): SerdeResult<String> = unexpected()
 
-    override fun serializeI8(v: Byte): Result<String> = unexpected()
+    override fun serializeI8(v: Byte): SerdeResult<String> = unexpected()
 
-    override fun serializeI16(v: Short): Result<String> = unexpected()
+    override fun serializeI16(v: Short): SerdeResult<String> = unexpected()
 
-    override fun serializeI32(v: Int): Result<String> = unexpected()
+    override fun serializeI32(v: Int): SerdeResult<String> = unexpected()
 
-    override fun serializeI64(v: Long): Result<String> = unexpected()
+    override fun serializeI64(v: Long): SerdeResult<String> = unexpected()
 
-    override fun serializeI128(value: String): Result<String> = unexpected()
+    override fun serializeI128(value: String): SerdeResult<String> = unexpected()
 
-    override fun serializeU8(v: UByte): Result<String> = unexpected()
+    override fun serializeU8(v: UByte): SerdeResult<String> = unexpected()
 
-    override fun serializeU16(v: UShort): Result<String> = unexpected()
+    override fun serializeU16(v: UShort): SerdeResult<String> = unexpected()
 
-    override fun serializeU32(v: UInt): Result<String> = unexpected()
+    override fun serializeU32(v: UInt): SerdeResult<String> = unexpected()
 
-    override fun serializeU64(v: ULong): Result<String> = unexpected()
+    override fun serializeU64(v: ULong): SerdeResult<String> = unexpected()
 
-    override fun serializeF32(v: Float): Result<String> = unexpected()
+    override fun serializeF32(v: Float): SerdeResult<String> = unexpected()
 
-    override fun serializeF64(v: Double): Result<String> = unexpected()
+    override fun serializeF64(v: Double): SerdeResult<String> = unexpected()
 
-    override fun serializeChar(v: Char): Result<String> = unexpected()
+    override fun serializeChar(v: Char): SerdeResult<String> = unexpected()
 
-    override fun serializeStr(v: String): Result<String> = unexpected()
+    override fun serializeStr(v: String): SerdeResult<String> = unexpected()
 
-    override fun serializeBytes(v: ByteArray): Result<String> = unexpected()
+    override fun serializeBytes(v: ByteArray): SerdeResult<String> = unexpected()
 
-    override fun serializeNone(): Result<String> = unexpected()
+    override fun serializeNone(): SerdeResult<String> = unexpected()
 
-    override fun <T> serializeSome(value: T): Result<String>
+    override fun <T> serializeSome(value: T): SerdeResult<String>
         where T : Serialize = unexpected()
 
-    override fun serializeUnit(): Result<String> = unexpected()
+    override fun serializeUnit(): SerdeResult<String> = unexpected()
 
-    override fun serializeUnitStruct(name: String): Result<String> = unexpected()
+    override fun serializeUnitStruct(name: String): SerdeResult<String> = unexpected()
 
     override fun serializeUnitVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): Result<String> = unexpected()
+    ): SerdeResult<String> = unexpected()
 
     override fun <T> serializeNewtypeStruct(
         name: String,
         value: T,
-    ): Result<String>
+    ): SerdeResult<String>
         where T : Serialize = unexpected()
 
     override fun <T> serializeNewtypeVariant(
@@ -130,57 +133,57 @@ private open class FailingSerializer : Serializer<String, TestError> {
         variantIndex: UInt,
         variant: String,
         value: T,
-    ): Result<String>
+    ): SerdeResult<String>
         where T : Serialize = unexpected()
 
-    override fun serializeSeq(len: Int?): Result<SerializeSeq<String, TestError>> = unexpected()
+    override fun serializeSeq(len: Int?): SerdeResult<SerializeSeq<String, TestError>> = unexpected()
 
-    override fun serializeTuple(len: Int): Result<SerializeTuple<String, TestError>> = unexpected()
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<String, TestError>> = unexpected()
 
     override fun serializeTupleStruct(
         name: String,
         len: Int,
-    ): Result<SerializeTupleStruct<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeTupleStruct<String, TestError>> = unexpected()
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeTupleVariant<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeTupleVariant<String, TestError>> = unexpected()
 
-    override fun serializeMap(len: Int?): Result<SerializeMap<String, TestError>> = unexpected()
+    override fun serializeMap(len: Int?): SerdeResult<SerializeMap<String, TestError>> = unexpected()
 
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): Result<SerializeStruct<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeStruct<String, TestError>> = unexpected()
 
     override fun serializeStructVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): Result<SerializeStructVariant<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeStructVariant<String, TestError>> = unexpected()
 }
 
 private class StructRecordingSerializer : FailingSerializer() {
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): Result<SerializeStruct<String, TestError>> = Result.success(RecordingStruct(name, len))
+    ): SerdeResult<SerializeStruct<String, TestError>> = SerdeResult.success(RecordingStruct(name, len))
 }
 
 private class FieldRecordingSerializer : FailingSerializer() {
-    override fun serializeStr(v: String): Result<String> = Result.success(v)
+    override fun serializeStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-    override fun serializeU32(v: UInt): Result<String> = Result.success(v.toString())
+    override fun serializeU32(v: UInt): SerdeResult<String> = SerdeResult.success(v.toString())
 
-    override fun serializeU64(v: ULong): Result<String> = Result.success(v.toString())
+    override fun serializeU64(v: ULong): SerdeResult<String> = SerdeResult.success(v.toString())
 }
 
 private class TupleRecordingSerializer : FailingSerializer() {
-    override fun serializeTuple(len: Int): Result<SerializeTuple<String, TestError>> = Result.success(RecordingTuple(len))
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<String, TestError>> = SerdeResult.success(RecordingTuple(len))
 }
 
 private class RecordingTuple(
@@ -188,16 +191,17 @@ private class RecordingTuple(
 ) : SerializeTuple<String, TestError> {
     private val elements = mutableListOf<String>()
 
-    override fun <T> serializeElement(value: T): Result<Unit>
+    override fun <T> serializeElement(value: T): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             if (elements.size == len) {
                 throw AssertionError("too many elements")
             }
             elements += value.serialize(FieldRecordingSerializer()).getOrThrow()
         }
 
-    override fun end(): Result<String> = Result.success(elements.joinToString(separator = ",", prefix = "Tuple$len(", postfix = ")"))
+    override fun end(): SerdeResult<String> =
+        SerdeResult.success(elements.joinToString(separator = ",", prefix = "Tuple$len(", postfix = ")"))
 }
 
 private class RecordingStruct(
@@ -209,17 +213,17 @@ private class RecordingStruct(
     override fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize =
-        runCatching {
+        serdeCatching {
             if (fields.size == len) {
                 throw AssertionError("too many fields")
             }
             fields += key to value.serialize(FieldRecordingSerializer()).getOrThrow()
         }
 
-    override fun end(): Result<String> =
-        Result.success(fields.joinToString(separator = ",", prefix = "$name(", postfix = ")") { (key, value) -> "$key=$value" })
+    override fun end(): SerdeResult<String> =
+        SerdeResult.success(fields.joinToString(separator = ",", prefix = "$name(", postfix = ")") { (key, value) -> "$key=$value" })
 }
 
 private fun formatSerialize(value: Serialize): String {
@@ -231,6 +235,6 @@ private fun formatSerialize(value: Serialize): String {
 private data class ImplsLiteralSerialize(
     private val text: String,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): Result<Ok>
+    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
         where E : Error = serializer.serializeStr(text)
 }

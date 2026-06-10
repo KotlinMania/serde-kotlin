@@ -1,6 +1,8 @@
 // port-lint: source serde_core/src/ser/mod.rs
 package io.github.kotlinmania.serde.core.ser
 
+import io.github.kotlinmania.serde.SerdeResult
+
 /**
  * Returned from `Serializer.serializeStruct`.
  */
@@ -12,7 +14,7 @@ interface SerializeStruct<Ok, E>
     fun <T> serializeField(
         key: String,
         value: T,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where T : Serialize
 
     /**
@@ -20,12 +22,10 @@ interface SerializeStruct<Ok, E>
      *
      * The default implementation does nothing.
      */
-    fun skipField(key: String): Result<Unit> {
-        return Result.success(Unit)
-    }
+    fun skipField(key: String): SerdeResult<Unit> = SerdeResult.success(Unit)
 
     /**
      * Finish serializing a class.
      */
-    fun end(): Result<Ok>
+    fun end(): SerdeResult<Ok>
 }

@@ -1,11 +1,13 @@
 // port-lint: source test_suite/tests/test_enum_untagged.rs
 package io.github.kotlinmania.serde.`private`
 
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.core.de.DeserializeSeed
 import io.github.kotlinmania.serde.core.de.Deserializer
 import io.github.kotlinmania.serde.core.de.EnumAccess
 import io.github.kotlinmania.serde.core.de.Visitor
 import io.github.kotlinmania.serde.core.`private`.Content
+import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -80,41 +82,41 @@ public class TestEnumUntaggedDeTest {
 private data object UIntVisitor : Visitor<UInt> {
     override fun expecting(): String = "a `UInt` value"
 
-    override fun visitU32(v: UInt): Result<UInt> = Result.success(v)
+    override fun visitU32(v: UInt): SerdeResult<UInt> = SerdeResult.success(v)
 }
 
 private data object StringVisitor : Visitor<String> {
     override fun expecting(): String = "a string"
 
-    override fun visitStr(v: String): Result<String> = Result.success(v)
+    override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-    override fun visitBorrowedStr(v: String): Result<String> = Result.success(v)
+    override fun visitBorrowedStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-    override fun visitString(v: String): Result<String> = Result.success(v)
+    override fun visitString(v: String): SerdeResult<String> = SerdeResult.success(v)
 }
 
 private data object UnitVisitor : Visitor<Unit> {
     override fun expecting(): String = "unit"
 
-    override fun visitUnit(): Result<Unit> = Result.success(Unit)
+    override fun visitUnit(): SerdeResult<Unit> = SerdeResult.success(Unit)
 }
 
 private data object NullableUIntVisitor : Visitor<UInt?> {
     override fun expecting(): String = "an optional `UInt` value"
 
-    override fun visitNone(): Result<UInt?> = Result.success(null)
+    override fun visitNone(): SerdeResult<UInt?> = SerdeResult.success(null)
 
-    override fun visitUnit(): Result<UInt?> = Result.success(null)
+    override fun visitUnit(): SerdeResult<UInt?> = SerdeResult.success(null)
 
-    override fun <D> visitSome(deserializer: D): Result<UInt?>
+    override fun <D> visitSome(deserializer: D): SerdeResult<UInt?>
         where D : Deserializer =
-        runCatching<UInt?> { deserializer.deserializeU32(UIntVisitor).getOrThrow() }
+        serdeCatching<UInt?> { deserializer.deserializeU32(UIntVisitor).getOrThrow() }
 }
 
 private data object NewtypeUIntVisitor : Visitor<UInt> {
     override fun expecting(): String = "a newtype struct"
 
-    override fun <D> visitNewtypeStruct(deserializer: D): Result<UInt>
+    override fun <D> visitNewtypeStruct(deserializer: D): SerdeResult<UInt>
         where D : Deserializer =
         deserializer.deserializeU32(UIntVisitor)
 }
@@ -122,17 +124,19 @@ private data object NewtypeUIntVisitor : Visitor<UInt> {
 private data object EnumNewtypeVisitor : Visitor<Pair<String, UInt>> {
     override fun expecting(): String = "an enum"
 
-    override fun <A> visitEnum(access: A): Result<Pair<String, UInt>>
+    override fun <A> visitEnum(access: A): SerdeResult<Pair<String, UInt>>
         where A : EnumAccess =
-        runCatching {
+        serdeCatching {
             val (variant, variantAccess) =
-                access.variantSeed(
+                access
+                    .variantSeed(
                         seed { deserializer ->
                             deserializer.deserializeString(StringVisitor)
                         },
                     ).getOrThrow()
             val value =
-                variantAccess.newtypeVariantSeed(
+                variantAccess
+                    .newtypeVariantSeed(
                         seed { deserializer ->
                             deserializer.deserializeU32(UIntVisitor)
                         },
@@ -141,8 +145,8 @@ private data object EnumNewtypeVisitor : Visitor<Pair<String, UInt>> {
         }
 }
 
-private fun <T> seed(block: (Deserializer) -> Result<T>): DeserializeSeed<T> =
+private fun <T> seed(block: (Deserializer) -> SerdeResult<T>): DeserializeSeed<T> =
     object : DeserializeSeed<T> {
-        override fun <D> deserialize(deserializer: D): Result<T>
+        override fun <D> deserialize(deserializer: D): SerdeResult<T>
             where D : Deserializer = block(deserializer)
     }

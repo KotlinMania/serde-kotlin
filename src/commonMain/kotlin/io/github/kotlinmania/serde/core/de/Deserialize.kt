@@ -1,6 +1,9 @@
 // port-lint: source serde_core/src/de/mod.rs
 package io.github.kotlinmania.serde.core.de
 
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
+
 /**
  * A **data structure** that can be deserialized from any data format supported by Serde.
  */
@@ -8,7 +11,7 @@ interface Deserialize<T> {
     /**
      * Deserialize this value from the given Serde deserializer.
      */
-    fun <D> deserialize(deserializer: D): Result<T>
+    fun <D> deserialize(deserializer: D): SerdeResult<T>
         where D : Deserializer
 
     /**
@@ -22,9 +25,9 @@ interface Deserialize<T> {
     fun <D> deserializeInPlace(
         deserializer: D,
         place: (T) -> Unit,
-    ): Result<Unit>
+    ): SerdeResult<Unit>
         where D : Deserializer =
-        runCatching {
+        serdeCatching {
             place(deserialize(deserializer).getOrThrow())
         }
 }

@@ -1,6 +1,10 @@
 // port-lint: source serde_derive/src/internals/case.rs
 package io.github.kotlinmania.serde.serdederive.src.internals
 
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
+
 /**
  * Code to convert declaration names such as `myField` or `MyType` to the case used in the
  * serialized source, for example `my-field` or `MY_FIELD`.
@@ -129,13 +133,13 @@ enum class RenameRule {
         }
 
     companion object {
-        fun fromStr(renameAllStr: String): Result<RenameRule> {
+        fun fromStr(renameAllStr: String): SerdeResult<RenameRule> {
             for ((name, rule) in RENAME_RULES) {
                 if (renameAllStr == name) {
-                    return Result.success(rule)
+                    return SerdeResult.success(rule)
                 }
             }
-            return Result.failure(ParseError(renameAllStr))
+            return SerdeResult.failure(SerdeError(ParseError(renameAllStr).message))
         }
     }
 }
@@ -169,8 +173,8 @@ class ParseError(
                 }
             }
 
-    fun fmt(formatter: Appendable): Result<Unit> =
-        runCatching {
+    fun fmt(formatter: Appendable): SerdeResult<Unit> =
+        serdeCatching {
             formatter.append(message)
             Unit
         }

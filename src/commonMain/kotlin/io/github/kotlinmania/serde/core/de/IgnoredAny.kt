@@ -1,6 +1,9 @@
 // port-lint: source serde_core/src/de/ignored_any.rs
 package io.github.kotlinmania.serde.core.de
 
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
+
 /**
  * An efficient way of discarding data from a deserializer.
  *
@@ -32,20 +35,20 @@ package io.github.kotlinmania.serde.core.de
  *     override fun expecting(): String =
  *         "a sequence in which we care about element $n"
  *
- *     override fun <A> visitSeq(access: A): Result<T>
+ *     override fun <A> visitSeq(access: A): SerdeResult<T>
  *         where A : SeqAccess =
- *         runCatching {
+ *         serdeCatching {
  *             for (index in 0 until n) {
  *                 if (seq.nextElement(IgnoredAny).getOrThrow() == null) {
- *                     throw Error.invalidLength(index, this)
+ *                     throw SerdeException(Error.invalidLength(index, this))
  *                 }
  *             }
  *
  *             val nth = seq.nextElement(object : DeserializeSeed<T> {
- *                 override fun <D> deserialize(deserializer: D): Result<T>
+ *                 override fun <D> deserialize(deserializer: D): SerdeResult<T>
  *                     where D : Deserializer =
  *                     deserializeValue.deserialize(deserializer)
- *             }).getOrThrow() ?: throw Error.invalidLength(n, this)
+ *             }).getOrThrow() ?: throw SerdeException(Error.invalidLength(n, this))
  *
  *             while (access.nextElement(IgnoredAny).getOrThrow() != null) {
  *                 // ignore
@@ -54,7 +57,7 @@ package io.github.kotlinmania.serde.core.de
  *             nth
  *         }
  *
- *     override fun <D> deserialize(deserializer: D): Result<T>
+ *     override fun <D> deserialize(deserializer: D): SerdeResult<T>
  *         where D : Deserializer =
  *         deserializer.deserializeSeq(this)
  * }
@@ -68,61 +71,62 @@ package io.github.kotlinmania.serde.core.de
 data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, DeserializeSeed<IgnoredAny> {
     override fun expecting(): String = "anything at all"
 
-    override fun visitBool(v: Boolean): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitBool(v: Boolean): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitI64(v: Long): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitI64(v: Long): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitI128(v: String): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitI128(v: String): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitU64(v: ULong): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitU64(v: ULong): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitU128(v: String): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitU128(v: String): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitF64(v: Double): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitF64(v: Double): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitStr(v: String): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitStr(v: String): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun visitNone(): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitNone(): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun <D> visitSome(deserializer: D): Result<IgnoredAny>
+    override fun <D> visitSome(deserializer: D): SerdeResult<IgnoredAny>
         where D : Deserializer = deserialize(deserializer)
 
-    override fun <D> visitNewtypeStruct(deserializer: D): Result<IgnoredAny>
+    override fun <D> visitNewtypeStruct(deserializer: D): SerdeResult<IgnoredAny>
         where D : Deserializer = deserialize(deserializer)
 
-    override fun visitUnit(): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitUnit(): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun <A> visitSeq(access: A): Result<IgnoredAny>
+    override fun <A> visitSeq(access: A): SerdeResult<IgnoredAny>
         where A : SeqAccess =
-        runCatching {
+        serdeCatching {
             while (access.nextElement(IgnoredAny).getOrThrow() != null) {
                 // Gobble
             }
             IgnoredAny
         }
 
-    override fun <A> visitMap(access: A): Result<IgnoredAny>
+    override fun <A> visitMap(access: A): SerdeResult<IgnoredAny>
         where A : MapAccess =
-        runCatching {
+        serdeCatching {
             while (access.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
                 // Gobble
             }
             IgnoredAny
         }
 
-    override fun visitBytes(v: ByteArray): Result<IgnoredAny> = Result.success(IgnoredAny)
+    override fun visitBytes(v: ByteArray): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun <A> visitEnum(access: A): Result<IgnoredAny>
+    override fun <A> visitEnum(access: A): SerdeResult<IgnoredAny>
         where A : EnumAccess =
-        runCatching {
-            access.variantSeed(IgnoredAny)
+        serdeCatching {
+            access
+                .variantSeed(IgnoredAny)
                 .getOrThrow()
                 .second
                 .newtypeVariant(IgnoredAny)
                 .getOrThrow()
         }
 
-    override fun <D> deserialize(deserializer: D): Result<IgnoredAny>
+    override fun <D> deserialize(deserializer: D): SerdeResult<IgnoredAny>
         where D : Deserializer =
         deserializer.deserializeIgnoredAny(IgnoredAny)
 }

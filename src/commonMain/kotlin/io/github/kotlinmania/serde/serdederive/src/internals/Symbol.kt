@@ -1,14 +1,16 @@
 // port-lint: source serde_derive/src/internals/symbol.rs
 package io.github.kotlinmania.serde.serdederive.src.internals
 
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Path
 
 class Symbol(
     val value: String,
 ) {
-    fun fmt(formatter: Appendable): Result<Unit> =
-        runCatching {
+    fun fmt(formatter: Appendable): SerdeResult<Unit> =
+        serdeCatching {
             formatter.append(value)
             Unit
         }

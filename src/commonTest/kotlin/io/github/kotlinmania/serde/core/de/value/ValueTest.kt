@@ -1,6 +1,7 @@
 // port-lint: source serde_core/src/de/value.rs
 package io.github.kotlinmania.serde.core.de.value
 
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.core.de.DeserializeSeed
 import io.github.kotlinmania.serde.core.de.Deserializer
 import io.github.kotlinmania.serde.core.de.Visitor
@@ -31,13 +32,13 @@ public class ValueTest {
 private data object StringKindVisitor : Visitor<String> {
     override fun expecting(): String = "a string"
 
-    override fun visitStr(v: String): Result<String> = Result.success("str:$v")
+    override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success("str:$v")
 
-    override fun visitString(v: String): Result<String> = Result.success("string:$v")
+    override fun visitString(v: String): SerdeResult<String> = SerdeResult.success("string:$v")
 }
 
 private data object StringSeed : DeserializeSeed<String> {
-    override fun <D> deserialize(deserializer: D): Result<String>
+    override fun <D> deserialize(deserializer: D): SerdeResult<String>
         where D : Deserializer =
         deserializer.deserializeStr(StringOnlyVisitor)
 }
@@ -45,5 +46,5 @@ private data object StringSeed : DeserializeSeed<String> {
 private data object StringOnlyVisitor : Visitor<String> {
     override fun expecting(): String = "a string"
 
-    override fun visitStr(v: String): Result<String> = Result.success(v)
+    override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 }
