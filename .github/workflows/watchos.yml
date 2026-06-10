@@ -28,12 +28,9 @@ jobs:
       - name: Build and test watchOS targets
         run: >
           ./gradlew
-          watchosArm64Binaries
-          watchosArm64TestBinaries
-          watchosDeviceArm64Binaries
-          watchosDeviceArm64TestBinaries
-          watchosSimulatorArm64Binaries
-          watchosSimulatorArm64TestBinaries
+          compileKotlinWatchosArm64
+          compileKotlinWatchosDeviceArm64
+          compileKotlinWatchosSimulatorArm64
           watchosSimulatorArm64Test
           --no-configuration-cache
 

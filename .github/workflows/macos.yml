@@ -28,8 +28,7 @@ jobs:
       - name: Build and test macOS targets
         run: >
           ./gradlew
-          macosArm64Binaries
-          macosArm64TestBinaries
+          compileKotlinMacosArm64
           macosArm64Test
           --no-configuration-cache
 
