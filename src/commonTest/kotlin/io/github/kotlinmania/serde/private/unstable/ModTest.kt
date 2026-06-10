@@ -170,8 +170,7 @@ private class TokenStructVariant(
         serdeCatching {
             tokens += Token.Str(key)
             value.serialize(TokenSerializer(tokens)).getOrThrow()
-            Unit
-        }
+        }.map { }
 
     override fun end(): SerdeResult<List<Token>> =
         serdeCatching {

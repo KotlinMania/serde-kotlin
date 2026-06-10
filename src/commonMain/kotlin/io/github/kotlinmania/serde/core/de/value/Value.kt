@@ -1346,9 +1346,7 @@ class SeqDeserializer<T : IntoDeserializer>(
     fun end(): SerdeResult<Unit> =
         serdeCatching {
             val remaining = iter.asSequence().count()
-            if (remaining == 0) {
-                Unit
-            } else {
+            if (remaining != 0) {
                 throw SerdeException(DeError.invalidLength(count + remaining, ExpectedInSeq(count)))
             }
         }
@@ -1618,9 +1616,7 @@ class MapDeserializer<K, V>(
     fun end(): SerdeResult<Unit> =
         serdeCatching {
             val remaining = iter.asSequence().count()
-            if (remaining == 0) {
-                Unit
-            } else {
+            if (remaining != 0) {
                 throw SerdeException(DeError.invalidLength(count + remaining, ExpectedInMap(count)))
             }
         }
