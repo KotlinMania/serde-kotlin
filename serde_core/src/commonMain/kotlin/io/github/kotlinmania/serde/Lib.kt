@@ -88,10 +88,10 @@ package io.github.kotlinmania.serde
 // The upstream lib.rs re-exports core serde types from the serdeCore module.
 // Per the workspace mod.rs/root re-export rule, no Kotlin typealias is introduced.
 // Callers target the upstream symbol directly:
-//   Deserialize  -> io.github.kotlinmania.serde.core.de.Deserialize
-//   Deserializer -> io.github.kotlinmania.serde.core.de.Deserializer
-//   Serialize    -> io.github.kotlinmania.serde.core.ser.Serialize
-//   Serializer   -> io.github.kotlinmania.serde.core.ser.Serializer
+//   Deserialize  -> io.github.kotlinmania.serdecore.de.Deserialize
+//   Deserializer -> io.github.kotlinmania.serdecore.de.Deserializer
+//   Serialize    -> io.github.kotlinmania.serdecore.ser.Serialize
+//   Serializer   -> io.github.kotlinmania.serdecore.ser.Serializer
 // optionally with `import <fqn> as <Name>` if the caller wants the bare name.
 //
 // Callers migrated:

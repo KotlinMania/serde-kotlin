@@ -1,5 +1,5 @@
 // port-lint: source serde_core/src/ser/fmt.rs
-package io.github.kotlinmania.serde.core.ser
+package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeResult
 import kotlin.test.Test

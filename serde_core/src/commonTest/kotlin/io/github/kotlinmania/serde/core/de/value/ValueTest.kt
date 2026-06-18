@@ -1,10 +1,10 @@
 // port-lint: source serde_core/src/de/value.rs
-package io.github.kotlinmania.serde.core.de.value
+package io.github.kotlinmania.serdecore.de.value
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.core.de.DeserializeSeed
-import io.github.kotlinmania.serde.core.de.Deserializer
-import io.github.kotlinmania.serde.core.de.Visitor
+import io.github.kotlinmania.serdecore.de.DeserializeSeed
+import io.github.kotlinmania.serdecore.de.Deserializer
+import io.github.kotlinmania.serdecore.de.Visitor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

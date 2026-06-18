@@ -1,0 +1,30 @@
+// Klib ABI Dump
+// Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, wasmWasi, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <serde-kotlin:serde>
+final enum class io.github.kotlinmania.serde.private/TagContentOtherField : kotlin/Enum<io.github.kotlinmania.serde.private/TagContentOtherField> { // io.github.kotlinmania.serde.private/TagContentOtherField|null[0]
+    enum entry Content // io.github.kotlinmania.serde.private/TagContentOtherField.Content|null[0]
+    enum entry Other // io.github.kotlinmania.serde.private/TagContentOtherField.Other|null[0]
+    enum entry Tag // io.github.kotlinmania.serde.private/TagContentOtherField.Tag|null[0]
+
+    final val entries // io.github.kotlinmania.serde.private/TagContentOtherField.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.kotlinmania.serde.private/TagContentOtherField> // io.github.kotlinmania.serde.private/TagContentOtherField.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.kotlinmania.serde.private/TagContentOtherField // io.github.kotlinmania.serde.private/TagContentOtherField.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.kotlinmania.serde.private/TagContentOtherField> // io.github.kotlinmania.serde.private/TagContentOtherField.values|values#static(){}[0]
+}
+
+final enum class io.github.kotlinmania.serde.private/TagOrContentField : kotlin/Enum<io.github.kotlinmania.serde.private/TagOrContentField> { // io.github.kotlinmania.serde.private/TagOrContentField|null[0]
+    enum entry Content // io.github.kotlinmania.serde.private/TagOrContentField.Content|null[0]
+    enum entry Tag // io.github.kotlinmania.serde.private/TagOrContentField.Tag|null[0]
+
+    final val entries // io.github.kotlinmania.serde.private/TagOrContentField.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.kotlinmania.serde.private/TagOrContentField> // io.github.kotlinmania.serde.private/TagOrContentField.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.kotlinmania.serde.private/TagOrContentField // io.github.kotlinmania.serde.private/TagOrContentField.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.kotlinmania.serde.private/TagOrContentField> // io.github.kotlinmania.serde.private/TagOrContentField.values|values#static(){}[0]
+}

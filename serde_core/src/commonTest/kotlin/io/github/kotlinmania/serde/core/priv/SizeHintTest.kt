@@ -1,5 +1,5 @@
 // port-lint: source serde_core/src/private/size_hint.rs
-package io.github.kotlinmania.serde.core.`private`
+package io.github.kotlinmania.serdecore.`private`
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

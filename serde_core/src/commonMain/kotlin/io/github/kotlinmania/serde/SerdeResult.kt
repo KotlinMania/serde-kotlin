@@ -186,8 +186,8 @@ class SerdeError(
          * Raised when a `Deserialize` receives a type different from what it was expecting.
          */
         fun invalidType(
-            unexp: io.github.kotlinmania.serde.core.de.Unexpected,
-            exp: io.github.kotlinmania.serde.core.de.Expected,
+            unexp: io.github.kotlinmania.serdecore.de.Unexpected,
+            exp: io.github.kotlinmania.serdecore.de.Expected,
         ): SerdeError = custom("invalid type: $unexp, expected ${exp.expecting()}")
 
         /**
@@ -195,8 +195,8 @@ class SerdeError(
          * other reason.
          */
         fun invalidValue(
-            unexp: io.github.kotlinmania.serde.core.de.Unexpected,
-            exp: io.github.kotlinmania.serde.core.de.Expected,
+            unexp: io.github.kotlinmania.serdecore.de.Unexpected,
+            exp: io.github.kotlinmania.serdecore.de.Expected,
         ): SerdeError = custom("invalid value: $unexp, expected ${exp.expecting()}")
 
         /**
@@ -205,7 +205,7 @@ class SerdeError(
          */
         fun invalidLength(
             len: Int,
-            exp: io.github.kotlinmania.serde.core.de.Expected,
+            exp: io.github.kotlinmania.serdecore.de.Expected,
         ): SerdeError = custom("invalid length $len, expected ${exp.expecting()}")
 
         /**
@@ -218,7 +218,7 @@ class SerdeError(
             if (expected.isEmpty()) {
                 custom("unknown variant `$variant`, there are no variants")
             } else {
-                custom("unknown variant `$variant`, expected ${io.github.kotlinmania.serde.core.de.OneOf(expected)}")
+                custom("unknown variant `$variant`, expected ${io.github.kotlinmania.serdecore.de.OneOf(expected)}")
             }
 
         /**
@@ -231,7 +231,7 @@ class SerdeError(
             if (expected.isEmpty()) {
                 custom("unknown field `$field`, there are no fields")
             } else {
-                custom("unknown field `$field`, expected ${io.github.kotlinmania.serde.core.de.OneOf(expected)}")
+                custom("unknown field `$field`, expected ${io.github.kotlinmania.serdecore.de.OneOf(expected)}")
             }
 
         /**

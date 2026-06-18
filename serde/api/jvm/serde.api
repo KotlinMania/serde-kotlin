@@ -1,0 +1,17 @@
+public final class io/github/kotlinmania/serde/private/TagContentOtherField : java/lang/Enum {
+	public static final field Content Lio/github/kotlinmania/serde/private/TagContentOtherField;
+	public static final field Other Lio/github/kotlinmania/serde/private/TagContentOtherField;
+	public static final field Tag Lio/github/kotlinmania/serde/private/TagContentOtherField;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kotlinmania/serde/private/TagContentOtherField;
+	public static fun values ()[Lio/github/kotlinmania/serde/private/TagContentOtherField;
+}
+
+public final class io/github/kotlinmania/serde/private/TagOrContentField : java/lang/Enum {
+	public static final field Content Lio/github/kotlinmania/serde/private/TagOrContentField;
+	public static final field Tag Lio/github/kotlinmania/serde/private/TagOrContentField;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kotlinmania/serde/private/TagOrContentField;
+	public static fun values ()[Lio/github/kotlinmania/serde/private/TagOrContentField;
+}
+

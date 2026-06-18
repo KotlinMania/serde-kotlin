@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.github.kotlinmania.serde.core"
+        namespace = "io.github.kotlinmania.serdecore"
     }
 
 }

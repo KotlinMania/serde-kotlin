@@ -1,0 +1,1826 @@
+public final class io/github/kotlinmania/serde/Integer128Kt {
+	public static final fun serdeIfInteger128 (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class io/github/kotlinmania/serde/LibKt {
+	public static final fun __requireSerdeNotSerdeCore ()V
+}
+
+public final class io/github/kotlinmania/serde/SerdeError {
+	public static final field Companion Lio/github/kotlinmania/serde/SerdeError$Companion;
+	public fun <init> (Ljava/lang/String;Lio/github/kotlinmania/serde/SerdeError;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/kotlinmania/serde/SerdeError;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getSource ()Lio/github/kotlinmania/serde/SerdeError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serde/SerdeError$Companion {
+	public final fun custom (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun duplicateField (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun invalidLength (ILio/github/kotlinmania/serdecore/de/Expected;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun invalidType (Lio/github/kotlinmania/serdecore/de/Unexpected;Lio/github/kotlinmania/serdecore/de/Expected;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun invalidValue (Lio/github/kotlinmania/serdecore/de/Unexpected;Lio/github/kotlinmania/serdecore/de/Expected;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun missingField (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun unknownField (Ljava/lang/String;Ljava/util/List;)Lio/github/kotlinmania/serde/SerdeError;
+	public final fun unknownVariant (Ljava/lang/String;Ljava/util/List;)Lio/github/kotlinmania/serde/SerdeError;
+}
+
+public final class io/github/kotlinmania/serde/SerdeException : java/lang/IllegalStateException {
+	public fun <init> (Lio/github/kotlinmania/serde/SerdeError;)V
+	public final fun getError ()Lio/github/kotlinmania/serde/SerdeError;
+}
+
+public abstract class io/github/kotlinmania/serde/SerdeResult {
+	public static final field Companion Lio/github/kotlinmania/serde/SerdeResult$Companion;
+	public final fun exceptionOrNull ()Lio/github/kotlinmania/serde/SerdeError;
+	public final fun flatMap (Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun fold (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun getOrDefault (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrElse (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun getOrNull ()Ljava/lang/Object;
+	public final fun getOrThrow ()Ljava/lang/Object;
+	public final fun isFailure ()Z
+	public final fun isSuccess ()Z
+	public final fun map (Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun onFailure (Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun onSuccess (Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun recoverCatching (Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serde/SerdeResult$Companion {
+	public final fun failure (Lio/github/kotlinmania/serde/SerdeError;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun success (Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serde/SerdeResult$Failure : io/github/kotlinmania/serde/SerdeResult {
+	public fun <init> (Lio/github/kotlinmania/serde/SerdeError;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lio/github/kotlinmania/serde/SerdeError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serde/SerdeResult$Success : io/github/kotlinmania/serde/SerdeResult {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serde/SerdeResultKt {
+	public static final fun serdeCatching (Lkotlin/jvm/functions/Function0;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ForwardToDeserializeAnyDeserializer : io/github/kotlinmania/serdecore/de/Deserializer {
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/BooleanDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/BooleanDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/BorrowedBytesDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/BorrowedBytesDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/BorrowedStrDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/BorrowedStrDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/CharDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/CharDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/Deserialize {
+	public abstract fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeInPlace (Lio/github/kotlinmania/serdecore/de/Deserializer;Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/DeserializeOwned : io/github/kotlinmania/serdecore/de/Deserialize {
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/DeserializeSeed {
+	public abstract fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/Deserializer {
+	public abstract fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun isHumanReadable ()Z
+}
+
+public final class io/github/kotlinmania/serdecore/de/DurationDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/DurationDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/EnumAccess {
+	public abstract fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/Expected {
+	public abstract fun expecting ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/F32Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/F32Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/F64Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/F64Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/I128Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/I128Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/I16Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/I16Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/I32Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/I32Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/I64Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/I64Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/I8Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/I8Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/IgnoredAny : io/github/kotlinmania/serdecore/de/Deserialize, io/github/kotlinmania/serdecore/de/DeserializeSeed, io/github/kotlinmania/serdecore/de/Visitor {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/IgnoredAny;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun expecting ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun visitBool (Z)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitEnum (Lio/github/kotlinmania/serdecore/de/EnumAccess;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitF64 (D)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI64 (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitMap (Lio/github/kotlinmania/serdecore/de/MapAccess;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitNewtypeStruct (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitNone ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitSeq (Lio/github/kotlinmania/serdecore/de/SeqAccess;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitSome (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU64-VKZWuLQ (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitUnit ()Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/ImplsKt {
+	public static final fun mutableListDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun mutableMapDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun nullableDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun pairDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun tripleDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public abstract fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/MapAccess {
+	public fun nextEntrySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun nextKeySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/SeqAccess {
+	public fun nextElement (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun nextElementSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/SerdeDeserializationException : java/lang/IllegalStateException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class io/github/kotlinmania/serdecore/de/StringDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/StringDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeInPlace (Lio/github/kotlinmania/serdecore/de/Deserializer;Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/SystemTimeDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/SystemTimeDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/U128Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/U128Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/U16Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/U16Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/U32Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/U32Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/U64Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/U64Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/U8Deserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/U8Deserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Bool : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lio/github/kotlinmania/serdecore/de/Unexpected$Bool;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$Bool;ZILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$Bool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Bytes : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> ([B)V
+	public final fun component1 ()[B
+	public final fun copy ([B)Lio/github/kotlinmania/serdecore/de/Unexpected$Bytes;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$Bytes;[BILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$Bytes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()[B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$CharValue : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> (C)V
+	public final fun component1 ()C
+	public final fun copy (C)Lio/github/kotlinmania/serdecore/de/Unexpected$CharValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$CharValue;CILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$CharValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()C
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Enum : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$Enum;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$FloatValue : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Lio/github/kotlinmania/serdecore/de/Unexpected$FloatValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$FloatValue;DILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$FloatValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Map : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$Map;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$NewtypeStruct : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$NewtypeStruct;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$NewtypeVariant : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$NewtypeVariant;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Option : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$Option;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Other : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/Unexpected$Other;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$Other;Ljava/lang/String;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$Other;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Seq : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$Seq;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Signed : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/github/kotlinmania/serdecore/de/Unexpected$Signed;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$Signed;JILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$Signed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Str : io/github/kotlinmania/serdecore/de/Unexpected {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/Unexpected$Str;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/Unexpected$Str;Ljava/lang/String;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$Str;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$StructVariant : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$StructVariant;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$TupleVariant : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$TupleVariant;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$UnitValue : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$UnitValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$UnitVariant : io/github/kotlinmania/serdecore/de/Unexpected {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/Unexpected$UnitVariant;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/Unexpected$Unsigned : io/github/kotlinmania/serdecore/de/Unexpected {
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-s-VKNKU ()J
+	public final fun copy-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/Unexpected$Unsigned;
+	public static synthetic fun copy-VKZWuLQ$default (Lio/github/kotlinmania/serdecore/de/Unexpected$Unsigned;JILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/Unexpected$Unsigned;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue-s-VKNKU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/UnitDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/UnitDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/VariantAccess {
+	public fun newtypeVariant (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun newtypeVariantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun structVariant (Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun tupleVariant (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun unitVariant ()Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/de/Visitor : io/github/kotlinmania/serdecore/de/Expected {
+	public abstract fun expecting ()Ljava/lang/String;
+	public fun privateVisitUntaggedOption (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitBool (Z)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitBorrowedBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitBorrowedStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitByteBuf ([B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitChar (C)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitEnum (Lio/github/kotlinmania/serdecore/de/EnumAccess;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitF32 (F)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitF64 (D)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI16 (S)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI32 (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI64 (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitI8 (B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitMap (Lio/github/kotlinmania/serdecore/de/MapAccess;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitNewtypeStruct (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitNone ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitSeq (Lio/github/kotlinmania/serdecore/de/SeqAccess;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitSome (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitString (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU16-xj2QHRw (S)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU32-WZ4Q5Ns (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU64-VKZWuLQ (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitU8-7apg3OU (B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun visitUnit ()Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BoolDeserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/BoolDeserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BoolDeserializer$Companion {
+	public final fun new (Z)Lio/github/kotlinmania/serdecore/de/value/BoolDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BorrowedBytesDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/BorrowedBytesDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BorrowedBytesDeserializer$Companion {
+	public final fun new ([B)Lio/github/kotlinmania/serdecore/de/value/BorrowedBytesDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BorrowedStrDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/BorrowedStrDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BorrowedStrDeserializer$Companion {
+	public final fun new (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/BorrowedStrDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BytesDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/BytesDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/BytesDeserializer$Companion {
+	public final fun new ([B)Lio/github/kotlinmania/serdecore/de/value/BytesDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/CharDeserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/CharDeserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/CharDeserializer$Companion {
+	public final fun new (C)Lio/github/kotlinmania/serdecore/de/value/CharDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/CowStrDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/CowStrDeserializer$Companion {
+	public final fun borrowed (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer;
+	public final fun new (Ljava/lang/String;Z)Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer;
+	public static synthetic fun new$default (Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer$Companion;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer;
+	public final fun owned (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer$Companion;
+	public fun <init> (Lio/github/kotlinmania/serdecore/de/EnumAccess;)V
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer$Companion {
+	public final fun new (Lio/github/kotlinmania/serdecore/de/EnumAccess;)Lio/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/F32Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/F32Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/F32Deserializer$Companion {
+	public final fun new (F)Lio/github/kotlinmania/serdecore/de/value/F32Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/F64Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/F64Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/F64Deserializer$Companion {
+	public final fun new (D)Lio/github/kotlinmania/serdecore/de/value/F64Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I128Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/I128Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I128Deserializer$Companion {
+	public final fun new (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/I128Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I16Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/I16Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I16Deserializer$Companion {
+	public final fun new (S)Lio/github/kotlinmania/serdecore/de/value/I16Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I32Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/I32Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I32Deserializer$Companion {
+	public final fun new (I)Lio/github/kotlinmania/serdecore/de/value/I32Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I64Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/I64Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I64Deserializer$Companion {
+	public final fun new (J)Lio/github/kotlinmania/serdecore/de/value/I64Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I8Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/I8Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/I8Deserializer$Companion {
+	public final fun new (B)Lio/github/kotlinmania/serdecore/de/value/I8Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/IsizeDeserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/IsizeDeserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/IsizeDeserializer$Companion {
+	public final fun new (J)Lio/github/kotlinmania/serdecore/de/value/IsizeDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/MapAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/MapAccessDeserializer$Companion;
+	public fun <init> (Lio/github/kotlinmania/serdecore/de/MapAccess;)V
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/MapAccessDeserializer$Companion {
+	public final fun new (Lio/github/kotlinmania/serdecore/de/MapAccess;)Lio/github/kotlinmania/serdecore/de/value/MapAccessDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/MapDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer, io/github/kotlinmania/serdecore/de/MapAccess, io/github/kotlinmania/serdecore/de/SeqAccess {
+	public fun <init> (Ljava/util/Iterator;)V
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun nextElementSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun nextKeySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/NeverDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+}
+
+public abstract class io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public fun <init> ()V
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	protected abstract fun getValue ()Ljava/lang/Object;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	protected abstract fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/SeqAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/SeqAccessDeserializer$Companion;
+	public fun <init> (Lio/github/kotlinmania/serdecore/de/SeqAccess;)V
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/SeqAccessDeserializer$Companion {
+	public final fun new (Lio/github/kotlinmania/serdecore/de/SeqAccess;)Lio/github/kotlinmania/serdecore/de/value/SeqAccessDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/SeqDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer, io/github/kotlinmania/serdecore/de/SeqAccess {
+	public fun <init> (Ljava/util/Iterator;)V
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun nextElementSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/StrDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/StrDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/StrDeserializer$Companion {
+	public final fun new (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/StrDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/StringDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/StringDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/StringDeserializer$Companion {
+	public final fun new (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/StringDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U128Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/U128Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U128Deserializer$Companion {
+	public final fun new (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/U128Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U16Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/U16Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U16Deserializer$Companion {
+	public final fun new-xj2QHRw (S)Lio/github/kotlinmania/serdecore/de/value/U16Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U32Deserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/U32Deserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U32Deserializer$Companion {
+	public final fun new-WZ4Q5Ns (I)Lio/github/kotlinmania/serdecore/de/value/U32Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U64Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/U64Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U64Deserializer$Companion {
+	public final fun new-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/U64Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U8Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/U8Deserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/U8Deserializer$Companion {
+	public final fun new-7apg3OU (B)Lio/github/kotlinmania/serdecore/de/value/U8Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/UnitDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/UnitDeserializer$Companion;
+	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeBytes (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeChar (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeEnum (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeF64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeI8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIdentifier (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeIgnoredAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeMap (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeOption (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeSeq (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStr (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeString (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeStruct (Ljava/lang/String;Ljava/util/List;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTuple (ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeTupleStruct (Ljava/lang/String;ILio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU128 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU16 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU32 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU64 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/UnitDeserializer$Companion {
+	public final fun new ()Lio/github/kotlinmania/serdecore/de/value/UnitDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/UsizeDeserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/UsizeDeserializer$Companion;
+	public synthetic fun getValue ()Ljava/lang/Object;
+	public synthetic fun visit (Lio/github/kotlinmania/serdecore/de/Visitor;Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/UsizeDeserializer$Companion {
+	public final fun new-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/UsizeDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/ValueKt {
+	public static final fun intoDeserializer (B)Lio/github/kotlinmania/serdecore/de/value/I8Deserializer;
+	public static final fun intoDeserializer (C)Lio/github/kotlinmania/serdecore/de/value/CharDeserializer;
+	public static final fun intoDeserializer (D)Lio/github/kotlinmania/serdecore/de/value/F64Deserializer;
+	public static final fun intoDeserializer (F)Lio/github/kotlinmania/serdecore/de/value/F32Deserializer;
+	public static final fun intoDeserializer (I)Lio/github/kotlinmania/serdecore/de/value/I32Deserializer;
+	public static final fun intoDeserializer (J)Lio/github/kotlinmania/serdecore/de/value/I64Deserializer;
+	public static final fun intoDeserializer (Ljava/lang/Iterable;)Lio/github/kotlinmania/serdecore/de/value/SeqDeserializer;
+	public static final fun intoDeserializer (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/StringDeserializer;
+	public static final fun intoDeserializer (Ljava/util/Map;)Lio/github/kotlinmania/serdecore/de/value/MapDeserializer;
+	public static final fun intoDeserializer (Lkotlin/Unit;)Lio/github/kotlinmania/serdecore/de/value/UnitDeserializer;
+	public static final fun intoDeserializer (S)Lio/github/kotlinmania/serdecore/de/value/I16Deserializer;
+	public static final fun intoDeserializer (Z)Lio/github/kotlinmania/serdecore/de/value/BoolDeserializer;
+	public static final fun intoDeserializer ([B)Lio/github/kotlinmania/serdecore/de/value/BytesDeserializer;
+	public static final fun intoDeserializer-7apg3OU (B)Lio/github/kotlinmania/serdecore/de/value/U8Deserializer;
+	public static final fun intoDeserializer-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/U64Deserializer;
+	public static final fun intoDeserializer-WZ4Q5Ns (I)Lio/github/kotlinmania/serdecore/de/value/U32Deserializer;
+	public static final fun intoDeserializer-xj2QHRw (S)Lio/github/kotlinmania/serdecore/de/value/U16Deserializer;
+	public static final fun intoI128Deserializer (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/I128Deserializer;
+	public static final fun intoIsizeDeserializer (J)Lio/github/kotlinmania/serdecore/de/value/IsizeDeserializer;
+	public static final fun intoU128Deserializer (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/U128Deserializer;
+	public static final fun intoUsizeDeserializer-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/UsizeDeserializer;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/priv/Content {
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Bool : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lio/github/kotlinmania/serdecore/priv/Content$Bool;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Bool;ZILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Bool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$ByteBuf : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> ([B)V
+	public final fun component1 ()[B
+	public final fun copy ([B)Lio/github/kotlinmania/serdecore/priv/Content$ByteBuf;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$ByteBuf;[BILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$ByteBuf;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()[B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Bytes : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> ([B)V
+	public final fun component1 ()[B
+	public final fun copy ([B)Lio/github/kotlinmania/serdecore/priv/Content$Bytes;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Bytes;[BILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Bytes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()[B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Char : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (C)V
+	public final fun component1 ()C
+	public final fun copy (C)Lio/github/kotlinmania/serdecore/priv/Content$Char;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Char;CILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Char;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()C
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$F32 : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/github/kotlinmania/serdecore/priv/Content$F32;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$F32;FILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$F32;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$F64 : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Lio/github/kotlinmania/serdecore/priv/Content$F64;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$F64;DILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$F64;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$I16 : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (S)V
+	public final fun component1 ()S
+	public final fun copy (S)Lio/github/kotlinmania/serdecore/priv/Content$I16;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$I16;SILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$I16;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()S
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$I32 : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/github/kotlinmania/serdecore/priv/Content$I32;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$I32;IILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$I32;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$I64 : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/github/kotlinmania/serdecore/priv/Content$I64;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$I64;JILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$I64;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$I8 : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (B)V
+	public final fun component1 ()B
+	public final fun copy (B)Lio/github/kotlinmania/serdecore/priv/Content$I8;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$I8;BILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$I8;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Map : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/kotlinmania/serdecore/priv/Content$Map;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Map;Ljava/util/List;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Map;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Newtype : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Lio/github/kotlinmania/serdecore/priv/Content;)V
+	public final fun component1 ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public final fun copy (Lio/github/kotlinmania/serdecore/priv/Content;)Lio/github/kotlinmania/serdecore/priv/Content$Newtype;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Newtype;Lio/github/kotlinmania/serdecore/priv/Content;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Newtype;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$None : io/github/kotlinmania/serdecore/priv/Content {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/priv/Content$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Seq : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/kotlinmania/serdecore/priv/Content$Seq;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Seq;Ljava/util/List;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Seq;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Some : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Lio/github/kotlinmania/serdecore/priv/Content;)V
+	public final fun component1 ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public final fun copy (Lio/github/kotlinmania/serdecore/priv/Content;)Lio/github/kotlinmania/serdecore/priv/Content$Some;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Some;Lio/github/kotlinmania/serdecore/priv/Content;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Some;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Str : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/priv/Content$Str;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$Str;Ljava/lang/String;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$Str;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$StringValue : io/github/kotlinmania/serdecore/priv/Content {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/priv/Content$StringValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/Content$StringValue;Ljava/lang/String;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$StringValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$U16 : io/github/kotlinmania/serdecore/priv/Content {
+	public synthetic fun <init> (SLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-Mh2AYeg ()S
+	public final fun copy-xj2QHRw (S)Lio/github/kotlinmania/serdecore/priv/Content$U16;
+	public static synthetic fun copy-xj2QHRw$default (Lio/github/kotlinmania/serdecore/priv/Content$U16;SILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$U16;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue-Mh2AYeg ()S
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$U32 : io/github/kotlinmania/serdecore/priv/Content {
+	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-pVg5ArA ()I
+	public final fun copy-WZ4Q5Ns (I)Lio/github/kotlinmania/serdecore/priv/Content$U32;
+	public static synthetic fun copy-WZ4Q5Ns$default (Lio/github/kotlinmania/serdecore/priv/Content$U32;IILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$U32;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue-pVg5ArA ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$U64 : io/github/kotlinmania/serdecore/priv/Content {
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-s-VKNKU ()J
+	public final fun copy-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/priv/Content$U64;
+	public static synthetic fun copy-VKZWuLQ$default (Lio/github/kotlinmania/serdecore/priv/Content$U64;JILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$U64;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue-s-VKNKU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$U8 : io/github/kotlinmania/serdecore/priv/Content {
+	public synthetic fun <init> (BLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-w2LRezQ ()B
+	public final fun copy-7apg3OU (B)Lio/github/kotlinmania/serdecore/priv/Content$U8;
+	public static synthetic fun copy-7apg3OU$default (Lio/github/kotlinmania/serdecore/priv/Content$U8;BILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/Content$U8;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue-w2LRezQ ()B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/Content$Unit : io/github/kotlinmania/serdecore/priv/Content {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/priv/Content$Unit;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/ContentMapEntry {
+	public fun <init> (Lio/github/kotlinmania/serdecore/priv/Content;Lio/github/kotlinmania/serdecore/priv/Content;)V
+	public final fun component1 ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public final fun component2 ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public final fun copy (Lio/github/kotlinmania/serdecore/priv/Content;Lio/github/kotlinmania/serdecore/priv/Content;)Lio/github/kotlinmania/serdecore/priv/ContentMapEntry;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/ContentMapEntry;Lio/github/kotlinmania/serdecore/priv/Content;Lio/github/kotlinmania/serdecore/priv/Content;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/ContentMapEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/priv/Content;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/InPlaceSeed : io/github/kotlinmania/serdecore/de/DeserializeSeed {
+	public fun <init> (Lio/github/kotlinmania/serdecore/de/Deserialize;)V
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public final fun setValue (Lio/github/kotlinmania/serdecore/de/Deserialize;)V
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/priv/IteratorWithSizeHint : java/util/Iterator, kotlin/jvm/internal/markers/KMappedMarker {
+	public abstract fun sizeHint ()Lkotlin/Pair;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/SizeHintKt {
+	public static final fun fromBounds (Lio/github/kotlinmania/serdecore/priv/IteratorWithSizeHint;)Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/StringKt {
+	public static final fun fromUtf8Lossy ([B)Ljava/lang/String;
+	public static final fun fromUtf8LossyNoAlloc ([B)Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/FormatterSerializer : io/github/kotlinmania/serdecore/ser/Serializer {
+	public fun <init> (Ljava/lang/Appendable;)V
+	public fun collectStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeBool (Z)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeChar (C)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeF32 (F)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeF64 (D)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeI128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeI16 (S)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeI32 (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeI64 (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeI8 (B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeMap (Ljava/lang/Integer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeNewtypeVariant-Yuhug_o (Ljava/lang/String;ILjava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeNone ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeSeq (Ljava/lang/Integer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeSome (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeStruct (Ljava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeStructVariant-Yuhug_o (Ljava/lang/String;ILjava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeTuple (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeTupleStruct (Ljava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeTupleVariant-Yuhug_o (Ljava/lang/String;ILjava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeU128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeU16-xj2QHRw (S)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeU32-WZ4Q5Ns (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeU64-VKZWuLQ (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeU8-7apg3OU (B)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeUnit ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeUnitStruct (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeUnitVariant-OsBMiQA (Ljava/lang/String;ILjava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/ImplsKt {
+	public static final fun serialize (BLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (CLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (DLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (FLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (ILio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (JLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/ser/Serialize;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Ljava/lang/Iterable;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Ljava/util/Map;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lkotlin/Pair;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lkotlin/Triple;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lkotlin/Unit;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lkotlin/time/Instant;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (SLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (ZLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize ([BLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize ([Lio/github/kotlinmania/serdecore/ser/Serialize;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize-0ky7B_Q (BLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize-4PLdz1A (JLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize-VtjQ1oo (JLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize-qim9Vi0 (ILio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize-vckuEUM (SLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/Impossible : io/github/kotlinmania/serdecore/ser/SerializeMap, io/github/kotlinmania/serdecore/ser/SerializeSeq, io/github/kotlinmania/serdecore/ser/SerializeStruct, io/github/kotlinmania/serdecore/ser/SerializeStructVariant, io/github/kotlinmania/serdecore/ser/SerializeTuple, io/github/kotlinmania/serdecore/ser/SerializeTupleStruct, io/github/kotlinmania/serdecore/ser/SerializeTupleVariant {
+	public fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeElement (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeField (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeField (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeKey (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeValue (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun skipField (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/PhantomData : io/github/kotlinmania/serdecore/ser/Serialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/ser/PhantomData;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/Reverse : io/github/kotlinmania/serdecore/ser/Serialize {
+	public fun <init> (Lio/github/kotlinmania/serdecore/ser/Serialize;)V
+	public final fun component1 ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public final fun copy (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serdecore/ser/Reverse;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Reverse;Lio/github/kotlinmania/serdecore/ser/Serialize;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Reverse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/Saturating : io/github/kotlinmania/serdecore/ser/Serialize {
+	public fun <init> (Lio/github/kotlinmania/serdecore/ser/Serialize;)V
+	public final fun component1 ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public final fun copy (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serdecore/ser/Saturating;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Saturating;Lio/github/kotlinmania/serdecore/ser/Serialize;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Saturating;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/SerdeSerializationException : java/lang/IllegalStateException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/Serialize {
+	public abstract fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeMap {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeEntry (Lio/github/kotlinmania/serdecore/ser/Serialize;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeKey (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeValue (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeSeq {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeElement (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeStruct {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeField (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun skipField (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeStructVariant {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeField (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun skipField (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeTuple {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeElement (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeTupleStruct {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeField (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeTupleVariant {
+	public abstract fun end ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeField (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/ser/Serializer {
+	public fun collectMap (Ljava/lang/Iterable;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun collectSeq (Ljava/lang/Iterable;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun collectStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun isHumanReadable ()Z
+	public abstract fun serializeBool (Z)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeChar (C)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeF32 (F)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeF64 (D)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeI128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeI16 (S)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeI32 (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeI64 (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeI8 (B)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeMap (Ljava/lang/Integer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeNewtypeStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeNewtypeVariant-Yuhug_o (Ljava/lang/String;ILjava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeNone ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeSeq (Ljava/lang/Integer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeSome (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeStruct (Ljava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeStructVariant-Yuhug_o (Ljava/lang/String;ILjava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeTuple (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeTupleStruct (Ljava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeTupleVariant-Yuhug_o (Ljava/lang/String;ILjava/lang/String;I)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun serializeU128 (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeU16-xj2QHRw (S)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeU32-WZ4Q5Ns (I)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeU64-VKZWuLQ (J)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeU8-7apg3OU (B)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeUnit ()Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeUnitStruct (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public abstract fun serializeUnitVariant-OsBMiQA (Ljava/lang/String;ILjava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public final class io/github/kotlinmania/serdecore/ser/Wrapping : io/github/kotlinmania/serdecore/ser/Serialize {
+	public fun <init> (Lio/github/kotlinmania/serdecore/ser/Serialize;)V
+	public final fun component1 ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public final fun copy (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serdecore/ser/Wrapping;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Wrapping;Lio/github/kotlinmania/serdecore/ser/Serialize;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Wrapping;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun toString ()Ljava/lang/String;
+}
+
