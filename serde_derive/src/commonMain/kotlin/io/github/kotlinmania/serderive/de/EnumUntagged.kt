@@ -12,12 +12,16 @@ import io.github.kotlinmania.serderive.de.tuple
 use crate.de.{
     effective_style, expr_is_missing, unwrap_to_variant_closure, Parameters, StructForm, TupleForm,
 };
-import io.github.kotlinmania.serderive.fragment.{Expr, Fragment}
-import io.github.kotlinmania.serderive.internals.ast.{Field, Style, Variant}
+import io.github.kotlinmania.serderive.fragment.Expr
+import io.github.kotlinmania.serderive.fragment.Fragment
+import io.github.kotlinmania.serderive.internals.ast.Field
+import io.github.kotlinmania.serderive.internals.ast.Style
+import io.github.kotlinmania.serderive.internals.ast.Variant
 import io.github.kotlinmania.serderive.internals.attr
 import io.github.kotlinmania.serderive.private
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.{quote, quote_spanned}
+import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.quote.quote_spanned
 import io.github.kotlinmania.syn.spanned.Spanned
 
 /// Generates `Deserialize.deserialize` body for an `enum Enum {...}` with ``#`[serde(untagged)]` attribute
@@ -66,7 +70,7 @@ pub(super) fun deserialize_variant(
     variant: Variant,
     cattrs: attr.Container,
 ) : Fragment {
-    if val Some(path) = variant.attrs.deserialize_with() {
+    if val path = variant.attrs.deserialize_with() {
         val unwrap_fn = unwrap_to_variant_closure(params, variant, false);
         return quote_block! {
             _serde.#private.Result.map(#path(__deserializer), #unwrap_fn)
@@ -76,32 +80,32 @@ pub(super) fun deserialize_variant(
     val variant_ident = variant.ident;
 
     when effective_style(variant) {
-        Style.Unit => {
+        Style.Unit -> {
             val this_value = params.this_value;
             val type_name = params.type_name();
             val variant_name = variant.ident.to_string();
             val default = variant.fields.first().map(|field| {
                 val default = Expr(expr_is_missing(field, cattrs));
-                quote!((#default))
+                quote(""" (#default """))
             });
             quote_expr! {
                 when _serde.Deserializer.deserialize_any(
                     __deserializer,
                     _serde.#private.de.UntaggedUnitVisitor.new(#type_name, #variant_name)
                 ) {
-                    _serde.#private.Ok(()) => _serde.#private.Ok(#this_value.#variant_ident #default),
-                    _serde.#private.Err(__err) => _serde.#private.Err(__err),
+                    _serde.#private.Ok(()) -> _serde.#private.Ok(#this_value.#variant_ident #default),
+                    _serde.#private.Err(__err) -> _serde.#private.Err(__err),
                 }
             }
         }
-        Style.Newtype => deserialize_newtype_variant(variant_ident, params, variant.fields[0]),
-        Style.Tuple => tuple.deserialize(
+        Style.Newtype -> deserialize_newtype_variant(variant_ident, params, variant.fields[0]),
+        Style.Tuple -> tuple.deserialize(
             params,
             variant.fields,
             cattrs,
             TupleForm.Untagged(variant_ident),
         ),
-        Style.Struct => struct_.deserialize(
+        Style.Struct -> struct_.deserialize(
             params,
             variant.fields,
             cattrs,
@@ -120,14 +124,14 @@ pub(super) fun deserialize_newtype_variant(
     val this_value = params.this_value;
     val field_ty = field.ty;
     when field.attrs.deserialize_with() {
-        None => {
+        null -> {
             val span = field.original.span();
-            val func = quote_spanned!(span=> .deserialize);
+            val func = quote_spanned(span, """.deserialize """);
             quote_expr! {
                 _serde.#private.Result.map(#func(__deserializer), #this_value.#variant_ident)
             }
         }
-        Some(path) => {
+        path -> {
             quote_block! {
                 val __value: _serde.#private.Result<#field_ty, _> = #path(__deserializer);
                 _serde.#private.Result.map(__value, #this_value.#variant_ident)

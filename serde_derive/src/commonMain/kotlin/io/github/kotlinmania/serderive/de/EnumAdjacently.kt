@@ -9,12 +9,16 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.serderive.de.enum_
 import io.github.kotlinmania.serderive.de.enum_untagged
-import io.github.kotlinmania.serderive.de.{field_i, Parameters}
-import io.github.kotlinmania.serderive.fragment.{Fragment, Match}
-import io.github.kotlinmania.serderive.internals.ast.{Style, Variant}
+import io.github.kotlinmania.serderive.de.field_i
+import io.github.kotlinmania.serderive.de.Parameters
+import io.github.kotlinmania.serderive.fragment.Fragment
+import io.github.kotlinmania.serderive.fragment.Match
+import io.github.kotlinmania.serderive.internals.ast.Style
+import io.github.kotlinmania.serderive.internals.ast.Variant
 import io.github.kotlinmania.serderive.internals.attr
 import io.github.kotlinmania.serderive.private
-import io.github.kotlinmania.quote.{quote, quote_spanned}
+import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.quote.quote_spanned
 import io.github.kotlinmania.syn.spanned.Spanned
 
 /// Generates `Deserialize.deserialize` body for an `enum Enum {...}` with ``#`[serde(tag, content)]` attributes
@@ -42,9 +46,9 @@ pub(super) fun deserialize(
 
         val block = Match(enum_untagged.deserialize_variant(params, variant, cattrs));
 
-        variant_arms.push(quote {
-            __Field.#variant_index => #block
-        });
+        variant_arms.push(quote("""
+            __Field.#variant_index -> #block
+        """));
     }
 
     val rust_name = params.type_name();
@@ -56,15 +60,15 @@ pub(super) fun deserialize(
     // If unknown fields are allowed, we pick the visitor that can step over
     // those. Otherwise we pick the visitor that fails on unknown keys.
     val field_visitor_ty = if deny_unknown_fields {
-        quote { _serde.#private.de.TagOrContentFieldVisitor }
+        quote(""" _serde.#private.de.TagOrContentFieldVisitor """)
     } else {
-        quote { _serde.#private.de.TagContentOtherFieldVisitor }
+        quote(""" _serde.#private.de.TagContentOtherFieldVisitor """)
     };
 
-    val var missing_content = quote {
+    val var missing_content = quote("""
         _serde.#private.Err(.missing_field(#content))
-    };
-    val var missing_content_fallthrough = quote!();
+    """);
+    val var missing_content_fallthrough = quote("""  """);
     val var missing_content_arms = Vec.new();
     for (i, variant) in variants.iter().enumerate() {
         if variant.attrs.skip_deserializing() {
@@ -74,50 +78,50 @@ pub(super) fun deserialize(
         val variant_ident = variant.ident;
 
         val arm = when variant.style {
-            Style.Unit => quote {
+            Style.Unit -> quote("""
                 _serde.#private.Ok(#this_value.#variant_ident)
-            },
-            Style.Newtype if variant.attrs.deserialize_with().is_none() => {
+            """),
+            Style.Newtype if variant.attrs.deserialize_with().is_none() -> {
                 val span = variant.original.span();
-                val func = quote_spanned!(span=> _serde.#private.de.missing_field);
-                quote {
+                val func = quote_spanned(span, """_serde.#private.de.missing_field """);
+                quote("""
                     #func(#content).map(#this_value.#variant_ident)
-                }
+                """)
             }
-            _ => {
-                missing_content_fallthrough = quote!(_ => #missing_content);
+            _ -> {
+                missing_content_fallthrough = quote(""" _ -> #missing_content """);
                 continue;
             }
         };
-        missing_content_arms.push(quote {
-            __Field.#variant_index => #arm,
-        });
+        missing_content_arms.push(quote("""
+            __Field.#variant_index -> #arm,
+        """));
     }
 
     if !missing_content_arms.is_empty() {
-        missing_content = quote {
+        missing_content = quote("""
             when __field {
                 #(#missing_content_arms)*
                 #missing_content_fallthrough
             }
-        };
+        """);
     }
 
     // Advance the map by one key, returning early in case of error.
-    val next_key = quote {
+    val next_key = quote("""
         _serde.de.MapAccess.next_key_seed(var __map, #field_visitor_ty {
             tag: #tag,
             content: #content,
         })?
-    };
+    """);
 
-    val variant_from_map = quote {
+    val variant_from_map = quote("""
         _serde.de.MapAccess.next_value_seed(var __map, _serde.#private.de.AdjacentlyTaggedEnumVariantSeed.<__Field> {
             enum_name: #rust_name,
             variants: VARIANTS,
             fields_enum: _serde.#private.PhantomData
         })?
-    };
+    """);
 
     // When allowing unknown fields, we want to transparently step through keys
     // we don't care about until we find `tag`, `content`, or run out of keys.
@@ -125,19 +129,19 @@ pub(super) fun deserialize(
         next_key
     } else {
         quote!({
-            val var __rk : _serde.#private._serde.#private.de.TagOrContentField? = _serde.#private.None;
-            while val _serde.#private.Some(__k) = #next_key {
+            val var __rk : _serde.#private._serde.#private.de.TagOrContentField? = _serde.#private.null;
+            while val _serde.#private.__k = #next_key {
                 when __k {
-                    _serde.#private.de.TagContentOtherField.Other => {
+                    _serde.#private.de.TagContentOtherField.Other -> {
                         val _ = _serde.de.MapAccess.next_value.<_serde.de.IgnoredAny>(var __map)?;
                         continue;
                     },
-                    _serde.#private.de.TagContentOtherField.Tag => {
-                        __rk = _serde.#private.Some(_serde.#private.de.TagOrContentField.Tag);
+                    _serde.#private.de.TagContentOtherField.Tag -> {
+                        __rk = _serde.#private._serde.#private.de.TagOrContentField.Tag;
                         break;
                     }
-                    _serde.#private.de.TagContentOtherField.Content => {
-                        __rk = _serde.#private.Some(_serde.#private.de.TagOrContentField.Content);
+                    _serde.#private.de.TagContentOtherField.Content -> {
+                        __rk = _serde.#private._serde.#private.de.TagOrContentField.Content;
                         break;
                     }
                 }
@@ -150,24 +154,24 @@ pub(super) fun deserialize(
     // Step through remaining keys, looking for duplicates of previously-seen
     // keys. When unknown fields are denied, any key that isn't a duplicate will
     // at this point immediately produce an error.
-    val visit_remaining_keys = quote {
-        match #next_relevant_key {
-            _serde.#private.Some(_serde.#private.de.TagOrContentField.Tag) => {
+    val visit_remaining_keys = quote("""
+        when (#next_relevant_key ) {
+            _serde.#private._serde.#private.de.TagOrContentField.Tag -> {
                 _serde.#private.Err(.duplicate_field(#tag))
             }
-            _serde.#private.Some(_serde.#private.de.TagOrContentField.Content) => {
+            _serde.#private._serde.#private.de.TagOrContentField.Content -> {
                 _serde.#private.Err(.duplicate_field(#content))
             }
-            _serde.#private.None => _serde.#private.Ok(__ret),
+            _serde.#private.null -> _serde.#private.Ok(__ret),
         }
-    };
+    """);
 
     val finish_content_then_tag = if variant_arms.is_empty() {
-        quote {
-            match #variant_from_map {}
-        }
+        quote("""
+            when (#variant_from_map ) {}
+        """)
     } else {
-        quote {
+        quote("""
             val __seed = __Seed {
                 variant: #variant_from_map,
                 marker: _serde.#private.PhantomData,
@@ -177,7 +181,7 @@ pub(super) fun deserialize(
             val __ret = _serde.de.DeserializeSeed.deserialize(__seed, __deserializer)?;
             // Visit remaining keys, looking for duplicates.
             #visit_remaining_keys
-        }
+        """)
     };
 
     quote_block! {
@@ -196,7 +200,7 @@ pub(super) fun deserialize(
         impl #de_impl_generics _serde.de.DeserializeSeed<#delife> for __Seed #de_ty_generics #where_clause {
             type Value = #this_type #ty_generics;
 
-            fun deserialize<__D>(self, __deserializer: __D) -> _serde.#private.Result<Self.Value, __D.Error>
+            fun deserialize<__D>(self, __deserializer: __D) -> _serde.#private.Result<this.Value, __D.Error>
             where
                 __D: _serde.Deserializer<#delife>,
             {
@@ -220,24 +224,24 @@ pub(super) fun deserialize(
                 _serde.#private.Formatter.write_str(__formatter, #expecting)
             }
 
-            fun visit_map<__A>(self, var __map: __A) -> _serde.#private.Result<Self.Value, __A.Error>
+            fun visit_map<__A>(self, var __map: __A) -> _serde.#private.Result<this.Value, __A.Error>
             where
                 __A: _serde.de.MapAccess<#delife>,
             {
                 // Visit the first relevant key.
-                match #next_relevant_key {
+                when (#next_relevant_key ) {
                     // First key is the tag.
-                    _serde.#private.Some(_serde.#private.de.TagOrContentField.Tag) => {
+                    _serde.#private._serde.#private.de.TagOrContentField.Tag -> {
                         // Parse the tag.
                         val __field = #variant_from_map;
                         // Visit the second key.
-                        match #next_relevant_key {
+                        when (#next_relevant_key ) {
                             // Second key is a duplicate of the tag.
-                            _serde.#private.Some(_serde.#private.de.TagOrContentField.Tag) => {
+                            _serde.#private._serde.#private.de.TagOrContentField.Tag -> {
                                 _serde.#private.Err(.duplicate_field(#tag))
                             }
                             // Second key is the content.
-                            _serde.#private.Some(_serde.#private.de.TagOrContentField.Content) => {
+                            _serde.#private._serde.#private.de.TagOrContentField.Content -> {
                                 val __ret = _serde.de.MapAccess.next_value_seed(var __map,
                                     __Seed {
                                         variant: __field,
@@ -248,43 +252,43 @@ pub(super) fun deserialize(
                                 #visit_remaining_keys
                             }
                             // There is no second key; might be okay if the we have a unit variant.
-                            _serde.#private.None => #missing_content
+                            _serde.#private.null -> #missing_content
                         }
                     }
                     // First key is the content.
-                    _serde.#private.Some(_serde.#private.de.TagOrContentField.Content) => {
+                    _serde.#private._serde.#private.de.TagOrContentField.Content -> {
                         // Buffer up the content.
                         val __content = _serde.de.MapAccess.next_value_seed(var __map, _serde.#private.de.ContentVisitor.new())?;
                         // Visit the second key.
-                        match #next_relevant_key {
+                        when (#next_relevant_key ) {
                             // Second key is the tag.
-                            _serde.#private.Some(_serde.#private.de.TagOrContentField.Tag) => {
+                            _serde.#private._serde.#private.de.TagOrContentField.Tag -> {
                                 #finish_content_then_tag
                             }
                             // Second key is a duplicate of the content.
-                            _serde.#private.Some(_serde.#private.de.TagOrContentField.Content) => {
+                            _serde.#private._serde.#private.de.TagOrContentField.Content -> {
                                 _serde.#private.Err(.duplicate_field(#content))
                             }
                             // There is no second key.
-                            _serde.#private.None => {
+                            _serde.#private.null -> {
                                 _serde.#private.Err(.missing_field(#tag))
                             }
                         }
                     }
                     // There is no first key.
-                    _serde.#private.None => {
+                    _serde.#private.null -> {
                         _serde.#private.Err(.missing_field(#tag))
                     }
                 }
             }
 
-            fun visit_seq<__A>(self, var __seq: __A) -> _serde.#private.Result<Self.Value, __A.Error>
+            fun visit_seq<__A>(self, var __seq: __A) -> _serde.#private.Result<this.Value, __A.Error>
             where
                 __A: _serde.de.SeqAccess<#delife>,
             {
                 // Visit the first element - the tag.
                 when _serde.de.SeqAccess.next_element(var __seq) {
-                    _serde.#private.Ok(_serde.#private.Some(__variant)) => {
+                    _serde.#private.Ok(_serde.#private.__variant) -> {
                         // Visit the second element - the content.
                         when _serde.de.SeqAccess.next_element_seed(
                             var __seq,
@@ -294,19 +298,19 @@ pub(super) fun deserialize(
                                 lifetime: _serde.#private.PhantomData,
                             },
                         ) {
-                            _serde.#private.Ok(_serde.#private.Some(__ret)) => _serde.#private.Ok(__ret),
+                            _serde.#private.Ok(_serde.#private.__ret) -> _serde.#private.Ok(__ret),
                             // There is no second element.
-                            _serde.#private.Ok(_serde.#private.None) => {
+                            _serde.#private.Ok(_serde.#private.null) -> {
                                 _serde.#private.Err(_serde.de.Error.invalid_length(1, self))
                             }
-                            _serde.#private.Err(__err) => _serde.#private.Err(__err),
+                            _serde.#private.Err(__err) -> _serde.#private.Err(__err),
                         }
                     }
                     // There is no first element.
-                    _serde.#private.Ok(_serde.#private.None) => {
+                    _serde.#private.Ok(_serde.#private.null) -> {
                         _serde.#private.Err(_serde.de.Error.invalid_length(0, self))
                     }
-                    _serde.#private.Err(__err) => _serde.#private.Err(__err),
+                    _serde.#private.Err(__err) -> _serde.#private.Err(__err),
                 }
             }
         }

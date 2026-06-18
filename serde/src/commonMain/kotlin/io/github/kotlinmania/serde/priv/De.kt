@@ -4,13 +4,13 @@ package io.github.kotlinmania.serde.`private`
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.core.de.*
-import io.github.kotlinmania.serde.core.de.value.BytesDeserializer
-import io.github.kotlinmania.serde.core.de.value.SeqAccessDeserializer
-import io.github.kotlinmania.serde.core.de.value.intoDeserializer
-import io.github.kotlinmania.serde.core.priv.Content
-import io.github.kotlinmania.serde.core.priv.ContentMapEntry
-import io.github.kotlinmania.serde.core.priv.cautious
+import io.github.kotlinmania.serdecore.de.*
+import io.github.kotlinmania.serdecore.de.value.BytesDeserializer
+import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
+import io.github.kotlinmania.serdecore.de.value.intoDeserializer
+import io.github.kotlinmania.serdecore.priv.Content
+import io.github.kotlinmania.serdecore.priv.ContentMapEntry
+import io.github.kotlinmania.serdecore.priv.cautious
 import io.github.kotlinmania.serde.serdeCatching
 
 /**

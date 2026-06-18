@@ -9,10 +9,10 @@ public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream {
     val pretendFields = pretendFieldsUsed(cont, isPacked)
     val pretendVariants = pretendVariantsUsed(cont)
 
-    return quote {
+    return quote("""
         `#`pretendFields
         `#`pretendVariants
-    }
+    """)
 }
 
 private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
@@ -27,7 +27,7 @@ private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
                         pretendFieldsUsedStruct(cont, data.fields)
                     }
                 }
-                Style.Unit -> quote {}
+                Style.Unit -> quote("""""")
             }
         }
     }
@@ -40,12 +40,12 @@ private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): Token
     val members = fields.map { it.member }
     val placeholders = fields.indices.map { i -> formatIdent("__v`#`i") }
 
-    return quote {
-        match _serde.`#`private.None::<&`#`typeIdent `#`tyGenerics> {
-            _serde.`#`private.Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) => {}
-            _ => {}
+    return quote("""
+        when (_serde.`#`private.null::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde.`#`private.`#`typeIdent { `#`(`#`members: `#`placeholders,* }) -> {}
+            _ -> {}
         }
-    }
+    """)
 }
 
 private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>): TokenStream {
@@ -55,16 +55,16 @@ private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>):
     val members = fields.map { it.member }
     val private2 = private
 
-    return quote {
-        match _serde.`#`private.None::<&`#`typeIdent `#`tyGenerics> {
-            _serde.`#`private.Some(__v @ `#`typeIdent { `#`(`#`members: _),* }) => {
+    return quote("""
+        when (_serde.`#`private.null::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde.`#`private.__v @ `#`typeIdent { `#`(`#`members: _,* }) -> {
                 `#`(
                     let _ = _serde.`#`private2.ptr.addr_of!(__v.`#`members);
                 )*
             }
-            _ => {}
+            _ -> {}
         }
-    }
+    """)
 }
 
 private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): TokenStream {
@@ -85,20 +85,20 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
     }
 
     val private2 = private
-    return quote {
-        match _serde.`#`private.None::<&`#`typeIdent `#`tyGenerics> {
+    return quote("""
+        when (_serde.`#`private.null::<&`#`typeIdent `#`tyGenerics> ) {
             `#`(
-                _serde.`#`private2.Some(`#`patterns) => {}
+                _serde.`#`private2.`#`patterns -> {}
             )*
-            _ => {}
+            _ -> {}
         }
-    }
+    """)
 }
 
 private fun pretendVariantsUsed(cont: Container): TokenStream {
     val variants = when (val data = cont.data) {
         is Data.Enum -> data.variants
-        is Data.Struct -> return quote {}
+        is Data.Struct -> return quote("""""")
     }
 
     val typeIdent = cont.ident
@@ -119,11 +119,11 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
         }
 
         quote! {
-            match _serde.`#`private.None {
-                _serde.`#`private.Some((`#`(`#`placeholders,)*)) => {
+            when (_serde.`#`private.null ) {
+                _serde.`#`private.(`#`(`#`placeholders,*)) -> {
                     let _ = `#`typeIdent::`#`variantIdent `#`turbofish `#`pat;
                 }
-                _ => {}
+                _ -> {}
             }
         }
     }

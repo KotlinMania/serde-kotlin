@@ -160,7 +160,7 @@ public fun withBound(
 
         fun visitPathArguments(arguments: PathArguments) {
             when (arguments) {
-                is PathArguments.None -> {}
+                is PathArguments.null -> {}
                 is PathArguments.AngleBracketed -> {
                     for (arg in arguments.args) {
                         when (arg) {
@@ -234,7 +234,7 @@ public fun withBound(
             bounds = punctuated.Punctuated.fromList(listOf(
                 TypeParamBound.Trait(TraitBound(
                     parenToken = null,
-                    modifier = TraitBoundModifier.None,
+                    modifier = TraitBoundModifier.null,
                     lifetimes = null,
                     path = bound.clone()
                 ))
@@ -275,7 +275,7 @@ public fun withSelfBound(
             bounds = punctuated.Punctuated.fromList(listOf(
                 TypeParamBound.Trait(TraitBound(
                     parenToken = null,
-                    modifier = TraitBoundModifier.None,
+                    modifier = TraitBoundModifier.null,
                     lifetimes = null,
                     path = bound.clone()
                 ))

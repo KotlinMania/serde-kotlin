@@ -18,7 +18,7 @@ public fun check(cx: Ctxt, cont: Container, derive: Derive) {
 }
 
 private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
-    if (cont.attrs.default() == Default.None) {
+    if (cont.attrs.default() == Default.null) {
         val data = cont.data
         if (data is Data.Struct && data.style == Style.Tuple) {
             var firstDefaultIndex: Int? = null
@@ -26,7 +26,7 @@ private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
                 if (field.attrs.skipDeserializing()) {
                     continue
                 }
-                if (field.attrs.default() == Default.None) {
+                if (field.attrs.default() == Default.null) {
                     if (firstDefaultIndex != null) {
                         cx.errorSpannedBy(
                             field.ty,
@@ -47,7 +47,7 @@ private fun checkRemoteGeneric(cx: Ctxt, cont: Container) {
     val remote = cont.attrs.remote()
     if (remote != null) {
         val localHasGeneric = cont.generics.params.isNotEmpty()
-        val remoteHasGeneric = remote.segments.lastOrNull()?.arguments != syn.PathArguments.None
+        val remoteHasGeneric = remote.segments.lastOrNull()?.arguments != syn.PathArguments.null
         if (localHasGeneric && remoteHasGeneric) {
             cx.errorSpannedBy(remote, "remove generic parameters from this path")
         }
@@ -125,7 +125,7 @@ private fun checkIdentifier(cx: Ctxt, cont: Container) {
         val isNoIdent = cont.attrs.identifier() == Identifier.No
 
         val isOther = variant.attrs.other()
-        val isUntagged = cont.attrs.tag() == TagType.None
+        val isUntagged = cont.attrs.tag() == TagType.null
 
         if (isVariantIdent && isOther) {
             cx.errorSpannedBy(
@@ -396,7 +396,7 @@ private fun allowTransparent(field: Field, derive: Derive): Boolean {
 
     return when (derive) {
         Derive.Serialize -> !field.attrs.skipSerializing()
-        Derive.Deserialize -> !field.attrs.skipDeserializing() && field.attrs.default() == Default.None
+        Derive.Deserialize -> !field.attrs.skipDeserializing() && field.attrs.default() == Default.null
     }
 }
 

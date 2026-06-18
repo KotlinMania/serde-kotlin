@@ -2,11 +2,11 @@
 package io.github.kotlinmania.serde.`private`
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.core.de.DeserializeSeed
-import io.github.kotlinmania.serde.core.de.Deserializer
-import io.github.kotlinmania.serde.core.de.EnumAccess
-import io.github.kotlinmania.serde.core.de.Visitor
-import io.github.kotlinmania.serde.core.`private`.Content
+import io.github.kotlinmania.serdecore.de.DeserializeSeed
+import io.github.kotlinmania.serdecore.de.Deserializer
+import io.github.kotlinmania.serdecore.de.EnumAccess
+import io.github.kotlinmania.serdecore.de.Visitor
+import io.github.kotlinmania.serdecore.`private`.Content
 import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals

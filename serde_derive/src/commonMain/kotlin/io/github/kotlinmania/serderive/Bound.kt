@@ -169,7 +169,7 @@ public fun withBound(
 
         fun visitPathArguments(arguments: syn.PathArguments) {
             when (arguments) {
-                is syn.PathArguments.None -> {}
+                is syn.PathArguments.null -> {}
                 is syn.PathArguments.AngleBracketed -> {
                     for (arg in arguments.args) {
                         when (arg) {
@@ -246,7 +246,7 @@ public fun withBound(
                 bounds = syn.punctuated.Punctuated.fromList(listOf(
                     syn.TypeParamBound.Trait(syn.TraitBound(
                         parenToken = null,
-                        modifier = syn.TraitBoundModifier.None,
+                        modifier = syn.TraitBoundModifier.null,
                         lifetimes = null,
                         path = boundPath.clone()
                     ))
@@ -266,7 +266,7 @@ public fun withBound(
             qself = null,
             path = syn.Path(
                 leadingColon = null,
-                segments = syn.punctuated.Punctuated.fromList(listOf(syn.PathSegment(id.clone(), syn.PathArguments.None)))
+                segments = syn.punctuated.Punctuated.fromList(listOf(syn.PathSegment(id.clone(), syn.PathArguments.null)))
             )
         )
         dstPredicates.push(makeWhereBoundedType(boundedTy, bound))
@@ -292,7 +292,7 @@ public fun withSelfBound(
                 bounds = syn.punctuated.Punctuated.fromList(listOf(
                     syn.TypeParamBound.Trait(syn.TraitBound(
                         parenToken = null,
-                        modifier = syn.TraitBoundModifier.None,
+                        modifier = syn.TraitBoundModifier.null,
                         lifetimes = null,
                         path = bound.clone()
                     ))
@@ -344,7 +344,7 @@ private fun typeOfItem(cont: Container): syn.Type {
                     qself = null,
                     path = syn.Path(
                         leadingColon = null,
-                        segments = syn.punctuated.Punctuated.fromList(listOf(syn.PathSegment(param.ident.clone(), syn.PathArguments.None)))
+                        segments = syn.punctuated.Punctuated.fromList(listOf(syn.PathSegment(param.ident.clone(), syn.PathArguments.null)))
                     )
                 ))
             )

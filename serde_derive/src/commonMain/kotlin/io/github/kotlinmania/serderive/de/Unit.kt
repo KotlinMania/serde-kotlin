@@ -34,7 +34,7 @@ pub(super) fun deserialize(params: Parameters, cattrs: attr.Container) : Fragmen
             }
 
             `#`[inline]
-            fun visit_unit<__E>(self) -> _serde.#private.Result<Self.Value, __E>
+            fun visit_unit<__E>(self) -> _serde.#private.Result<this.Value, __E>
             where
                 __E: _serde.de.Error,
             {

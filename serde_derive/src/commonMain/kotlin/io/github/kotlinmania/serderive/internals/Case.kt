@@ -2,7 +2,7 @@ package io.github.kotlinmania.serderive.internals
 
 
 public enum class RenameRule {
-    None,
+    null,
     LowerCase,
     UpperCase,
     PascalCase,
@@ -14,7 +14,7 @@ public enum class RenameRule {
 
     public fun applyToVariant(variant: String): String {
         return when (this) {
-            None, PascalCase -> variant
+            null, PascalCase -> variant
             LowerCase -> variant.lowercase()
             UpperCase -> variant.uppercase()
             CamelCase -> {
@@ -39,7 +39,7 @@ public enum class RenameRule {
 
     public fun applyToField(field: String): String {
         return when (this) {
-            None, LowerCase, SnakeCase -> field
+            null, LowerCase, SnakeCase -> field
             UpperCase -> field.uppercase()
             PascalCase -> {
                 val pascal = StringBuilder()
@@ -68,7 +68,7 @@ public enum class RenameRule {
     }
 
     public fun or(ruleB: RenameRule): RenameRule {
-        return if (this == None) ruleB else this
+        return if (this == null) ruleB else this
     }
 
     public companion object {

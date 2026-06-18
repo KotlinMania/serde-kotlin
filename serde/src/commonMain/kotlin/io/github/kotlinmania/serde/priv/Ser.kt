@@ -4,13 +4,13 @@ package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.core.ser.*
-import io.github.kotlinmania.serde.core.ser.SerializeMap
-import io.github.kotlinmania.serde.core.ser.SerializeStruct
-import io.github.kotlinmania.serde.core.ser.SerializeStructVariant
-import io.github.kotlinmania.serde.core.ser.SerializeTuple
-import io.github.kotlinmania.serde.core.ser.SerializeTupleStruct
-import io.github.kotlinmania.serde.core.ser.SerializeTupleVariant
+import io.github.kotlinmania.serdecore.ser.*
+import io.github.kotlinmania.serdecore.ser.SerializeMap
+import io.github.kotlinmania.serdecore.ser.SerializeStruct
+import io.github.kotlinmania.serdecore.ser.SerializeStructVariant
+import io.github.kotlinmania.serdecore.ser.SerializeTuple
+import io.github.kotlinmania.serdecore.ser.SerializeTupleStruct
+import io.github.kotlinmania.serdecore.ser.SerializeTupleVariant
 import io.github.kotlinmania.serde.serdeCatching
 
 /**
@@ -135,7 +135,7 @@ private class TaggedSerializer<Ok, S>(
             map.end().getOrThrow()
         }
 
-    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Ok>> =
+    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serdecore.ser.SerializeSeq<Ok>> =
         SerdeResult.failure(badType(Unsupported.Sequence))
 
     override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Ok>> = SerdeResult.failure(badType(Unsupported.Tuple))
@@ -492,7 +492,7 @@ private class ContentSerializer : Serializer<Content>
             Content.NewtypeVariant(name, variantIndex, variant, value.serialize(ContentSerializer()).getOrThrow())
         }
 
-    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Content>> =
+    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serdecore.ser.SerializeSeq<Content>> =
         SerdeResult.success(SerializeSeq(len))
 
     override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Content>> = SerdeResult.success(SerializeTuple(len))
@@ -526,7 +526,7 @@ private class ContentSerializer : Serializer<Content>
 
 private class SerializeSeq(
     len: Int?,
-) : io.github.kotlinmania.serde.core.ser.SerializeSeq<Content>
+) : io.github.kotlinmania.serdecore.ser.SerializeSeq<Content>
     {
     private val elements: MutableList<Content> = ArrayList(len ?: 0)
 
@@ -779,7 +779,7 @@ internal class FlatMapSerializer<MOk, E, M>(
             map.serializeEntry(Content.String(variant), value).getOrThrow()
         }.map { }
 
-    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serde.core.ser.SerializeSeq<Unit>> =
+    override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serdecore.ser.SerializeSeq<Unit>> =
         SerdeResult.failure(badType(Unsupported.Sequence))
 
     override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Unit>> = SerdeResult.failure(badType(Unsupported.Tuple))

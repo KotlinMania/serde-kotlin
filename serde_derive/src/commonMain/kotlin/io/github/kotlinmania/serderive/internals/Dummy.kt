@@ -6,17 +6,17 @@ import io.github.kotlinmania.syn.Path
 
 public fun wrapInConst(serdePath: Path?, code: TokenStream): TokenStream {
     val useSerde = if (serdePath != null) {
-        quote {
+        quote("""
             use `#`serdePath as _serde;
-        }
+        """)
     } else {
-        quote {
+        quote("""
             `#`[allow(unused_extern_crates, clippy.useless_attribute)]
             extern crate serde as _serde;
-        }
+        """)
     }
 
-    return quote {
+    return quote("""
         `#`[doc(hidden)]
         `#`[allow(
             non_upper_case_globals,
@@ -31,5 +31,5 @@ public fun wrapInConst(serdePath: Path?, code: TokenStream): TokenStream {
 
             `#`code
         };
-    }
+    """)
 }

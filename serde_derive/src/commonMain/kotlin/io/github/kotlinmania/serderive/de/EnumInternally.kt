@@ -13,8 +13,11 @@ import io.github.kotlinmania.serderive.de.struct_
 use crate.de.{
     effective_style, expr_is_missing, field_i, unwrap_to_variant_closure, Parameters, StructForm,
 };
-import io.github.kotlinmania.serderive.fragment.{Expr, Fragment, Match}
-import io.github.kotlinmania.serderive.internals.ast.{Style, Variant}
+import io.github.kotlinmania.serderive.fragment.Expr
+import io.github.kotlinmania.serderive.fragment.Fragment
+import io.github.kotlinmania.serderive.fragment.Match
+import io.github.kotlinmania.serderive.internals.ast.Style
+import io.github.kotlinmania.serderive.internals.ast.Variant
 import io.github.kotlinmania.serderive.internals.attr
 import io.github.kotlinmania.serderive.private
 import io.github.kotlinmania.quote.quote
@@ -40,9 +43,9 @@ pub(super) fun deserialize(
                 params, variant, cattrs,
             ));
 
-            quote {
-                __Field.#variant_name => #block
-            }
+            quote("""
+                __Field.#variant_name -> #block
+            """)
         });
 
     val expecting = format!("internally tagged enum {}", params.type_name());
@@ -71,7 +74,7 @@ fun deserialize_internally_tagged_variant(
     variant: Variant,
     cattrs: attr.Container,
 ) : Fragment {
-    if val Some(path) = variant.attrs.deserialize_with() {
+    if val path = variant.attrs.deserialize_with() {
         val unwrap_fn = unwrap_to_variant_closure(params, variant, false);
         return quote_block! {
             _serde.#private.Result.map(#path(__deserializer), #unwrap_fn)
@@ -81,28 +84,28 @@ fun deserialize_internally_tagged_variant(
     val variant_ident = variant.ident;
 
     when effective_style(variant) {
-        Style.Unit => {
+        Style.Unit -> {
             val this_value = params.this_value;
             val type_name = params.type_name();
             val variant_name = variant.ident.to_string();
             val default = variant.fields.first().map(|field| {
                 val default = Expr(expr_is_missing(field, cattrs));
-                quote!((#default))
+                quote(""" (#default """))
             });
             quote_block! {
                 _serde.Deserializer.deserialize_any(__deserializer, _serde.#private.de.InternallyTaggedUnitVisitor.new(#type_name, #variant_name))?;
                 _serde.#private.Ok(#this_value.#variant_ident #default)
             }
         }
-        Style.Newtype => {
+        Style.Newtype -> {
             enum_untagged.deserialize_newtype_variant(variant_ident, params, variant.fields[0])
         }
-        Style.Struct => struct_.deserialize(
+        Style.Struct -> struct_.deserialize(
             params,
             variant.fields,
             cattrs,
             StructForm.InternallyTagged(variant_ident),
         ),
-        Style.Tuple => unreachable!("checked in serde_derive_internals"),
+        Style.Tuple -> unreachable!("checked in serde_derive_internals"),
     }
 }

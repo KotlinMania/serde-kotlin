@@ -9,9 +9,15 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.github.kotlinmania.serde.derive"
+        namespace = "io.github.kotlinmania.serderive"
     }
-
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.syn.kotlin)
+            api(libs.quote.kotlin)
+            api(libs.proc.macro2.kotlin)
+        }
+    }
 }
 
 val fullTargetBuildTasks = listOf(

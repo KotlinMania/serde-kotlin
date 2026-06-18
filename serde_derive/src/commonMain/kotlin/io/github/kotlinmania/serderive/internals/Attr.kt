@@ -311,7 +311,7 @@ public class AttrContainer(
                         } else if (REMOTE == meta.path) {
                             val path = parseLitIntoPath(cx, REMOTE, meta)
                             if (path != null) {
-                                if (isPrimitivePath(path, "Self")) {
+                                if (isPrimitivePath(path, "this")) {
                                     remote.set(meta.path, parseQuote(item.ident.toString()) as Path)
                                 } else {
                                     remote.set(meta.path, path)
@@ -359,14 +359,14 @@ public class AttrContainer(
                 name = MultiName.fromAttrs(Name.from(unraw(item.ident)), serName, deName, null),
                 transparent = transparent.get(),
                 denyUnknownFields = denyUnknownFields.get(),
-                default = default.get() ?: Default.None,
+                default = default.get() ?: Default.null,
                 renameAllRules = RenameAllRules(
-                    serialize = renameAllSerRule.get() ?: RenameRule.None,
-                    deserialize = renameAllDeRule.get() ?: RenameRule.None
+                    serialize = renameAllSerRule.get() ?: RenameRule.null,
+                    deserialize = renameAllDeRule.get() ?: RenameRule.null
                 ),
                 renameAllFieldsRules = RenameAllRules(
-                    serialize = renameAllFieldsSerRule.get() ?: RenameRule.None,
-                    deserialize = renameAllFieldsDeRule.get() ?: RenameRule.None
+                    serialize = renameAllFieldsSerRule.get() ?: RenameRule.null,
+                    deserialize = renameAllFieldsDeRule.get() ?: RenameRule.null
                 ),
                 serBound = serBound.get(),
                 deBound = deBound.get(),
@@ -402,7 +402,7 @@ private fun decideTag(
         return TagType.External
     }
     if (untaggedTokens != null && internalTagTokens == null && contentTokens == null) {
-        return TagType.None
+        return TagType.null
     }
     if (untaggedTokens == null && internalTagTokens != null && contentTokens == null) {
         val tag = internalTagTokens.second
@@ -652,8 +652,8 @@ public class AttrVariant(
             return AttrVariant(
                 name = MultiName.fromAttrs(Name.from(unraw(variant.ident)), serName, deName, deAliases),
                 renameAllRules = RenameAllRules(
-                    serialize = renameAllSerRule.get() ?: RenameRule.None,
-                    deserialize = renameAllDeRule.get() ?: RenameRule.None
+                    serialize = renameAllSerRule.get() ?: RenameRule.null,
+                    deserialize = renameAllDeRule.get() ?: RenameRule.null
                 ),
                 serBound = serBound.get(),
                 deBound = deBound.get(),
@@ -705,7 +705,7 @@ public class AttrField(
     }
 
     public fun isNone(): Boolean {
-        return false // None is not used here properly, just return false
+        return false // null is not used here properly, just return false
     }
 }
 
@@ -919,7 +919,7 @@ public companion object {
             skipSerializing = skipSerializing.get(),
             skipDeserializing = skipDeserializing.get(),
             skipSerializingIf = skipSerializingIf.get(),
-            default = default.get() ?: Default.None,
+            default = default.get() ?: Default.null,
             serializeWith = serializeWith.get(),
             deserializeWith = actualDeserializeWith,
             serBound = serBound.get(),
@@ -989,7 +989,7 @@ private fun isPrimitivePath(path: Path, primitive: String): Boolean {
     return path.leadingColon == null &&
             path.segments.size == 1 &&
             path.segments[0].ident.toString() == primitive &&
-            path.segments[0].arguments is PathArguments.None
+            path.segments[0].arguments is PathArguments.null
 }
 
 private fun borrowableLifetimes(
@@ -1095,11 +1095,11 @@ public sealed class TagType {
     public object External : TagType()
     public class Internal(public val tag: String) : TagType()
     public class Adjacent(public val tag: String, public val content: String) : TagType()
-    public object None : TagType()
+    public object null : TagType()
 }
 
 public sealed class Default {
-    public object None : Default()
+    public object null : Default()
     public object Plain : Default() // Renamed Default to Plain to avoid cycle
     public class Path(public val path: Expr.Path) : Default()
 }

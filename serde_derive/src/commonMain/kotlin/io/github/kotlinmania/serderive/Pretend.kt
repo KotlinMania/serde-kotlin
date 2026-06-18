@@ -11,10 +11,10 @@ public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream {
     val pretendFields = pretendFieldsUsed(cont, isPacked)
     val pretendVariants = pretendVariantsUsed(cont)
 
-    return quote {
+    return quote("""
         `#`pretendFields
         `#`pretendVariants
-    }
+    """)
 }
 
 private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
@@ -42,12 +42,12 @@ private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): Token
     val members = fields.map { it.member }
     val placeholders = fields.indices.map { formatIdent("__v`#`it") }
 
-    return quote {
-        match _serde.Private.None::<&`#`typeIdent `#`tyGenerics> {
-            _serde.Private.Some(`#`typeIdent { #(`#`members: `#`placeholders),* }) => {}
-            _ => {}
+    return quote("""
+        when (_serde.Private.null::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde.Private.`#`typeIdent { #(`#`members: `#`placeholders,* }) -> {}
+            _ -> {}
         }
-    }
+    """)
 }
 
 private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>): TokenStream {
@@ -56,16 +56,16 @@ private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>):
 
     val members = fields.map { it.member }
 
-    return quote {
-        match _serde.Private.None::<&`#`typeIdent `#`tyGenerics> {
-            _serde.Private.Some(__v @ `#`typeIdent { #(`#`members: _),* }) => {
+    return quote("""
+        when (_serde.Private.null::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde.Private.__v @ `#`typeIdent { #(`#`members: _,* }) -> {
                 #(
                     val _ = _serde.Private.ptr.addr_of!(__v.`#`members);
                 )*
             }
-            _ => {}
+            _ -> {}
         }
-    }
+    """)
 }
 
 private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): TokenStream {
@@ -85,14 +85,14 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
         }
     }
 
-    return quote {
-        match _serde.Private.None::<&`#`typeIdent `#`tyGenerics> {
+    return quote("""
+        when (_serde.Private.null::<&`#`typeIdent `#`tyGenerics> ) {
             #(
-                _serde.Private.Some(`#`patterns) => {}
+                _serde.Private.`#`patterns -> {}
             )*
-            _ => {}
+            _ -> {}
         }
-    }
+    """)
 }
 
 private fun pretendVariantsUsed(cont: Container): TokenStream {
@@ -118,14 +118,14 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
             Style.Unit -> quote("")
         }
 
-        quote {
-            match _serde.Private.None {
-                _serde.Private.Some((#(`#`placeholders,)*)) => {
+        quote("""
+            when (_serde.Private.null ) {
+                _serde.Private.(#(`#`placeholders,*)) -> {
                     val _ = `#`typeIdent::`#`variantIdent `#`turbofish `#`pat;
                 }
-                _ => {}
+                _ -> {}
             }
-        }
+        """)
     }
 
     return quote("#(`#`cases)*")

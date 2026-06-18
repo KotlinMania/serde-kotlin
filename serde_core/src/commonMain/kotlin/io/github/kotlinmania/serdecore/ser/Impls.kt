@@ -65,7 +65,7 @@ fun <Ok> Unit.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E, T> T?.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+fun <Ok, T> T?.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
     where T : Serialize =
     if (this != null) serializer.serializeSome(this) else serializer.serializeNone()
 
@@ -79,7 +79,7 @@ data object PhantomData : Serialize {
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
     where T : Serialize =
     serdeCatching {
         val tuple = serializer.serializeTuple(size).getOrThrow()
@@ -89,13 +89,13 @@ fun <Ok, E, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
         tuple.end().getOrThrow()
     }
 
-fun <Ok, E, T> Iterable<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+fun <Ok, T> Iterable<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
     where T : Serialize =
     serializer.collectSeq(this)
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E, K, V> Map<K, V>.serialize(
+fun <Ok, K, V> Map<K, V>.serialize(
     serializer: Serializer<Ok>,
 ): SerdeResult<Ok>
     where K : Serialize,
@@ -104,7 +104,7 @@ fun <Ok, E, K, V> Map<K, V>.serialize(
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(
+fun <Ok, T0, T1> Pair<T0, T1>.serialize(
     serializer: Serializer<Ok>,
 ): SerdeResult<Ok>
     where T0 : Serialize,
@@ -116,7 +116,7 @@ fun <Ok, E, T0, T1> Pair<T0, T1>.serialize(
         tuple.end().getOrThrow()
     }
 
-fun <Ok, E, T0, T1, T2> Triple<T0, T1, T2>.serialize(
+fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(
     serializer: Serializer<Ok>,
 ): SerdeResult<Ok>
     where T0 : Serialize,

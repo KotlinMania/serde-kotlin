@@ -10,7 +10,7 @@ import io.github.kotlinmania.syn.parseNestedMeta
 
 public fun allowDeprecated(input: DeriveInput): TokenStream? {
     return if (shouldAllowDeprecated(input)) {
-        quote { `#`[allow(deprecated)] }
+        quote(""" `#`[allow(deprecated)] """)
     } else {
         null
     }
