@@ -72,9 +72,9 @@ public class ImplsTest {
     }
 }
 
-private data object TestError : Error
+private data object TestError : Error()
 
-private open class FailingSerializer : Serializer<String, TestError> {
+private open class FailingSerializer : Serializer<String> {
     protected fun <T> unexpected(): SerdeResult<T> = SerdeResult.failure(SerdeError("unexpected serializer method"))
 
     override fun serializeBool(v: Boolean): SerdeResult<String> = unexpected()
@@ -136,42 +136,42 @@ private open class FailingSerializer : Serializer<String, TestError> {
     ): SerdeResult<String>
         where T : Serialize = unexpected()
 
-    override fun serializeSeq(len: Int?): SerdeResult<SerializeSeq<String, TestError>> = unexpected()
+    override fun serializeSeq(len: Int?): SerdeResult<SerializeSeq<String>> = unexpected()
 
-    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<String, TestError>> = unexpected()
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<String>> = unexpected()
 
     override fun serializeTupleStruct(
         name: String,
         len: Int,
-    ): SerdeResult<SerializeTupleStruct<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeTupleStruct<String>> = unexpected()
 
     override fun serializeTupleVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): SerdeResult<SerializeTupleVariant<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeTupleVariant<String>> = unexpected()
 
-    override fun serializeMap(len: Int?): SerdeResult<SerializeMap<String, TestError>> = unexpected()
+    override fun serializeMap(len: Int?): SerdeResult<SerializeMap<String>> = unexpected()
 
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): SerdeResult<SerializeStruct<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeStruct<String>> = unexpected()
 
     override fun serializeStructVariant(
         name: String,
         variantIndex: UInt,
         variant: String,
         len: Int,
-    ): SerdeResult<SerializeStructVariant<String, TestError>> = unexpected()
+    ): SerdeResult<SerializeStructVariant<String>> = unexpected()
 }
 
 private class StructRecordingSerializer : FailingSerializer() {
     override fun serializeStruct(
         name: String,
         len: Int,
-    ): SerdeResult<SerializeStruct<String, TestError>> = SerdeResult.success(RecordingStruct(name, len))
+    ): SerdeResult<SerializeStruct<String>> = SerdeResult.success(RecordingStruct(name, len))
 }
 
 private class FieldRecordingSerializer : FailingSerializer() {
@@ -183,12 +183,12 @@ private class FieldRecordingSerializer : FailingSerializer() {
 }
 
 private class TupleRecordingSerializer : FailingSerializer() {
-    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<String, TestError>> = SerdeResult.success(RecordingTuple(len))
+    override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<String>> = SerdeResult.success(RecordingTuple(len))
 }
 
 private class RecordingTuple(
     private val len: Int,
-) : SerializeTuple<String, TestError> {
+) : SerializeTuple<String> {
     private val elements = mutableListOf<String>()
 
     override fun <T> serializeElement(value: T): SerdeResult<Unit>
@@ -207,7 +207,7 @@ private class RecordingTuple(
 private class RecordingStruct(
     private val name: String,
     private val len: Int,
-) : SerializeStruct<String, TestError> {
+) : SerializeStruct<String> {
     private val fields = mutableListOf<Pair<String, String>>()
 
     override fun <T> serializeField(
@@ -235,6 +235,6 @@ private fun formatSerialize(value: Serialize): String {
 private data class ImplsLiteralSerialize(
     private val text: String,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
-        where E : Error = serializer.serializeStr(text)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+        = serializer.serializeStr(text)
 }

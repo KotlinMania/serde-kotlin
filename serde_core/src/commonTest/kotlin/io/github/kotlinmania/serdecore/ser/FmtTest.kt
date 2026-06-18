@@ -64,6 +64,6 @@ private fun format(block: FormatterSerializer.() -> SerdeResult<Unit>): String {
 private data class LiteralSerialize(
     private val text: String,
 ) : Serialize {
-    override fun <Ok, E> serialize(serializer: Serializer<Ok, E>): SerdeResult<Ok>
-        where E : Error = serializer.serializeStr(text)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+        = serializer.serializeStr(text)
 }
