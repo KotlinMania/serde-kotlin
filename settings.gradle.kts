@@ -1,6 +1,4 @@
 pluginManagement {
-    includeBuild("build-logic")
-
     repositories {
         google()
         mavenCentral()
@@ -18,11 +16,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "serde-kotlin"
-
-include(":serde-derive")
-include(":serde-core")
-include(":serde")
-
-project(":serde-derive").projectDir = file("./serde_derive")
-project(":serde-core").projectDir = file("./serde_core")
-project(":serde").projectDir = file("./serde")

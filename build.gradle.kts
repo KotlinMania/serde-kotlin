@@ -115,7 +115,7 @@ val commonOptIns =
 // Android SDK installer
 // ----------------------------------------------------------------------------
 // The Android Gradle Plugin resolves the SDK location at configuration time,
-// so the SDK must already be on disk before the ``
+// so the SDK must already be on disk before the `kotlin { android { ... } }`
 // block evaluates. The installer is idempotent — a .install-complete marker
 // short-circuits the download on every subsequent invocation, so warm runs
 // pay only a directory-existence check. CI runners pay a one-time cold cost
@@ -268,7 +268,36 @@ fun installProjectAndroidSdk(execOperations: ExecOperations) {
     println("setup-android-sdk: done; SDK at $projectAndroidSdkDir")
 }
 
-installProjectAndroidSdk(serviceOf())
+// ----------------------------------------------------------------------------
+// Android SDK setup is gated to follow the requested task. It must never run for
+// non-Android invocations (jsTest, jvmTest, swiftExportSmokeTest, native /
+// androidNative links) -- an unconditional install here is what made the SDK
+// download appear on every machine and target.
+//
+// `writeAndroidLocalProperties()` always runs: it is cheap, hits no network, and
+// only points local.properties at the project-local .android-sdk so AGP can
+// resolve `sdk.dir` while the `androidLibrary {}` block evaluates.
+//
+// The SDK *package* download must happen at configuration time when -- and only
+// when -- an Android task is in the requested build. AGP validates the packages
+// while determining the dependencies of `compileAndroidMain` (task-graph
+// construction, strictly before any task executes), so a plain `dependsOn`
+// cannot supply them in time. We detect Android intent from the requested task
+// names and install eagerly in that case. androidNative* are Kotlin/Native
+// targets and need no Android SDK.
+// ----------------------------------------------------------------------------
+writeAndroidLocalProperties()
+
+fun requestedTaskWantsAndroid(rawTaskName: String): Boolean {
+    val taskName = rawTaskName.substringAfterLast(':')
+    if (taskName.contains("AndroidNative")) return false // Kotlin/Native, no SDK
+    if (taskName.contains("Android")) return true // direct AGP tasks
+    return taskName in setOf("build", "assemble", "check") // aggregates pull android
+}
+
+if (gradle.startParameter.taskNames.any(::requestedTaskWantsAndroid)) {
+    installProjectAndroidSdk(serviceOf())
+}
 
 val ensureAndroidSdk by tasks.registering {
     group = "setup"
@@ -279,7 +308,14 @@ val ensureAndroidSdk by tasks.registering {
     }
 }
 
-tasks.matching { it.name == "compileAndroidMain" }.configureEach {
+// Secondary net: order every AGP Android task after the installer (a no-op on
+// warm runs). Excludes androidNative* (Kotlin/Native) and the installer itself.
+tasks.matching { task ->
+    val taskName = task.name
+    taskName != "ensureAndroidSdk" &&
+        taskName.contains("Android") &&
+        !taskName.contains("AndroidNative")
+}.configureEach {
     dependsOn(ensureAndroidSdk)
 }
 
@@ -564,6 +600,7 @@ if (benchmarkEnabled) {
 tasks.named("check") {
     dependsOn(tasks.withType<io.gitlab.arturbosch.detekt.Detekt>())
     dependsOn(tasks.named("ktlintCheck"))
+    dependsOn("test")
 }
 
 // ============================================================================
@@ -626,7 +663,42 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
 // ============================================================================
 // Maven Central publishing
 // ============================================================================
-
+mavenPublishing {
+    publishToMavenCentral()
+    if (project.findProperty("RELEASE_SIGNING_ENABLED") != "false") {
+        signAllPublications()
+    }
+    val projectName = providers.gradleProperty("project.name").getOrElse("unnamed-project")
+    coordinates(group.toString(), projectName, version.toString())
+    pom {
+        name.set(projectName)
+        description.set(providers.gradleProperty("project.pom.description").getOrElse(""))
+        inceptionYear.set("2026")
+        url.set("https://github.com/KotlinMania/$projectName")
+        licenses {
+            license {
+                name.set(providers.gradleProperty("project.pom.licenseName").getOrElse("MIT"))
+                url.set(
+                    providers.gradleProperty("project.pom.licenseUrl").getOrElse("https://opensource.org/licenses/MIT"),
+                )
+                distribution.set("repo")
+            }
+        }
+        developers {
+            developer {
+                id.set("sydneyrenee")
+                name.set("Sydney Renee")
+                email.set("sydney@solace.ofharmony.ai")
+                url.set("https://github.com/sydneyrenee")
+            }
+        }
+        scm {
+            url.set("https://github.com/KotlinMania/$projectName")
+            connection.set("scm:git:git://github.com/KotlinMania/$projectName.git")
+            developerConnection.set("scm:git:ssh://github.com/KotlinMania/$projectName.git")
+        }
+    }
+}
 
 // ============================================================================
 // Tasks
@@ -635,7 +707,13 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
 // Exact test lifecycle task. Without this, ./gradlew test is ambiguous between
 // Android test task names. This runs commonTest through the KMP allTests
 // lifecycle and adds the Android host + Swift Export parity tests.
-
+tasks.register("test") {
+    group = "verification"
+    description = "Runs the commonTest-backed KMP suite, Android host tests, and Swift Export smoke test."
+    dependsOn("allTests")
+    dependsOn("testAndroidHostTest")
+    dependsOn("swiftExportSmokeTest")
+}
 
 tasks.register("setupAndroidSdk") {
     group = "setup"
@@ -646,14 +724,91 @@ tasks.register("setupAndroidSdk") {
 // Explicit test runner. Named hostTests to avoid shadowing the KMP allTests
 // lifecycle task. Do not use findByName/mapNotNull here: missing test tasks
 // mean the target surface drifted and must fail loudly.
-
+tasks.register("hostTests") {
+    group = "verification"
+    description = "Runs the required real test suite (jvm, macosArm64, js, wasmJs, wasmWasi, android host)."
+    dependsOn(
+        "jvmTest",
+        "macosArm64Test",
+        "jsNodeTest",
+        "wasmJsNodeTest",
+        "wasmWasiNodeTest",
+        "testAndroidHostTest",
+    )
+}
 
 // Swift Export smoke test — produces the SPM package via embedSwiftExportForXcode
 // (spawned with the Xcode-style env it requires) and runs `swift test` against it,
 // so Swift Export breakage surfaces locally, not only in the swift.yml CI job.
 // Pattern mirrors kasuari-kotlin. This task is part of the build contract and
 // must fail rather than skip when the required toolchain is unavailable.
+tasks.register("swiftExportSmokeTest") {
+    group = "verification"
+    description = "Builds the Swift Export SPM package and runs swift test against it."
+    outputs.upToDateWhen { false }
 
+    doLast {
+        val execOperations = serviceOf<ExecOperations>()
+        val swiftBuildDir =
+            layout.buildDirectory
+                .dir("swift-test")
+                .get()
+                .asFile
+                .absolutePath
+        execOperations
+            .exec {
+                workingDir = projectDir
+                commandLine(
+                    "./gradlew",
+                    "embedSwiftExportForXcode",
+                    "--no-configuration-cache",
+                    "--no-daemon",
+                    "--console=plain",
+                )
+                environment(
+                    mapOf(
+                        "BUILT_PRODUCTS_DIR" to swiftBuildDir,
+                        "TARGET_BUILD_DIR" to swiftBuildDir,
+                        "SDK_NAME" to "macosx",
+                        "CONFIGURATION" to "Debug",
+                        "ARCHS" to "arm64",
+                        "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+                        "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+                        "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+                    ),
+                )
+            }.assertNormalExitValue()
+
+        val generatedPackageSwift =
+            layout.buildDirectory
+                .file("SPMPackage/macosArm64/Debug/Package.swift")
+                .get()
+                .asFile
+        if (generatedPackageSwift.exists()) {
+            val text = generatedPackageSwift.readText()
+            if (!text.contains("platforms:")) {
+                generatedPackageSwift.writeText(
+                    text.replaceFirst(
+                        Regex("(name:\\s*\"[^\"]*\",)"),
+                        "\$1\n    platforms: [.macOS(.v14)],",
+                    ),
+                )
+            }
+        }
+
+        execOperations
+            .exec {
+                workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
+                commandLine("swift", "package", "reset")
+            }.assertNormalExitValue()
+
+        execOperations
+            .exec {
+                workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
+                commandLine("swift", "test")
+            }.assertNormalExitValue()
+    }
+}
 
 // ============================================================================
 // `build` aggregate
@@ -684,13 +839,35 @@ val nativeTargetNames =
         "watchosSimulatorArm64",
     )
 
-
-
-
-subprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-        if (name.startsWith("compileSwiftExport")) {
-            compilerOptions.allWarningsAsErrors.set(false)
+val fullTargetBuildTaskNames =
+    buildSet {
+        addAll(
+            listOf(
+                "compileAndroidMain",
+                "compileAndroidHostTest",
+                "compileAndroidDeviceTest",
+                "assembleAndroidMain",
+                "assembleUnitTest",
+                "assembleAndroidTest",
+                "assembleAndroidDeviceTest",
+                "jvmMainClasses",
+                "jvmTestClasses",
+                "jsMainClasses",
+                "jsTestClasses",
+                "wasmJsMainClasses",
+                "wasmJsTestClasses",
+                "wasmWasiMainClasses",
+                "wasmWasiTestClasses",
+                "swiftExportSmokeTest",
+                "assemble${frameworkName}XCFramework",
+            ),
+        )
+        for (target in nativeTargetNames) {
+            add("${target}Binaries")
+            add("${target}TestBinaries")
         }
     }
+
+tasks.named("build") {
+    dependsOn(fullTargetBuildTaskNames)
 }
