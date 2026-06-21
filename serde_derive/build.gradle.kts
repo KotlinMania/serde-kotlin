@@ -5,6 +5,7 @@
 
 plugins {
     id("kotlinx-io-multiplatform")
+    id("kotlinx-io-publish")
     id("kotlinx-io-dokka")
     id("kotlinx-io-android-compat")
     id("kotlinx-io-compatibility")

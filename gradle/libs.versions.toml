@@ -36,7 +36,6 @@ kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-p
 dokka-gradle-plugin = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version.ref = "dokka" }
 power-assert-plugin = { group = "org.jetbrains.kotlin.plugin.power-assert", name = "org.jetbrains.kotlin.plugin.power-assert.gradle.plugin", version.ref = "kotlin" }
 animalsniffer-gradle-plugin = { group = "ru.vyarus", name = "gradle-animalsniffer-plugin", version.ref = "animalsniffer" }
-maven-publish-gradle-plugin = { group = "com.vanniktech", name = "gradle-maven-publish-plugin", version.ref = "vanniktech" }
 android-kmp-library-gradle-plugin = { group = "com.android.kotlin.multiplatform.library", name = "com.android.kotlin.multiplatform.library.gradle.plugin", version.ref = "androidKmp" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
