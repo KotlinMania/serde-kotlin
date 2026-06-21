@@ -52,7 +52,7 @@ kotlin {
             ?: throw GradleException("Version 'multi.release.toolchain' is not specified in the version catalog")
 
         val jpmsModuleName = "$projectNamespace." +
-            project.name.removePrefix("km-io-")
+            project.name.substringAfterLast('-')
         configureJava9ModuleInfoCompilation(
             sourceSetName = project.sourceSets.create("java9ModuleInfo") {
                 java.srcDir("jvm/module")
