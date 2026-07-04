@@ -30,7 +30,7 @@ import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 
-public fun expand_derive_serialize(input: var syn.DeriveInput) : TokenStream {
+public fun expandDeriveSerialize(input: io.github.kotlinmania.syn.DeriveInput): TokenStream {
     replace_receiver(input);
 
     val ctxt = Ctxt.new();
