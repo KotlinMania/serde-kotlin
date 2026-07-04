@@ -3,6 +3,7 @@ bin
 .idea/*
 *.iml
 .gradle
+.cache
 *.swp
 .DS_Store
 .project
