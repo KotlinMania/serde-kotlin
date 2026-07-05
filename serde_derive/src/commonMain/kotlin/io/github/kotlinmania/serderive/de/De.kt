@@ -150,7 +150,7 @@ class Parameters(cont: Container) {
     }
 }
 
-private data class Quadruple<A, B, C, D>(
+internal data class Quadruple<A, B, C, D>(
     val first: A, val second: B, val third: C, val fourth: D
 )
 

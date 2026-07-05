@@ -1,54 +1,67 @@
+// port-lint: source de/unit.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.serderive.de.Parameters
-import io.github.kotlinmania.serderive.fragment.Fragment
-import io.github.kotlinmania.serderive.internals.attr
-import io.github.kotlinmania.serderive.private
 import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.internals.Fragment
+import io.github.kotlinmania.serderive.internals.AttrContainer
 
-/// Generates `Deserialize.deserialize` body for a `struct Unit;`
-pub(super) fun deserialize(params: Parameters, cattrs: attr.Container) : Fragment {
-    val this_type = params.this_type;
-    val this_value = params.this_value;
-    val type_name = cattrs.name().deserialize_name();
-    let (de_impl_generics, de_ty_generics, ty_generics, where_clause) =
-        params.generics_with_de_lifetime();
-    val delife = params.borrowed.de_lifetime();
+// Generates `Deserialize::deserialize` body for a `struct Unit;`
+internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragment {
+    val thisType = params.thisType
+    val thisValue = params.thisValue
+    val typeName = cattrs.name().deserializeName()
+    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) =
+        params.genericsWithDeLifetime()
+    val delife = params.borrowed.deLifetime()
 
-    val expecting = format!("unit struct {}", params.type_name());
-    val expecting = cattrs.expecting().unwrap_or(expecting);
+    var expecting = "unit struct ${params.typeName()}"
+    expecting = cattrs.expecting() ?: expecting
 
-    quote_block! {
+    val code = quote(
+        """
         `#`[doc(hidden)]
-        struct __Visitor #de_impl_generics #where_clause {
-            marker: _serde.#private.PhantomData<#this_type #ty_generics>,
-            lifetime: _serde.#private.PhantomData<&#delife ()>,
+        struct __Visitor `#`deImplGenerics `#`whereClause {
+            marker: _serde.`#`Private.PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde.`#`Private.PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
-        impl #de_impl_generics _serde.de.Visitor<#delife> for __Visitor #de_ty_generics #where_clause {
-            type Value = #this_type #ty_generics;
+        impl `#`deImplGenerics _serde.de.Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
+            type Value = `#`thisType `#`tyGenerics;
 
-            fun expecting(self, __formatter: var _serde.#private.Formatter) : _serde.#private.fmt.Result {
-                _serde.#private.Formatter.write_str(__formatter, #expecting)
+            fn expecting(self, __formatter: var _serde.`#`Private.Formatter) -> _serde.`#`Private.fmt.Result {
+                _serde.`#`Private.Formatter.write_str(__formatter, `#`expecting)
             }
 
             `#`[inline]
-            fun visit_unit<__E>(self) -> _serde.#private.Result<this.Value, __E>
+            fn visit_unit<__E>(self) -> _serde.`#`Private.Result<Self.Value, __E>
             where
                 __E: _serde.de.Error,
             {
-                _serde.#private.Ok(#this_value)
+                _serde.`#`Private.Ok(`#`thisValue)
             }
         }
 
         _serde.Deserializer.deserialize_unit_struct(
             __deserializer,
-            #type_name,
+            `#`typeName,
             __Visitor {
-                marker: _serde.#private.PhantomData.<#this_type #ty_generics>,
-                lifetime: _serde.#private.PhantomData,
+                marker: _serde.`#`Private.PhantomData.<`#`thisType `#`tyGenerics>,
+                lifetime: _serde.`#`Private.PhantomData,
             },
         )
-    }
+        """,
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "delife" to delife,
+        "deTyGenerics" to deTyGenerics,
+        "expecting" to expecting,
+        "thisValue" to thisValue,
+        "typeName" to typeName,
+    )
+
+    return Fragment.Block(code)
 }
