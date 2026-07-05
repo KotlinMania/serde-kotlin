@@ -359,14 +359,14 @@ public class AttrContainer(
                 name = MultiName.fromAttrs(Name.from(unraw(item.ident)), serName, deName, null),
                 transparent = transparent.get(),
                 denyUnknownFields = denyUnknownFields.get(),
-                default = default.get() ?: Default.null,
+                default = default.get() ?: Default.None,
                 renameAllRules = RenameAllRules(
-                    serialize = renameAllSerRule.get() ?: RenameRule.null,
-                    deserialize = renameAllDeRule.get() ?: RenameRule.null
+                    serialize = renameAllSerRule.get() ?: RenameRule.None,
+                    deserialize = renameAllDeRule.get() ?: RenameRule.None
                 ),
                 renameAllFieldsRules = RenameAllRules(
-                    serialize = renameAllFieldsSerRule.get() ?: RenameRule.null,
-                    deserialize = renameAllFieldsDeRule.get() ?: RenameRule.null
+                    serialize = renameAllFieldsSerRule.get() ?: RenameRule.None,
+                    deserialize = renameAllFieldsDeRule.get() ?: RenameRule.None
                 ),
                 serBound = serBound.get(),
                 deBound = deBound.get(),
@@ -402,7 +402,7 @@ private fun decideTag(
         return TagType.External
     }
     if (untaggedTokens != null && internalTagTokens == null && contentTokens == null) {
-        return TagType.null
+        return TagType.None
     }
     if (untaggedTokens == null && internalTagTokens != null && contentTokens == null) {
         val tag = internalTagTokens.second
@@ -919,7 +919,7 @@ public companion object {
             skipSerializing = skipSerializing.get(),
             skipDeserializing = skipDeserializing.get(),
             skipSerializingIf = skipSerializingIf.get(),
-            default = default.get() ?: Default.null,
+            default = default.get() ?: Default.None,
             serializeWith = serializeWith.get(),
             deserializeWith = actualDeserializeWith,
             serBound = serBound.get(),
@@ -989,7 +989,7 @@ private fun isPrimitivePath(path: Path, primitive: String): Boolean {
     return path.leadingColon == null &&
             path.segments.size == 1 &&
             path.segments[0].ident.toString() == primitive &&
-            path.segments[0].arguments is PathArguments.null
+            path.segments[0].arguments is PathArguments.None
 }
 
 private fun borrowableLifetimes(
@@ -1095,12 +1095,12 @@ public sealed class TagType {
     public object External : TagType()
     public class Internal(public val tag: String) : TagType()
     public class Adjacent(public val tag: String, public val content: String) : TagType()
-    public object null : TagType()
+    public object None : TagType()
 }
 
 public sealed class Default {
-    public object null : Default()
-    public object Plain : Default() // Renamed Default to Plain to avoid cycle
+    public object None : Default()
+    public object Plain : Default()
     public class Path(public val path: Expr.Path) : Default()
 }
 

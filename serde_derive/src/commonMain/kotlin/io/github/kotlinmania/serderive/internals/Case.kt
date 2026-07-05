@@ -1,20 +1,37 @@
+// port-lint: source internals/case.rs
 package io.github.kotlinmania.serderive.internals
 
+// Code to convert the Rust-styled field/variant (e.g. `my_field`, `MyType`) to
+// the case of the source (e.g. `my-field`, `MY_FIELD`).
 
+// The different possible ways to change case of fields in a struct, or
+// variants in an enum.
 public enum class RenameRule {
-    null,
+    // Don't apply a default rename rule.
+    None,
+    // Rename direct children to "lowercase" style.
     LowerCase,
+    // Rename direct children to "UPPERCASE" style.
     UpperCase,
+    // Rename direct children to "PascalCase" style, as typically used for
+    // enum variants.
     PascalCase,
+    // Rename direct children to "camelCase" style.
     CamelCase,
+    // Rename direct children to "snake_case" style, as commonly used for
+    // fields.
     SnakeCase,
+    // Rename direct children to "SCREAMING_SNAKE_CASE" style, as commonly
+    // used for constants.
     ScreamingSnakeCase,
+    // Rename direct children to "kebab-case" style.
     KebabCase,
+    // Rename direct children to "SCREAMING-KEBAB-CASE" style.
     ScreamingKebabCase;
 
     public fun applyToVariant(variant: String): String {
         return when (this) {
-            null, PascalCase -> variant
+            None, PascalCase -> variant
             LowerCase -> variant.lowercase()
             UpperCase -> variant.uppercase()
             CamelCase -> {
@@ -39,7 +56,7 @@ public enum class RenameRule {
 
     public fun applyToField(field: String): String {
         return when (this) {
-            null, LowerCase, SnakeCase -> field
+            None, LowerCase, SnakeCase -> field
             UpperCase -> field.uppercase()
             PascalCase -> {
                 val pascal = StringBuilder()
@@ -68,7 +85,7 @@ public enum class RenameRule {
     }
 
     public fun or(ruleB: RenameRule): RenameRule {
-        return if (this == null) ruleB else this
+        return if (this == None) ruleB else this
     }
 
     public companion object {
@@ -89,6 +106,5 @@ public enum class RenameRule {
 }
 
 public class ParseError(public val unknown: String) : Exception(
-    "unknown rename rule `rename_all = \"`#`unknown\"`, expected one of \"lowercase\", \"UPPERCASE\", \"PascalCase\", \"camelCase\", \"snake_case\", \"SCREAMING_SNAKE_CASE\", \"kebab-case\", \"SCREAMING-KEBAB-CASE\""
+    "unknown rename rule `rename_all = \"$unknown\"`, expected one of \"lowercase\", \"UPPERCASE\", \"PascalCase\", \"camelCase\", \"snake_case\", \"SCREAMING_SNAKE_CASE\", \"kebab-case\", \"SCREAMING-KEBAB-CASE\""
 )
-

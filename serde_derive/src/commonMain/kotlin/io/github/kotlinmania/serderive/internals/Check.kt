@@ -2,6 +2,7 @@ package io.github.kotlinmania.serderive.internals
 
 
 import io.github.kotlinmania.syn.Member
+import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.SynType
 
 public fun check(cx: Ctxt, cont: Container, derive: Derive) {
@@ -18,7 +19,7 @@ public fun check(cx: Ctxt, cont: Container, derive: Derive) {
 }
 
 private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
-    if (cont.attrs.default() == Default.null) {
+    if (cont.attrs.default() == Default.None) {
         val data = cont.data
         if (data is Data.Struct && data.style == Style.Tuple) {
             var firstDefaultIndex: Int? = null
@@ -26,7 +27,7 @@ private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
                 if (field.attrs.skipDeserializing()) {
                     continue
                 }
-                if (field.attrs.default() == Default.null) {
+                if (field.attrs.default() == Default.None) {
                     if (firstDefaultIndex != null) {
                         cx.errorSpannedBy(
                             field.ty,
@@ -47,7 +48,7 @@ private fun checkRemoteGeneric(cx: Ctxt, cont: Container) {
     val remote = cont.attrs.remote()
     if (remote != null) {
         val localHasGeneric = cont.generics.params.isNotEmpty()
-        val remoteHasGeneric = remote.segments.lastOrNull()?.arguments != syn.PathArguments.null
+        val remoteHasGeneric = remote.segments.lastOrNull()?.arguments != PathArguments.None
         if (localHasGeneric && remoteHasGeneric) {
             cx.errorSpannedBy(remote, "remove generic parameters from this path")
         }
@@ -78,7 +79,7 @@ private fun checkGetter(cx: Ctxt, cont: Container) {
 private fun checkFlatten(cx: Ctxt, cont: Container) {
     when (val data = cont.data) {
         is Data.Enum -> {
-            for (variant in data.variants) {
+            for (variant in data.variants.toList()) {
                 for (field in variant.fields) {
                     checkFlattenField(cx, variant.style, field)
                 }
@@ -115,7 +116,7 @@ private fun checkFlattenField(cx: Ctxt, style: Style, field: Field) {
 
 private fun checkIdentifier(cx: Ctxt, cont: Container) {
     val variants = when (val data = cont.data) {
-        is Data.Enum -> data.variants
+        is Data.Enum -> data.variants.toList()
         is Data.Struct -> return
     }
 
@@ -125,7 +126,7 @@ private fun checkIdentifier(cx: Ctxt, cont: Container) {
         val isNoIdent = cont.attrs.identifier() == Identifier.No
 
         val isOther = variant.attrs.other()
-        val isUntagged = cont.attrs.tag() == TagType.null
+        val isUntagged = cont.attrs.tag() == TagType.None
 
         if (isVariantIdent && isOther) {
             cx.errorSpannedBy(
@@ -182,7 +183,7 @@ private fun checkIdentifier(cx: Ctxt, cont: Container) {
 
 private fun checkVariantSkipAttrs(cx: Ctxt, cont: Container) {
     val variants = when (val data = cont.data) {
-        is Data.Enum -> data.variants
+        is Data.Enum -> data.variants.toList()
         is Data.Struct -> return
     }
 
@@ -238,7 +239,7 @@ private fun checkVariantSkipAttrs(cx: Ctxt, cont: Container) {
 
 private fun checkInternalTagFieldNameConflict(cx: Ctxt, cont: Container) {
     val variants = when (val data = cont.data) {
-        is Data.Enum -> data.variants
+        is Data.Enum -> data.variants.toList()
         is Data.Struct -> return
     }
 
@@ -271,7 +272,7 @@ private fun checkInternalTagFieldNameConflict(cx: Ctxt, cont: Container) {
                         return
                     }
 
-                    for (deName in field.attrs.aliases()) {
+                    for (deName in field.attrs.name().deserializeAliases()) {
                         if (checkDe && deName.value == tag) {
                             diagnoseConflict()
                             return
@@ -396,7 +397,7 @@ private fun allowTransparent(field: Field, derive: Derive): Boolean {
 
     return when (derive) {
         Derive.Serialize -> !field.attrs.skipSerializing()
-        Derive.Deserialize -> !field.attrs.skipDeserializing() && field.attrs.default() == Default.null
+        Derive.Deserialize -> !field.attrs.skipDeserializing() && field.attrs.default() == Default.None
     }
 }
 
