@@ -1,6 +1,7 @@
 package io.github.kotlinmania.serderive.internals
 
 
+import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.SynError
 
@@ -9,6 +10,10 @@ public class Ctxt {
 
     public fun errorSpannedBy(obj: ToTokens, msg: String) {
         errors?.add(SynError.newSpanned(obj.toTokenStream(), msg))
+    }
+
+    public fun errorSpannedBy(tokens: TokenStream, msg: String) {
+        errors?.add(SynError.newSpanned(tokens, msg))
     }
 
     public fun synError(err: SynError) {

@@ -64,7 +64,7 @@ internal class BoolAttr(private val attr: Attr<Unit>) {
 internal class VecAttr<T>(
     private val cx: Ctxt,
     private val name: Symbol,
-    private var firstDupTokens: TokenStream = TokenStream(),
+    private var firstDupTokens: TokenStream = TokenStream.new(),
     private val values: MutableList<T> = mutableListOf()
 ) {
     fun insert(obj: ToTokens, value: T) {
@@ -97,7 +97,7 @@ internal class VecAttr<T>(
 }
 
 private fun unraw(ident: Ident): Ident {
-    return Ident(ident.toString().removePrefix("r#"), ident.span())
+    return Ident.new(ident.toString().removePrefix("r#"), ident.span())
 }
 
 public class RenameAllRules(
@@ -504,8 +504,8 @@ public class AttrVariant(
     private val skipDeserializing: Boolean,
     private val skipSerializing: Boolean,
     private val other: Boolean,
-    private val serializeWith: Expr.Path?,
-    private val deserializeWith: Expr.Path?,
+    private val serializeWith: io.github.kotlinmania.syn.Expr.Path?,
+    private val deserializeWith: io.github.kotlinmania.syn.Expr.Path?,
     private val borrow: BorrowAttribute?,
     private val untagged: Boolean
 ) {
@@ -516,8 +516,8 @@ public class AttrVariant(
     public fun skipDeserializing(): Boolean = skipDeserializing
     public fun skipSerializing(): Boolean = skipSerializing
     public fun other(): Boolean = other
-    public fun serializeWith(): Expr.Path? = serializeWith
-    public fun deserializeWith(): Expr.Path? = deserializeWith
+    public fun serializeWith(): io.github.kotlinmania.syn.Expr.Path? = serializeWith
+    public fun deserializeWith(): io.github.kotlinmania.syn.Expr.Path? = deserializeWith
     public fun untagged(): Boolean = untagged
 
     public fun renameByRules(rules: RenameAllRules) {
@@ -545,8 +545,8 @@ public class AttrVariant(
             val serBound = Attr<List<WherePredicate>>(cx, BOUND)
             val deBound = Attr<List<WherePredicate>>(cx, BOUND)
             val other = BoolAttr.none(cx, OTHER)
-            val serializeWith = Attr<Expr.Path>(cx, SERIALIZE_WITH)
-            val deserializeWith = Attr<Expr.Path>(cx, DESERIALIZE_WITH)
+            val serializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SERIALIZE_WITH)
+            val deserializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, DESERIALIZE_WITH)
             val borrow = Attr<BorrowAttribute>(cx, BORROW)
             val untagged = BoolAttr.none(cx, UNTAGGED)
 
@@ -609,13 +609,13 @@ public class AttrVariant(
                             if (path != null) {
                                 var serPath = path.clone()
                                 val serSegs = serPath.path.segments.toMutableList()
-                                serSegs.add(PathSegment(Ident("serialize", serPath.span())))
+                                serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
                                 serPath = serPath.copy(path = serPath.path.copy(segments = punctuated.Punctuated.fromList(serSegs)))
                                 serializeWith.set(meta.path, serPath)
 
                                 var dePath = path.clone()
                                 val deSegs = dePath.path.segments.toMutableList()
-                                deSegs.add(PathSegment(Ident("deserialize", dePath.span())))
+                                deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
                                 dePath = dePath.copy(path = dePath.path.copy(segments = punctuated.Punctuated.fromList(deSegs)))
                                 deserializeWith.set(meta.path, dePath)
                             }
@@ -675,28 +675,28 @@ public class AttrField(
     private val name: MultiName,
     private val skipSerializing: Boolean,
     private val skipDeserializing: Boolean,
-    private val skipSerializingIf: Expr.Path?,
+    private val skipSerializingIf: io.github.kotlinmania.syn.Expr.Path?,
     private val default: Default,
-    private val serializeWith: Expr.Path?,
-    private val deserializeWith: Expr.Path?,
+    private val serializeWith: io.github.kotlinmania.syn.Expr.Path?,
+    private val deserializeWith: io.github.kotlinmania.syn.Expr.Path?,
     private val serBound: List<WherePredicate>?,
     private val deBound: List<WherePredicate>?,
     private val borrowedLifetimes: Set<Lifetime>,
-    private val getter: Expr.Path?,
+    private val getter: io.github.kotlinmania.syn.Expr.Path?,
     private val flatten: Boolean,
     private var transparent: Boolean
 ) {
     public fun name(): MultiName = name
     public fun skipSerializing(): Boolean = skipSerializing
     public fun skipDeserializing(): Boolean = skipDeserializing
-    public fun skipSerializingIf(): Expr.Path? = skipSerializingIf
+    public fun skipSerializingIf(): io.github.kotlinmania.syn.Expr.Path? = skipSerializingIf
     public fun default(): Default = default
-    public fun serializeWith(): Expr.Path? = serializeWith
-    public fun deserializeWith(): Expr.Path? = deserializeWith
+    public fun serializeWith(): io.github.kotlinmania.syn.Expr.Path? = serializeWith
+    public fun deserializeWith(): io.github.kotlinmania.syn.Expr.Path? = deserializeWith
     public fun serBound(): List<WherePredicate>? = serBound
     public fun deBound(): List<WherePredicate>? = deBound
     public fun borrowedLifetimes(): Set<Lifetime> = borrowedLifetimes
-    public fun getter(): Expr.Path? = getter
+    public fun getter(): io.github.kotlinmania.syn.Expr.Path? = getter
     public fun flatten(): Boolean = flatten
     public fun transparent(): Boolean = transparent
 
@@ -723,14 +723,14 @@ public companion object {
         val deAliases = VecAttr.none<Name>(cx, RENAME)
         val skipSerializing = BoolAttr.none(cx, SKIP_SERIALIZING)
         val skipDeserializing = BoolAttr.none(cx, SKIP_DESERIALIZING)
-        val skipSerializingIf = Attr<Expr.Path>(cx, SKIP_SERIALIZING_IF)
+        val skipSerializingIf = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SKIP_SERIALIZING_IF)
         val default = Attr<Default>(cx, DEFAULT)
-        val serializeWith = Attr<Expr.Path>(cx, SERIALIZE_WITH)
-        val deserializeWith = Attr<Expr.Path>(cx, DESERIALIZE_WITH)
+        val serializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SERIALIZE_WITH)
+        val deserializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, DESERIALIZE_WITH)
         val serBound = Attr<List<WherePredicate>>(cx, BOUND)
         val deBound = Attr<List<WherePredicate>>(cx, BOUND)
         val borrowedLifetimes = Attr<Set<Lifetime>>(cx, BORROW)
-        val getter = Attr<Expr.Path>(cx, GETTER)
+        val getter = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, GETTER)
         val flatten = BoolAttr.none(cx, FLATTEN)
 
         val identName = field.ident?.let { Name.from(unraw(it)) } ?: Name(index.toString(), Span.callSite())
@@ -813,13 +813,13 @@ public companion object {
                         if (path != null) {
                             var serPath = path.clone()
                             val serSegs = serPath.path.segments.toMutableList()
-                            serSegs.add(PathSegment(Ident("serialize", serPath.span())))
+                            serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
                             serPath = serPath.copy(path = serPath.path.copy(segments = punctuated.Punctuated.fromList(serSegs)))
                             serializeWith.set(meta.path, serPath)
 
                             var dePath = path.clone()
                             val deSegs = dePath.path.segments.toMutableList()
-                            deSegs.add(PathSegment(Ident("deserialize", dePath.span())))
+                            deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
                             dePath = dePath.copy(path = dePath.path.copy(segments = punctuated.Punctuated.fromList(deSegs)))
                             deserializeWith.set(meta.path, dePath)
                         }
@@ -877,12 +877,12 @@ public companion object {
             if (borrowableIsStr) {
                 val span = Span.callSite()
                 val segments = mutableListOf(
-                    PathSegment(Ident("_serde", span)),
+                    PathSegment(Ident.new("_serde", span)),
                     PathSegment(private.clone()),
-                    PathSegment(Ident("de", span)),
-                    PathSegment(Ident("borrow_cow_str", span))
+                    PathSegment(Ident.new("de", span)),
+                    PathSegment(Ident.new("borrow_cow_str", span))
                 )
-                Expr.Path(
+                io.github.kotlinmania.syn.Expr.Path(
                     attrs = emptyList(),
                     qself = null,
                     path = Path(leadingColon = null, segments = punctuated.Punctuated.fromList(segments))
@@ -890,12 +890,12 @@ public companion object {
             } else if (borrowableIsSliceU8) {
                 val span = Span.callSite()
                 val segments = mutableListOf(
-                    PathSegment(Ident("_serde", span)),
+                    PathSegment(Ident.new("_serde", span)),
                     PathSegment(private.clone()),
-                    PathSegment(Ident("de", span)),
-                    PathSegment(Ident("borrow_cow_bytes", span))
+                    PathSegment(Ident.new("de", span)),
+                    PathSegment(Ident.new("borrow_cow_bytes", span))
                 )
-                Expr.Path(
+                io.github.kotlinmania.syn.Expr.Path(
                     attrs = emptyList(),
                     qself = null,
                     path = Path(leadingColon = null, segments = punctuated.Punctuated.fromList(segments))
@@ -1101,6 +1101,6 @@ public sealed class TagType {
 public sealed class Default {
     public object None : Default()
     public object Plain : Default()
-    public class Path(public val path: Expr.Path) : Default()
+    public class Path(public val path: io.github.kotlinmania.syn.Expr.Path) : Default()
 }
 
