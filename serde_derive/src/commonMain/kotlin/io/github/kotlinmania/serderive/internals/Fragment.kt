@@ -2,7 +2,9 @@ package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.syn.token
+import io.github.kotlinmania.quote.toTokens
+import io.github.kotlinmania.syn.token.Brace
+import io.github.kotlinmania.syn.token.Comma
 
 public sealed class Fragment {
     public data class Expr(val expr: TokenStream) : Fragment()
@@ -19,8 +21,8 @@ public class Expr(public val fragment: Fragment) : ToTokens {
         when (val frag = fragment) {
             is Fragment.Expr -> frag.expr.toTokens(out)
             is Fragment.Block -> {
-                token.Brace().surround(out) {
-                    frag.block.toTokens(it)
+                Brace.default().surround(out) { inner ->
+                    frag.block.toTokens(inner)
                 }
             }
         }
@@ -41,11 +43,11 @@ public class Match(public val fragment: Fragment) : ToTokens {
         when (val frag = fragment) {
             is Fragment.Expr -> {
                 frag.expr.toTokens(out)
-                token.Comma().toTokens(out)
+                Comma.default().toTokens(out)
             }
             is Fragment.Block -> {
-                token.Brace().surround(out) {
-                    frag.block.toTokens(it)
+                Brace.default().surround(out) { inner ->
+                    frag.block.toTokens(inner)
                 }
             }
         }
