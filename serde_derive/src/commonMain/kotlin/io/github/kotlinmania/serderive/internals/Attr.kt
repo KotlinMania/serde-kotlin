@@ -180,14 +180,14 @@ public class AttrContainer(
             for (attr in item.attrs) {
                 if (SERDE != attr.path()) {
                     val meta = attr.meta
-                    if (meta is syn.Meta.Path && NON_EXHAUSTIVE == meta.path) {
+                    if (meta is Meta.PathMeta && NON_EXHAUSTIVE == meta.path) {
                         nonExhaustive = true
                     }
                     continue
                 }
 
                 val metaVal = attr.meta
-                if (metaVal is syn.Meta.List && metaVal.tokens.isEmpty()) {
+                if (metaVal is Meta.List && metaVal.tokens.isEmpty()) {
                     continue
                 }
 
@@ -218,7 +218,7 @@ public class AttrContainer(
                             val oneName = meta.input.peek(token.Eq::class)
                             val (ser, de) = getRenames(cx, RENAME_ALL_FIELDS, meta)
                             when (item.data) {
-                                is syn.Data.Enum -> {
+                                is Data.Enum -> {
                                     if (ser != null) {
                                         try {
                                             renameAllFieldsSerRule.set(meta.path, RenameRule.fromStr(ser.value))
@@ -234,8 +234,8 @@ public class AttrContainer(
                                         }
                                     }
                                 }
-                                is syn.Data.Struct -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
-                                is syn.Data.Union -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
+                                is Data.Struct -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
+                                is Data.Union -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
                             }
                         } else if (TRANSPARENT == meta.path) {
                             transparent.setTrue(meta.path)
@@ -246,8 +246,8 @@ public class AttrContainer(
                                 val path = parseLitIntoExprPath(cx, DEFAULT, meta)
                                 if (path != null) {
                                     val itemData = item.data
-                                    if (itemData is syn.Data.Struct) {
-                                        if (itemData.fields is syn.Fields.Named || itemData.fields is syn.Fields.Unnamed) {
+                                    if (itemData is Data.Struct) {
+                                        if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
                                             default.set(meta.path, Default.Path(path))
                                         } else {
                                             cx.synError(meta.error("#[serde(default = \"...\")] can only be used on structs that have fields"))
@@ -258,9 +258,9 @@ public class AttrContainer(
                                 }
                             } else {
                                 val itemData = item.data
-                                if (itemData is syn.Data.Struct) {
-                                    if (itemData.fields is syn.Fields.Named || itemData.fields is syn.Fields.Unnamed) {
-                                        default.set(meta.path, Default.Default)
+                                if (itemData is Data.Struct) {
+                                    if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
+                                        default.set(meta.path, Default.Plain)
                                     } else {
                                         cx.errorSpannedBy(itemData.fields, "#[serde(default)] can only be used on structs that have fields")
                                     }
@@ -273,7 +273,7 @@ public class AttrContainer(
                             serBound.setOpt(meta.path, ser)
                             deBound.setOpt(meta.path, de)
                         } else if (UNTAGGED == meta.path) {
-                            if (item.data is syn.Data.Enum) {
+                            if (item.data is Data.Enum) {
                                 untagged.setTrue(meta.path)
                             } else {
                                 cx.synError(meta.error("#[serde(untagged)] can only be used on enums"))
@@ -282,9 +282,9 @@ public class AttrContainer(
                             val s = getLitStr(cx, TAG, meta)
                             if (s != null) {
                                 val itemData = item.data
-                                if (itemData is syn.Data.Enum) {
+                                if (itemData is Data.Enum) {
                                     internalTag.set(meta.path, s.value)
-                                } else if (itemData is syn.Data.Struct && itemData.fields is syn.Fields.Named) {
+                                } else if (itemData is Data.Struct && itemData.fields is Fields.Named) {
                                     internalTag.set(meta.path, s.value)
                                 } else {
                                     cx.synError(meta.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
@@ -293,7 +293,7 @@ public class AttrContainer(
                         } else if (CONTENT == meta.path) {
                             val s = getLitStr(cx, CONTENT, meta)
                             if (s != null) {
-                                if (item.data is syn.Data.Enum) {
+                                if (item.data is Data.Enum) {
                                     content.set(meta.path, s.value)
                                 } else {
                                     cx.synError(meta.error("#[serde(content = \"...\")] can only be used on enums"))
@@ -334,7 +334,7 @@ public class AttrContainer(
                             throw meta.error("unknown serde container attribute `$pathStr`")
                         }
                     }
-                } catch (err: syn.Error) {
+                } catch (err: SynError) {
                     cx.synError(err)
                 }
             }
@@ -407,9 +407,9 @@ private fun decideTag(
     if (untaggedTokens == null && internalTagTokens != null && contentTokens == null) {
         val tag = internalTagTokens.second
         val itemData = item.data
-        if (itemData is syn.Data.Enum) {
+        if (itemData is Data.Enum) {
             for (variant in itemData.variants) {
-                if (variant.fields is syn.Fields.Unnamed) {
+                if (variant.fields is Fields.Unnamed) {
                     if (variant.fields.unnamed.size != 1) {
                         cx.errorSpannedBy(variant, "#[serde(tag = \"...\")] cannot be used with tuple variants")
                         break
@@ -467,30 +467,30 @@ private fun decideIdentifier(
         cx.errorSpannedBy(variantTokens.first, msg)
         return Identifier.No
     }
-    if (item.data is syn.Data.Enum && fieldTokens != null && variantTokens == null) {
+    if (item.data is Data.Enum && fieldTokens != null && variantTokens == null) {
         return Identifier.Field
     }
-    if (item.data is syn.Data.Enum && fieldTokens == null && variantTokens != null) {
+    if (item.data is Data.Enum && fieldTokens == null && variantTokens != null) {
         return Identifier.Variant
     }
-    if (item.data is syn.Data.Struct && fieldTokens != null && variantTokens == null) {
+    if (item.data is Data.Struct && fieldTokens != null && variantTokens == null) {
         val msg = "#[serde(field_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as syn.Data.Struct).structToken, msg)
+        cx.errorSpannedBy((item.data as Data.Struct).structToken, msg)
         return Identifier.No
     }
-    if (item.data is syn.Data.Union && fieldTokens != null && variantTokens == null) {
+    if (item.data is Data.Union && fieldTokens != null && variantTokens == null) {
         val msg = "#[serde(field_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as syn.Data.Union).unionToken, msg)
+        cx.errorSpannedBy((item.data as Data.Union).unionToken, msg)
         return Identifier.No
     }
-    if (item.data is syn.Data.Struct && fieldTokens == null && variantTokens != null) {
+    if (item.data is Data.Struct && fieldTokens == null && variantTokens != null) {
         val msg = "#[serde(variant_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as syn.Data.Struct).structToken, msg)
+        cx.errorSpannedBy((item.data as Data.Struct).structToken, msg)
         return Identifier.No
     }
-    if (item.data is syn.Data.Union && fieldTokens == null && variantTokens != null) {
+    if (item.data is Data.Union && fieldTokens == null && variantTokens != null) {
         val msg = "#[serde(variant_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as syn.Data.Union).unionToken, msg)
+        cx.errorSpannedBy((item.data as Data.Union).unionToken, msg)
         return Identifier.No
     }
     return Identifier.No
@@ -556,7 +556,7 @@ public class AttrVariant(
                 }
 
                 val metaVal = attr.meta
-                if (metaVal is syn.Meta.List && metaVal.tokens.isEmpty()) {
+                if (metaVal is Meta.List && metaVal.tokens.isEmpty()) {
                     continue
                 }
 
@@ -632,7 +632,7 @@ public class AttrVariant(
                             } else {
                                 BorrowAttribute(meta.path.clone(), null)
                             }
-                            if (variant.fields is syn.Fields.Unnamed && variant.fields.unnamed.size == 1) {
+                            if (variant.fields is Fields.Unnamed && variant.fields.unnamed.size == 1) {
                                 borrow.set(meta.path, borrowAttribute)
                             } else {
                                 cx.errorSpannedBy(variant, "#[serde(borrow)] may only be used on newtype variants")
@@ -644,7 +644,7 @@ public class AttrVariant(
                             throw meta.error("unknown serde variant attribute `$pathStr`")
                         }
                     }
-                } catch (err: syn.Error) {
+                } catch (err: SynError) {
                     cx.synError(err)
                 }
             }
@@ -652,8 +652,8 @@ public class AttrVariant(
             return AttrVariant(
                 name = MultiName.fromAttrs(Name.from(unraw(variant.ident)), serName, deName, deAliases),
                 renameAllRules = RenameAllRules(
-                    serialize = renameAllSerRule.get() ?: RenameRule.null,
-                    deserialize = renameAllDeRule.get() ?: RenameRule.null
+                    serialize = renameAllSerRule.get() ?: RenameRule.None,
+                    deserialize = renameAllDeRule.get() ?: RenameRule.None
                 ),
                 serBound = serBound.get(),
                 deBound = deBound.get(),
@@ -759,7 +759,7 @@ public companion object {
             }
 
             val metaVal = attr.meta
-            if (metaVal is syn.Meta.List && metaVal.tokens.isEmpty()) {
+            if (metaVal is Meta.List && metaVal.tokens.isEmpty()) {
                 continue
             }
 
@@ -784,7 +784,7 @@ public companion object {
                                 default.set(meta.path, Default.Path(path))
                             }
                         } else {
-                            default.set(meta.path, Default.Default)
+                            default.set(meta.path, Default.Plain)
                         }
                     } else if (SKIP_SERIALIZING == meta.path) {
                         skipSerializing.setTrue(meta.path)
@@ -858,13 +858,13 @@ public companion object {
                         throw meta.error("unknown serde field attribute `$pathStr`")
                     }
                 }
-            } catch (err: syn.Error) {
+            } catch (err: SynError) {
                 cx.synError(err)
             }
         }
 
         if (containerDefault.isNone() && skipDeserializing.get()) {
-            default.setIfNone(Default.Default)
+            default.setIfNone(Default.Plain)
         }
 
         val resolvedBorrowedLifetimes = borrowedLifetimes.get() ?: emptySet()
@@ -942,7 +942,7 @@ private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
         else -> return false
     }
     return seg.ident.toString() == "Cow" && args.size == 2 &&
-            args[0] is GenericArgument.Lifetime &&
+            args[0] is GenericArgument.LifetimeArg &&
             args[1] is GenericArgument.SynType && elem((args[1] as GenericArgument.SynType).ty)
 }
 
