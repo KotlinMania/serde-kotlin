@@ -1,15 +1,21 @@
 package io.github.kotlinmania.serderive.internals
 
 
+import io.github.kotlinmania.syn.Data as SynData
 import io.github.kotlinmania.syn.DeriveInput
+import io.github.kotlinmania.syn.Fields
+import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.Ident
+import io.github.kotlinmania.syn.Index
+import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.SynType
+import io.github.kotlinmania.syn.Variant
 
 public class Container(
     public val ident: Ident,
     public val attrs: AttrContainer,
     public val data: Data,
-    public val generics: syn.Generics,
+    public val generics: Generics,
     public val original: DeriveInput
 ) {
     public companion object {
@@ -22,14 +28,14 @@ public class Container(
             val attrs = AttrContainer.fromAst(cx, item)
 
             var data = when (val itemData = item.data) {
-                is syn.Data.Enum -> {
+                is SynData.Enum -> {
                     Data.Enum(enumFromAst(cx, itemData.variants, attrs.default(), private))
                 }
-                is syn.Data.Struct -> {
+                is SynData.Struct -> {
                     val (style, fields) = structFromAst(cx, itemData.fields, null, attrs.default(), private)
                     Data.Struct(style, fields)
                 }
-                is syn.Data.Union -> {
+                is SynData.Union -> {
                     cx.errorSpannedBy(item, "Serde does not support derive for unions")
                     return null
                 }
@@ -106,7 +112,7 @@ public enum class Style {
 
 private fun enumFromAst(
     cx: Ctxt,
-    variants: Iterable<syn.Variant>,
+    variants: Iterable<Variant>,
     containerDefault: Default,
     private: Ident
 ): List<Variant> {
@@ -145,17 +151,17 @@ private fun enumFromAst(
 
 private fun structFromAst(
     cx: Ctxt,
-    fields: syn.Fields,
+    fields: Fields,
     attrs: AttrVariant?,
     containerDefault: Default,
     private: Ident
 ): Pair<Style, List<Field>> {
     return when (fields) {
-        is syn.Fields.Named -> Pair(
+        is Fields.Named -> Pair(
             Style.Struct,
             fieldsFromAst(cx, fields.named, attrs, containerDefault, private)
         )
-        is syn.Fields.Unnamed -> {
+        is Fields.Unnamed -> {
             if (fields.unnamed.size == 1) {
                 Pair(
                     Style.Newtype,
@@ -168,13 +174,13 @@ private fun structFromAst(
                 )
             }
         }
-        is syn.Fields.Unit -> Pair(Style.Unit, emptyList())
+        is Fields.Unit -> Pair(Style.Unit, emptyList())
     }
 }
 
 private fun fieldsFromAst(
     cx: Ctxt,
-    fields: Iterable<syn.Field>,
+    fields: Iterable<io.github.kotlinmania.syn.Field>,
     attrs: AttrVariant?,
     containerDefault: Default,
     private: Ident
@@ -183,9 +189,9 @@ private fun fieldsFromAst(
     for (field in fields) {
         val ident = field.ident
         val member = if (ident != null) {
-            syn.Member.Named(ident.clone())
+            Member.Named(ident.clone())
         } else {
-            syn.Member.Unnamed(syn.Index(dstFields.size.toUInt()))
+            Member.Unnamed(Index(dstFields.size.toUInt()))
         }
         dstFields.add(
             Field(
