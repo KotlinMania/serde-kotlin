@@ -156,7 +156,7 @@ class Parameters(cont: Container) {
 data class SplitForDeLifetime(
     val deImplGenerics: DeImplGenerics,
     val deTyGenerics: DeTypeGenerics,
-    val tyGenerics: io.github.kotlinmania.syn.TypeGenerics,
+    val tyGenerics: io.github.kotlinmania.syn.Generics,
     val whereClause: WhereClause?
 )
 private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generics {
