@@ -3,7 +3,25 @@ package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.Ident
-import io.github.kotlinmania.syn.*
+import io.github.kotlinmania.syn.Generics
+import io.github.kotlinmania.syn.GenericParam
+import io.github.kotlinmania.syn.GenericParamList
+import io.github.kotlinmania.syn.GenericArgument
+import io.github.kotlinmania.syn.GenericArgumentList
+import io.github.kotlinmania.syn.Lifetime
+import io.github.kotlinmania.syn.LifetimeList
+import io.github.kotlinmania.syn.Macro
+import io.github.kotlinmania.syn.Path
+import io.github.kotlinmania.syn.PathArguments
+import io.github.kotlinmania.syn.PathSegment
+import io.github.kotlinmania.syn.PathSegmentList
+import io.github.kotlinmania.syn.QSelf
+import io.github.kotlinmania.syn.ReturnType
+import io.github.kotlinmania.syn.SynType
+import io.github.kotlinmania.syn.TypeParamBound
+import io.github.kotlinmania.syn.TypeParamBoundList
+import io.github.kotlinmania.syn.WherePredicate
+import io.github.kotlinmania.syn.WherePredicateList
 import io.github.kotlinmania.syn.token.Colon
 import io.github.kotlinmania.syn.token.Lt
 import io.github.kotlinmania.syn.token.Gt
@@ -31,7 +49,7 @@ public fun withWherePredicates(
     generics: Generics,
     predicates: List<WherePredicate>
 ): Generics {
-    val mutGenerics = generics.deepCopy()
+    val mutGenerics = generics.copy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (predicate in predicates) {
@@ -45,7 +63,7 @@ public fun withWherePredicatesFromFields(
     generics: Generics,
     fromField: (AttrField) -> List<WherePredicate>?
 ): Generics {
-    val mutGenerics = generics.deepCopy()
+    val mutGenerics = generics.copy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (field in cont.data.allFields()) {
@@ -64,9 +82,9 @@ public fun withWherePredicatesFromVariants(
 ): Generics {
     val variants = when (val data = cont.data) {
         is Data.Enum -> data.variants
-        is Data.Struct -> return generics.deepCopy()
+        is Data.Struct -> return generics.copy()
     }
-    val mutGenerics = generics.deepCopy()
+    val mutGenerics = generics.copy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (variant in variants) {
@@ -92,7 +110,7 @@ public fun withBound(
         fun visitField(field: io.github.kotlinmania.syn.Field) {
             val ty = ungroup(field.ty)
             if (ty is SynType.Path) {
-                val firstSegment = ty.path.segments.firstOrNull()
+                val firstSegment = ty.path.segments.toList().firstOrNull()
                 if (firstSegment != null) {
                     if (allTypeParams.contains(firstSegment.ident)) {
                         associatedTypeUsage.add(ty)
@@ -103,17 +121,17 @@ public fun withBound(
         }
 
         fun visitPath(path: Path) {
-            val lastSeg = path.segments.lastOrNull()
+            val lastSeg = path.segments.toList().lastOrNull()
             if (lastSeg != null && lastSeg.ident.toString() == "PhantomData") {
                 return
             }
             if (path.leadingColon == null && path.segments.size == 1) {
-                val id = path.segments[0].ident
+                val id = path.segments.toList()[0].ident
                 if (allTypeParams.contains(id)) {
                     relevantTypeParams.add(id)
                 }
             }
-            for (segment in path.segments) {
+            for (segment in path.segments.toList()) {
                 visitPathSegment(segment)
             }
         }
@@ -129,7 +147,7 @@ public fun withBound(
                 }
                 is SynType.Group -> visitType(ty.elem)
                 is SynType.ImplTrait -> {
-                    for (bound in ty.bounds) {
+                    for (bound in ty.bounds.toList()) {
                         visitTypeParamBound(bound)
                     }
                 }
@@ -146,12 +164,12 @@ public fun withBound(
                 is SynType.Reference -> visitType(ty.elem)
                 is SynType.Slice -> visitType(ty.elem)
                 is SynType.TraitObject -> {
-                    for (bound in ty.bounds) {
+                    for (bound in ty.bounds.toList()) {
                         visitTypeParamBound(bound)
                     }
                 }
                 is SynType.Tuple -> {
-                    for (elem in ty.elems) {
+                    for (elem in ty.elems.toList()) {
                         visitType(elem)
                     }
                 }
@@ -167,16 +185,16 @@ public fun withBound(
             when (arguments) {
                 is PathArguments.None -> {}
                 is PathArguments.AngleBracketed -> {
-                    for (arg in arguments.args) {
+                    for (arg in arguments.args.toList()) {
                         when (arg) {
                             is GenericArgument.TypeArg -> visitType(arg.type)
-                            is GenericArgument.AssocTypeArg -> visitType(arg.ty)
+                            is GenericArgument.AssocTypeArg -> visitType(arg.assoc.ty)
                             else -> {}
                         }
                     }
                 }
                 is PathArguments.Parenthesized -> {
-                    for (argument in arguments.inputs) {
+                    for (argument in arguments.inputs.toList()) {
                         visitType(argument)
                     }
                     visitReturnType(arguments.output)
@@ -241,7 +259,7 @@ public fun withBound(
         )
     }
 
-    val dstGenerics = generics.deepCopy()
+    val dstGenerics = generics.copy()
     val dstPredicates = dstGenerics.makeWhereClause().predicates
     for (param in generics.typeParams()) {
         val id = param.ident
@@ -252,10 +270,10 @@ public fun withBound(
             qself = null,
             path = Path.from(id)
         )
-        dstPredicates.add(makeWhereBoundedType(boundedTy, bound))
+        dstPredicates.pushValue(makeWhereBoundedType(boundedTy, bound))
     }
     for (boundedTy in associatedTypeUsage) {
-        dstPredicates.add(makeWhereBoundedType(boundedTy.deepCopy() as SynType.Path, bound))
+        dstPredicates.pushValue(makeWhereBoundedType(boundedTy.deepCopy() as SynType.Path, bound))
     }
     return dstGenerics
 }
@@ -265,10 +283,10 @@ public fun withSelfBound(
     generics: Generics,
     bound: Path
 ): Generics {
-    val mutGenerics = generics.deepCopy()
+    val mutGenerics = generics.copy()
     val boundsList = TypeParamBoundList()
     boundsList.pushValue(TypeParamBound.Trait(bound.deepCopy()))
-    mutGenerics.makeWhereClause().predicates.add(
+    mutGenerics.makeWhereClause().predicates.pushValue(
         WherePredicate.TypePredicate(
             boundedTy = typeOfItem(cont),
             colonToken = Colon.default(),
