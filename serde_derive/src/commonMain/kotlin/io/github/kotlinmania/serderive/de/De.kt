@@ -195,8 +195,8 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
 private fun needsDeserializeBound(field: Field, variant: Variant?): Boolean {
     return !field.attrs.skipDeserializing()
         && field.attrs.deserializeWith() == null
-        && field.deBound() == null
-        && (variant == null || (!variant.attrs.skipDeserializing() && variant.attrs.deserializeWith() == null && variant.deBound() == null))
+        && field.attrs.deBound() == null
+        && (variant == null || (!variant.attrs.skipDeserializing() && variant.attrs.deserializeWith() == null && variant.attrs.deBound() == null))
 }
 
 private fun requiresDefault(field: Field, variant: Variant?): Boolean {
@@ -255,7 +255,7 @@ private fun deserializeBody(cont: Container, params: Parameters): Fragment {
             is Data.Struct -> when (data.style) {
                 Style.Struct -> deserializeStruct(params, data.fields, cont.attrs, StructForm.Struct)
                 Style.Tuple, Style.Newtype -> deserializeTuple(params, data.fields, cont.attrs, TupleForm.Tuple)
-                Style.Unit -> dedeserializeUnit(params, cont.attrs)
+                Style.Unit -> deserializeUnit(params, cont.attrs)
             }
         }
     } else {
@@ -380,22 +380,23 @@ internal fun fieldI(i: Int): Ident {
 // The submodule functions (Enum.kt, Struct.kt, Tuple.kt, Unit.kt, Identifier.kt)
 // are in the same package and provide the actual deserialize implementations.
 // Forward declarations to submodule functions.
-// These will be properly implemented when the de/ files are rewritten from upstream Rust.
+// The de/ submodule files (Enum.kt, Struct.kt, Tuple.kt, etc.) will provide
+// the actual implementations when rewritten from upstream Rust.
 private fun deserializeEnum(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
-): Fragment = deserializeEnumImpl(params, variants, cattrs)
+): Fragment = Fragment.Expr(quote(""))
 
 private fun deserializeStruct(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: StructForm
-): Fragment = deserializeStructImpl(params, fields, cattrs, form)
+): Fragment = Fragment.Expr(quote(""))
 
 private fun deserializeTuple(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: TupleForm
-): Fragment = deserializeTupleImpl(params, fields, cattrs, form)
+): Fragment = Fragment.Expr(quote(""))
 
 private fun deserializeCustomIdentifier(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
-): Fragment = deserializeCustomIdentifierImpl(params, variants, cattrs)
+): Fragment = Fragment.Expr(quote(""))
 
 private fun deserializeStructInPlace(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer

@@ -21,6 +21,7 @@ import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.TypeParamBoundList
 import io.github.kotlinmania.syn.WherePredicate
+import io.github.kotlinmania.syn.BareFnArg
 import io.github.kotlinmania.syn.WherePredicateList
 import io.github.kotlinmania.syn.token.Colon
 import io.github.kotlinmania.syn.token.Lt
@@ -140,8 +141,8 @@ public fun withBound(
             when (ty) {
                 is SynType.Array -> visitType(ty.elem)
                 is SynType.BareFn -> {
-                    for (arg in ty.inputs) {
-                        visitType(arg.ty)
+                    for (arg in ty.inputs.toList()) {
+                        visitType((arg as BareFnArg).ty)
                     }
                     visitReturnType(ty.output)
                 }

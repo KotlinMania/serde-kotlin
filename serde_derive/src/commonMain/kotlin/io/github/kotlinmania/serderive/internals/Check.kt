@@ -390,7 +390,7 @@ private fun memberMessage(member: Member): String {
 private fun allowTransparent(field: Field, derive: Derive): Boolean {
     val ty = ungroup(field.ty)
     if (ty is SynType.Path) {
-        if (ty.path.segments.lastOrNull()?.ident?.toString() == "PhantomData") {
+        if (ty.path.segments.toList().lastOrNull()?.ident?.toString() == "PhantomData") {
             return false
         }
     }

@@ -3,6 +3,7 @@ package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
+import io.github.kotlinmania.quote.append
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.SynError
 import io.github.kotlinmania.syn.Field
@@ -34,6 +35,18 @@ public class Ctxt {
     public fun errorSpannedBy(variant: Variant, msg: String) {
         val out = TokenStream.new()
         variant.toTokens(out)
+        errors?.add(SynError.newSpanned(out, msg))
+    }
+
+    public fun errorSpannedBy(ident: io.github.kotlinmania.procmacro2.Ident, msg: String) {
+        val ts = TokenStream.new()
+        ts.append(ident)
+        errors?.add(SynError.newSpanned(ts, msg))
+    }
+
+    public fun errorSpannedBy(synType: io.github.kotlinmania.syn.SynType, msg: String) {
+        val out = TokenStream.new()
+        synType.toTokens(out)
         errors?.add(SynError.newSpanned(out, msg))
     }
 
