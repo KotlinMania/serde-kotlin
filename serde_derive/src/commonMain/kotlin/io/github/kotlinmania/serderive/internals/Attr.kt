@@ -586,6 +586,7 @@ public class AttrVariant(
     public fun deserializeWith(): io.github.kotlinmania.syn.Expr.Path? = deserializeWith
     public fun untagged(): Boolean = untagged
     public fun borrow(): BorrowAttribute? = borrow
+    public fun aliases(): Set<Name> = name.deserializeAliases()
 
     public fun renameByRules(rules: RenameAllRules) {
         if (!name.serializeRenamed) {
@@ -767,6 +768,7 @@ public class AttrField(
     public fun getter(): io.github.kotlinmania.syn.Expr.Path? = getter
     public fun flatten(): Boolean = flatten
     public fun transparent(): Boolean = transparent
+    public fun aliases(): Set<Name> = name.deserializeAliases()
 
     public fun markTransparent() {
         transparent = true
