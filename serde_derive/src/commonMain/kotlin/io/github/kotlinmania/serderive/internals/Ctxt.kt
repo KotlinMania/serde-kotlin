@@ -3,7 +3,10 @@ package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
+import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.SynError
+import io.github.kotlinmania.syn.Field
+import io.github.kotlinmania.syn.Variant
 
 public class Ctxt {
     private var errors: MutableList<SynError>? = mutableListOf()
@@ -14,6 +17,24 @@ public class Ctxt {
 
     public fun errorSpannedBy(tokens: TokenStream, msg: String) {
         errors?.add(SynError.newSpanned(tokens, msg))
+    }
+
+    public fun errorSpannedBy(path: Path, msg: String) {
+        val out = TokenStream.new()
+        path.toTokens(out)
+        errors?.add(SynError.newSpanned(out, msg))
+    }
+
+    public fun errorSpannedBy(field: Field, msg: String) {
+        val out = TokenStream.new()
+        field.toTokens(out)
+        errors?.add(SynError.newSpanned(out, msg))
+    }
+
+    public fun errorSpannedBy(variant: Variant, msg: String) {
+        val out = TokenStream.new()
+        variant.toTokens(out)
+        errors?.add(SynError.newSpanned(out, msg))
     }
 
     public fun synError(err: SynError) {

@@ -6,14 +6,56 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.*
 
+// Extension: convert any object with a toTokens(TokenStream) method to a TokenStream.
+// Needed because syn-kotlin Path doesn't implement ToTokens.
+private fun Path.toTokenStream(): TokenStream {
+    val out = TokenStream.new()
+    toTokens(out)
+    return out
+}
+
+private fun SynType.toTokenStream(): TokenStream {
+    val out = TokenStream.new()
+    toTokens(out)
+    return out
+}
+
+// Wrap a Path as a ToTokens for passing to Attr.set / Ctxt.errorSpannedBy
+private class PathTokens(private val path: Path) : ToTokens {
+    override fun toTokens(out: TokenStream) {
+        path.toTokens(out)
+    }
+}
+
+private fun Path.asToTokens(): ToTokens = PathTokens(this)
+
+// Convert any ToTokens or Path-like object to a TokenStream
+private fun toTokenStream(obj: Any): TokenStream {
+    return when (obj) {
+        is ToTokens -> obj.toTokenStream()
+        is Path -> {
+            val out = TokenStream.new()
+            obj.toTokens(out)
+            out
+        }
+        is SynType -> {
+            val out = TokenStream.new()
+            obj.toTokens(out)
+            out
+        }
+        is TokenStream -> obj
+        else -> throw IllegalArgumentException("Cannot convert $obj to TokenStream")
+    }
+}
+
 internal class Attr<T>(
     private val cx: Ctxt,
     private val name: Symbol,
     private var tokens: TokenStream = TokenStream.new(),
     private var value: T? = null
 ) {
-    fun set(obj: ToTokens, value: T) {
-        val tokens = obj.toTokenStream()
+    fun set(obj: Any, value: T) {
+        val tokens = toTokenStream(obj)
 
         if (this.value != null) {
             val msg = "duplicate serde attribute `#`name"
@@ -24,7 +66,7 @@ internal class Attr<T>(
         }
     }
 
-    fun setOpt(obj: ToTokens, value: T?) {
+    fun setOpt(obj: Any, value: T?) {
         if (value != null) {
             this.set(obj, value)
         }
@@ -46,7 +88,7 @@ internal class Attr<T>(
 }
 
 internal class BoolAttr(private val attr: Attr<Unit>) {
-    fun setTrue(obj: ToTokens) {
+    fun setTrue(obj: Any) {
         attr.set(obj, Unit)
     }
 
@@ -67,9 +109,9 @@ internal class VecAttr<T>(
     private var firstDupTokens: TokenStream = TokenStream.new(),
     private val values: MutableList<T> = mutableListOf()
 ) {
-    fun insert(obj: ToTokens, value: T) {
+    fun insert(obj: Any, value: T) {
         if (values.size == 1) {
-            this.firstDupTokens = obj.toTokenStream()
+            this.firstDupTokens = toTokenStream(obj)
         }
         this.values.add(value)
     }
@@ -707,9 +749,8 @@ public class AttrField(
     public fun isNone(): Boolean {
         return false // null is not used here properly, just return false
     }
-}
 
-public companion object {
+    public companion object {
     public fun fromAst(
         cx: Ctxt,
         index: Int,
@@ -930,6 +971,8 @@ public companion object {
             transparent = false
         )
     }
+}
+}
 
 private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
     val path = when (val ungrouped = ungroup(ty)) {
