@@ -475,8 +475,9 @@ private fun decideTag(
         val itemData = item.data
         if (itemData is SynData.Enum) {
             for (synVariant in itemData.variants.toList()) {
-                if (synVariant.fields is Fields.Unnamed) {
-                    if (synVariant.fields.fields.unnamed.size != 1) {
+                val variantFields = synVariant.fields
+                if (variantFields is Fields.Unnamed) {
+                    if (variantFields.fields.unnamed.size != 1) {
                         cx.errorSpannedBy(synVariant, "#[serde(tag = \"...\")] cannot be used with tuple variants")
                         break
                     }
@@ -1021,7 +1022,9 @@ private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
         is SynType.Path -> ungrouped.path
         else -> return false
     }
-    val seg = path.segments.lastOrNull() ?: return false
+    val segList = path.segments
+    if (segList.isEmpty()) return false
+    val seg: io.github.kotlinmania.syn.PathSegment = segList.last()!!
     val args = when (val arguments = seg.arguments) {
         is PathArguments.AngleBracketed -> arguments.args.toList()
         else -> return false
@@ -1036,7 +1039,9 @@ private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
         is SynType.Path -> ungrouped.path
         else -> return false
     }
-    val seg = path.segments.lastOrNull() ?: return false
+    val segList = path.segments
+    if (segList.isEmpty()) return false
+    val seg: io.github.kotlinmania.syn.PathSegment = segList.last()!!
     val args = when (val arguments = seg.arguments) {
         is PathArguments.AngleBracketed -> arguments.args.toList()
         else -> return false
@@ -1166,8 +1171,10 @@ private fun parseLitIntoTy(
     // an Expr and converting path/struct expressions to SynType.
     val typeParse = object : io.github.kotlinmania.syn.Parse<SynType> {
         override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<SynType> {
-            val exprResult = input.parse(io.github.kotlinmania.syn.ExprParse)
-            return exprResult.map { expr -> exprToSynType(expr) }
+            val pathResult = input.parse(io.github.kotlinmania.syn.PathParse)
+            return pathResult.map { path ->
+                exprToSynType(io.github.kotlinmania.syn.Expr.Path(attrs = emptyList(), qself = null, path = path))
+            }
         }
     }
     val typeResult = io.github.kotlinmania.syn.parseStr(typeParse, string.value())
@@ -1265,9 +1272,12 @@ private fun parseLitIntoWhere(
 }
 
 // Parse a SynType from a ParseBuffer by parsing an Expr and converting it.
+// Workaround: ExprParse is internal in syn-kotlin 0.2.0. Using PathParse for path expressions.
 private fun exprToSynTypeResult(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<SynType> {
-    val exprResult = input.parse(io.github.kotlinmania.syn.ExprParse)
-    return exprResult.map { expr -> exprToSynType(expr) }
+    val pathResult = input.parse(io.github.kotlinmania.syn.PathParse)
+    return pathResult.map { path ->
+        exprToSynType(io.github.kotlinmania.syn.Expr.Path(attrs = emptyList(), qself = null, path = path))
+    }
 }
 
 // Parse a comma-or-plus-separated list of lifetimes (for LifetimePredicate bounds).
