@@ -675,15 +675,15 @@ public class AttrVariant(
                             val path = parseLitIntoExprPath(cx, WITH, meta)
                             if (path != null) {
                                 var serPath = path.deepCopy()
-                                val serSegs = serPath.path.segments.toMutableList()
+                                val serSegs = serPath.path.segments.toList().toMutableList()
                                 serSegs.add(PathSegment(Ident.new("serialize", serPath.span()), PathArguments.None))
-                                serPath = serPath.copy(path = serPath.path.copy(segments = pathSegmentListFrom(serSegs)))
+                                serPath = serPath.copy(path = Path(serPath.path.leadingColon, pathSegmentListFrom(serSegs)))
                                 serializeWith.set(meta.path, serPath)
 
                                 var dePath = path.deepCopy()
-                                val deSegs = dePath.path.segments.toMutableList()
+                                val deSegs = dePath.path.segments.toList().toMutableList()
                                 deSegs.add(PathSegment(Ident.new("deserialize", dePath.span()), PathArguments.None))
-                                dePath = dePath.copy(path = dePath.path.copy(segments = pathSegmentListFrom(deSegs)))
+                                dePath = dePath.copy(path = Path(dePath.path.leadingColon, pathSegmentListFrom(deSegs)))
                                 deserializeWith.set(meta.path, dePath)
                             }
                         } else if (SERIALIZE_WITH == meta.path) {
@@ -879,15 +879,15 @@ public class AttrField(
                         val path = parseLitIntoExprPath(cx, WITH, meta)
                         if (path != null) {
                             var serPath = path.deepCopy()
-                            val serSegs = serPath.path.segments.toMutableList()
+                            val serSegs = serPath.path.segments.toList().toMutableList()
                             serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
-                            serPath = serPath.copy(path = serPath.path.copy(segments = pathSegmentListFrom(serSegs)))
+                            serPath = serPath.copy(path = Path(serPath.path.leadingColon, pathSegmentListFrom(serSegs)))
                             serializeWith.set(meta.path, serPath)
 
                             var dePath = path.deepCopy()
-                            val deSegs = dePath.path.segments.toMutableList()
+                            val deSegs = dePath.path.segments.toList().toMutableList()
                             deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
-                            dePath = dePath.copy(path = dePath.path.copy(segments = pathSegmentListFrom(deSegs)))
+                            dePath = dePath.copy(path = Path(dePath.path.leadingColon, pathSegmentListFrom(deSegs)))
                             deserializeWith.set(meta.path, dePath)
                         }
                     } else if (BOUND == meta.path) {
