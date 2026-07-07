@@ -573,6 +573,7 @@ public class AttrVariant(
     public fun serializeWith(): io.github.kotlinmania.syn.Expr.Path? = serializeWith
     public fun deserializeWith(): io.github.kotlinmania.syn.Expr.Path? = deserializeWith
     public fun untagged(): Boolean = untagged
+    public fun borrow(): BorrowAttribute? = borrow
 
     public fun renameByRules(rules: RenameAllRules) {
         if (!name.serializeRenamed) {
@@ -588,7 +589,7 @@ public class AttrVariant(
     }
 
     public companion object {
-        public fun fromAst(cx: Ctxt, variant: Variant): AttrVariant {
+        public fun fromAst(cx: Ctxt, variant: io.github.kotlinmania.syn.Variant): AttrVariant {
             val serName = Attr<Name>(cx, RENAME)
             val deName = Attr<Name>(cx, RENAME)
             val deAliases = VecAttr.none<Name>(cx, RENAME)
@@ -663,14 +664,14 @@ public class AttrVariant(
                             if (path != null) {
                                 var serPath = path.deepCopy()
                                 val serSegs = serPath.path.segments.toMutableList()
-                                serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
-                                serPath = serPath.copy(path = serPath.path.copy(segments = punctuated.Punctuated.fromList(serSegs)))
+                                serSegs.add(PathSegment(Ident.new("serialize", serPath.span()), PathArguments.None))
+                                serPath = serPath.copy(path = serPath.path.copy(segments = io.github.kotlinmania.syn.Punctuated.fromList(serSegs)))
                                 serializeWith.set(meta.path, serPath)
 
                                 var dePath = path.deepCopy()
                                 val deSegs = dePath.path.segments.toMutableList()
-                                deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
-                                dePath = dePath.copy(path = dePath.path.copy(segments = punctuated.Punctuated.fromList(deSegs)))
+                                deSegs.add(PathSegment(Ident.new("deserialize", dePath.span()), PathArguments.None))
+                                dePath = dePath.copy(path = dePath.path.copy(segments = io.github.kotlinmania.syn.Punctuated.fromList(deSegs)))
                                 deserializeWith.set(meta.path, dePath)
                             }
                         } else if (SERIALIZE_WITH == meta.path) {
@@ -686,7 +687,7 @@ public class AttrVariant(
                             } else {
                                 BorrowAttribute(meta.path.deepCopy(), null)
                             }
-                            if (variant.fields is Fields.Unnamed && variant.fields.unnamed.size == 1) {
+                            if (variant.fields is Fields.Unnamed && (variant.fields as Fields.Unnamed).fields.unnamed.size == 1) {
                                 borrow.set(meta.path, borrowAttribute)
                             } else {
                                 cx.errorSpannedBy(variant, "#[serde(borrow)] may only be used on newtype variants")
@@ -767,7 +768,7 @@ public class AttrField(
     public fun fromAst(
         cx: Ctxt,
         index: Int,
-        field: Field,
+        field: io.github.kotlinmania.syn.Field,
         attrs: AttrVariant?,
         containerDefault: Default,
         private: Ident
@@ -1296,7 +1297,7 @@ private fun parseLitIntoLifetimes(
 private fun borrowableLifetimes(
     cx: Ctxt,
     name: String,
-    field: Field
+    field: io.github.kotlinmania.syn.Field
 ): Set<Lifetime>? {
     val lifetimes = mutableSetOf<Lifetime>()
     collectLifetimes(field.ty, lifetimes)
