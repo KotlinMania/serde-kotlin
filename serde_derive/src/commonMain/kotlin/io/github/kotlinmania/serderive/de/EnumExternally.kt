@@ -1,220 +1,190 @@
+// port-lint: source de/enum_externally.rs
 package io.github.kotlinmania.serderive
 
-//! Deserialization for externally tagged enums:
-//!
-//! ```ignore
-//! enum Enum {}
-//! ```
-
-import io.github.kotlinmania.serderive.de.enum_
-import io.github.kotlinmania.serderive.de.struct_
-import io.github.kotlinmania.serderive.de.tuple
-use crate.de.{
-    expr_is_missing, field_i, unwrap_to_variant_closure, wrap_deserialize_field_with,
-    wrap_deserialize_with, Parameters, StructForm, TupleForm,
-};
-import io.github.kotlinmania.serderive.fragment.Expr
-import io.github.kotlinmania.serderive.fragment.Fragment
-import io.github.kotlinmania.serderive.fragment.Match
-import io.github.kotlinmania.serderive.internals.ast.Field
-import io.github.kotlinmania.serderive.internals.ast.Style
-import io.github.kotlinmania.serderive.internals.ast.Variant
-import io.github.kotlinmania.serderive.internals.attr
-import io.github.kotlinmania.serderive.private
 import io.github.kotlinmania.procmacro2.TokenStream
+import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.quote.quote_spanned
-import io.github.kotlinmania.syn.spanned.Spanned
+import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Field
+import io.github.kotlinmania.serderive.internals.Fragment
+import io.github.kotlinmania.serderive.internals.Match
+import io.github.kotlinmania.serderive.internals.Style
+import io.github.kotlinmania.serderive.internals.Variant
+import io.github.kotlinmania.syn.span
 
-/// Generates `Deserialize.deserialize` body for an `enum Enum {...}` without additional attributes
-pub(super) fun deserialize(
+// Generates `Deserialize::deserialize` body for an `enum Enum {...}` without additional attributes
+internal fun deserializeEnumExternally(
     params: Parameters,
-    variants: &[Variant],
-    cattrs: attr.Container,
-) : Fragment {
-    val this_type = params.this_type;
-    let (de_impl_generics, de_ty_generics, ty_generics, where_clause) =
-        params.generics_with_de_lifetime();
-    val delife = params.borrowed.de_lifetime();
+    variants: List<Variant>,
+    cattrs: AttrContainer
+): Fragment {
+    val thisType = params.thisType
+    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.genericsWithDeLifetime()
+    val delife = params.borrowed.deLifetime()
 
-    val type_name = cattrs.name().deserialize_name();
-    val expecting = format!("enum {}", params.type_name());
-    val expecting = cattrs.expecting().unwrap_or(expecting);
+    val typeName = cattrs.name().deserializeName()
+    val expecting = "enum ${params.typeName()}"
+    val expectingVal = cattrs.expecting() ?: expecting
 
-    let (variants_stmt, variant_visitor) = enum_.prepare_enum_variant_enum(variants);
+    val (variantsStmt, variantVisitor) = prepareEnumVariantEnum(variants)
 
     // Match arms to extract a variant from a string
-    val variant_arms = variants
-        .iter()
-        .enumerate()
-        .filter(|&(_, variant)| !variant.attrs.skip_deserializing())
-        .map(|(i, variant)| {
-            val variant_name = field_i(i);
+    val variantArms = variants.mapIndexedNotNull { i, variant ->
+        if (variant.attrs.skipDeserializing()) return@mapIndexedNotNull null
 
-            val block = Match(deserialize_externally_tagged_variant(
-                params, variant, cattrs,
-            ));
+        val variantName = fieldI(i)
 
-            quote("""
-                _serde.#private.Ok((__Field.#variant_name, __variant)) -> #block
-            """)
-        });
+        val block = Match(deserializeExternallyTaggedVariant(params, variant, cattrs))
 
-    val all_skipped = variants
-        .iter()
-        .all(|variant| variant.attrs.skip_deserializing());
-    val match_variant = if all_skipped {
-        // This is an empty enum like `enum Impossible {}` or an enum in which
-        // all variants have ``#`[serde(skip_deserializing)]`.
+        quote("_serde.`#`Private::Ok((__Field::`#`variantName, __variant)) => `#`block")
+    }
+
+    val allSkipped = variants.all { it.attrs.skipDeserializing() }
+    val matchVariant = if (allSkipped) {
         quote("""
-            // FIXME: Once feature(exhaustive_patterns) is stable:
-            // val _serde.#private.Err(__err) = _serde.de.EnumAccess.variant.<__Field>(__data);
-            // _serde.#private.Err(__err)
-            _serde.#private.Result.map(
-                _serde.de.EnumAccess.variant.<__Field>(__data),
-                |(__impossible, _)| when __impossible {})
+            _serde.`#`Private::Result::map(
+                _serde::de::EnumAccess::variant::<__Field>(__data),
+                |(__impossible, _)| match __impossible {})
         """)
     } else {
         quote("""
-            when _serde.de.EnumAccess.variant(__data) {
-                #(#variant_arms)*
-                _serde.#private.Err(__err) -> _serde.#private.Err(__err),
+            match _serde::de::EnumAccess::variant(__data) {
+                `#`(`#`variantArms)*
+                _serde.`#`Private::Err(__err) => _serde.`#`Private::Err(__err),
             }
         """)
-    };
+    }
 
-    quote_block! {
-        #variant_visitor
+    return Fragment.Block(quote("""
+        `#`variantVisitor
 
         `#`[doc(hidden)]
-        struct __Visitor #de_impl_generics #where_clause {
-            marker: _serde.#private.PhantomData<#this_type #ty_generics>,
-            lifetime: _serde.#private.PhantomData<&#delife ()>,
+        struct __Visitor `#`deImplGenerics `#`whereClause {
+            marker: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
-        impl #de_impl_generics _serde.de.Visitor<#delife> for __Visitor #de_ty_generics #where_clause {
-            type Value = #this_type #ty_generics;
+        impl `#`deImplGenerics _serde::de::Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
+            type Value = `#`thisType `#`tyGenerics;
 
-            fun expecting(self, __formatter: var _serde.#private.Formatter) : _serde.#private.fmt.Result {
-                _serde.#private.Formatter.write_str(__formatter, #expecting)
+            fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
+                _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
             }
 
-            fun visit_enum<__A>(self, __data: __A) -> _serde.#private.Result<this.Value, __A.Error>
+            fn visit_enum<__A>(self, __data: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
             where
-                __A: _serde.de.EnumAccess<#delife>,
+                __A: _serde::de::EnumAccess<`#`delife>,
             {
-                #match_variant
+                `#`matchVariant
             }
         }
 
-        #variants_stmt
+        `#`variantsStmt
 
-        _serde.Deserializer.deserialize_enum(
+        _serde::Deserializer::deserialize_enum(
             __deserializer,
-            #type_name,
+            `#`typeName,
             VARIANTS,
             __Visitor {
-                marker: _serde.#private.PhantomData.<#this_type #ty_generics>,
-                lifetime: _serde.#private.PhantomData,
+                marker: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+                lifetime: _serde.`#`Private::PhantomData,
             },
+        )
+    """))
+}
+
+private fun deserializeExternallyTaggedVariant(
+    params: Parameters,
+    variant: Variant,
+    cattrs: AttrContainer
+): Fragment {
+    val path = variant.attrs.deserializeWith()
+    if (path != null) {
+        val (wrapper, wrapperTy, unwrapFn) = wrapDeserializeVariantWith(params, variant, path)
+        return Fragment.Block(quote("""
+            `#`wrapper
+            _serde.`#`Private::Result::map(
+                _serde::de::VariantAccess::newtype_variant::<`#`wrapperTy>(__variant), `#`unwrapFn)
+        """))
+    }
+
+    val variantIdent = variant.ident
+
+    return when (variant.style) {
+        Style.Unit -> {
+            val thisValue = params.thisValue
+            Fragment.Block(quote("""
+                _serde::de::VariantAccess::unit_variant(__variant)?;
+                _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent)
+            """))
+        }
+        Style.Newtype -> deserializeExternallyTaggedNewtypeVariant(
+            variantIdent,
+            params,
+            variant.fields[0],
+            cattrs
+        )
+        Style.Tuple -> deserializeTuple(
+            params,
+            variant.fields,
+            cattrs,
+            TupleForm.ExternallyTagged(variantIdent)
+        )
+        Style.Struct -> deserializeStruct(
+            params,
+            variant.fields,
+            cattrs,
+            StructForm.ExternallyTagged(variantIdent)
         )
     }
 }
 
-fun deserialize_externally_tagged_variant(
+private fun wrapDeserializeVariantWith(
     params: Parameters,
     variant: Variant,
-    cattrs: attr.Container,
-) : Fragment {
-    if val path = variant.attrs.deserialize_with() {
-        let (wrapper, wrapper_ty, unwrap_fn) = wrap_deserialize_variant_with(params, variant, path);
-        return quote_block! {
-            #wrapper
-            _serde.#private.Result.map(
-                _serde.de.VariantAccess.newtype_variant.<#wrapper_ty>(__variant), #unwrap_fn)
-        };
-    }
+    deserializeWith: io.github.kotlinmania.syn.Expr.Path
+): Triple<TokenStream, TokenStream, TokenStream> {
+    val fieldTys = variant.fields.map { it.ty }
+    val (wrapper, wrapperTy) = wrapDeserializeWith(params, quote("(`#`(`#`fieldTys),*)"), deserializeWith)
 
-    val variant_ident = variant.ident;
+    val unwrapFn = unwrapToVariantClosure(params, variant, true)
 
-    when variant.style {
-        Style.Unit -> {
-            val this_value = params.this_value;
-            quote_block! {
-                _serde.de.VariantAccess.unit_variant(__variant)?;
-                _serde.#private.Ok(#this_value.#variant_ident)
-            }
-        }
-        Style.Newtype -> deserialize_externally_tagged_newtype_variant(
-            variant_ident,
-            params,
-            variant.fields[0],
-            cattrs,
-        ),
-        Style.Tuple -> tuple.deserialize(
-            params,
-            variant.fields,
-            cattrs,
-            TupleForm.ExternallyTagged(variant_ident),
-        ),
-        Style.Struct -> struct_.deserialize(
-            params,
-            variant.fields,
-            cattrs,
-            StructForm.ExternallyTagged(variant_ident),
-        ),
-    }
+    return Triple(wrapper, wrapperTy, unwrapFn)
 }
 
-fun wrap_deserialize_variant_with(
-    params: Parameters,
-    variant: Variant,
-    deserialize_with: syn.ExprPath,
-) : (TokenStream, TokenStream, TokenStream) {
-    val field_tys = variant.fields.iter().map(|field| field.ty);
-    let (wrapper, wrapper_ty) =
-        wrap_deserialize_with(params, quote(""" (#(#field_tys """),*)), deserialize_with);
-
-    val unwrap_fn = unwrap_to_variant_closure(params, variant, true);
-
-    (wrapper, wrapper_ty, unwrap_fn)
-}
-
-fun deserialize_externally_tagged_newtype_variant(
-    variant_ident: syn.Ident,
+private fun deserializeExternallyTaggedNewtypeVariant(
+    variantIdent: Ident,
     params: Parameters,
     field: Field,
-    cattrs: attr.Container,
-) : Fragment {
-    val this_value = params.this_value;
+    cattrs: AttrContainer
+): Fragment {
+    val thisValue = params.thisValue
 
-    if field.attrs.skip_deserializing() {
-        val default = Expr(expr_is_missing(field, cattrs));
-        return quote_block! {
-            _serde.de.VariantAccess.unit_variant(__variant)?;
-            _serde.#private.Ok(#this_value.#variant_ident(#default))
-        };
+    if (field.attrs.skipDeserializing()) {
+        val default = Fragment.Expr(exprIsMissing(field, cattrs))
+        return Fragment.Block(quote("""
+            _serde::de::VariantAccess::unit_variant(__variant)?;
+            _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent(`#`default))
+        """))
     }
 
-    when field.attrs.deserialize_with() {
-        null -> {
-            val field_ty = field.ty;
-            val span = field.original.span();
-            val func =
-                quote_spanned(span, """_serde.de.VariantAccess.newtype_variant.<#field_ty> """);
-            quote_expr! {
-                _serde.#private.Result.map(#func(__variant), #this_value.#variant_ident)
-            }
-        }
-        path -> {
-            let (wrapper, wrapper_ty) = wrap_deserialize_field_with(params, field.ty, path);
-            quote_block! {
-                #wrapper
-                _serde.#private.Result.map(
-                    _serde.de.VariantAccess.newtype_variant.<#wrapper_ty>(__variant),
-                    |__wrapper| #this_value.#variant_ident(__wrapper.value))
-            }
-        }
+    val fieldPath = field.attrs.deserializeWith()
+    return if (fieldPath == null) {
+        val fieldTy = field.ty
+        val span = field.original.span()
+        val func = quoteSpanned(span, "_serde::de::VariantAccess::newtype_variant::<`#`fieldTy>")
+        Fragment.Expr(quote("""
+            _serde.`#`Private::Result::map(`#`func(__variant), `#`thisValue::`#`variantIdent)
+        """))
+    } else {
+        val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, fieldPath)
+        Fragment.Block(quote("""
+            `#`wrapper
+            _serde.`#`Private::Result::map(
+                _serde::de::VariantAccess::newtype_variant::<`#`wrapperTy>(__variant),
+                |__wrapper| `#`thisValue::`#`variantIdent(__wrapper.value))
+        """))
     }
 }
