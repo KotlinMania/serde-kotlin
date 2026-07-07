@@ -162,9 +162,9 @@ data class SplitForDeLifetime(
 private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generics {
     val g0 = withoutDefaults(cont.generics)
 
-    val g1 = withWherePredicatesFromFields(cont, g0) { field -> field.attrs.deBound() }
+    val g1 = withWherePredicatesFromFields(cont, g0) { field -> field.deBound() }
 
-    val g2 = withWherePredicatesFromVariants(cont, g1) { variant -> variant.attrs.deBound() }
+    val g2 = withWherePredicatesFromVariants(cont, g1) { variant -> variant.deBound() }
 
     return when (val deBound = cont.attrs.deBound()) {
         null -> {
@@ -255,12 +255,12 @@ private fun deserializeBody(cont: Container, params: Parameters): Fragment {
             is Data.Struct -> when (data.style) {
                 Style.Struct -> deserializeStruct(params, data.fields, cont.attrs, StructForm.Struct)
                 Style.Tuple, Style.Newtype -> deserializeTuple(params, data.fields, cont.attrs, TupleForm.Tuple)
-                Style.Unit -> io.github.kotlinmania.serderive.de.deserializeUnit(params, cont.attrs)
+                Style.Unit -> deserializeUnit(params, cont.attrs)
             }
         }
     } else {
         return when (val data = cont.data) {
-            is Data.Enum -> io.github.kotlinmania.serderive.de.deserializeCustomIdentifier(params, data.variants as List<Variant>, cont.attrs)
+            is Data.Enum -> deserializeCustomIdentifier(params, data.variants as List<Variant>, cont.attrs)
             is Data.Struct -> error("checked in serde_derive_internals")
         }
     }
@@ -280,8 +280,8 @@ private fun deserializeInPlaceBody(cont: Container, params: Parameters): Stmts? 
 
     val code = when (val data = cont.data) {
         is Data.Struct -> when (data.style) {
-            Style.Struct -> io.github.kotlinmania.serderive.de.deserializeStructInPlace(params, data.fields, cont.attrs) ?: return null
-            Style.Tuple, Style.Newtype -> io.github.kotlinmania.serderive.de.deserializeTupleInPlace(params, data.fields, cont.attrs)
+            Style.Struct -> deserializeStructInPlace(params, data.fields, cont.attrs) ?: return null
+            Style.Tuple, Style.Newtype -> deserializeTupleInPlace(params, data.fields, cont.attrs)
             Style.Unit -> return null
         }
         is Data.Enum -> return null
@@ -383,15 +383,15 @@ internal fun fieldI(i: Int): Ident {
 // The submodule functions are in separate files (Enum.kt, Struct.kt, etc.).
 private fun deserializeEnum(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
-): Fragment = io.github.kotlinmania.serderive.de.deserializeEnum(params, variants, cattrs)
+): Fragment = deserializeEnum(params, variants, cattrs)
 
 private fun deserializeStruct(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: StructForm
-): Fragment = io.github.kotlinmania.serderive.de.deserializeStruct(params, fields, cattrs, form)
+): Fragment = deserializeStruct(params, fields, cattrs, form)
 
 private fun deserializeTuple(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: TupleForm
-): Fragment = io.github.kotlinmania.serderive.de.deserializeTuple(params, fields, cattrs, form)
+): Fragment = deserializeTuple(params, fields, cattrs, form)
 
 internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {
