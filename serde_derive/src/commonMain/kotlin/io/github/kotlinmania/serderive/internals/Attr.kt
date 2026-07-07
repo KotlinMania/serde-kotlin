@@ -369,7 +369,7 @@ public class AttrContainer(
                             val path = parseLitIntoPath(cx, REMOTE, meta)
                             if (path != null) {
                                 if (isPrimitivePath(path, "this")) {
-                                    remote.set(meta.path, parseQuote(item.ident.toString()) as Path)
+                                    remote.set(meta.path, Path.from(item.ident.deepCopy()))
                                 } else {
                                     remote.set(meta.path, path)
                                 }
@@ -400,16 +400,11 @@ public class AttrContainer(
             var isPacked = false
             for (attr in item.attrs) {
                 if (REPR == attr.path()) {
-                    try {
-                        attr.parseArgsWith { input ->
-                            while (true) {
-                                val token = input.parse<TokenTree>() ?: break
-                                if (token is TokenTree.Ident) {
-                                    isPacked = isPacked || token.ident.toString() == "packed"
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {}
+                    val metaVal = attr.meta
+                    if (metaVal is Meta.List) {
+                        val tokensStr = metaVal.tokens.toString().replace(" ", "")
+                        isPacked = tokensStr.contains("packed")
+                    }
                 }
             }
 
@@ -467,9 +462,10 @@ private fun decideTag(
         val itemData = item.data
         if (itemData is SynData.Enum) {
             for (variant in itemData.variants) {
-                if (variant.fields is Fields.Unnamed) {
-                    if (variant.fields.unnamed.size != 1) {
-                        cx.errorSpannedBy(variant, "#[serde(tag = \"...\")] cannot be used with tuple variants")
+                val synVariant = variant as Variant
+                if (synVariant.fields is Fields.Unnamed) {
+                    if (synVariant.fields.unnamed.size != 1) {
+                        cx.errorSpannedBy(synVariant, "#[serde(tag = \"...\")] cannot be used with tuple variants")
                         break
                     }
                 }
@@ -533,22 +529,22 @@ private fun decideIdentifier(
     }
     if (item.data is SynData.Struct && fieldTokens != null && variantTokens == null) {
         val msg = "#[serde(field_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as Data.Struct).structToken, msg)
+        cx.errorSpannedBy((item.data as SynData.Struct).value.structToken, msg)
         return Identifier.No
     }
     if (item.data is SynData.Union && fieldTokens != null && variantTokens == null) {
         val msg = "#[serde(field_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as Data.Union).unionToken, msg)
+        cx.errorSpannedBy((item.data as SynData.Union).value.unionToken, msg)
         return Identifier.No
     }
     if (item.data is SynData.Struct && fieldTokens == null && variantTokens != null) {
         val msg = "#[serde(variant_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as Data.Struct).structToken, msg)
+        cx.errorSpannedBy((item.data as SynData.Struct).value.structToken, msg)
         return Identifier.No
     }
     if (item.data is SynData.Union && fieldTokens == null && variantTokens != null) {
         val msg = "#[serde(variant_identifier)] can only be used on an enum"
-        cx.errorSpannedBy((item.data as Data.Union).unionToken, msg)
+        cx.errorSpannedBy((item.data as SynData.Union).value.unionToken, msg)
         return Identifier.No
     }
     return Identifier.No
@@ -592,7 +588,7 @@ public class AttrVariant(
     }
 
     public companion object {
-        public fun fromAst(cx: Ctxt, variant: syn.Variant): AttrVariant {
+        public fun fromAst(cx: Ctxt, variant: Variant): AttrVariant {
             val serName = Attr<Name>(cx, RENAME)
             val deName = Attr<Name>(cx, RENAME)
             val deAliases = VecAttr.none<Name>(cx, RENAME)
@@ -608,7 +604,7 @@ public class AttrVariant(
             val borrow = Attr<BorrowAttribute>(cx, BORROW)
             val untagged = BoolAttr.none(cx, UNTAGGED)
 
-            for (attr in variant.attrs) {
+            for (attr in variant.attrs.toList()) {
                 if (SERDE != attr.path()) {
                     continue
                 }
@@ -665,13 +661,13 @@ public class AttrVariant(
                         } else if (WITH == meta.path) {
                             val path = parseLitIntoExprPath(cx, WITH, meta)
                             if (path != null) {
-                                var serPath = path.clone()
+                                var serPath = path.deepCopy()
                                 val serSegs = serPath.path.segments.toMutableList()
                                 serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
                                 serPath = serPath.copy(path = serPath.path.copy(segments = punctuated.Punctuated.fromList(serSegs)))
                                 serializeWith.set(meta.path, serPath)
 
-                                var dePath = path.clone()
+                                var dePath = path.deepCopy()
                                 val deSegs = dePath.path.segments.toMutableList()
                                 deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
                                 dePath = dePath.copy(path = dePath.path.copy(segments = punctuated.Punctuated.fromList(deSegs)))
@@ -686,9 +682,9 @@ public class AttrVariant(
                         } else if (BORROW == meta.path) {
                             val borrowAttribute = if (metaPeekEq(meta)) {
                                 val lifetimes = parseLitIntoLifetimes(cx, meta)
-                                BorrowAttribute(meta.path.clone(), lifetimes.toSet())
+                                BorrowAttribute(meta.path.deepCopy(), lifetimes.toSet())
                             } else {
-                                BorrowAttribute(meta.path.clone(), null)
+                                BorrowAttribute(meta.path.deepCopy(), null)
                             }
                             if (variant.fields is Fields.Unnamed && variant.fields.unnamed.size == 1) {
                                 borrow.set(meta.path, borrowAttribute)
@@ -869,13 +865,13 @@ public class AttrField(
                     } else if (WITH == meta.path) {
                         val path = parseLitIntoExprPath(cx, WITH, meta)
                         if (path != null) {
-                            var serPath = path.clone()
+                            var serPath = path.deepCopy()
                             val serSegs = serPath.path.segments.toMutableList()
                             serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
                             serPath = serPath.copy(path = serPath.path.copy(segments = punctuated.Punctuated.fromList(serSegs)))
                             serializeWith.set(meta.path, serPath)
 
-                            var dePath = path.clone()
+                            var dePath = path.deepCopy()
                             val deSegs = dePath.path.segments.toMutableList()
                             deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
                             dePath = dePath.copy(path = dePath.path.copy(segments = punctuated.Punctuated.fromList(deSegs)))
@@ -937,7 +933,7 @@ public class AttrField(
                 val span = Span.callSite()
                 val segments = mutableListOf(
                     PathSegment(Ident.new("_serde", span)),
-                    PathSegment(private.clone()),
+                    PathSegment(private.deepCopy()),
                     PathSegment(Ident.new("de", span)),
                     PathSegment(Ident.new("borrow_cow_str", span))
                 )
@@ -950,7 +946,7 @@ public class AttrField(
                 val span = Span.callSite()
                 val segments = mutableListOf(
                     PathSegment(Ident.new("_serde", span)),
-                    PathSegment(private.clone()),
+                    PathSegment(private.deepCopy()),
                     PathSegment(Ident.new("de", span)),
                     PathSegment(Ident.new("borrow_cow_bytes", span))
                 )
@@ -1122,16 +1118,11 @@ private fun parseLitIntoTy(
     meta: ParseNestedMeta
 ): SynType? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.parseExpr(input) }, string.toTokenStream())
-    if (result.isFailure) {
-        cx.errorSpannedBy(string, "failed to parse type: $attrName = ${string.value()}")
-        return null
+    // Parse the string as a type expression. Use parserFromFunction to create a Parse<SynType>.
+    val typeParse = io.github.kotlinmania.syn.parserFromFunction { input ->
+        io.github.kotlinmania.syn.parseTypeFull(input)
     }
-    // parseExpr returns an Expr, but we need a SynType. Try parse2 with a type parser.
-    // For now, parse as expr and check if it's a path that can be a type.
-    val expr = result.getOrThrow()
-    // Actually, use parseStr to parse as SynType
-    val typeResult = io.github.kotlinmania.syn.parseStr({ input -> io.github.kotlinmania.syn.parseType(input) }, string.value())
+    val typeResult = io.github.kotlinmania.syn.parseStr(typeParse, string.value())
     if (typeResult.isFailure) {
         cx.errorSpannedBy(string, "failed to parse type: $attrName = ${string.value()}")
         return null
@@ -1146,20 +1137,21 @@ private fun parseLitIntoWhere(
     meta: ParseNestedMeta
 ): List<WherePredicate> {
     val string = getLitStr2(cx, attrName, metaItemName, meta) ?: return emptyList()
-    // Parse as a comma-separated list of WherePredicate
-    val result = io.github.kotlinmania.syn.parseStr({ input ->
+    // Parse as a comma-separated list of WherePredicate using parserFromFunction
+    val whereParse = io.github.kotlinmania.syn.parserFromFunction { input ->
         val predicates = mutableListOf<WherePredicate>()
         while (!input.isEmpty()) {
             val predResult = io.github.kotlinmania.syn.parseWherePredicate(input)
-            if (predResult.isFailure) return@parseStr io.github.kotlinmania.syn.SynResult.failure(predResult.exceptionOrNull()!!)
+            if (predResult.isFailure) return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(predResult.exceptionOrNull()!!)
             predicates.add(predResult.getOrThrow())
             if (!input.isEmpty()) {
                 val commaResult = input.parse(io.github.kotlinmania.syn.CommaParse)
-                if (commaResult.isFailure) return@parseStr io.github.kotlinmania.syn.SynResult.failure(commaResult.exceptionOrNull()!!)
+                if (commaResult.isFailure) return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(commaResult.exceptionOrNull()!!)
             }
         }
         io.github.kotlinmania.syn.SynResult.success(predicates)
-    }, string.value())
+    }
+    val result = io.github.kotlinmania.syn.parseStr(whereParse, string.value())
     if (result.isFailure) {
         cx.errorSpannedBy(string, result.exceptionOrNull()?.message ?: "failed to parse where predicates")
         return emptyList()
@@ -1188,6 +1180,16 @@ private fun getRenames(
     return Pair(ser?.atMostOne(), de?.atMostOne())
 }
 
+private fun getMultipleRenames(
+    cx: Ctxt,
+    meta: ParseNestedMeta
+): Pair<LitStr?, List<LitStr>> {
+    val (ser, de) = getSerAndDe(cx, RENAME, meta) { cx2, _, metaItemName, m ->
+        getLitStr2(cx2, RENAME, metaItemName, m)
+    }
+    return Pair(ser?.atMostOne(), de?.get() ?: emptyList())
+}
+
 // Generic helper: parse `serialize = "..."` / `deserialize = "..."` sub-attributes
 private fun <T> getSerAndDe(
     cx: Ctxt,
@@ -1201,13 +1203,15 @@ private fun <T> getSerAndDe(
     // Check if input starts with `=` (single value for both ser and de)
     val valueTokens = meta.value()
     // Try parsing as `= "..."` (the Eq token followed by a literal)
-    val eqResult = io.github.kotlinmania.syn.parse2({ input ->
+    val eqParse = io.github.kotlinmania.syn.parserFromFunction { input ->
         val eqParseResult = input.parse(io.github.kotlinmania.syn.EqParse)
         if (eqParseResult.isFailure) {
-            return@parse2 io.github.kotlinmania.syn.SynResult.success(false)
+            io.github.kotlinmania.syn.SynResult.success(false)
+        } else {
+            io.github.kotlinmania.syn.SynResult.success(true)
         }
-        io.github.kotlinmania.syn.SynResult.success(true)
-    }, valueTokens)
+    }
+    val eqResult = io.github.kotlinmania.syn.parse2(eqParse, valueTokens)
 
     if (eqResult.isSuccess && eqResult.getOrThrow()) {
         // It's `attr = "..."` — applies to both ser and de
@@ -1330,7 +1334,7 @@ private fun ungroup(ty: SynType): SynType {
     return result
 }
 
-internal class BorrowAttribute(
+public class BorrowAttribute(
     public val path: Path,
     public val lifetimes: Set<Lifetime>?
 )
