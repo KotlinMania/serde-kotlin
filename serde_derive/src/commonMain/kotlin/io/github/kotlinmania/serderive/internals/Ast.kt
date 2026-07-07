@@ -60,7 +60,7 @@ public class Container(
             }
 
             val container = Container(
-                ident = item.ident.clone(),
+                ident = item.ident.deepCopy(),
                 attrs = attrs,
                 data = data,
                 generics = item.generics,
@@ -93,14 +93,14 @@ public class Variant(
     public val attrs: AttrVariant,
     public val style: Style,
     public val fields: List<Field>,
-    public val original: syn.Variant
+    public val original: io.github.kotlinmania.syn.Variant
 )
 
 public class Field(
-    public val member: syn.Member,
+    public val member: io.github.kotlinmania.syn.Member,
     public val attrs: AttrField,
     public val ty: SynType,
-    public val original: syn.Field
+    public val original: io.github.kotlinmania.syn.Field
 )
 
 public enum class Style {
@@ -126,7 +126,7 @@ private fun enumFromAst(
             private
         )
         Variant(
-            ident = variant.ident.clone(),
+            ident = variant.ident.deepCopy(),
             attrs = attrs,
             style = style,
             fields = fields,
@@ -189,7 +189,7 @@ private fun fieldsFromAst(
     for (field in fields) {
         val ident = field.ident
         val member = if (ident != null) {
-            Member.Named(ident.clone())
+            Member.Named(ident.deepCopy())
         } else {
             Member.Unnamed(Index(dstFields.size.toUInt()))
         }
