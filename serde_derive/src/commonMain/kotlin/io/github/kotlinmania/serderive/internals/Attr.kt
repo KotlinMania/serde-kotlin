@@ -5,6 +5,7 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.*
+import io.github.kotlinmania.syn.SynResult
 
 // Extension: convert any object with a toTokens(TokenStream) method to a TokenStream.
 // Needed because syn-kotlin Path doesn't implement ToTokens.
@@ -28,6 +29,16 @@ private class PathTokens(private val path: Path) : ToTokens {
 }
 
 private fun Path.asToTokens(): ToTokens = PathTokens(this)
+
+// Check if a ParseNestedMeta's input starts with `=` (i.e., `attr = "value"`)
+private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
+    val valueTokens = meta.value()
+    val result = io.github.kotlinmania.syn.parse2({ input ->
+        val eqResult = input.parse(io.github.kotlinmania.syn.EqParse)
+        io.github.kotlinmania.syn.SynResult.success(eqResult.isSuccess)
+    }, valueTokens)
+    return result.isSuccess && result.getOrThrow()
+}
 
 // Convert any ToTokens or Path-like object to a TokenStream
 private fun toTokenStream(obj: Any): TokenStream {
@@ -240,37 +251,37 @@ public class AttrContainer(
                             serName.setOpt(meta.path, ser?.let { Name.from(it) })
                             deName.setOpt(meta.path, de?.let { Name.from(it) })
                         } else if (RENAME_ALL == meta.path) {
-                            val oneName = meta.input.peek(token.Eq::class)
+                            val oneName = metaPeekEq(meta)
                             val (ser, de) = getRenames(cx, RENAME_ALL, meta)
                             if (ser != null) {
                                 try {
-                                    renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value))
+                                    renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
                                 } catch (e: ParseError) {
                                     cx.errorSpannedBy(ser, e.message ?: "")
                                 }
                             }
                             if (de != null) {
                                 try {
-                                    renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value))
+                                    renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value()))
                                 } catch (e: ParseError) {
                                     if (!oneName) cx.errorSpannedBy(de, e.message ?: "")
                                 }
                             }
                         } else if (RENAME_ALL_FIELDS == meta.path) {
-                            val oneName = meta.input.peek(token.Eq::class)
+                            val oneName = metaPeekEq(meta)
                             val (ser, de) = getRenames(cx, RENAME_ALL_FIELDS, meta)
                             when (item.data) {
                                 is Data.Enum -> {
                                     if (ser != null) {
                                         try {
-                                            renameAllFieldsSerRule.set(meta.path, RenameRule.fromStr(ser.value))
+                                            renameAllFieldsSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
                                         } catch (e: ParseError) {
                                             cx.errorSpannedBy(ser, e.message ?: "")
                                         }
                                     }
                                     if (de != null) {
                                         try {
-                                            renameAllFieldsDeRule.set(meta.path, RenameRule.fromStr(de.value))
+                                            renameAllFieldsDeRule.set(meta.path, RenameRule.fromStr(de.value()))
                                         } catch (e: ParseError) {
                                             if (!oneName) cx.errorSpannedBy(de, e.message ?: "")
                                         }
@@ -284,7 +295,7 @@ public class AttrContainer(
                         } else if (DENY_UNKNOWN_FIELDS == meta.path) {
                             denyUnknownFields.setTrue(meta.path)
                         } else if (DEFAULT == meta.path) {
-                            if (meta.input.peek(token.Eq::class)) {
+                            if (metaPeekEq(meta)) {
                                 val path = parseLitIntoExprPath(cx, DEFAULT, meta)
                                 if (path != null) {
                                     val itemData = item.data
@@ -325,9 +336,9 @@ public class AttrContainer(
                             if (s != null) {
                                 val itemData = item.data
                                 if (itemData is Data.Enum) {
-                                    internalTag.set(meta.path, s.value)
+                                    internalTag.set(meta.path, s.value())
                                 } else if (itemData is Data.Struct && itemData.fields is Fields.Named) {
-                                    internalTag.set(meta.path, s.value)
+                                    internalTag.set(meta.path, s.value())
                                 } else {
                                     cx.synError(meta.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
                                 }
@@ -336,7 +347,7 @@ public class AttrContainer(
                             val s = getLitStr(cx, CONTENT, meta)
                             if (s != null) {
                                 if (item.data is Data.Enum) {
-                                    content.set(meta.path, s.value)
+                                    content.set(meta.path, s.value())
                                 } else {
                                     cx.synError(meta.error("#[serde(content = \"...\")] can only be used on enums"))
                                 }
@@ -369,12 +380,13 @@ public class AttrContainer(
                         } else if (EXPECTING == meta.path) {
                             val s = getLitStr(cx, EXPECTING, meta)
                             if (s != null) {
-                                expecting.set(meta.path, s.value)
+                                expecting.set(meta.path, s.value())
                             }
                         } else {
                             val pathStr = meta.path.toTokenStream().toString().replace(" ", "")
                             throw meta.error("unknown serde container attribute `$pathStr`")
                         }
+                        SynResult.success(Unit)
                     }
                 } catch (err: SynError) {
                     cx.synError(err)
@@ -617,18 +629,18 @@ public class AttrVariant(
                                 deAliases.insert(meta.path, Name.from(s))
                             }
                         } else if (RENAME_ALL == meta.path) {
-                            val oneName = meta.input.peek(token.Eq::class)
+                            val oneName = metaPeekEq(meta)
                             val (ser, de) = getRenames(cx, RENAME_ALL, meta)
                             if (ser != null) {
                                 try {
-                                    renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value))
+                                    renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
                                 } catch (e: ParseError) {
                                     cx.errorSpannedBy(ser, e.message ?: "")
                                 }
                             }
                             if (de != null) {
                                 try {
-                                    renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value))
+                                    renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value()))
                                 } catch (e: ParseError) {
                                     if (!oneName) cx.errorSpannedBy(de, e.message ?: "")
                                 }
@@ -668,7 +680,7 @@ public class AttrVariant(
                             val path = parseLitIntoExprPath(cx, DESERIALIZE_WITH, meta)
                             deserializeWith.setOpt(meta.path, path)
                         } else if (BORROW == meta.path) {
-                            val borrowAttribute = if (meta.input.peek(token.Eq::class)) {
+                            val borrowAttribute = if (metaPeekEq(meta)) {
                                 val lifetimes = parseLitIntoLifetimes(cx, meta)
                                 BorrowAttribute(meta.path.clone(), lifetimes.toSet())
                             } else {
@@ -685,6 +697,7 @@ public class AttrVariant(
                             val pathStr = meta.path.toTokenStream().toString().replace(" ", "")
                             throw meta.error("unknown serde variant attribute `$pathStr`")
                         }
+                        SynResult.success(Unit)
                     }
                 } catch (err: SynError) {
                     cx.synError(err)
@@ -819,7 +832,7 @@ public class AttrField(
                             deAliases.insert(meta.path, Name.from(s))
                         }
                     } else if (DEFAULT == meta.path) {
-                        if (meta.input.peek(token.Eq::class)) {
+                        if (metaPeekEq(meta)) {
                             val path = parseLitIntoExprPath(cx, DEFAULT, meta)
                             if (path != null) {
                                 default.set(meta.path, Default.Path(path))
@@ -869,7 +882,7 @@ public class AttrField(
                         serBound.setOpt(meta.path, ser)
                         deBound.setOpt(meta.path, de)
                     } else if (BORROW == meta.path) {
-                        if (meta.input.peek(token.Eq::class)) {
+                        if (metaPeekEq(meta)) {
                             val lifetimes = parseLitIntoLifetimes(cx, meta)
                             val borrowable = borrowableLifetimes(cx, identName.value, field)
                             if (borrowable != null) {
@@ -898,6 +911,7 @@ public class AttrField(
                         val pathStr = meta.path.toTokenStream().toString().replace(" ", "")
                         throw meta.error("unknown serde field attribute `$pathStr`")
                     }
+                    SynResult.success(Unit)
                 }
             } catch (err: SynError) {
                 cx.synError(err)
@@ -1026,6 +1040,206 @@ private fun isPrimitiveType(ty: SynType, primitive: String): Boolean {
         is SynType.Path -> ungrouped.qself == null && isPrimitivePath(ungrouped.path, primitive)
         else -> false
     }
+}
+
+// Helper functions ported from upstream Rust attr.rs
+
+private fun getLitStr(
+    cx: Ctxt,
+    attrName: Symbol,
+    meta: ParseNestedMeta
+): LitStr? {
+    return getLitStr2(cx, attrName, attrName, meta)
+}
+
+private fun getLitStr2(
+    cx: Ctxt,
+    attrName: Symbol,
+    metaItemName: Symbol,
+    meta: ParseNestedMeta
+): LitStr? {
+    val valueTokens = meta.value()
+    val exprResult = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.ExprParse.parse(input) }, valueTokens)
+    if (exprResult.isFailure) {
+        cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
+        return null
+    }
+    val expr = exprResult.getOrThrow()
+    var value: Expr = expr
+    while (value is Expr.Group) {
+        value = value.expr
+    }
+    if (value is Expr.Lit) {
+        val lit = value.lit
+        if (lit is Lit.Str) {
+            return lit
+        }
+    }
+    cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
+    return null
+}
+
+private fun parseLitIntoPath(
+    cx: Ctxt,
+    attrName: Symbol,
+    meta: ParseNestedMeta
+): Path? {
+    val string = getLitStr(cx, attrName, meta) ?: return null
+    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.PathParse.parse(input) }, string.toTokenStream())
+    if (result.isFailure) {
+        cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
+        return null
+    }
+    return result.getOrThrow()
+}
+
+private fun parseLitIntoExprPath(
+    cx: Ctxt,
+    attrName: Symbol,
+    meta: ParseNestedMeta
+): io.github.kotlinmania.syn.Expr.Path? {
+    val string = getLitStr(cx, attrName, meta) ?: return null
+    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.ExprParse.parse(input) }, string.toTokenStream())
+    if (result.isFailure) {
+        cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
+        return null
+    }
+    val expr = result.getOrThrow()
+    if (expr is io.github.kotlinmania.syn.Expr.Path) {
+        return expr
+    }
+    cx.errorSpannedBy(string, "expected path expression")
+    return null
+}
+
+private fun parseLitIntoTy(
+    cx: Ctxt,
+    attrName: Symbol,
+    meta: ParseNestedMeta
+): SynType? {
+    val string = getLitStr(cx, attrName, meta) ?: return null
+    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.parseExpr(input) }, string.toTokenStream())
+    if (result.isFailure) {
+        cx.errorSpannedBy(string, "failed to parse type: $attrName = ${string.value()}")
+        return null
+    }
+    // parseExpr returns an Expr, but we need a SynType. Try parse2 with a type parser.
+    // For now, parse as expr and check if it's a path that can be a type.
+    val expr = result.getOrThrow()
+    // Actually, use parseStr to parse as SynType
+    val typeResult = io.github.kotlinmania.syn.parseStr({ input -> io.github.kotlinmania.syn.parseType(input) }, string.value())
+    if (typeResult.isFailure) {
+        cx.errorSpannedBy(string, "failed to parse type: $attrName = ${string.value()}")
+        return null
+    }
+    return typeResult.getOrThrow()
+}
+
+private fun parseLitIntoWhere(
+    cx: Ctxt,
+    attrName: Symbol,
+    metaItemName: Symbol,
+    meta: ParseNestedMeta
+): List<WherePredicate> {
+    val string = getLitStr2(cx, attrName, metaItemName, meta) ?: return emptyList()
+    // Parse as a comma-separated list of WherePredicate
+    val result = io.github.kotlinmania.syn.parseStr({ input ->
+        val predicates = mutableListOf<WherePredicate>()
+        while (!input.isEmpty()) {
+            val predResult = io.github.kotlinmania.syn.parseWherePredicate(input)
+            if (predResult.isFailure) return@parseStr io.github.kotlinmania.syn.SynResult.failure(predResult.exceptionOrNull()!!)
+            predicates.add(predResult.getOrThrow())
+            if (!input.isEmpty()) {
+                val commaResult = input.parse(io.github.kotlinmania.syn.CommaParse)
+                if (commaResult.isFailure) return@parseStr io.github.kotlinmania.syn.SynResult.failure(commaResult.exceptionOrNull()!!)
+            }
+        }
+        io.github.kotlinmania.syn.SynResult.success(predicates)
+    }, string.value())
+    if (result.isFailure) {
+        cx.errorSpannedBy(string, result.exceptionOrNull()?.message ?: "failed to parse where predicates")
+        return emptyList()
+    }
+    return result.getOrThrow()
+}
+
+private fun getWherePredicates(
+    cx: Ctxt,
+    meta: ParseNestedMeta
+): Pair<List<WherePredicate>?, List<WherePredicate>?> {
+    val (ser, de) = getSerAndDe(cx, BOUND, meta) { cx2, attrName, metaItemName, m ->
+        parseLitIntoWhere(cx2, attrName, metaItemName, m)
+    }
+    return Pair(ser?.atMostOne(), de?.atMostOne())
+}
+
+private fun getRenames(
+    cx: Ctxt,
+    attrName: Symbol,
+    meta: ParseNestedMeta
+): Pair<LitStr?, LitStr?> {
+    val (ser, de) = getSerAndDe(cx, attrName, meta) { cx2, _, metaItemName, m ->
+        getLitStr2(cx2, attrName, metaItemName, m)
+    }
+    return Pair(ser?.atMostOne(), de?.atMostOne())
+}
+
+// Generic helper: parse `serialize = "..."` / `deserialize = "..."` sub-attributes
+private fun <T> getSerAndDe(
+    cx: Ctxt,
+    attrName: Symbol,
+    meta: ParseNestedMeta,
+    f: (Ctxt, Symbol, Symbol, ParseNestedMeta) -> T?
+): Pair<VecAttr<T>, VecAttr<T>> {
+    val serMeta = VecAttr.none<T>(cx, attrName)
+    val deMeta = VecAttr.none<T>(cx, attrName)
+
+    // Check if input starts with `=` (single value for both ser and de)
+    val valueTokens = meta.value()
+    // Try parsing as `= "..."` (the Eq token followed by a literal)
+    val eqResult = io.github.kotlinmania.syn.parse2({ input ->
+        val eqParseResult = input.parse(io.github.kotlinmania.syn.EqParse)
+        if (eqParseResult.isFailure) {
+            return@parse2 io.github.kotlinmania.syn.SynResult.success(false)
+        }
+        io.github.kotlinmania.syn.SynResult.success(true)
+    }, valueTokens)
+
+    if (eqResult.isSuccess && eqResult.getOrThrow()) {
+        // It's `attr = "..."` — applies to both ser and de
+        val both = f(cx, attrName, attrName, meta)
+        if (both != null) {
+            serMeta.insert(meta.path, both)
+            deMeta.insert(meta.path, both)
+        }
+    } else {
+        // Try parsing as `(serialize = "...", deserialize = "...")`
+        meta.parseNestedMeta { subMeta ->
+            if (subMeta.path == SERIALIZE) {
+                val v = f(cx, attrName, SERIALIZE, subMeta)
+                if (v != null) {
+                    serMeta.insert(subMeta.path, v)
+                }
+            } else if (subMeta.path == DESERIALIZE) {
+                val v = f(cx, attrName, DESERIALIZE, subMeta)
+                if (v != null) {
+                    deMeta.insert(subMeta.path, v)
+                }
+            } else {
+                return@parseNestedMeta io.github.kotlinmania.syn.SynResult.failure(
+                    subMeta.error("malformed $attrName attribute, expected `$attrName(serialize = ..., deserialize = ...)`")
+                )
+            }
+            io.github.kotlinmania.syn.SynResult.success(Unit)
+        }
+    }
+
+    return Pair(serMeta, deMeta)
+}
+
+// Extension to get at most one value from VecAttr
+private fun <T> VecAttr<T>.atMostOne(): T? {
+    return this.get().lastOrNull()
 }
 
 private fun isPrimitivePath(path: Path, primitive: String): Boolean {
