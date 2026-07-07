@@ -29,7 +29,7 @@ public class Container(
 
             var data = when (val itemData = item.data) {
                 is SynData.Enum -> {
-                    Data.Enum(enumFromAst(cx, itemData.variants, attrs.default(), private))
+                    Data.Enum(enumFromAst(cx, itemData.variants.toList(), attrs.default(), private))
                 }
                 is SynData.Struct -> {
                     val (style, fields) = structFromAst(cx, itemData.fields, null, attrs.default(), private)

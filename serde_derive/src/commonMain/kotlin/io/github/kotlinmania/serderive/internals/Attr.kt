@@ -41,7 +41,7 @@ private fun pathSegmentListFrom(segments: List<PathSegment>): PathSegmentList {
 }
 
 // Extension: "deep copy" an Ident (Ident has no deepCopy method)
-private fun Ident.deepCopy(): Ident = Ident.new(this.toString(), this.span())
+internal fun Ident.deepCopy(): Ident = Ident.new(this.toString(), this.span())
 
 // Check if a ParseNestedMeta's input starts with `=` (i.e., `attr = "value"`)
 private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
@@ -774,6 +774,19 @@ public class AttrField(
 
     public fun isNone(): Boolean {
         return false // null is not used here properly, just return false
+    }
+
+    public fun renameByRules(rules: RenameAllRules) {
+        if (!name.serializeRenamed) {
+            name.serialize.value = rules.serialize.applyToField(name.serialize.value)
+        }
+        if (!name.deserializeRenamed) {
+            name.deserialize.value = rules.deserialize.applyToField(name.deserialize.value)
+        }
+        val aliases = name.deserializeAliases().toList()
+        for (alias in aliases) {
+            alias.value = rules.deserialize.applyToField(alias.value)
+        }
     }
 
     public companion object {
