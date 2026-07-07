@@ -5,28 +5,28 @@ import io.github.kotlinmania.syn.*
 import io.github.kotlinmania.syn.punctuated.Punctuated
 
 public fun withoutDefaults(generics: Generics): Generics {
-    return generics.copy(
-        params = punctuated.Punctuated.fromList(
-            generics.params.map { param ->
-                when (param) {
-                    is GenericParam.Type -> GenericParam.Type(
-                        param.type.copy(
-                            eqToken = null,
-                            default = null
-                        )
-                    )
-                    else -> param
-                }
-            }.toList()
-        )
-    )
+    val newParams = GenericParamList()
+    for (param in generics.params.toList()) {
+        when (param) {
+            is GenericParam.Type -> newParams.pushValue(GenericParam.TypeParam(
+                param.attrs,
+                param.ident,
+                param.colonToken,
+                param.bounds,
+                eqToken = null,
+                default = null
+            ))
+            else -> newParams.pushValue(param)
+        }
+    }
+    return generics.copy(params = newParams)
 }
 
 public fun withWherePredicates(
     generics: Generics,
     predicates: List<WherePredicate>
 ): Generics {
-    var mutGenerics = generics.clone()
+    var mutGenerics = generics.deepCopy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (predicate in predicates) {
@@ -40,7 +40,7 @@ public fun withWherePredicatesFromFields(
     generics: Generics,
     fromField: (Field) -> List<WherePredicate>?
 ): Generics {
-    var mutGenerics = generics.clone()
+    var mutGenerics = generics.deepCopy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (field in cont.data.allFields()) {
@@ -59,9 +59,9 @@ public fun withWherePredicatesFromVariants(
 ): Generics {
     val variants = when (val data = cont.data) {
         is Data.Enum -> data.variants
-        is Data.Struct -> return generics.clone()
+        is Data.Struct -> return generics.deepCopy()
     }
-    var mutGenerics = generics.clone()
+    var mutGenerics = generics.deepCopy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (variant in variants) {
@@ -82,9 +82,9 @@ public fun withBound(
     class FindTyParams(
         val allTypeParams: Set<Ident>,
         val relevantTypeParams: MutableSet<Ident>,
-        val associatedTypeUsage: MutableList<TypePath>
+        val associatedTypeUsage: MutableList<io.github.kotlinmania.syn.TypePath>
     ) {
-        fun visitField(field: syn.Field) {
+        fun visitField(field: io.github.kotlinmania.syn.Field) {
             val ty = ungroup(field.ty)
             if (ty is SynType.Path) {
                 val firstSegment = ty.path.segments.firstOrNull()
@@ -226,37 +226,37 @@ public fun withBound(
     val relevantTypeParams = visitor.relevantTypeParams
     val associatedTypeUsage = visitor.associatedTypeUsage
 
-    fun makeWhereBoundedType(boundedTy: TypePath, bound: Path): WherePredicate {
+    fun makeWhereBoundedType(boundedTy: io.github.kotlinmania.syn.TypePath, bound: Path): WherePredicate {
         return WherePredicate.Type(PredicateType(
             lifetimes = null,
             boundedTy = SynType.Path(boundedTy),
             colonToken = token.Colon(),
-            bounds = punctuated.Punctuated.fromList(listOf(
+            bounds = io.github.kotlinmania.syn.Punctuated.Companion.fromList(listOf(
                 TypeParamBound.Trait(TraitBound(
                     parenToken = null,
                     modifier = TraitBoundModifier.null,
                     lifetimes = null,
-                    path = bound.clone()
+                    path = bound.deepCopy()
                 ))
             ))
         ))
     }
 
-    var dstGenerics = generics.clone()
+    var dstGenerics = generics.deepCopy()
     val dstPredicates = dstGenerics.makeWhereClause().predicates
     for (param in generics.typeParams()) {
         val id = param.ident
         if (!relevantTypeParams.contains(id)) {
             continue
         }
-        val boundedTy = TypePath(
+        val boundedTy = io.github.kotlinmania.syn.TypePath(
             qself = null,
-            path = Path.from(id.clone())
+            path = Path.from(id.deepCopy())
         )
         dstPredicates.add(makeWhereBoundedType(boundedTy, bound))
     }
     for (boundedTy in associatedTypeUsage) {
-        dstPredicates.add(makeWhereBoundedType(boundedTy.clone(), bound))
+        dstPredicates.add(makeWhereBoundedType(boundedTy.deepCopy(), bound))
     }
     return dstGenerics
 }
@@ -266,18 +266,18 @@ public fun withSelfBound(
     generics: Generics,
     bound: Path
 ): Generics {
-    var mutGenerics = generics.clone()
+    var mutGenerics = generics.deepCopy()
     mutGenerics.makeWhereClause().predicates.add(
         WherePredicate.Type(PredicateType(
             lifetimes = null,
             boundedTy = typeOfItem(cont),
             colonToken = token.Colon(),
-            bounds = punctuated.Punctuated.fromList(listOf(
+            bounds = io.github.kotlinmania.syn.Punctuated.Companion.fromList(listOf(
                 TypeParamBound.Trait(TraitBound(
                     parenToken = null,
                     modifier = TraitBoundModifier.null,
                     lifetimes = null,
-                    path = bound.clone()
+                    path = bound.deepCopy()
                 ))
             ))
         ))
@@ -289,7 +289,7 @@ public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
     val bound = Lifetime.new(lifetime, Span.callSite())
     val def = LifetimeParam(
         attrs = emptyList(),
-        lifetime = bound.clone(),
+        lifetime = bound.deepCopy(),
         colonToken = null,
         bounds = punctuated.Punctuated.new()
     )
@@ -298,42 +298,42 @@ public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
     for (param in generics.params) {
         when (param) {
             is GenericParam.Lifetime -> {
-                param.bounds.add(bound.clone())
+                param.bounds.add(bound.deepCopy())
             }
             is GenericParam.Type -> {
-                param.bounds.add(TypeParamBound.Lifetime(bound.clone()))
+                param.bounds.add(TypeParamBound.Lifetime(bound.deepCopy()))
             }
             is GenericParam.Const -> {}
         }
         params.add(param)
     }
 
-    return generics.copy(params = punctuated.Punctuated.fromList(params))
+    return generics.copy(params = (run { val l = io.github.kotlinmania.syn.GenericParamList(); for (p in params)) l.pushValue(p); l })
 }
 
 private fun typeOfItem(cont: Container): SynType {
-    return SynType.Path(TypePath(
+    return SynType.Path(io.github.kotlinmania.syn.TypePath(
         qself = null,
         path = Path(
             leadingColon = null,
-            segments = punctuated.Punctuated.fromList(listOf(
+            segments = io.github.kotlinmania.syn.Punctuated.Companion.fromList(listOf(
                 PathSegment(
-                    ident = cont.ident.clone(),
+                    ident = cont.ident.deepCopy(),
                     arguments = PathArguments.AngleBracketed(
                         AngleBracketedGenericArguments(
                             colon2Token = null,
                             ltToken = token.Lt(),
-                            args = punctuated.Punctuated.fromList(
+                            args = io.github.kotlinmania.syn.Punctuated.Companion.fromList(
                                 cont.generics.params.map { param ->
                                     when (param) {
                                         is GenericParam.Type -> {
-                                            GenericArgument.TypeArg(SynType.Path(TypePath(
+                                            GenericArgument.TypeArg(SynType.Path(io.github.kotlinmania.syn.TypePath(
                                                 qself = null,
-                                                path = Path.from(param.ident.clone())
+                                                path = Path.from(param.ident.deepCopy())
                                             )))
                                         }
                                         is GenericParam.Lifetime -> {
-                                            GenericArgument.LifetimeArg(param.lifetime.clone())
+                                            GenericArgument.LifetimeArg(param.lifetime.deepCopy())
                                         }
                                         is GenericParam.Const -> {
                                             throw Exception("Serde does not support const generics yet")
