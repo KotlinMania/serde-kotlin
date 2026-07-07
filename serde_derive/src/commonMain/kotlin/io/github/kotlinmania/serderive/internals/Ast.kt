@@ -112,7 +112,7 @@ public enum class Style {
 
 private fun enumFromAst(
     cx: Ctxt,
-    variants: Iterable<Variant>,
+    variants: Iterable<io.github.kotlinmania.syn.Variant>,
     containerDefault: Default,
     private: Ident
 ): List<Variant> {
@@ -151,7 +151,7 @@ private fun enumFromAst(
 
 private fun structFromAst(
     cx: Ctxt,
-    fields: Fields,
+    fields: io.github.kotlinmania.syn.Fields,
     attrs: AttrVariant?,
     containerDefault: Default,
     private: Ident
@@ -159,18 +159,18 @@ private fun structFromAst(
     return when (fields) {
         is Fields.Named -> Pair(
             Style.Struct,
-            fieldsFromAst(cx, fields.named, attrs, containerDefault, private)
+            fieldsFromAst(cx, fields.fields.named, attrs, containerDefault, private)
         )
         is Fields.Unnamed -> {
-            if (fields.unnamed.size == 1) {
+            if (fields.fields.unnamed.size == 1) {
                 Pair(
                     Style.Newtype,
-                    fieldsFromAst(cx, fields.unnamed, attrs, containerDefault, private)
+                    fieldsFromAst(cx, fields.fields.unnamed, attrs, containerDefault, private)
                 )
             } else {
                 Pair(
                     Style.Tuple,
-                    fieldsFromAst(cx, fields.unnamed, attrs, containerDefault, private)
+                    fieldsFromAst(cx, fields.fields.unnamed, attrs, containerDefault, private)
                 )
             }
         }
