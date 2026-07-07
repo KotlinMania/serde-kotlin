@@ -34,10 +34,13 @@ private fun Path.asToTokens(): ToTokens = PathTokens(this)
 // Check if a ParseNestedMeta's input starts with `=` (i.e., `attr = "value"`)
 private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
     val valueTokens = meta.value()
-    val result = io.github.kotlinmania.syn.parse2<Boolean>({ input: io.github.kotlinmania.syn.ParseBuffer ->
-        val eqResult = input.parse(io.github.kotlinmania.syn.EqParse)
-        io.github.kotlinmania.syn.SynResult.success(eqResult.isSuccess)
-    }, valueTokens)
+    val eqParse = object : io.github.kotlinmania.syn.Parse<Boolean> {
+        override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<Boolean> {
+            val eqResult = input.parse(io.github.kotlinmania.syn.EqParse)
+            return io.github.kotlinmania.syn.SynResult.success(eqResult.isSuccess)
+        }
+    }
+    val result = io.github.kotlinmania.syn.parse2(eqParse, valueTokens)
     return result.isSuccess && result.getOrThrow()
 }
 
@@ -1060,7 +1063,7 @@ private fun getLitStr2(
     meta: ParseNestedMeta
 ): LitStr? {
     val valueTokens = meta.value()
-    val exprResult = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.ExprParse.parse(input) }, valueTokens)
+    val exprResult = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.ExprParse, valueTokens)
     if (exprResult.isFailure) {
         cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
         return null
@@ -1086,7 +1089,7 @@ private fun parseLitIntoPath(
     meta: ParseNestedMeta
 ): Path? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.PathParse.parse(input) }, string.toTokenStream())
+    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse, string.toTokenStream())
     if (result.isFailure) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
         return null
@@ -1100,7 +1103,7 @@ private fun parseLitIntoExprPath(
     meta: ParseNestedMeta
 ): io.github.kotlinmania.syn.Expr.Path? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.ExprParse.parse(input) }, string.toTokenStream())
+    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.ExprParse, string.toTokenStream())
     if (result.isFailure) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
         return null
