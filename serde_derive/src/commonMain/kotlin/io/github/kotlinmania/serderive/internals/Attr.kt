@@ -369,7 +369,7 @@ public class AttrContainer(
                             val path = parseLitIntoPath(cx, REMOTE, meta)
                             if (path != null) {
                                 if (isPrimitivePath(path, "this")) {
-                                    remote.set(meta.path, Path.from(item.ident.deepCopy()))
+                                    remote.set(meta.path, Path.from(Path.from(item.ident)))
                                 } else {
                                     remote.set(meta.path, path)
                                 }
@@ -464,7 +464,7 @@ private fun decideTag(
             for (variant in itemData.variants) {
                 val synVariant = variant as Variant
                 if (synVariant.fields is Fields.Unnamed) {
-                    if (synVariant.fields.unnamed.size != 1) {
+                    if (synVariant.fields.fields.unnamed.size != 1) {
                         cx.errorSpannedBy(synVariant, "#[serde(tag = \"...\")] cannot be used with tuple variants")
                         break
                     }
@@ -767,7 +767,7 @@ public class AttrField(
     public fun fromAst(
         cx: Ctxt,
         index: Int,
-        field: syn.Field,
+        field: Field,
         attrs: AttrVariant?,
         containerDefault: Default,
         private: Ident
@@ -1257,10 +1257,46 @@ private fun isPrimitivePath(path: Path, primitive: String): Boolean {
             path.segments[0].arguments is PathArguments.None
 }
 
+// Parse a string literal like "'a + 'b + 'c" containing lifetimes separated by `+`
+private fun parseLitIntoLifetimes(
+    cx: Ctxt,
+    meta: ParseNestedMeta
+): Set<Lifetime> {
+    val string = getLitStr(cx, BORROW, meta) ?: return emptySet()
+    val lifetimesParse = io.github.kotlinmania.syn.parserFromFunction { input ->
+        val set = mutableSetOf<Lifetime>()
+        while (!input.isEmpty()) {
+            val ltResult = io.github.kotlinmania.syn.LifetimeParse.parse(input)
+            if (ltResult.isFailure) {
+                return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(ltResult.exceptionOrNull()!!)
+            }
+            val lt = ltResult.getOrThrow()
+            if (!set.add(lt)) {
+                cx.errorSpannedBy(string, "duplicate borrowed lifetime `$lt`")
+            }
+            if (input.isEmpty()) break
+            val plusResult = input.parse(io.github.kotlinmania.syn.PlusParse)
+            if (plusResult.isFailure) {
+                return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(plusResult.exceptionOrNull()!!)
+            }
+        }
+        if (set.isEmpty()) {
+            cx.errorSpannedBy(string, "at least one lifetime must be borrowed")
+        }
+        io.github.kotlinmania.syn.SynResult.success(set)
+    }
+    val result = io.github.kotlinmania.syn.parseStr(lifetimesParse, string.value())
+    if (result.isFailure) {
+        cx.errorSpannedBy(string, "failed to parse borrowed lifetimes: ${string.value()}")
+        return emptySet()
+    }
+    return result.getOrThrow()
+}
+
 private fun borrowableLifetimes(
     cx: Ctxt,
     name: String,
-    field: syn.Field
+    field: Field
 ): Set<Lifetime>? {
     val lifetimes = mutableSetOf<Lifetime>()
     collectLifetimes(field.ty, lifetimes)
