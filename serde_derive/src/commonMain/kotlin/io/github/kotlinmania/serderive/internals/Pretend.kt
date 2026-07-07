@@ -1,10 +1,16 @@
+// port-lint: source pretend.rs
 package io.github.kotlinmania.serderive.internals
 
+import io.github.kotlinmania.procmacro2.Ident
+import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.formatIdent
 import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.syn.Path
 
+// Suppress dead_code warnings that would otherwise appear when using a remote
+// derive. Other than this pretend code, a struct annotated with remote derive
+// never has its fields referenced and an enum annotated with remote derive
+// never has its variants constructed.
 public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream {
     val pretendFields = pretendFieldsUsed(cont, isPacked)
     val pretendVariants = pretendVariantsUsed(cont)
@@ -27,7 +33,7 @@ private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
                         pretendFieldsUsedStruct(cont, data.fields)
                     }
                 }
-                Style.Unit -> quote("""""")
+                Style.Unit -> quote("")
             }
         }
     }
@@ -35,41 +41,40 @@ private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
 
 private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): TokenStream {
     val typeIdent = cont.ident
-    val (_, tyGenerics, _) = cont.generics.splitForImpl()
+    val split = cont.generics.splitForImpl()
 
     val members = fields.map { it.member }
-    val placeholders = fields.indices.map { i -> formatIdent("__v`#`i") }
+    val placeholders = fields.indices.map { i -> formatIdent("__v$i") }
 
     return quote("""
-        when (_serde.`#`private.null::<&`#`typeIdent `#`tyGenerics> ) {
-            _serde.`#`private.`#`typeIdent { `#`(`#`members: `#`placeholders,* }) -> {}
-            _ -> {}
+        when (_serde.`#`Private.None::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde.`#`Private.Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) -> {}
+            _ => {}
         }
     """)
 }
 
 private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>): TokenStream {
     val typeIdent = cont.ident
-    val (_, tyGenerics, _) = cont.generics.splitForImpl()
+    val split = cont.generics.splitForImpl()
 
     val members = fields.map { it.member }
-    val private2 = private
 
     return quote("""
-        when (_serde.`#`private.null::<&`#`typeIdent `#`tyGenerics> ) {
-            _serde.`#`private.__v @ `#`typeIdent { `#`(`#`members: _,* }) -> {
+        when (_serde.`#`Private.None::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde.`#`Private.Some(__v @ `#`typeIdent { `#`(`#`members: _),* }) => {
                 `#`(
-                    let _ = _serde.`#`private2.ptr.addr_of!(__v.`#`members);
+                    let _ = _serde.`#`Private.ptr.addr_of!(__v.`#`members);
                 )*
             }
-            _ -> {}
+            _ => {}
         }
     """)
 }
 
 private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): TokenStream {
     val typeIdent = cont.ident
-    val (_, tyGenerics, _) = cont.generics.splitForImpl()
+    val split = cont.generics.splitForImpl()
 
     val patterns = mutableListOf<TokenStream>()
     for (variant in variants) {
@@ -77,20 +82,19 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
             Style.Struct, Style.Tuple, Style.Newtype -> {
                 val variantIdent = variant.ident
                 val members = variant.fields.map { it.member }
-                val placeholders = variant.fields.indices.map { i -> formatIdent("__v`#`i") }
-                patterns.add(quote! { `#`typeIdent::`#`variantIdent { `#`(`#`members: `#`placeholders),* } })
+                val placeholders = variant.fields.indices.map { i -> formatIdent("__v$i") }
+                patterns.add(quote("`#`typeIdent::`#`variantIdent { `#`(`#`members: `#`placeholders),* }"))
             }
             Style.Unit -> {}
         }
     }
 
-    val private2 = private
     return quote("""
-        when (_serde.`#`private.null::<&`#`typeIdent `#`tyGenerics> ) {
+        when (_serde.`#`Private.None::<&`#`typeIdent `#`tyGenerics> ) {
             `#`(
-                _serde.`#`private2.`#`patterns -> {}
+                _serde.`#`Private.Some(`#`patterns) => {}
             )*
-            _ -> {}
+            _ => {}
         }
     """)
 }
@@ -98,35 +102,35 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
 private fun pretendVariantsUsed(cont: Container): TokenStream {
     val variants = when (val data = cont.data) {
         is Data.Enum -> data.variants
-        is Data.Struct -> return quote("""""")
+        is Data.Struct -> return quote("")
     }
 
     val typeIdent = cont.ident
-    val (_, tyGenerics, _) = cont.generics.splitForImpl()
-    val turbofish = tyGenerics.asTurbofish()
+    val split = cont.generics.splitForImpl()
+    val turbofish = split.turbofish
 
     val cases = variants.map { variant ->
         val variantIdent = variant.ident
-        val placeholders = variant.fields.indices.map { i -> formatIdent("__v`#`i") }
+        val placeholders = variant.fields.indices.map { i -> formatIdent("__v$i") }
 
         val pat = when (variant.style) {
             Style.Struct -> {
                 val members = variant.fields.map { it.member }
-                quote! { { `#`(`#`members: `#`placeholders),* } }
+                quote("{ `#`(`#`members: `#`placeholders),* }")
             }
-            Style.Tuple, Style.Newtype -> quote! { ( `#`(`#`placeholders),* ) }
-            Style.Unit -> quote! {}
+            Style.Tuple, Style.Newtype -> quote("( `#`(`#`placeholders),* )")
+            Style.Unit -> quote("")
         }
 
-        quote! {
-            when (_serde.`#`private.null ) {
-                _serde.`#`private.(`#`(`#`placeholders,*)) -> {
+        quote("""
+            when (_serde.`#`Private.None ) {
+                _serde.`#`Private.Some((`#`(`#`placeholders,)*)) => {
                     let _ = `#`typeIdent::`#`variantIdent `#`turbofish `#`pat;
                 }
-                _ -> {}
+                _ => {}
             }
-        }
+        """)
     }
 
-    return quote! { `#`(`#`cases)* }
+    return quote("`#`(`#`cases)*")
 }
