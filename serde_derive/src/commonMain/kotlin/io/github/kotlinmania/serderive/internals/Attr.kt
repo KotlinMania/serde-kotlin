@@ -3,6 +3,7 @@ package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
+import io.github.kotlinmania.procmacro2.TokenTree
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.*
 import io.github.kotlinmania.syn.SynResult
@@ -1087,20 +1088,21 @@ private fun getLitStr2(
     meta: ParseNestedMeta
 ): LitStr? {
     val valueTokens = meta.value()
-    val exprResult = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.ExprParse, valueTokens)
-    if (exprResult.isFailure) {
-        cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
-        return null
-    }
-    val expr = exprResult.getOrThrow()
-    var value: Expr = expr
-    while (value is Expr.Group) {
-        value = value.expr
-    }
-    if (value is Expr.Lit) {
-        val lit = value.lit
-        if (lit is Lit.Str) {
-            return lit
+    // Workaround: ExprParse is internal in syn-kotlin 0.2.0 metadata.
+    // Parse the token stream manually: a string literal is a single Lit.Str token.
+    val iter = valueTokens.iterator()
+    if (iter.hasNext()) {
+        val token = iter.next()
+        if (token is TokenTree.Literal && !iter.hasNext()) {
+            val lit = token.value
+            if (lit is io.github.kotlinmania.procmacro2.Literal) {
+                // Try to extract as string literal
+                val text = lit.toString()
+                if (text.startsWith("\"") && text.endsWith("\"")) {
+                    val inner = text.substring(1, text.length - 1)
+                    return LitStr.new(inner, lit.span())
+                }
+            }
         }
     }
     cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
@@ -1127,14 +1129,26 @@ private fun parseLitIntoExprPath(
     meta: ParseNestedMeta
 ): io.github.kotlinmania.syn.Expr.Path? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.ExprParse, string.toTokenStream())
-    if (result.isFailure) {
+    // Workaround: ExprParse is internal in syn-kotlin 0.2.0 metadata.
+    // Use parseStr with a custom parser that delegates to TokenStream.fromString
+    // and then checks if the parsed expression is a path.
+    val parseResult = TokenStream.fromString(string.value())
+    if (!parseResult.isSuccess()) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
         return null
     }
-    val expr = result.getOrThrow()
-    if (expr is io.github.kotlinmania.syn.Expr.Path) {
-        return expr
+    val ts = parseResult.getOrThrow()
+    // Parse as a path expression: the token stream should be a path like `foo::bar::Baz`
+    val pathParseResult = io.github.kotlinmania.syn.parse2(
+        io.github.kotlinmania.syn.PathParse,
+        ts
+    )
+    if (pathParseResult is SynResult.Success) {
+        val path = pathParseResult.value
+        return io.github.kotlinmania.syn.Expr.Path(
+            qself = null,
+            path = path
+        )
     }
     cx.errorSpannedBy(string, "expected path expression")
     return null

@@ -17,6 +17,11 @@ dependencyResolutionManagement {
     }
 }
 
+// Composite build of sibling KotlinMania ports whose latest API is not yet
+// published to Maven Central. Gradle substitutes the published coordinates
+// with the local source build automatically.
+includeBuild("../quote-kotlin")
+
 rootProject.name = "serde-kotlin"
 
 // Multi-build hierarchy mirroring Rust's crate split (serde_core / serde / serde_derive),

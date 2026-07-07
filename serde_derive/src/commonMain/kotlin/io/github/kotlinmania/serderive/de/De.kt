@@ -388,7 +388,7 @@ internal fun fieldI(i: Int): Ident {
 // All are in the same package and called directly.
 
 // Temporary stubs — will be replaced by the real implementations in
-// Struct.kt and Identifier.kt when those files are rewritten from upstream Rust.
+// Struct.kt when that file is rewritten from upstream Rust.
 internal fun deserializeStruct(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: StructForm
 ): Fragment = Fragment.Expr(quote(""))
@@ -399,15 +399,7 @@ internal fun deserializeStructInPlace(
 
 internal fun deserializeCustomIdentifier(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
-): Fragment = Fragment.Expr(quote(""))
-
-internal fun deserializeGenerated(
-    deserializedFields: List<FieldWithAliases>,
-    hasFlatten: Boolean,
-    isVariant: Boolean,
-    ignoreVariant: TokenStream?,
-    fallthrough: TokenStream?
-): Fragment = Fragment.Expr(quote(""))
+): Fragment = deserializeCustom(params, variants, cattrs)
 
 internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {

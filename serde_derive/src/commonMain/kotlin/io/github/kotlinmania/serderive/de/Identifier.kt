@@ -1,484 +1,441 @@
+// port-lint: source de/identifier.rs
 package io.github.kotlinmania.serderive
 
-//! Deserialization of struct field identifiers and enum variant identifiers by
-//! way of a Rust enum.
-
-import io.github.kotlinmania.serderive.de.FieldWithAliases
-import io.github.kotlinmania.serderive.de.Parameters
-import io.github.kotlinmania.serderive.fragment.Fragment
-import io.github.kotlinmania.serderive.fragment.Stmts
-import io.github.kotlinmania.serderive.internals.ast.Style
-import io.github.kotlinmania.serderive.internals.ast.Variant
-import io.github.kotlinmania.serderive.internals.attr
-import io.github.kotlinmania.serderive.private
 import io.github.kotlinmania.procmacro2.Literal
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.quote.ToTokens
+import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Expr
+import io.github.kotlinmania.serderive.internals.Fragment
+import io.github.kotlinmania.serderive.internals.Identifier
+import io.github.kotlinmania.serderive.internals.Name
+import io.github.kotlinmania.serderive.internals.Stmts
+import io.github.kotlinmania.serderive.internals.Style
+import io.github.kotlinmania.serderive.internals.Variant
 
-// Generates `Deserialize.deserialize` body for an enum with
+// Deserialization of struct field identifiers and enum variant identifiers by
+// way of a Rust enum.
+
+// Generates `Deserialize::deserialize` body for an enum with
 // `serde(field_identifier)` or `serde(variant_identifier)` attribute.
-pub(super) fun deserialize_custom(
+internal fun deserializeCustom(
     params: Parameters,
-    variants: &[Variant],
-    cattrs: attr.Container,
-) : Fragment {
-    val is_variant = when cattrs.identifier() {
-        attr.Identifier.Variant -> true,
-        attr.Identifier.Field -> false,
-        attr.Identifier.No -> unreachable!(),
-    };
+    variants: List<Variant>,
+    cattrs: AttrContainer
+): Fragment {
+    val isVariant = when (cattrs.identifier()) {
+        Identifier.Variant -> true
+        Identifier.Field -> false
+        Identifier.No -> error("checked in serde_derive_internals")
+    }
 
-    val this_type = params.this_type.to_token_stream();
-    val this_value = params.this_value.to_token_stream();
+    val thisType = params.thisType
+    val thisValue = params.thisValue
 
-    let (ordinary, fallthrough, fallthrough_borrowed) = if val last = variants.last() {
-        val last_ident = last.ident;
-        if last.attrs.other() {
+    val (ordinary, fallthrough, fallthroughBorrowed) = if (variants.isNotEmpty()) {
+        val last = variants.last()
+        val lastIdent = last.ident
+        if (last.attrs.other()) {
             // Process `serde(other)` attribute. It would always be found on the
             // last variant (checked in `check_identifier`), so all preceding
             // are ordinary variants.
-            val ordinary = variants[..variants.len() - 1];
-            val fallthrough = quote(""" _serde.#private.Ok(#this_value.#last_ident """));
-            (ordinary, fallthrough, null)
-        } else if val Style.Newtype = last.style {
-            val ordinary = variants[..variants.len() - 1];
-            val fallthrough = |value| {
+            val ordinary = variants.subList(0, variants.size - 1)
+            val fallthrough = quote("_serde.`#`Private::Ok(`#`thisValue::`#`lastIdent)")
+            Triple(ordinary, fallthrough, null)
+        } else if (last.style == Style.Newtype) {
+            val ordinary = variants.subList(0, variants.size - 1)
+            val fallthrough = { value: TokenStream ->
                 quote("""
-                    _serde.#private.Result.map(
-                        _serde.Deserialize.deserialize(
-                            _serde.#private.de.IdentifierDeserializer.from(#value)
+                    _serde.`#`Private::Result::map(
+                        _serde::Deserialize::deserialize(
+                            _serde.`#`Private::de::IdentifierDeserializer::from(`#`value)
                         ),
-                        #this_value.#last_ident)
+                        `#`thisValue::`#`lastIdent)
                 """)
-            };
-            (
+            }
+            Triple(
                 ordinary,
-                fallthrough(quote(""" __value """)),
-                Some(fallthrough(quote!(_serde.#private.de.Borrowed(
-                    __value
-                )))),
+                fallthrough(quote("__value")),
+                fallthrough(quote("_serde.`#`Private::de::Borrowed(__value)"))
             )
         } else {
-            (variants, null, null)
+            Triple(variants, null, null)
         }
     } else {
-        (variants, null, null)
-    };
+        Triple(variants, null, null)
+    }
 
-    val idents_aliases: List<_> = ordinary
-        .iter()
-        .map(|variant| FieldWithAliases {
-            ident: variant.ident.clone(),
-            aliases: variant.attrs.aliases(),
-        })
-        .collect();
+    val identsAliases = ordinary.map { variant ->
+        FieldWithAliases(
+            ident = variant.ident,
+            aliases = variant.attrs.aliases()
+        )
+    }
 
-    val names = idents_aliases.iter().flat_map(|variant| variant.aliases);
+    val names = identsAliases.flatMap { it.aliases }
 
-    val names_const = if fallthrough.is_some() {
+    val namesConst = if (fallthrough != null) {
         null
-    } else if is_variant {
-        val variants = quote("""
+    } else if (isVariant) {
+        quote("""
             `#`[doc(hidden)]
-            const VARIANTS: &'static [&'static str] = &[ #(#names),* ];
-        """);
-        variants
+            const VARIANTS: &'static [&'static str] = &[ `#`(`#`names),* ];
+        """)
     } else {
-        val fields = quote("""
+        quote("""
             `#`[doc(hidden)]
-            const FIELDS: &'static [&'static str] = &[ #(#names),* ];
-        """);
-        fields
-    };
+            const FIELDS: &'static [&'static str] = &[ `#`(`#`names),* ];
+        """)
+    }
 
-    let (de_impl_generics, de_ty_generics, ty_generics, where_clause) =
-        params.generics_with_de_lifetime();
-    val delife = params.borrowed.de_lifetime();
-    val visitor_impl = Stmts(deserialize_identifier(
-        this_value,
-        idents_aliases,
-        is_variant,
+    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.genericsWithDeLifetime()
+    val delife = params.borrowed.deLifetime()
+    val thisValueTs = TokenStream.new().also { thisValue.toTokens(it) }
+    val visitorImpl = Stmts(deserializeIdentifier(
+        thisValueTs,
+        identsAliases,
+        isVariant,
         fallthrough,
-        fallthrough_borrowed,
+        fallthroughBorrowed,
         false,
-        cattrs.expecting(),
-    ));
+        cattrs.expecting()
+    ))
 
-    quote_block! {
-        #names_const
+    return Fragment.Block(quote("""
+        `#`namesConst
 
         `#`[doc(hidden)]
-        struct __FieldVisitor #de_impl_generics #where_clause {
-            marker: _serde.#private.PhantomData<#this_type #ty_generics>,
-            lifetime: _serde.#private.PhantomData<&#delife ()>,
+        struct __FieldVisitor `#`deImplGenerics `#`whereClause {
+            marker: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
-        impl #de_impl_generics _serde.de.Visitor<#delife> for __FieldVisitor #de_ty_generics #where_clause {
-            type Value = #this_type #ty_generics;
+        impl `#`deImplGenerics _serde::de::Visitor<`#`delife> for __FieldVisitor `#`deTyGenerics `#`whereClause {
+            type Value = `#`thisType `#`tyGenerics;
 
-            #visitor_impl
+            `#`visitorImpl
         }
 
-        val __visitor = __FieldVisitor {
-            marker: _serde.#private.PhantomData.<#this_type #ty_generics>,
-            lifetime: _serde.#private.PhantomData,
+        let __visitor = __FieldVisitor {
+            marker: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+            lifetime: _serde.`#`Private::PhantomData,
         };
-        _serde.Deserializer.deserialize_identifier(__deserializer, __visitor)
-    }
+        _serde::Deserializer::deserialize_identifier(__deserializer, __visitor)
+    """))
 }
 
-pub(super) fun deserialize_generated(
-    deserialized_fields: &[FieldWithAliases],
-    has_flatten: bool,
-    is_variant: bool,
-    ignore_variant: TokenStream?,
-    fallthrough: TokenStream?,
-) : Fragment {
-    val this_value = quote(""" __Field """);
-    val field_idents: List<_> = deserialized_fields
-        .iter()
-        .map(|field| field.ident)
-        .collect();
+internal fun deserializeGenerated(
+    deserializedFields: List<FieldWithAliases>,
+    hasFlatten: Boolean,
+    isVariant: Boolean,
+    ignoreVariant: TokenStream?,
+    fallthrough: TokenStream?
+): Fragment {
+    val thisValue = quote("__Field")
+    val fieldIdents = deserializedFields.map { it.ident }
 
-    val visitor_impl = Stmts(deserialize_identifier(
-        this_value,
-        deserialized_fields,
-        is_variant,
+    val visitorImpl = Stmts(deserializeIdentifier(
+        thisValue,
+        deserializedFields,
+        isVariant,
         fallthrough,
         null,
-        !is_variant && has_flatten,
-        null,
-    ));
+        !isVariant && hasFlatten,
+        null
+    ))
 
-    val lifetime = if !is_variant && has_flatten {
-        quote(""" <'de> """)
+    val lifetime = if (!isVariant && hasFlatten) {
+        quote("<'de>")
     } else {
         null
-    };
+    }
 
-    quote_block! {
+    return Fragment.Block(quote("""
         `#`[allow(non_camel_case_types)]
         `#`[doc(hidden)]
-        enum __Field #lifetime {
-            #(#field_idents,)*
-            #ignore_variant
+        enum __Field `#`lifetime {
+            `#`(`#`fieldIdents),*
+            `#`ignoreVariant
         }
 
         `#`[doc(hidden)]
         struct __FieldVisitor;
 
         `#`[automatically_derived]
-        impl<'de> _serde.de.Visitor<'de> for __FieldVisitor {
-            type Value = __Field #lifetime;
+        impl<'de> _serde::de::Visitor<'de> for __FieldVisitor {
+            type Value = __Field `#`lifetime;
 
-            #visitor_impl
+            `#`visitorImpl
         }
 
         `#`[automatically_derived]
-        impl<'de> _serde.Deserialize<'de> for __Field #lifetime {
+        impl<'de> _serde::Deserialize<'de> for __Field `#`lifetime {
             `#`[inline]
-            fun deserialize<__D>(__deserializer: __D) -> _serde.#private.Result<this, __D.Error>
+            fn deserialize<__D>(__deserializer: __D) -> _serde.`#`Private::Result<Self, __D::Error>
             where
-                __D: _serde.Deserializer<'de>,
+                __D: _serde::Deserializer<'de>,
             {
-                _serde.Deserializer.deserialize_identifier(__deserializer, __FieldVisitor)
+                _serde::Deserializer::deserialize_identifier(__deserializer, __FieldVisitor)
             }
         }
-    }
+    """))
 }
 
-fun deserialize_identifier(
-    this_value: TokenStream,
-    deserialized_fields: &[FieldWithAliases],
-    is_variant: bool,
+private fun deserializeIdentifier(
+    thisValue: TokenStream,
+    deserializedFields: List<FieldWithAliases>,
+    isVariant: Boolean,
     fallthrough: TokenStream?,
-    fallthrough_borrowed: TokenStream?,
-    collect_other_fields: bool,
-    expecting: str?,
-) : Fragment {
-    val str_mapping = deserialized_fields.iter().map(|field| {
-        val ident = field.ident;
-        val aliases = field.aliases;
-        val private2 = private;
+    fallthroughBorrowed: TokenStream?,
+    collectOtherFields: Boolean,
+    expecting: String?
+): Fragment {
+    val strMapping = deserializedFields.map { field ->
+        val ident = field.ident
+        val aliases = field.aliases
         // `aliases` also contains a main name
-        quote("""
-            #(
-                #aliases -> _serde.#private2.Ok(#this_value.#ident),
-            )*
-        """)
-    });
-    val bytes_mapping = deserialized_fields.iter().map(|field| {
-        val ident = field.ident;
+        quote("`#`(`#`aliases),* => _serde.`#`Private::Ok(`#`thisValue::`#`ident),")
+    }
+
+    val bytesMapping = deserializedFields.map { field ->
+        val ident = field.ident
         // `aliases` also contains a main name
-        val aliases = field
-            .aliases
-            .iter()
-            .map(|alias| Literal.byte_string(alias.value.as_bytes()));
-        val private2 = private;
-        quote("""
-            #(
-                #aliases -> _serde.#private2.Ok(#this_value.#ident),
-            )*
-        """)
-    });
+        val byteAliases = field.aliases.map { alias ->
+            Literal.byteString(alias.value.toByteArray())
+        }
+        quote("`#`(`#`byteAliases),* => _serde.`#`Private::Ok(`#`thisValue::`#`ident),")
+    }
 
-    val expecting = expecting.unwrap_or(if is_variant {
-        "variant identifier"
-    } else {
-        "field identifier"
-    });
+    val expectingVal = expecting ?: if (isVariant) "variant identifier" else "field identifier"
 
-    val bytes_to_str = if fallthrough.is_some() || collect_other_fields {
+    val bytesToStr = if (fallthrough != null || collectOtherFields) {
         null
     } else {
-        Some(quote("""
-            val __value = _serde.#private.from_utf8_lossy(__value);
-        """))
-    };
+        quote("let __value = &_serde.`#`Private::from_utf8_lossy(__value);")
+    }
 
-    let (
-        value_as_str_content,
-        value_as_borrowed_str_content,
-        value_as_bytes_content,
-        value_as_borrowed_bytes_content,
-    ) = if collect_other_fields {
-        (
-            Some(quote("""
-                val __value = _serde.#private.de.Content.String(_serde.#private.ToString.to_string(__value));
-            """)),
-            Some(quote("""
-                val __value = _serde.#private.de.Content.Str(__value);
-            """)),
-            Some(quote("""
-                val __value = _serde.#private.de.Content.ByteBuf(__value.to_vec());
-            """)),
-            Some(quote("""
-                val __value = _serde.#private.de.Content.Bytes(__value);
-            """)),
-        )
-    } else {
-        (null, null, null, null)
-    };
+    val (valueAsStrContent, valueAsBorrowedStrContent, valueAsBytesContent, valueAsBorrowedBytesContent) =
+        if (collectOtherFields) {
+            Quad(
+                quote("let __value = _serde.`#`Private::de::Content::String(_serde.`#`Private::ToString::to_string(__value));"),
+                quote("let __value = _serde.`#`Private::de::Content::Str(__value);"),
+                quote("let __value = _serde.`#`Private::de::Content::ByteBuf(__value.to_vec());"),
+                quote("let __value = _serde.`#`Private::de::Content::Bytes(__value);")
+            )
+        } else {
+            Quad(null, null, null, null)
+        }
 
-    val fallthrough_arm_tokens;
-    val fallthrough_arm = if val fallthrough = fallthrough {
+    val fallthroughArm = if (fallthrough != null) {
         fallthrough
-    } else if is_variant {
-        fallthrough_arm_tokens = quote("""
-            _serde.#private.Err(_serde.de.Error.unknown_variant(__value, VARIANTS))
-        """);
-        fallthrough_arm_tokens
+    } else if (isVariant) {
+        quote("_serde.`#`Private::Err(_serde::de::Error::unknown_variant(__value, VARIANTS))")
     } else {
-        fallthrough_arm_tokens = quote("""
-            _serde.#private.Err(_serde.de.Error.unknown_field(__value, FIELDS))
-        """);
-        fallthrough_arm_tokens
-    };
+        quote("_serde.`#`Private::Err(_serde::de::Error::unknown_field(__value, FIELDS))")
+    }
 
-    val visit_other = if collect_other_fields {
+    val visitOther = if (collectOtherFields) {
         quote("""
-            fun visit_bool<__E>(self, __value: bool) -> _serde.#private.Result<this.Value, __E>
+            fn visit_bool<__E>(self, __value: bool) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.Bool(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Bool(__value)))
             }
 
-            fun visit_i8<__E>(self, __value: i8) -> _serde.#private.Result<this.Value, __E>
+            fn visit_i8<__E>(self, __value: i8) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.I8(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I8(__value)))
             }
 
-            fun visit_i16<__E>(self, __value: i16) -> _serde.#private.Result<this.Value, __E>
+            fn visit_i16<__E>(self, __value: i16) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.I16(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I16(__value)))
             }
 
-            fun visit_i32<__E>(self, __value: i32) -> _serde.#private.Result<this.Value, __E>
+            fn visit_i32<__E>(self, __value: i32) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.I32(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I32(__value)))
             }
 
-            fun visit_i64<__E>(self, __value: i64) -> _serde.#private.Result<this.Value, __E>
+            fn visit_i64<__E>(self, __value: i64) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.I64(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I64(__value)))
             }
 
-            fun visit_u8<__E>(self, __value: u8) -> _serde.#private.Result<this.Value, __E>
+            fn visit_u8<__E>(self, __value: u8) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.U8(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U8(__value)))
             }
 
-            fun visit_u16<__E>(self, __value: u16) -> _serde.#private.Result<this.Value, __E>
+            fn visit_u16<__E>(self, __value: u16) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.U16(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U16(__value)))
             }
 
-            fun visit_u32<__E>(self, __value: u32) -> _serde.#private.Result<this.Value, __E>
+            fn visit_u32<__E>(self, __value: u32) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.U32(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U32(__value)))
             }
 
-            fun visit_u64<__E>(self, __value: u64) -> _serde.#private.Result<this.Value, __E>
+            fn visit_u64<__E>(self, __value: u64) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.U64(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U64(__value)))
             }
 
-            fun visit_f32<__E>(self, __value: f32) -> _serde.#private.Result<this.Value, __E>
+            fn visit_f32<__E>(self, __value: f32) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.F32(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::F32(__value)))
             }
 
-            fun visit_f64<__E>(self, __value: f64) -> _serde.#private.Result<this.Value, __E>
+            fn visit_f64<__E>(self, __value: f64) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.F64(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::F64(__value)))
             }
 
-            fun visit_char<__E>(self, __value: char) -> _serde.#private.Result<this.Value, __E>
+            fn visit_char<__E>(self, __value: char) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.Char(__value)))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Char(__value)))
             }
 
-            fun visit_unit<__E>(self) -> _serde.#private.Result<this.Value, __E>
+            fn visit_unit<__E>(self) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                _serde.#private.Ok(__Field.__other(_serde.#private.de.Content.Unit))
+                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Unit))
             }
         """)
     } else {
-        val u64_mapping = deserialized_fields.iter().enumerate().map(|(i, field)| {
-            val i = i as u64;
-            val ident = field.ident;
-            quote(""" #i -> _serde.#private.Ok(#this_value.#ident """))
-        });
+        val u64Mapping = deserializedFields.mapIndexed { i, field ->
+            val ident = field.ident
+            quote("`#`i => _serde.`#`Private::Ok(`#`thisValue::`#`ident)")
+        }
 
-        val u64_fallthrough_arm_tokens;
-        val u64_fallthrough_arm = if val fallthrough = fallthrough {
+        val u64FallthroughArm = if (fallthrough != null) {
             fallthrough
         } else {
-            val index_expecting = if is_variant { "variant" } else { "field" };
-            val fallthrough_msg = format!(
-                "{} index 0 <= i < {}",
-                index_expecting,
-                deserialized_fields.len(),
-            );
-            u64_fallthrough_arm_tokens = quote("""
-                _serde.#private.Err(_serde.de.Error.invalid_value(
-                    _serde.de.Unexpected.Unsigned(__value),
-                    &#fallthrough_msg,
+            val indexExpecting = if (isVariant) "variant" else "field"
+            val fallthroughMsg = "$indexExpecting index 0 <= i < ${deserializedFields.size}"
+            quote("""
+                _serde.`#`Private::Err(_serde::de::Error::invalid_value(
+                    _serde::de::Unexpected::Unsigned(__value),
+                    &`#`fallthroughMsg,
                 ))
-            """);
-            u64_fallthrough_arm_tokens
-        };
+            """)
+        }
 
         quote("""
-            fun visit_u64<__E>(self, __value: u64) -> _serde.#private.Result<this.Value, __E>
+            fn visit_u64<__E>(self, __value: u64) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                when __value {
-                    #(#u64_mapping,)*
-                    _ -> #u64_fallthrough_arm,
+                match __value {
+                    `#`(`#`u64Mapping),*
+                    _ => `#`u64FallthroughArm,
                 }
             }
         """)
-    };
+    }
 
-    val visit_borrowed = if fallthrough_borrowed.is_some() || collect_other_fields {
-        val str_mapping = str_mapping.clone();
-        val bytes_mapping = bytes_mapping.clone();
-        val fallthrough_borrowed_arm = fallthrough_borrowed.as_ref().unwrap_or(fallthrough_arm);
+    val visitBorrowed = if (fallthroughBorrowed != null || collectOtherFields) {
+        val fallthroughBorrowedArm = fallthroughBorrowed ?: fallthroughArm
         quote("""
-            fun visit_borrowed_str<__E>(self, __value: &'de str -> _serde.#private.Result<this.Value, __E>
+            fn visit_borrowed_str<__E>(self, __value: &'de str) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                when __value {
-                    #(#str_mapping)*
-                    _ -> {
-                        #value_as_borrowed_str_content
-                        #fallthrough_borrowed_arm
+                match __value {
+                    `#`(`#`strMapping)*
+                    _ => {
+                        `#`valueAsBorrowedStrContent
+                        `#`fallthroughBorrowedArm
                     }
                 }
             }
 
-            fun visit_borrowed_bytes<__E>(self, __value: &'de [u8]) -> _serde.#private.Result<this.Value, __E>
+            fn visit_borrowed_bytes<__E>(self, __value: &'de [u8]) -> _serde.`#`Private::Result<Self::Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
-                when __value {
-                    #(#bytes_mapping)*
-                    _ -> {
-                        #bytes_to_str
-                        #value_as_borrowed_bytes_content
-                        #fallthrough_borrowed_arm
+                match __value {
+                    `#`(`#`bytesMapping)*
+                    _ => {
+                        `#`bytesToStr
+                        `#`valueAsBorrowedBytesContent
+                        `#`fallthroughBorrowedArm
                     }
                 }
             }
-        """))
+        """)
     } else {
         null
-    };
-
-    quote_block! {
-        fun expecting(self, __formatter: var _serde.#private.Formatter) : _serde.#private.fmt.Result {
-            _serde.#private.Formatter.write_str(__formatter, #expecting)
-        }
-
-        #visit_other
-
-        fun visit_str<__E>(self, __value: str) -> _serde.#private.Result<this.Value, __E>
-        where
-            __E: _serde.de.Error,
-        {
-            when __value {
-                #(#str_mapping)*
-                _ -> {
-                    #value_as_str_content
-                    #fallthrough_arm
-                }
-            }
-        }
-
-        fun visit_bytes<__E>(self, __value: &[u8]) -> _serde.#private.Result<this.Value, __E>
-        where
-            __E: _serde.de.Error,
-        {
-            when __value {
-                #(#bytes_mapping)*
-                _ -> {
-                    #bytes_to_str
-                    #value_as_bytes_content
-                    #fallthrough_arm
-                }
-            }
-        }
-
-        #visit_borrowed
     }
+
+    return Fragment.Block(quote("""
+        fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
+            _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
+        }
+
+        `#`visitOther
+
+        fn visit_str<__E>(self, __value: &str) -> _serde.`#`Private::Result<Self::Value, __E>
+        where
+            __E: _serde::de::Error,
+        {
+            match __value {
+                `#`(`#`strMapping)*
+                _ => {
+                    `#`valueAsStrContent
+                    `#`fallthroughArm
+                }
+            }
+        }
+
+        fn visit_bytes<__E>(self, __value: &[u8]) -> _serde.`#`Private::Result<Self::Value, __E>
+        where
+            __E: _serde::de::Error,
+        {
+            match __value {
+                `#`(`#`bytesMapping)*
+                _ => {
+                    `#`bytesToStr
+                    `#`valueAsBytesContent
+                    `#`fallthroughArm
+                }
+            }
+        }
+
+        `#`visitBorrowed
+    """))
 }
+
+private data class Quad<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
+)
