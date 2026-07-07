@@ -4,6 +4,7 @@ package io.github.kotlinmania.serderive
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.TagType
@@ -18,8 +19,9 @@ internal fun deserializeEnum(
     // The variants have already been checked (in ast.rs) that all untagged variants appear at the end
     val untaggedIdx = variants.indexOfFirst { it.attrs.untagged() }
     return if (untaggedIdx >= 0) {
-        val (tagged, untagged) = variants.splitAt(untaggedIdx)
-        val taggedFrag = Fragment.Expr(deserializeHomogeneousEnum(params, tagged, cattrs))
+        val tagged = variants.subList(0, untaggedIdx)
+        val untagged = variants.subList(untaggedIdx, variants.size)
+        val taggedFrag = Expr(deserializeHomogeneousEnum(params, tagged, cattrs))
         // Ignore any error associated with non-untagged deserialization so that we
         // can fall through to the untagged variants. This may be infallible so we
         // need to provide the error type.

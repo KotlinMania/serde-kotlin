@@ -6,6 +6,7 @@ import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.quote.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Field
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Stmts
@@ -22,7 +23,7 @@ internal fun deserializeEnumUntagged(
 ): Fragment {
     val attempts = variants
         .filter { !it.attrs.skipDeserializing() }
-        .map { variant -> Fragment.Expr(deserializeVariant(params, variant, cattrs)) }
+        .map { variant -> Expr(deserializeVariant(params, variant, cattrs)) }
 
     val fallthroughMsg = "data did not match any variant of untagged enum ${params.typeName()}"
     val fallthroughMsgVal = cattrs.expecting() ?: fallthroughMsg

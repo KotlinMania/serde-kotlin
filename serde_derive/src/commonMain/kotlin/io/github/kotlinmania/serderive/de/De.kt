@@ -401,6 +401,14 @@ internal fun deserializeCustomIdentifier(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
 ): Fragment = Fragment.Expr(quote(""))
 
+internal fun deserializeGenerated(
+    deserializedFields: List<FieldWithAliases>,
+    hasFlatten: Boolean,
+    isVariant: Boolean,
+    ignoreVariant: TokenStream?,
+    fallthrough: TokenStream?
+): Fragment = Fragment.Expr(quote(""))
+
 internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {
         is Default.Plain -> {

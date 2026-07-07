@@ -7,6 +7,7 @@ import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.quote.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Field
+import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Match
 import io.github.kotlinmania.serderive.internals.Style
@@ -163,7 +164,7 @@ private fun deserializeExternallyTaggedNewtypeVariant(
     val thisValue = params.thisValue
 
     if (field.attrs.skipDeserializing()) {
-        val default = Fragment.Expr(exprIsMissing(field, cattrs))
+        val default = Expr(exprIsMissing(field, cattrs))
         return Fragment.Block(quote("""
             _serde::de::VariantAccess::unit_variant(__variant)?;
             _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent(`#`default))
