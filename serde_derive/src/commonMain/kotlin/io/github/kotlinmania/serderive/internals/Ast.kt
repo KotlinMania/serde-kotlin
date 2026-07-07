@@ -9,7 +9,7 @@ import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.SynType
-import io.github.kotlinmania.syn.Variant
+import io.github.kotlinmania.syn.Variant as SynVariant
 
 public class Container(
     public val ident: Ident,
@@ -93,7 +93,7 @@ public class Variant(
     public val attrs: AttrVariant,
     public val style: Style,
     public val fields: List<Field>,
-    public val original: io.github.kotlinmania.syn.Variant
+    public val original: SynVariant
 )
 
 public class Field(
@@ -112,7 +112,7 @@ public enum class Style {
 
 private fun enumFromAst(
     cx: Ctxt,
-    variants: Iterable<io.github.kotlinmania.syn.Variant>,
+    variants: Iterable<SynVariant>,
     containerDefault: Default,
     private: Ident
 ): List<Variant> {
@@ -159,18 +159,18 @@ private fun structFromAst(
     return when (fields) {
         is Fields.Named -> Pair(
             Style.Struct,
-            fieldsFromAst(cx, fields.fields.named, attrs, containerDefault, private)
+            fieldsFromAst(cx, fields.fields.named.toList(), attrs, containerDefault, private)
         )
         is Fields.Unnamed -> {
             if (fields.fields.unnamed.size == 1) {
                 Pair(
                     Style.Newtype,
-                    fieldsFromAst(cx, fields.fields.unnamed, attrs, containerDefault, private)
+                    fieldsFromAst(cx, fields.fields.unnamed.toList(), attrs, containerDefault, private)
                 )
             } else {
                 Pair(
                     Style.Tuple,
-                    fieldsFromAst(cx, fields.fields.unnamed, attrs, containerDefault, private)
+                    fieldsFromAst(cx, fields.fields.unnamed.toList(), attrs, containerDefault, private)
                 )
             }
         }
@@ -191,7 +191,7 @@ private fun fieldsFromAst(
         val member = if (ident != null) {
             Member.Named(ident.deepCopy())
         } else {
-            Member.Unnamed(Index(dstFields.size.toUInt()))
+            Member.Unnamed(io.github.kotlinmania.syn.Index(dstFields.size, io.github.kotlinmania.procmacro2.Span.callSite()))
         }
         dstFields.add(
             Field(
