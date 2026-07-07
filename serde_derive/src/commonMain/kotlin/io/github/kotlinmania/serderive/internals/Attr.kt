@@ -31,6 +31,18 @@ private class PathTokens(private val path: Path) : ToTokens {
 
 private fun Path.asToTokens(): ToTokens = PathTokens(this)
 
+// Helper: build a PathSegmentList from a list of PathSegments
+private fun pathSegmentListFrom(segments: List<PathSegment>): PathSegmentList {
+    val list = PathSegmentList()
+    for (seg in segments) {
+        list.pushValue(seg)
+    }
+    return list
+}
+
+// Extension: "deep copy" an Ident (Ident has no deepCopy method)
+private fun Ident.deepCopy(): Ident = Ident.new(this.toString(), this.span())
+
 // Check if a ParseNestedMeta's input starts with `=` (i.e., `attr = "value"`)
 private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
     val valueTokens = meta.value()
@@ -665,13 +677,13 @@ public class AttrVariant(
                                 var serPath = path.deepCopy()
                                 val serSegs = serPath.path.segments.toMutableList()
                                 serSegs.add(PathSegment(Ident.new("serialize", serPath.span()), PathArguments.None))
-                                serPath = serPath.copy(path = serPath.path.copy(segments = io.github.kotlinmania.syn.Punctuated.fromList(serSegs)))
+                                serPath = serPath.copy(path = serPath.path.copy(segments = pathSegmentListFrom(serSegs)))
                                 serializeWith.set(meta.path, serPath)
 
                                 var dePath = path.deepCopy()
                                 val deSegs = dePath.path.segments.toMutableList()
                                 deSegs.add(PathSegment(Ident.new("deserialize", dePath.span()), PathArguments.None))
-                                dePath = dePath.copy(path = dePath.path.copy(segments = io.github.kotlinmania.syn.Punctuated.fromList(deSegs)))
+                                dePath = dePath.copy(path = dePath.path.copy(segments = pathSegmentListFrom(deSegs)))
                                 deserializeWith.set(meta.path, dePath)
                             }
                         } else if (SERIALIZE_WITH == meta.path) {
@@ -869,13 +881,13 @@ public class AttrField(
                             var serPath = path.deepCopy()
                             val serSegs = serPath.path.segments.toMutableList()
                             serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
-                            serPath = serPath.copy(path = serPath.path.copy(segments = punctuated.Punctuated.fromList(serSegs)))
+                            serPath = serPath.copy(path = serPath.path.copy(segments = pathSegmentListFrom(serSegs)))
                             serializeWith.set(meta.path, serPath)
 
                             var dePath = path.deepCopy()
                             val deSegs = dePath.path.segments.toMutableList()
                             deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
-                            dePath = dePath.copy(path = dePath.path.copy(segments = punctuated.Punctuated.fromList(deSegs)))
+                            dePath = dePath.copy(path = dePath.path.copy(segments = pathSegmentListFrom(deSegs)))
                             deserializeWith.set(meta.path, dePath)
                         }
                     } else if (BOUND == meta.path) {
@@ -941,7 +953,7 @@ public class AttrField(
                 io.github.kotlinmania.syn.Expr.Path(
                     attrs = emptyList(),
                     qself = null,
-                    path = Path(leadingColon = null, segments = punctuated.Punctuated.fromList(segments))
+                    path = Path(leadingColon = null, segments = pathSegmentListFrom(segments))
                 )
             } else if (borrowableIsSliceU8) {
                 val span = Span.callSite()
@@ -954,7 +966,7 @@ public class AttrField(
                 io.github.kotlinmania.syn.Expr.Path(
                     attrs = emptyList(),
                     qself = null,
-                    path = Path(leadingColon = null, segments = punctuated.Punctuated.fromList(segments))
+                    path = Path(leadingColon = null, segments = pathSegmentListFrom(segments))
                 )
             } else {
                 null
