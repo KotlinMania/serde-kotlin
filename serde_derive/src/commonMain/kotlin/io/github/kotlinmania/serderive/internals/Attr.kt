@@ -6,6 +6,7 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.syn.*
 import io.github.kotlinmania.syn.SynResult
+import io.github.kotlinmania.syn.Data as SynData
 
 // Extension: convert any object with a toTokens(TokenStream) method to a TokenStream.
 // Needed because syn-kotlin Path doesn't implement ToTokens.
@@ -33,7 +34,7 @@ private fun Path.asToTokens(): ToTokens = PathTokens(this)
 // Check if a ParseNestedMeta's input starts with `=` (i.e., `attr = "value"`)
 private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
     val valueTokens = meta.value()
-    val result = io.github.kotlinmania.syn.parse2({ input ->
+    val result = io.github.kotlinmania.syn.parse2<Boolean>({ input: io.github.kotlinmania.syn.ParseBuffer ->
         val eqResult = input.parse(io.github.kotlinmania.syn.EqParse)
         io.github.kotlinmania.syn.SynResult.success(eqResult.isSuccess)
     }, valueTokens)
@@ -271,7 +272,7 @@ public class AttrContainer(
                             val oneName = metaPeekEq(meta)
                             val (ser, de) = getRenames(cx, RENAME_ALL_FIELDS, meta)
                             when (item.data) {
-                                is Data.Enum -> {
+                                is SynData.Enum -> {
                                     if (ser != null) {
                                         try {
                                             renameAllFieldsSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
@@ -287,8 +288,8 @@ public class AttrContainer(
                                         }
                                     }
                                 }
-                                is Data.Struct -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
-                                is Data.Union -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
+                                is SynData.Struct -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
+                                is SynData.Union -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
                             }
                         } else if (TRANSPARENT == meta.path) {
                             transparent.setTrue(meta.path)
@@ -299,7 +300,7 @@ public class AttrContainer(
                                 val path = parseLitIntoExprPath(cx, DEFAULT, meta)
                                 if (path != null) {
                                     val itemData = item.data
-                                    if (itemData is Data.Struct) {
+                                    if (itemData is SynData.Struct) {
                                         if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
                                             default.set(meta.path, Default.Path(path))
                                         } else {
@@ -311,7 +312,7 @@ public class AttrContainer(
                                 }
                             } else {
                                 val itemData = item.data
-                                if (itemData is Data.Struct) {
+                                if (itemData is SynData.Struct) {
                                     if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
                                         default.set(meta.path, Default.Plain)
                                     } else {
@@ -326,7 +327,7 @@ public class AttrContainer(
                             serBound.setOpt(meta.path, ser)
                             deBound.setOpt(meta.path, de)
                         } else if (UNTAGGED == meta.path) {
-                            if (item.data is Data.Enum) {
+                            if (item.data is SynData.Enum) {
                                 untagged.setTrue(meta.path)
                             } else {
                                 cx.synError(meta.error("#[serde(untagged)] can only be used on enums"))
@@ -335,9 +336,9 @@ public class AttrContainer(
                             val s = getLitStr(cx, TAG, meta)
                             if (s != null) {
                                 val itemData = item.data
-                                if (itemData is Data.Enum) {
+                                if (itemData is SynData.Enum) {
                                     internalTag.set(meta.path, s.value())
-                                } else if (itemData is Data.Struct && itemData.fields is Fields.Named) {
+                                } else if (itemData is SynData.Struct && itemData.fields is Fields.Named) {
                                     internalTag.set(meta.path, s.value())
                                 } else {
                                     cx.synError(meta.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
@@ -346,7 +347,7 @@ public class AttrContainer(
                         } else if (CONTENT == meta.path) {
                             val s = getLitStr(cx, CONTENT, meta)
                             if (s != null) {
-                                if (item.data is Data.Enum) {
+                                if (item.data is SynData.Enum) {
                                     content.set(meta.path, s.value())
                                 } else {
                                     cx.synError(meta.error("#[serde(content = \"...\")] can only be used on enums"))
@@ -461,7 +462,7 @@ private fun decideTag(
     if (untaggedTokens == null && internalTagTokens != null && contentTokens == null) {
         val tag = internalTagTokens.second
         val itemData = item.data
-        if (itemData is Data.Enum) {
+        if (itemData is SynData.Enum) {
             for (variant in itemData.variants) {
                 if (variant.fields is Fields.Unnamed) {
                     if (variant.fields.unnamed.size != 1) {
@@ -521,28 +522,28 @@ private fun decideIdentifier(
         cx.errorSpannedBy(variantTokens.first, msg)
         return Identifier.No
     }
-    if (item.data is Data.Enum && fieldTokens != null && variantTokens == null) {
+    if (item.data is SynData.Enum && fieldTokens != null && variantTokens == null) {
         return Identifier.Field
     }
-    if (item.data is Data.Enum && fieldTokens == null && variantTokens != null) {
+    if (item.data is SynData.Enum && fieldTokens == null && variantTokens != null) {
         return Identifier.Variant
     }
-    if (item.data is Data.Struct && fieldTokens != null && variantTokens == null) {
+    if (item.data is SynData.Struct && fieldTokens != null && variantTokens == null) {
         val msg = "#[serde(field_identifier)] can only be used on an enum"
         cx.errorSpannedBy((item.data as Data.Struct).structToken, msg)
         return Identifier.No
     }
-    if (item.data is Data.Union && fieldTokens != null && variantTokens == null) {
+    if (item.data is SynData.Union && fieldTokens != null && variantTokens == null) {
         val msg = "#[serde(field_identifier)] can only be used on an enum"
         cx.errorSpannedBy((item.data as Data.Union).unionToken, msg)
         return Identifier.No
     }
-    if (item.data is Data.Struct && fieldTokens == null && variantTokens != null) {
+    if (item.data is SynData.Struct && fieldTokens == null && variantTokens != null) {
         val msg = "#[serde(variant_identifier)] can only be used on an enum"
         cx.errorSpannedBy((item.data as Data.Struct).structToken, msg)
         return Identifier.No
     }
-    if (item.data is Data.Union && fieldTokens == null && variantTokens != null) {
+    if (item.data is SynData.Union && fieldTokens == null && variantTokens != null) {
         val msg = "#[serde(variant_identifier)] can only be used on an enum"
         cx.errorSpannedBy((item.data as Data.Union).unionToken, msg)
         return Identifier.No
