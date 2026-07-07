@@ -133,7 +133,7 @@ private fun preconditionNoDeLifetime(cx: Ctxt, cont: Container) {
 }
 
 class Parameters(cont: Container) {
-    val local: Ident = cont.ident.copy()
+    val local: Ident = Ident.new(cont.ident.toString(), cont.ident.span())
     val thisType: Path = thisType(cont)
     val thisValue: Path = thisValue(cont)
     val borrowed: BorrowedLifetimes = borrowedLifetimes(cont)
@@ -149,7 +149,7 @@ class Parameters(cont: Container) {
         val deImplGenerics = DeImplGenerics(this)
         val deTyGenerics = DeTypeGenerics(this)
         val split = generics.splitForImpl()
-        return SplitForDeLifetime(deImplGenerics, deTyGenerics, split.typeGenerics, split.whereClause)
+        return SplitForDeLifetime(deImplGenerics, deTyGenerics, split.typeGenerics, split.typeGenerics.whereClause)
     }
 }
 
@@ -162,9 +162,9 @@ data class SplitForDeLifetime(
 private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generics {
     val g0 = withoutDefaults(cont.generics)
 
-    val g1 = withWherePredicatesFromFields(cont, g0) { field -> field.deBound() }
+    val g1 = withWherePredicatesFromFields(cont, g0) { field -> field.attrs.deBound() }
 
-    val g2 = withWherePredicatesFromVariants(cont, g1) { variant -> variant.deBound() }
+    val g2 = withWherePredicatesFromVariants(cont, g1) { variant -> variant.attrs.deBound() }
 
     return when (val deBound = cont.attrs.deBound()) {
         null -> {
@@ -192,15 +192,15 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
     }
 }
 
-private fun needsDeserializeBound(field: AttrField, variant: AttrVariant?): Boolean {
-    return !field.skipDeserializing()
-        && field.deserializeWith() == null
-        && field.deBound() == null
-        && (variant == null || (!variant.skipDeserializing() && variant.deserializeWith() == null && variant.deBound() == null))
+private fun needsDeserializeBound(field: Field, variant: Variant?): Boolean {
+    return !field.attrs.skipDeserializing()
+        && field.attrs.deserializeWith() == null
+        && field.attrs.deBound() == null
+        && (variant == null || (!variant.attrs.skipDeserializing() && variant.attrs.deserializeWith() == null && variant.attrs.deBound() == null))
 }
 
-private fun requiresDefault(field: AttrField, variant: AttrVariant?): Boolean {
-    return field.default() is Default.Plain
+private fun requiresDefault(field: Field, variant: Variant?): Boolean {
+    return field.attrs.default() is Default.Plain
 }
 
 sealed class BorrowedLifetimes {
@@ -251,16 +251,16 @@ private fun deserializeBody(cont: Container, params: Parameters): Fragment {
     cont.attrs.typeTryFrom()?.let { return deserializeTryFrom(it) }
     if (cont.attrs.identifier() == Identifier.No) {
         return when (val data = cont.data) {
-            is Data.Enum -> deserializeEnum(params, data.variants, cont.attrs)
+            is Data.Enum -> deserializeEnum(params, data.variants as List<Variant>, cont.attrs)
             is Data.Struct -> when (data.style) {
                 Style.Struct -> deserializeStruct(params, data.fields, cont.attrs, StructForm.Struct)
                 Style.Tuple, Style.Newtype -> deserializeTuple(params, data.fields, cont.attrs, TupleForm.Tuple)
-                Style.Unit -> deserializeUnitImpl(params, cont.attrs)
+                Style.Unit -> io.github.kotlinmania.serderive.de.deserializeUnit(params, cont.attrs)
             }
         }
     } else {
         return when (val data = cont.data) {
-            is Data.Enum -> deserializeCustomIdentifierImpl(params, data.variants, cont.attrs)
+            is Data.Enum -> io.github.kotlinmania.serderive.de.deserializeCustomIdentifier(params, data.variants as List<Variant>, cont.attrs)
             is Data.Struct -> error("checked in serde_derive_internals")
         }
     }
@@ -280,8 +280,8 @@ private fun deserializeInPlaceBody(cont: Container, params: Parameters): Stmts? 
 
     val code = when (val data = cont.data) {
         is Data.Struct -> when (data.style) {
-            Style.Struct -> deserializeStructInPlaceImpl(params, data.fields, cont.attrs) ?: return null
-            Style.Tuple, Style.Newtype -> deserializeTupleInPlaceImpl(params, data.fields, cont.attrs)
+            Style.Struct -> io.github.kotlinmania.serderive.de.deserializeStructInPlace(params, data.fields, cont.attrs) ?: return null
+            Style.Tuple, Style.Newtype -> io.github.kotlinmania.serderive.de.deserializeTupleInPlace(params, data.fields, cont.attrs)
             Style.Unit -> return null
         }
         is Data.Enum -> return null
@@ -379,19 +379,19 @@ internal fun fieldI(i: Int): Ident {
 
 // The submodule functions (Enum.kt, Struct.kt, Tuple.kt, Unit.kt, Identifier.kt)
 // are in the same package and provide the actual deserialize implementations.
-// These forward declarations will be satisfied when the submodule files are
-// properly ported from their upstream Rust counterparts.
+// Forward declarations to submodule functions.
+// The submodule functions are in separate files (Enum.kt, Struct.kt, etc.).
 private fun deserializeEnum(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
-): Fragment = deserializeEnumImpl(params, variants, cattrs)
+): Fragment = io.github.kotlinmania.serderive.de.deserializeEnum(params, variants, cattrs)
 
 private fun deserializeStruct(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: StructForm
-): Fragment = deserializeStructImpl(params, fields, cattrs, form)
+): Fragment = io.github.kotlinmania.serderive.de.deserializeStruct(params, fields, cattrs, form)
 
 private fun deserializeTuple(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: TupleForm
-): Fragment = deserializeTupleImpl(params, fields, cattrs, form)
+): Fragment = io.github.kotlinmania.serderive.de.deserializeTuple(params, fields, cattrs, form)
 
 internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {
@@ -513,6 +513,6 @@ private fun deTypeGenericsToTokens(
 // Parse a quote string into a Path, equivalent to Rust's parse_quote!().
 private fun parseQuotePath(template: String): Path {
     val tokens = quote(template)
-    val result = io.github.kotlinmania.syn.parse2({ input -> io.github.kotlinmania.syn.PathParse.parse(input) }, tokens)
+    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse, tokens)
     return result.getOrThrow()
 }
