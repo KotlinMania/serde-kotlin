@@ -305,7 +305,7 @@ public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
         bounds = LifetimeList()
     )
 
-    val params = mutableListOf<GenericParam>(GenericParam.Lifetime(def))
+    val params = mutableListOf<GenericParam>(def)
     for (param in generics.params.toList()) {
         when (param) {
             is GenericParam.LifetimeParam -> {

@@ -191,7 +191,7 @@ private fun fieldsFromAst(
         val member = if (ident != null) {
             Member.Named(ident.deepCopy())
         } else {
-            Member.Unnamed(io.github.kotlinmania.syn.Index(dstFields.size, io.github.kotlinmania.procmacro2.Span.callSite()))
+            Member.Unnamed(io.github.kotlinmania.syn.Index(dstFields.size.toUInt(), io.github.kotlinmania.procmacro2.Span.callSite()))
         }
         dstFields.add(
             Field(

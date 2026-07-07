@@ -195,8 +195,8 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
 private fun needsDeserializeBound(field: Field, variant: Variant?): Boolean {
     return !field.attrs.skipDeserializing()
         && field.attrs.deserializeWith() == null
-        && field.attrs.deBound() == null
-        && (variant == null || (!variant.attrs.skipDeserializing() && variant.attrs.deserializeWith() == null && variant.attrs.deBound() == null))
+        && field.deBound() == null
+        && (variant == null || (!variant.attrs.skipDeserializing() && variant.attrs.deserializeWith() == null && variant.deBound() == null))
 }
 
 private fun requiresDefault(field: Field, variant: Variant?): Boolean {
@@ -255,7 +255,7 @@ private fun deserializeBody(cont: Container, params: Parameters): Fragment {
             is Data.Struct -> when (data.style) {
                 Style.Struct -> deserializeStruct(params, data.fields, cont.attrs, StructForm.Struct)
                 Style.Tuple, Style.Newtype -> deserializeTuple(params, data.fields, cont.attrs, TupleForm.Tuple)
-                Style.Unit -> deserializeUnit(params, cont.attrs)
+                Style.Unit -> dedeserializeUnit(params, cont.attrs)
             }
         }
     } else {
@@ -380,18 +380,30 @@ internal fun fieldI(i: Int): Ident {
 // The submodule functions (Enum.kt, Struct.kt, Tuple.kt, Unit.kt, Identifier.kt)
 // are in the same package and provide the actual deserialize implementations.
 // Forward declarations to submodule functions.
-// The submodule functions are in separate files (Enum.kt, Struct.kt, etc.).
+// These will be properly implemented when the de/ files are rewritten from upstream Rust.
 private fun deserializeEnum(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
-): Fragment = deserializeEnum(params, variants, cattrs)
+): Fragment = deserializeEnumImpl(params, variants, cattrs)
 
 private fun deserializeStruct(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: StructForm
-): Fragment = deserializeStruct(params, fields, cattrs, form)
+): Fragment = deserializeStructImpl(params, fields, cattrs, form)
 
 private fun deserializeTuple(
     params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: TupleForm
-): Fragment = deserializeTuple(params, fields, cattrs, form)
+): Fragment = deserializeTupleImpl(params, fields, cattrs, form)
+
+private fun deserializeCustomIdentifier(
+    params: Parameters, variants: List<Variant>, cattrs: AttrContainer
+): Fragment = deserializeCustomIdentifierImpl(params, variants, cattrs)
+
+private fun deserializeStructInPlace(
+    params: Parameters, fields: List<Field>, cattrs: AttrContainer
+): Fragment? = null
+
+private fun deserializeTupleInPlace(
+    params: Parameters, fields: List<Field>, cattrs: AttrContainer
+): Fragment = Fragment.Expr(quote(""))
 
 internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {

@@ -47,8 +47,8 @@ private fun checkDefaultOnTuple(cx: Ctxt, cont: Container) {
 private fun checkRemoteGeneric(cx: Ctxt, cont: Container) {
     val remote = cont.attrs.remote()
     if (remote != null) {
-        val localHasGeneric = cont.generics.params.isNotEmpty()
-        val remoteHasGeneric = remote.segments.lastOrNull()?.arguments != PathArguments.None
+        val localHasGeneric = !cont.generics.params.isEmpty()
+        val remoteHasGeneric = remote.segments.toList().lastOrNull()?.arguments != PathArguments.None
         if (localHasGeneric && remoteHasGeneric) {
             cx.errorSpannedBy(remote, "remove generic parameters from this path")
         }
