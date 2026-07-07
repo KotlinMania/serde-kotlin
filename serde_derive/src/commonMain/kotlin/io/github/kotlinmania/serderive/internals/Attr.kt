@@ -382,7 +382,7 @@ public class AttrContainer(
                             val path = parseLitIntoPath(cx, REMOTE, meta)
                             if (path != null) {
                                 if (isPrimitivePath(path, "this")) {
-                                    remote.set(meta.path, Path.from(Path.from(item.ident)))
+                                    remote.set(meta.path, Path.from(item.ident))
                                 } else {
                                     remote.set(meta.path, path)
                                 }
@@ -474,8 +474,7 @@ private fun decideTag(
         val tag = internalTagTokens.second
         val itemData = item.data
         if (itemData is SynData.Enum) {
-            for (variant in itemData.variants) {
-                val synVariant = variant as Variant
+            for (synVariant in itemData.variants.toList()) {
                 if (synVariant.fields is Fields.Unnamed) {
                     if (synVariant.fields.fields.unnamed.size != 1) {
                         cx.errorSpannedBy(synVariant, "#[serde(tag = \"...\")] cannot be used with tuple variants")
@@ -947,7 +946,7 @@ public class AttrField(
             }
         }
 
-        if (containerDefault.isNone() && skipDeserializing.get()) {
+        if (containerDefault is Default.None && skipDeserializing.get()) {
             default.setIfNone(Default.Plain)
         }
 
@@ -1024,12 +1023,12 @@ private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
     }
     val seg = path.segments.lastOrNull() ?: return false
     val args = when (val arguments = seg.arguments) {
-        is PathArguments.AngleBracketed -> arguments.args
+        is PathArguments.AngleBracketed -> arguments.args.toList()
         else -> return false
     }
     return seg.ident.toString() == "Cow" && args.size == 2 &&
             args[0] is GenericArgument.LifetimeArg &&
-            args[1] is GenericArgument.SynType && elem((args[1] as GenericArgument.SynType).ty)
+            args[1] is GenericArgument.TypeArg && elem((args[1] as GenericArgument.TypeArg).type)
 }
 
 private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
@@ -1039,16 +1038,20 @@ private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
     }
     val seg = path.segments.lastOrNull() ?: return false
     val args = when (val arguments = seg.arguments) {
-        is PathArguments.AngleBracketed -> arguments.args
+        is PathArguments.AngleBracketed -> arguments.args.toList()
         else -> return false
     }
     return seg.ident.toString() == "Option" && args.size == 1 &&
-            args[0] is GenericArgument.SynType && elem((args[0] as GenericArgument.SynType).ty)
+            args[0] is GenericArgument.TypeArg && elem((args[0] as GenericArgument.TypeArg).type)
 }
 
 private fun isReference(ty: SynType, elem: (SynType) -> Boolean): Boolean {
+    // syn-kotlin 0.2.0 SynType.Reference does not expose a `mutability` field;
+    // it only has `lifetime` and `elem`. A non-mutable reference is the only kind
+    // representable, so we treat all references as non-mutable (matching the Rust
+    // `ty.mutability.is_none()` check against the available API).
     return when (val ungrouped = ungroup(ty)) {
-        is SynType.Reference -> ungrouped.mutability == null && elem(ungrouped.elem)
+        is SynType.Reference -> elem(ungrouped.elem)
         else -> false
     }
 }
@@ -1062,6 +1065,14 @@ private fun isSliceU8(ty: SynType): Boolean {
         is SynType.Slice -> isPrimitiveType(ungrouped.elem, "u8")
         else -> false
     }
+}
+
+private fun isImplicitlyBorrowedReference(ty: SynType): Boolean {
+    return isReference(ty, ::isStr) || isReference(ty, ::isSliceU8)
+}
+
+private fun isImplicitlyBorrowed(ty: SynType): Boolean {
+    return isImplicitlyBorrowedReference(ty) || isOption(ty, ::isImplicitlyBorrowedReference)
 }
 
 private fun isPrimitiveType(ty: SynType, primitive: String): Boolean {
@@ -1130,28 +1141,18 @@ private fun parseLitIntoExprPath(
 ): io.github.kotlinmania.syn.Expr.Path? {
     val string = getLitStr(cx, attrName, meta) ?: return null
     // Workaround: ExprParse is internal in syn-kotlin 0.2.0 metadata.
-    // Use parseStr with a custom parser that delegates to TokenStream.fromString
-    // and then checks if the parsed expression is a path.
-    val parseResult = TokenStream.fromString(string.value())
-    if (!parseResult.isSuccess()) {
+    // Parse the string as a Path, then wrap it in an Expr.Path.
+    val pathResult = io.github.kotlinmania.syn.parseStr(io.github.kotlinmania.syn.PathParse, string.value())
+    if (pathResult.isFailure) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
         return null
     }
-    val ts = parseResult.getOrThrow()
-    // Parse as a path expression: the token stream should be a path like `foo::bar::Baz`
-    val pathParseResult = io.github.kotlinmania.syn.parse2(
-        io.github.kotlinmania.syn.PathParse,
-        ts
+    val path = pathResult.getOrThrow()
+    return io.github.kotlinmania.syn.Expr.Path(
+        attrs = emptyList(),
+        qself = null,
+        path = path
     )
-    if (pathParseResult is SynResult.Success) {
-        val path = pathParseResult.value
-        return io.github.kotlinmania.syn.Expr.Path(
-            qself = null,
-            path = path
-        )
-    }
-    cx.errorSpannedBy(string, "expected path expression")
-    return null
 }
 
 private fun parseLitIntoTy(
@@ -1160,9 +1161,14 @@ private fun parseLitIntoTy(
     meta: ParseNestedMeta
 ): SynType? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    // Parse the string as a type expression. Use parserFromFunction to create a Parse<SynType>.
-    val typeParse = io.github.kotlinmania.syn.parserFromFunction { input ->
-        io.github.kotlinmania.syn.parseTypeFull(input)
+    // syn-kotlin 0.2.0 does not expose a public Parse<SynType> object (SynTypeParse
+    // parses a SynTypeToken, not a SynType). Implement a Parse<SynType> by parsing
+    // an Expr and converting path/struct expressions to SynType.
+    val typeParse = object : io.github.kotlinmania.syn.Parse<SynType> {
+        override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<SynType> {
+            val exprResult = input.parse(io.github.kotlinmania.syn.ExprParse)
+            return exprResult.map { expr -> exprToSynType(expr) }
+        }
     }
     val typeResult = io.github.kotlinmania.syn.parseStr(typeParse, string.value())
     if (typeResult.isFailure) {
@@ -1172,6 +1178,31 @@ private fun parseLitIntoTy(
     return typeResult.getOrThrow()
 }
 
+// Convert an Expr to a SynType. Only path and tuple/struct expressions are
+// supported, which covers the use cases of #[serde(from = "...", into = "...")].
+private fun exprToSynType(expr: io.github.kotlinmania.syn.Expr): SynType {
+    return when (expr) {
+        is io.github.kotlinmania.syn.Expr.Path -> SynType.Path(expr.qself, expr.path)
+        is io.github.kotlinmania.syn.Expr.Tuple -> {
+            val elems = expr.elems.toList()
+            val list = io.github.kotlinmania.syn.SynTypeList()
+            for ((idx, e) in elems.withIndex()) {
+                if (idx > 0) {
+                    list.pushPunct(io.github.kotlinmania.syn.token.Comma.default())
+                }
+                list.pushValue(exprToSynType(e))
+            }
+            SynType.Tuple(io.github.kotlinmania.syn.token.Paren.default(), list)
+        }
+        else -> {
+            // Fallback: render the expression as a verbatim type.
+            val ts = TokenStream.new()
+            expr.toTokens(ts)
+            SynType.Verbatim(ts)
+        }
+    }
+}
+
 private fun parseLitIntoWhere(
     cx: Ctxt,
     attrName: Symbol,
@@ -1179,19 +1210,51 @@ private fun parseLitIntoWhere(
     meta: ParseNestedMeta
 ): List<WherePredicate> {
     val string = getLitStr2(cx, attrName, metaItemName, meta) ?: return emptyList()
-    // Parse as a comma-separated list of WherePredicate using parserFromFunction
-    val whereParse = io.github.kotlinmania.syn.parserFromFunction { input ->
-        val predicates = mutableListOf<WherePredicate>()
-        while (!input.isEmpty()) {
-            val predResult = io.github.kotlinmania.syn.parseWherePredicate(input)
-            if (predResult.isFailure) return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(predResult.exceptionOrNull()!!)
-            predicates.add(predResult.getOrThrow())
-            if (!input.isEmpty()) {
-                val commaResult = input.parse(io.github.kotlinmania.syn.CommaParse)
-                if (commaResult.isFailure) return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(commaResult.exceptionOrNull()!!)
+    // Parse as a comma-separated list of WherePredicate.
+    // syn-kotlin 0.2.0 does not expose a Parse<WherePredicate> object, so we
+    // implement one: a where predicate is either `Type: bounds` or `'lt: bounds`.
+    val whereParse = object : io.github.kotlinmania.syn.Parse<MutableList<WherePredicate>> {
+        override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<MutableList<WherePredicate>> {
+            val predicates = mutableListOf<WherePredicate>()
+            while (!input.isEmpty()) {
+                // Try parsing a lifetime first; if that fails, parse a type.
+                val fork = input.fork()
+                val ltResult = input.parse(io.github.kotlinmania.syn.LifetimeParse)
+                if (ltResult.isSuccess) {
+                    val colonResult = input.parse(io.github.kotlinmania.syn.ColonParse)
+                    if (colonResult.isFailure) {
+                        return io.github.kotlinmania.syn.SynResult.failure(colonResult.exceptionOrNull()!!)
+                    }
+                    val bounds = parseLifetimeBounds(input)
+                    if (bounds.isFailure) {
+                        return io.github.kotlinmania.syn.SynResult.failure(bounds.exceptionOrNull()!!)
+                    }
+                    predicates.add(WherePredicate.LifetimePredicate(ltResult.getOrThrow(), colonResult.getOrThrow(), bounds.getOrThrow()))
+                } else {
+                    // Not a lifetime predicate; parse a type predicate.
+                    val tyResult = exprToSynTypeResult(input)
+                    if (tyResult.isFailure) {
+                        return io.github.kotlinmania.syn.SynResult.failure(tyResult.exceptionOrNull()!!)
+                    }
+                    val colonResult = input.parse(io.github.kotlinmania.syn.ColonParse)
+                    if (colonResult.isFailure) {
+                        return io.github.kotlinmania.syn.SynResult.failure(colonResult.exceptionOrNull()!!)
+                    }
+                    val bounds = parseTypeParamBounds(input)
+                    if (bounds.isFailure) {
+                        return io.github.kotlinmania.syn.SynResult.failure(bounds.exceptionOrNull()!!)
+                    }
+                    predicates.add(WherePredicate.TypePredicate(tyResult.getOrThrow(), colonResult.getOrThrow(), bounds.getOrThrow()))
+                }
+                if (!input.isEmpty()) {
+                    val commaResult = input.parse(io.github.kotlinmania.syn.CommaParse)
+                    if (commaResult.isFailure) {
+                        return io.github.kotlinmania.syn.SynResult.failure(commaResult.exceptionOrNull()!!)
+                    }
+                }
             }
+            return io.github.kotlinmania.syn.SynResult.success(predicates)
         }
-        io.github.kotlinmania.syn.SynResult.success(predicates)
     }
     val result = io.github.kotlinmania.syn.parseStr(whereParse, string.value())
     if (result.isFailure) {
@@ -1199,6 +1262,48 @@ private fun parseLitIntoWhere(
         return emptyList()
     }
     return result.getOrThrow()
+}
+
+// Parse a SynType from a ParseBuffer by parsing an Expr and converting it.
+private fun exprToSynTypeResult(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<SynType> {
+    val exprResult = input.parse(io.github.kotlinmania.syn.ExprParse)
+    return exprResult.map { expr -> exprToSynType(expr) }
+}
+
+// Parse a comma-or-plus-separated list of lifetimes (for LifetimePredicate bounds).
+private fun parseLifetimeBounds(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<io.github.kotlinmania.syn.LifetimeList> {
+    val list = io.github.kotlinmania.syn.LifetimeList()
+    while (true) {
+        val ltResult = input.parse(io.github.kotlinmania.syn.LifetimeParse)
+        if (ltResult.isFailure) break
+        list.pushValue(ltResult.getOrThrow())
+        if (!input.peek(io.github.kotlinmania.syn.PlusPeek)) break
+        val plusResult = input.parse(io.github.kotlinmania.syn.PlusParse)
+        if (plusResult.isFailure) break
+    }
+    return io.github.kotlinmania.syn.SynResult.success(list)
+}
+
+// Parse a plus-separated list of TypeParamBound (for TypePredicate bounds).
+private fun parseTypeParamBounds(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<io.github.kotlinmania.syn.TypeParamBoundList> {
+    val list = io.github.kotlinmania.syn.TypeParamBoundList()
+    while (true) {
+        // Try lifetime bound first.
+        val fork = input.fork()
+        val ltResult = input.parse(io.github.kotlinmania.syn.LifetimeParse)
+        if (ltResult.isSuccess) {
+            list.pushValue(io.github.kotlinmania.syn.TypeParamBound.LifetimeBound(ltResult.getOrThrow()))
+        } else {
+            // Parse a trait path.
+            val pathResult = input.parse(io.github.kotlinmania.syn.PathParse)
+            if (pathResult.isFailure) break
+            list.pushValue(io.github.kotlinmania.syn.TypeParamBound.Trait(pathResult.getOrThrow()))
+        }
+        if (!input.peek(io.github.kotlinmania.syn.PlusPeek)) break
+        val plusResult = input.parse(io.github.kotlinmania.syn.PlusParse)
+        if (plusResult.isFailure) break
+    }
+    return io.github.kotlinmania.syn.SynResult.success(list)
 }
 
 private fun getWherePredicates(
@@ -1245,12 +1350,14 @@ private fun <T> getSerAndDe(
     // Check if input starts with `=` (single value for both ser and de)
     val valueTokens = meta.value()
     // Try parsing as `= "..."` (the Eq token followed by a literal)
-    val eqParse = io.github.kotlinmania.syn.parserFromFunction { input ->
-        val eqParseResult = input.parse(io.github.kotlinmania.syn.EqParse)
-        if (eqParseResult.isFailure) {
-            io.github.kotlinmania.syn.SynResult.success(false)
-        } else {
-            io.github.kotlinmania.syn.SynResult.success(true)
+    val eqParse = object : io.github.kotlinmania.syn.Parse<Boolean> {
+        override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<Boolean> {
+            val eqParseResult = input.parse(io.github.kotlinmania.syn.EqParse)
+            return if (eqParseResult.isFailure) {
+                io.github.kotlinmania.syn.SynResult.success(false)
+            } else {
+                io.github.kotlinmania.syn.SynResult.success(true)
+            }
         }
     }
     val eqResult = io.github.kotlinmania.syn.parse2(eqParse, valueTokens)
@@ -1305,27 +1412,29 @@ private fun parseLitIntoLifetimes(
     meta: ParseNestedMeta
 ): Set<Lifetime> {
     val string = getLitStr(cx, BORROW, meta) ?: return emptySet()
-    val lifetimesParse = io.github.kotlinmania.syn.parserFromFunction { input ->
-        val set = mutableSetOf<Lifetime>()
-        while (!input.isEmpty()) {
-            val ltResult = io.github.kotlinmania.syn.LifetimeParse.parse(input)
-            if (ltResult.isFailure) {
-                return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(ltResult.exceptionOrNull()!!)
+    val lifetimesParse = object : io.github.kotlinmania.syn.Parse<MutableSet<Lifetime>> {
+        override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<MutableSet<Lifetime>> {
+            val set = mutableSetOf<Lifetime>()
+            while (!input.isEmpty()) {
+                val ltResult = input.parse(io.github.kotlinmania.syn.LifetimeParse)
+                if (ltResult.isFailure) {
+                    return io.github.kotlinmania.syn.SynResult.failure(ltResult.exceptionOrNull()!!)
+                }
+                val lt = ltResult.getOrThrow()
+                if (!set.add(lt)) {
+                    cx.errorSpannedBy(string, "duplicate borrowed lifetime `$lt`")
+                }
+                if (input.isEmpty()) break
+                val plusResult = input.parse(io.github.kotlinmania.syn.PlusParse)
+                if (plusResult.isFailure) {
+                    return io.github.kotlinmania.syn.SynResult.failure(plusResult.exceptionOrNull()!!)
+                }
             }
-            val lt = ltResult.getOrThrow()
-            if (!set.add(lt)) {
-                cx.errorSpannedBy(string, "duplicate borrowed lifetime `$lt`")
+            if (set.isEmpty()) {
+                cx.errorSpannedBy(string, "at least one lifetime must be borrowed")
             }
-            if (input.isEmpty()) break
-            val plusResult = input.parse(io.github.kotlinmania.syn.PlusParse)
-            if (plusResult.isFailure) {
-                return@parserFromFunction io.github.kotlinmania.syn.SynResult.failure(plusResult.exceptionOrNull()!!)
-            }
+            return io.github.kotlinmania.syn.SynResult.success(set)
         }
-        if (set.isEmpty()) {
-            cx.errorSpannedBy(string, "at least one lifetime must be borrowed")
-        }
-        io.github.kotlinmania.syn.SynResult.success(set)
     }
     val result = io.github.kotlinmania.syn.parseStr(lifetimesParse, string.value())
     if (result.isFailure) {
@@ -1360,16 +1469,16 @@ private fun collectLifetimes(ty: SynType, out: MutableSet<Lifetime>) {
             collectLifetimes(ty.elem, out)
         }
         is SynType.Tuple -> {
-            for (elem in ty.elems) {
+            for (elem in ty.elems.toList()) {
                 collectLifetimes(elem, out)
             }
         }
         is SynType.Path -> {
             ty.qself?.let { collectLifetimes(it.ty, out) }
-            for (seg in ty.path.segments) {
+            for (seg in ty.path.segments.toList()) {
                 val args = seg.arguments
                 if (args is PathArguments.AngleBracketed) {
-                    for (arg in args.args) {
+                    for (arg in args.args.toList()) {
                         when (arg) {
                             is GenericArgument.LifetimeArg -> out.add(arg.lifetime)
                             is GenericArgument.TypeArg -> collectLifetimes(arg.type, out)
@@ -1402,14 +1511,6 @@ private fun collectLifetimesFromTokens(tokens: TokenStream, out: MutableSet<Life
             collectLifetimesFromTokens(tt.value.stream(), out)
         }
     }
-}
-
-private fun ungroup(ty: SynType): SynType {
-    var result = ty
-    while (result is SynType.Group) {
-        result = result.elem
-    }
-    return result
 }
 
 public class BorrowAttribute(
