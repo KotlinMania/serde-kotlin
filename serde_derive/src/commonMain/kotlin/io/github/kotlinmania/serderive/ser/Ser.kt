@@ -15,10 +15,10 @@ import io.github.kotlinmania.serderive.internals.Data
 import io.github.kotlinmania.serderive.internals.Derive
 import io.github.kotlinmania.serderive.internals.Field
 import io.github.kotlinmania.serderive.internals.Fragment
+import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.Identifier
 import io.github.kotlinmania.serderive.internals.Match
 import io.github.kotlinmania.serderive.internals.Name
-import io.github.kotlinmania.serderive.internals.Pretend
 import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.TagType
 import io.github.kotlinmania.serderive.internals.Variant
@@ -41,7 +41,7 @@ import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.parseQuote
-import io.github.kotlinmania.syn.spanned.Spanned
+import io.github.kotlinmania.quote.Spanned
 
 public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
     replaceReceiver(input)

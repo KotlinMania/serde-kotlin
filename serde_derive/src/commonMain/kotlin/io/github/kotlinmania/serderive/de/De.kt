@@ -387,16 +387,6 @@ internal fun fieldI(i: Int): Ident {
 //   Identifier.kt — deserializeGenerated, deserializeCustom
 // All are in the same package and called directly.
 
-// Temporary stubs — will be replaced by the real implementations in
-// Struct.kt when that file is rewritten from upstream Rust.
-internal fun deserializeStruct(
-    params: Parameters, fields: List<Field>, cattrs: AttrContainer, form: StructForm
-): Fragment = Fragment.Expr(quote(""))
-
-internal fun deserializeStructInPlace(
-    params: Parameters, fields: List<Field>, cattrs: AttrContainer
-): Fragment? = null
-
 internal fun deserializeCustomIdentifier(
     params: Parameters, variants: List<Variant>, cattrs: AttrContainer
 ): Fragment = deserializeCustom(params, variants, cattrs)
