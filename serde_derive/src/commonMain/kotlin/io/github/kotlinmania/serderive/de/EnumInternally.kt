@@ -1,111 +1,99 @@
+// port-lint: source de/enum_internally.rs
 package io.github.kotlinmania.serderive
 
-//! Deserialization for internally tagged enums:
-//!
-//! ```ignore
-//! `#`[serde(tag = "...")]
-//! enum Enum {}
-//! ```
-
-import io.github.kotlinmania.serderive.de.enum_
-import io.github.kotlinmania.serderive.de.enum_untagged
-import io.github.kotlinmania.serderive.de.struct_
-use crate.de.{
-    effective_style, expr_is_missing, field_i, unwrap_to_variant_closure, Parameters, StructForm,
-};
-import io.github.kotlinmania.serderive.fragment.Expr
-import io.github.kotlinmania.serderive.fragment.Fragment
-import io.github.kotlinmania.serderive.fragment.Match
-import io.github.kotlinmania.serderive.internals.ast.Style
-import io.github.kotlinmania.serderive.internals.ast.Variant
-import io.github.kotlinmania.serderive.internals.attr
-import io.github.kotlinmania.serderive.private
+import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Field
+import io.github.kotlinmania.serderive.internals.Fragment
+import io.github.kotlinmania.serderive.internals.Match
+import io.github.kotlinmania.serderive.internals.Stmts
+import io.github.kotlinmania.serderive.internals.Style
+import io.github.kotlinmania.serderive.internals.Variant
+import io.github.kotlinmania.procmacro2.Span
 
-/// Generates `Deserialize.deserialize` body for an `enum Enum {...}` with ``#`[serde(tag)]` attribute
-pub(super) fun deserialize(
+// Generates `Deserialize::deserialize` body for an `enum Enum {...}` with `#[serde(tag)]` attribute
+internal fun deserializeEnumInternally(
     params: Parameters,
-    variants: &[Variant],
-    cattrs: attr.Container,
-    tag: str,
-) : Fragment {
-    let (variants_stmt, variant_visitor) = enum_.prepare_enum_variant_enum(variants);
+    variants: List<Variant>,
+    cattrs: AttrContainer,
+    tag: String
+): Fragment {
+    val (variantsStmt, variantVisitor) = prepareEnumVariantEnum(variants)
 
     // Match arms to extract a variant from a string
-    val variant_arms = variants
-        .iter()
-        .enumerate()
-        .filter(|&(_, variant)| !variant.attrs.skip_deserializing())
-        .map(|(i, variant)| {
-            val variant_name = field_i(i);
+    val variantArms = variants.mapIndexedNotNull { i, variant ->
+        if (variant.attrs.skipDeserializing()) return@mapIndexedNotNull null
 
-            val block = Match(deserialize_internally_tagged_variant(
-                params, variant, cattrs,
-            ));
+        val variantName = fieldI(i)
 
-            quote("""
-                __Field.#variant_name -> #block
-            """)
-        });
+        val block = Match(deserializeInternallyTaggedVariant(params, variant, cattrs))
 
-    val expecting = format!("internally tagged enum {}", params.type_name());
-    val expecting = cattrs.expecting().unwrap_or(expecting);
-
-    quote_block! {
-        #variant_visitor
-
-        #variants_stmt
-
-        let (__tag, __content) = _serde.Deserializer.deserialize_any(
-            __deserializer,
-            _serde.#private.de.TaggedContentVisitor.<__Field>.new(#tag, #expecting))?;
-        val __deserializer = _serde.#private.de.ContentDeserializer.<__D.Error>.new(__content);
-
-        when __tag {
-            #(#variant_arms)*
-        }
+        quote("__Field::`#`variantName => `#`block")
     }
+
+    val expecting = "internally tagged enum ${params.typeName()}"
+    val expectingVal = cattrs.expecting() ?: expecting
+
+    return Fragment.Block(quote("""
+        `#`variantVisitor
+
+        `#`variantsStmt
+
+        let (__tag, __content) = _serde::Deserializer::deserialize_any(
+            __deserializer,
+            _serde.`#`Private::de::TaggedContentVisitor::<__Field>::new(`#`tag, `#`expectingVal))?;
+        let __deserializer = _serde.`#`Private::de::ContentDeserializer::<__D::Error>::new(__content);
+
+        match __tag {
+            `#`(`#`variantArms)*
+        }
+    """))
 }
 
 // Generates significant part of the visit_seq and visit_map bodies of visitors
 // for the variants of internally tagged enum.
-fun deserialize_internally_tagged_variant(
+private fun deserializeInternallyTaggedVariant(
     params: Parameters,
     variant: Variant,
-    cattrs: attr.Container,
-) : Fragment {
-    if val path = variant.attrs.deserialize_with() {
-        val unwrap_fn = unwrap_to_variant_closure(params, variant, false);
-        return quote_block! {
-            _serde.#private.Result.map(#path(__deserializer), #unwrap_fn)
-        };
+    cattrs: AttrContainer
+): Fragment {
+    val path = variant.attrs.deserializeWith()
+    if (path != null) {
+        val unwrapFn = unwrapToVariantClosure(params, variant, false)
+        return Fragment.Block(quote("""
+            _serde.`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
+        """))
     }
 
-    val variant_ident = variant.ident;
+    val variantIdent = variant.ident
 
-    when effective_style(variant) {
+    return when (effectiveStyle(variant)) {
         Style.Unit -> {
-            val this_value = params.this_value;
-            val type_name = params.type_name();
-            val variant_name = variant.ident.to_string();
-            val default = variant.fields.first().map(|field| {
-                val default = Expr(expr_is_missing(field, cattrs));
-                quote(""" (#default """))
-            });
-            quote_block! {
-                _serde.Deserializer.deserialize_any(__deserializer, _serde.#private.de.InternallyTaggedUnitVisitor.new(#type_name, #variant_name))?;
-                _serde.#private.Ok(#this_value.#variant_ident #default)
-            }
+            val thisValue = params.thisValue
+            val typeName = params.typeName()
+            val variantName = variant.ident.toString()
+            val default = variant.fields.firstOrNull()?.let { field ->
+                val defaultExpr = Stmts(exprIsMissing(field, cattrs))
+                quote("(`#`defaultExpr)")
+            } ?: quote("")
+            Fragment.Block(quote("""
+                _serde::Deserializer::deserialize_any(__deserializer, _serde.`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
+                _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
+            """))
         }
         Style.Newtype -> {
-            enum_untagged.deserialize_newtype_variant(variant_ident, params, variant.fields[0])
+            deserializeNewtypeVariant(variantIdent, params, variant.fields[0])
         }
-        Style.Struct -> struct_.deserialize(
-            params,
-            variant.fields,
-            cattrs,
-            StructForm.InternallyTagged(variant_ident),
-        ),
-        Style.Tuple -> unreachable!("checked in serde_derive_internals"),
+        Style.Struct -> {
+            deserializeStruct(
+                params,
+                variant.fields,
+                cattrs,
+                StructForm.InternallyTagged(variantIdent)
+            )
+        }
+        Style.Tuple -> error("checked in serde_derive_internals")
     }
 }
