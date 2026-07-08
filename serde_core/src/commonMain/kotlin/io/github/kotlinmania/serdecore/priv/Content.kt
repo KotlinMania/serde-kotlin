@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/private/content.rs
+// port-lint: source private/content.rs
 package io.github.kotlinmania.serdecore.priv
 
 // Used from generated code to buffer the contents of the Deserializer when

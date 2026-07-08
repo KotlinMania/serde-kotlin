@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/private/seed.rs
+// port-lint: source private/seed.rs
 package io.github.kotlinmania.serdecore.priv
 
 import io.github.kotlinmania.serde.SerdeResult

@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/de/ignored_any.rs
+// port-lint: source de/ignored_any.rs
 package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError

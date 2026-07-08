@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/ser/fmt.rs
+// port-lint: source ser/fmt.rs
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeResult

@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/private/size_hint.rs
+// port-lint: source private/size_hint.rs
 package io.github.kotlinmania.serdecore.priv
 
 interface IteratorWithSizeHint<out T> : Iterator<T> {

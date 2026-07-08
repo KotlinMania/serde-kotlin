@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/ser/impls.rs
+// port-lint: source ser/impls.rs
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeError

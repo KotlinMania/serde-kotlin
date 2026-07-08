@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/macros.rs
+// port-lint: source macros.rs
 package io.github.kotlinmania.serdecore
 
 import io.github.kotlinmania.serde.SerdeResult

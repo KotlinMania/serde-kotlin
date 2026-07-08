@@ -1,4 +1,4 @@
-// port-lint: source serde_core/src/private/string.rs
+// port-lint: source private/string.rs
 package io.github.kotlinmania.serdecore.priv
 
 import io.github.kotlinmania.serde.serdeCatching
