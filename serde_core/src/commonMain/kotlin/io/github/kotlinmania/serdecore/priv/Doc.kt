@@ -1,22 +1,30 @@
-// port-lint: source serde_core/src/private/doc.rs
+// port-lint: source private/doc.rs
 package io.github.kotlinmania.serdecore.priv
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serdecore.Lib
+import io.github.kotlinmania.serdecore.StdError
 import io.github.kotlinmania.serdecore.ser.*
-import io.github.kotlinmania.serde.serdeCatching
 
 // Used only by Serde documentation tests. Not public API.
 
+internal class Error private constructor(
+    private val message: String,
+) : StdError {
+    fun description(): String = message
 
+    override fun toString(): String = message
+
+    companion object {
+        fun custom(message: Any?): Error = Error(message.toString())
+    }
+}
 
 internal interface PrivateSerialize {
     fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        }
+}
 
-internal interface SerializeDocTestSerializer<Ok> : Serializer<Ok>
-    {
+internal interface SerializeDocTestSerializer<Ok> : Serializer<Ok> {
     override fun serializeBool(v: Boolean): SerdeResult<Ok> = documentationTestError("serializeBool", v)
 
     override fun serializeI8(v: Byte): SerdeResult<Ok> = documentationTestError("serializeI8", v)
