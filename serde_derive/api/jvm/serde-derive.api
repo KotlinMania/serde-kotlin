@@ -1,0 +1,512 @@
+public abstract class io/github/kotlinmania/serderive/BorrowedLifetimes {
+	public final fun deLifetime ()Lio/github/kotlinmania/syn/Lifetime;
+	public final fun deLifetimeParam ()Lio/github/kotlinmania/syn/GenericParam$LifetimeParam;
+}
+
+public final class io/github/kotlinmania/serderive/BorrowedLifetimes$Borrowed : io/github/kotlinmania/serderive/BorrowedLifetimes {
+	public fun <init> (Ljava/util/Set;)V
+	public final fun getLifetimes ()Ljava/util/Set;
+}
+
+public final class io/github/kotlinmania/serderive/BorrowedLifetimes$Static : io/github/kotlinmania/serderive/BorrowedLifetimes {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/BorrowedLifetimes$Static;
+}
+
+public final class io/github/kotlinmania/serderive/DeImplGenerics : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/Parameters;)V
+	public final fun getParams ()Lio/github/kotlinmania/serderive/Parameters;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/DeKt {
+	public static final fun expandDeriveDeserialize (Lio/github/kotlinmania/syn/DeriveInput;)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/DeTypeGenerics : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/Parameters;)V
+	public final fun getParams ()Lio/github/kotlinmania/serderive/Parameters;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/FieldWithAliases {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;Ljava/util/Set;)V
+	public final fun getAliases ()Ljava/util/Set;
+	public final fun getIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+}
+
+public final class io/github/kotlinmania/serderive/LibKt {
+	public static final fun deriveDeserialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
+	public static final fun deriveSerialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/Parameters {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/Container;)V
+	public final fun genericsWithDeLifetime ()Lio/github/kotlinmania/serderive/SplitForDeLifetime;
+	public final fun getBorrowed ()Lio/github/kotlinmania/serderive/BorrowedLifetimes;
+	public final fun getGenerics ()Lio/github/kotlinmania/syn/Generics;
+	public final fun getHasGetter ()Z
+	public final fun getLocal ()Lio/github/kotlinmania/procmacro2/Ident;
+	public final fun getThisType ()Lio/github/kotlinmania/syn/Path;
+	public final fun getThisValue ()Lio/github/kotlinmania/syn/Path;
+	public final fun isPacked ()Z
+	public final fun typeName ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/SerKt {
+	public static final fun expandDeriveSerialize (Lio/github/kotlinmania/syn/DeriveInput;)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/SplitForDeLifetime {
+	public fun <init> (Lio/github/kotlinmania/serderive/DeImplGenerics;Lio/github/kotlinmania/serderive/DeTypeGenerics;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/WhereClause;)V
+	public final fun component1 ()Lio/github/kotlinmania/serderive/DeImplGenerics;
+	public final fun component2 ()Lio/github/kotlinmania/serderive/DeTypeGenerics;
+	public final fun component3 ()Lio/github/kotlinmania/syn/Generics;
+	public final fun component4 ()Lio/github/kotlinmania/syn/WhereClause;
+	public final fun copy (Lio/github/kotlinmania/serderive/DeImplGenerics;Lio/github/kotlinmania/serderive/DeTypeGenerics;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/WhereClause;)Lio/github/kotlinmania/serderive/SplitForDeLifetime;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serderive/SplitForDeLifetime;Lio/github/kotlinmania/serderive/DeImplGenerics;Lio/github/kotlinmania/serderive/DeTypeGenerics;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/WhereClause;ILjava/lang/Object;)Lio/github/kotlinmania/serderive/SplitForDeLifetime;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeImplGenerics ()Lio/github/kotlinmania/serderive/DeImplGenerics;
+	public final fun getDeTyGenerics ()Lio/github/kotlinmania/serderive/DeTypeGenerics;
+	public final fun getTyGenerics ()Lio/github/kotlinmania/syn/Generics;
+	public final fun getWhereClause ()Lio/github/kotlinmania/syn/WhereClause;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/github/kotlinmania/serderive/StructForm {
+}
+
+public final class io/github/kotlinmania/serderive/StructForm$ExternallyTagged : io/github/kotlinmania/serderive/StructForm {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;)V
+	public final fun getVariantIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+}
+
+public final class io/github/kotlinmania/serderive/StructForm$InternallyTagged : io/github/kotlinmania/serderive/StructForm {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;)V
+	public final fun getVariantIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+}
+
+public final class io/github/kotlinmania/serderive/StructForm$Struct : io/github/kotlinmania/serderive/StructForm {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/StructForm$Struct;
+}
+
+public final class io/github/kotlinmania/serderive/StructForm$Untagged : io/github/kotlinmania/serderive/StructForm {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;)V
+	public final fun getVariantIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+}
+
+public abstract class io/github/kotlinmania/serderive/TupleForm {
+}
+
+public final class io/github/kotlinmania/serderive/TupleForm$ExternallyTagged : io/github/kotlinmania/serderive/TupleForm {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;)V
+	public final fun getVariantIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+}
+
+public final class io/github/kotlinmania/serderive/TupleForm$Tuple : io/github/kotlinmania/serderive/TupleForm {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/TupleForm$Tuple;
+}
+
+public final class io/github/kotlinmania/serderive/TupleForm$Untagged : io/github/kotlinmania/serderive/TupleForm {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;)V
+	public final fun getVariantIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+}
+
+public final class io/github/kotlinmania/serderive/internals/AttrContainer {
+	public static final field Companion Lio/github/kotlinmania/serderive/internals/AttrContainer$Companion;
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/MultiName;ZZLio/github/kotlinmania/serderive/internals/Default;Lio/github/kotlinmania/serderive/internals/RenameAllRules;Lio/github/kotlinmania/serderive/internals/RenameAllRules;Ljava/util/List;Ljava/util/List;Lio/github/kotlinmania/serderive/internals/TagType;Lio/github/kotlinmania/syn/SynType;Lio/github/kotlinmania/syn/SynType;Lio/github/kotlinmania/syn/SynType;Lio/github/kotlinmania/syn/Path;Lio/github/kotlinmania/serderive/internals/Identifier;Lio/github/kotlinmania/syn/Path;ZLjava/lang/String;Z)V
+	public final fun deBound ()Ljava/util/List;
+	public final fun default ()Lio/github/kotlinmania/serderive/internals/Default;
+	public final fun denyUnknownFields ()Z
+	public final fun expecting ()Ljava/lang/String;
+	public final fun identifier ()Lio/github/kotlinmania/serderive/internals/Identifier;
+	public final fun isPacked ()Z
+	public final fun name ()Lio/github/kotlinmania/serderive/internals/MultiName;
+	public final fun nonExhaustive ()Z
+	public final fun remote ()Lio/github/kotlinmania/syn/Path;
+	public final fun renameAllFieldsRules ()Lio/github/kotlinmania/serderive/internals/RenameAllRules;
+	public final fun renameAllRules ()Lio/github/kotlinmania/serderive/internals/RenameAllRules;
+	public final fun serBound ()Ljava/util/List;
+	public final fun serdePath ()Lio/github/kotlinmania/syn/Path;
+	public final fun tag ()Lio/github/kotlinmania/serderive/internals/TagType;
+	public final fun transparent ()Z
+	public final fun typeFrom ()Lio/github/kotlinmania/syn/SynType;
+	public final fun typeInto ()Lio/github/kotlinmania/syn/SynType;
+	public final fun typeTryFrom ()Lio/github/kotlinmania/syn/SynType;
+}
+
+public final class io/github/kotlinmania/serderive/internals/AttrContainer$Companion {
+	public final fun fromAst (Lio/github/kotlinmania/serderive/internals/Ctxt;Lio/github/kotlinmania/syn/DeriveInput;)Lio/github/kotlinmania/serderive/internals/AttrContainer;
+}
+
+public final class io/github/kotlinmania/serderive/internals/AttrField {
+	public static final field Companion Lio/github/kotlinmania/serderive/internals/AttrField$Companion;
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/MultiName;ZZLio/github/kotlinmania/syn/Expr$Path;Lio/github/kotlinmania/serderive/internals/Default;Lio/github/kotlinmania/syn/Expr$Path;Lio/github/kotlinmania/syn/Expr$Path;Ljava/util/List;Ljava/util/List;Ljava/util/Set;Lio/github/kotlinmania/syn/Expr$Path;ZZ)V
+	public final fun aliases ()Ljava/util/Set;
+	public final fun borrowedLifetimes ()Ljava/util/Set;
+	public final fun deBound ()Ljava/util/List;
+	public final fun default ()Lio/github/kotlinmania/serderive/internals/Default;
+	public final fun deserializeWith ()Lio/github/kotlinmania/syn/Expr$Path;
+	public final fun flatten ()Z
+	public final fun getter ()Lio/github/kotlinmania/syn/Expr$Path;
+	public final fun isNone ()Z
+	public final fun markTransparent ()V
+	public final fun name ()Lio/github/kotlinmania/serderive/internals/MultiName;
+	public final fun renameByRules (Lio/github/kotlinmania/serderive/internals/RenameAllRules;)V
+	public final fun serBound ()Ljava/util/List;
+	public final fun serializeWith ()Lio/github/kotlinmania/syn/Expr$Path;
+	public final fun skipDeserializing ()Z
+	public final fun skipSerializing ()Z
+	public final fun skipSerializingIf ()Lio/github/kotlinmania/syn/Expr$Path;
+	public final fun transparent ()Z
+}
+
+public final class io/github/kotlinmania/serderive/internals/AttrField$Companion {
+	public final fun fromAst (Lio/github/kotlinmania/serderive/internals/Ctxt;ILio/github/kotlinmania/syn/Field;Lio/github/kotlinmania/serderive/internals/AttrVariant;Lio/github/kotlinmania/serderive/internals/Default;Lio/github/kotlinmania/procmacro2/Ident;)Lio/github/kotlinmania/serderive/internals/AttrField;
+}
+
+public final class io/github/kotlinmania/serderive/internals/AttrVariant {
+	public static final field Companion Lio/github/kotlinmania/serderive/internals/AttrVariant$Companion;
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/MultiName;Lio/github/kotlinmania/serderive/internals/RenameAllRules;Ljava/util/List;Ljava/util/List;ZZZLio/github/kotlinmania/syn/Expr$Path;Lio/github/kotlinmania/syn/Expr$Path;Lio/github/kotlinmania/serderive/internals/BorrowAttribute;Z)V
+	public final fun aliases ()Ljava/util/Set;
+	public final fun borrow ()Lio/github/kotlinmania/serderive/internals/BorrowAttribute;
+	public final fun deBound ()Ljava/util/List;
+	public final fun deserializeWith ()Lio/github/kotlinmania/syn/Expr$Path;
+	public final fun name ()Lio/github/kotlinmania/serderive/internals/MultiName;
+	public final fun other ()Z
+	public final fun renameAllRules ()Lio/github/kotlinmania/serderive/internals/RenameAllRules;
+	public final fun renameByRules (Lio/github/kotlinmania/serderive/internals/RenameAllRules;)V
+	public final fun serBound ()Ljava/util/List;
+	public final fun serializeWith ()Lio/github/kotlinmania/syn/Expr$Path;
+	public final fun skipDeserializing ()Z
+	public final fun skipSerializing ()Z
+	public final fun untagged ()Z
+}
+
+public final class io/github/kotlinmania/serderive/internals/AttrVariant$Companion {
+	public final fun fromAst (Lio/github/kotlinmania/serderive/internals/Ctxt;Lio/github/kotlinmania/syn/Variant;)Lio/github/kotlinmania/serderive/internals/AttrVariant;
+}
+
+public final class io/github/kotlinmania/serderive/internals/BorrowAttribute {
+	public fun <init> (Lio/github/kotlinmania/syn/Path;Ljava/util/Set;)V
+	public final fun getLifetimes ()Ljava/util/Set;
+	public final fun getPath ()Lio/github/kotlinmania/syn/Path;
+}
+
+public final class io/github/kotlinmania/serderive/internals/BoundKt {
+	public static final fun withBound (Lio/github/kotlinmania/serderive/internals/Container;Lio/github/kotlinmania/syn/Generics;Lkotlin/jvm/functions/Function2;Lio/github/kotlinmania/syn/Path;)Lio/github/kotlinmania/syn/Generics;
+	public static final fun withLifetimeBound (Lio/github/kotlinmania/syn/Generics;Ljava/lang/String;)Lio/github/kotlinmania/syn/Generics;
+	public static final fun withSelfBound (Lio/github/kotlinmania/serderive/internals/Container;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/Path;)Lio/github/kotlinmania/syn/Generics;
+	public static final fun withWherePredicates (Lio/github/kotlinmania/syn/Generics;Ljava/util/List;)Lio/github/kotlinmania/syn/Generics;
+	public static final fun withWherePredicatesFromFields (Lio/github/kotlinmania/serderive/internals/Container;Lio/github/kotlinmania/syn/Generics;Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/syn/Generics;
+	public static final fun withWherePredicatesFromVariants (Lio/github/kotlinmania/serderive/internals/Container;Lio/github/kotlinmania/syn/Generics;Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/syn/Generics;
+	public static final fun withoutDefaults (Lio/github/kotlinmania/syn/Generics;)Lio/github/kotlinmania/syn/Generics;
+}
+
+public final class io/github/kotlinmania/serderive/internals/CheckKt {
+	public static final fun check (Lio/github/kotlinmania/serderive/internals/Ctxt;Lio/github/kotlinmania/serderive/internals/Container;Lio/github/kotlinmania/serderive/internals/Derive;)V
+}
+
+public final class io/github/kotlinmania/serderive/internals/Container {
+	public static final field Companion Lio/github/kotlinmania/serderive/internals/Container$Companion;
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;Lio/github/kotlinmania/serderive/internals/AttrContainer;Lio/github/kotlinmania/serderive/internals/Data;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/DeriveInput;)V
+	public final fun getAttrs ()Lio/github/kotlinmania/serderive/internals/AttrContainer;
+	public final fun getData ()Lio/github/kotlinmania/serderive/internals/Data;
+	public final fun getGenerics ()Lio/github/kotlinmania/syn/Generics;
+	public final fun getIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+	public final fun getOriginal ()Lio/github/kotlinmania/syn/DeriveInput;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Container$Companion {
+	public final fun fromAst (Lio/github/kotlinmania/serderive/internals/Ctxt;Lio/github/kotlinmania/syn/DeriveInput;Lio/github/kotlinmania/serderive/internals/Derive;Lio/github/kotlinmania/procmacro2/Ident;)Lio/github/kotlinmania/serderive/internals/Container;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Ctxt {
+	public fun <init> ()V
+	public final fun check ()V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/procmacro2/Ident;Ljava/lang/String;)V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/procmacro2/TokenStream;Ljava/lang/String;)V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/quote/ToTokens;Ljava/lang/String;)V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/syn/Field;Ljava/lang/String;)V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/syn/Path;Ljava/lang/String;)V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/syn/SynType;Ljava/lang/String;)V
+	public final fun errorSpannedBy (Lio/github/kotlinmania/syn/Variant;Ljava/lang/String;)V
+	public final fun synError (Lio/github/kotlinmania/syn/SynError;)V
+}
+
+public abstract class io/github/kotlinmania/serderive/internals/Data {
+	public final fun allFields ()Lkotlin/sequences/Sequence;
+	public final fun hasGetter ()Z
+}
+
+public final class io/github/kotlinmania/serderive/internals/Data$Enum : io/github/kotlinmania/serderive/internals/Data {
+	public fun <init> (Ljava/util/List;)V
+	public final fun getVariants ()Ljava/util/List;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Data$Struct : io/github/kotlinmania/serderive/internals/Data {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/Style;Ljava/util/List;)V
+	public final fun getFields ()Ljava/util/List;
+	public final fun getStyle ()Lio/github/kotlinmania/serderive/internals/Style;
+}
+
+public abstract class io/github/kotlinmania/serderive/internals/Default {
+}
+
+public final class io/github/kotlinmania/serderive/internals/Default$None : io/github/kotlinmania/serderive/internals/Default {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/internals/Default$None;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Default$Path : io/github/kotlinmania/serderive/internals/Default {
+	public fun <init> (Lio/github/kotlinmania/syn/Expr$Path;)V
+	public final fun getPath ()Lio/github/kotlinmania/syn/Expr$Path;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Default$Plain : io/github/kotlinmania/serderive/internals/Default {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/internals/Default$Plain;
+}
+
+public final class io/github/kotlinmania/serderive/internals/DeprecatedKt {
+	public static final fun allowDeprecated (Lio/github/kotlinmania/syn/DeriveInput;)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Derive : java/lang/Enum {
+	public static final field Deserialize Lio/github/kotlinmania/serderive/internals/Derive;
+	public static final field Serialize Lio/github/kotlinmania/serderive/internals/Derive;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kotlinmania/serderive/internals/Derive;
+	public static fun values ()[Lio/github/kotlinmania/serderive/internals/Derive;
+}
+
+public final class io/github/kotlinmania/serderive/internals/DummyKt {
+	public static final fun wrapInConst (Lio/github/kotlinmania/syn/Path;Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Expr : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/Fragment;)V
+	public final fun getFragment ()Lio/github/kotlinmania/serderive/internals/Fragment;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/internals/Field {
+	public fun <init> (Lio/github/kotlinmania/syn/Member;Lio/github/kotlinmania/serderive/internals/AttrField;Lio/github/kotlinmania/syn/SynType;Lio/github/kotlinmania/syn/Field;)V
+	public final fun getAttrs ()Lio/github/kotlinmania/serderive/internals/AttrField;
+	public final fun getMember ()Lio/github/kotlinmania/syn/Member;
+	public final fun getOriginal ()Lio/github/kotlinmania/syn/Field;
+	public final fun getTy ()Lio/github/kotlinmania/syn/SynType;
+}
+
+public abstract class io/github/kotlinmania/serderive/internals/Fragment {
+	public final fun asRef ()Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Fragment$Block : io/github/kotlinmania/serderive/internals/Fragment {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+	public final fun component1 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun copy (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/serderive/internals/Fragment$Block;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serderive/internals/Fragment$Block;Lio/github/kotlinmania/procmacro2/TokenStream;ILjava/lang/Object;)Lio/github/kotlinmania/serderive/internals/Fragment$Block;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlock ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Fragment$Expr : io/github/kotlinmania/serderive/internals/Fragment {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+	public final fun component1 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun copy (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/serderive/internals/Fragment$Expr;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serderive/internals/Fragment$Expr;Lio/github/kotlinmania/procmacro2/TokenStream;ILjava/lang/Object;)Lio/github/kotlinmania/serderive/internals/Fragment$Expr;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExpr ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Identifier : java/lang/Enum {
+	public static final field Field Lio/github/kotlinmania/serderive/internals/Identifier;
+	public static final field No Lio/github/kotlinmania/serderive/internals/Identifier;
+	public static final field Variant Lio/github/kotlinmania/serderive/internals/Identifier;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun isSome ()Z
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kotlinmania/serderive/internals/Identifier;
+	public static fun values ()[Lio/github/kotlinmania/serderive/internals/Identifier;
+}
+
+public final class io/github/kotlinmania/serderive/internals/InternalsKt {
+	public static final fun ungroup (Lio/github/kotlinmania/syn/SynType;)Lio/github/kotlinmania/syn/SynType;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Match : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/Fragment;)V
+	public final fun getFragment ()Lio/github/kotlinmania/serderive/internals/Fragment;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/internals/MultiName {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/Name;ZLio/github/kotlinmania/serderive/internals/Name;ZLjava/util/Set;)V
+	public final fun deserializeName ()Lio/github/kotlinmania/serderive/internals/Name;
+	public final fun serializeName ()Lio/github/kotlinmania/serderive/internals/Name;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Name : io/github/kotlinmania/quote/ToTokens, java/lang/Comparable {
+	public static final field Companion Lio/github/kotlinmania/serderive/internals/Name$Companion;
+	public fun <init> (Ljava/lang/String;Lio/github/kotlinmania/procmacro2/Span;)V
+	public final fun clone ()Lio/github/kotlinmania/serderive/internals/Name;
+	public fun compareTo (Lio/github/kotlinmania/serderive/internals/Name;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSpan ()Lio/github/kotlinmania/procmacro2/Span;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setValue (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/internals/Name$Companion {
+	public final fun from (Lio/github/kotlinmania/procmacro2/Ident;)Lio/github/kotlinmania/serderive/internals/Name;
+	public final fun from (Lio/github/kotlinmania/syn/LitStr;)Lio/github/kotlinmania/serderive/internals/Name;
+}
+
+public final class io/github/kotlinmania/serderive/internals/ParseError : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getUnknown ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/internals/PretendKt {
+	public static final fun pretendUsed (Lio/github/kotlinmania/serderive/internals/Container;Z)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
+public final class io/github/kotlinmania/serderive/internals/ReceiverKt {
+	public static final fun replaceReceiver (Lio/github/kotlinmania/syn/DeriveInput;)V
+}
+
+public final class io/github/kotlinmania/serderive/internals/RenameAllRules {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/RenameRule;Lio/github/kotlinmania/serderive/internals/RenameRule;)V
+	public final fun getDeserialize ()Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public final fun getSerialize ()Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public final fun or (Lio/github/kotlinmania/serderive/internals/RenameAllRules;)Lio/github/kotlinmania/serderive/internals/RenameAllRules;
+}
+
+public final class io/github/kotlinmania/serderive/internals/RenameRule : java/lang/Enum {
+	public static final field CamelCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field Companion Lio/github/kotlinmania/serderive/internals/RenameRule$Companion;
+	public static final field KebabCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field LowerCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field None Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field PascalCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field ScreamingKebabCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field ScreamingSnakeCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field SnakeCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static final field UpperCase Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public final fun applyToField (Ljava/lang/String;)Ljava/lang/String;
+	public final fun applyToVariant (Ljava/lang/String;)Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun or (Lio/github/kotlinmania/serderive/internals/RenameRule;)Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kotlinmania/serderive/internals/RenameRule;
+	public static fun values ()[Lio/github/kotlinmania/serderive/internals/RenameRule;
+}
+
+public final class io/github/kotlinmania/serderive/internals/RenameRule$Companion {
+	public final fun fromStr (Ljava/lang/String;)Lio/github/kotlinmania/serderive/internals/RenameRule;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Stmts : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/internals/Fragment;)V
+	public final fun getFragment ()Lio/github/kotlinmania/serderive/internals/Fragment;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/internals/Style : java/lang/Enum {
+	public static final field Newtype Lio/github/kotlinmania/serderive/internals/Style;
+	public static final field Struct Lio/github/kotlinmania/serderive/internals/Style;
+	public static final field Tuple Lio/github/kotlinmania/serderive/internals/Style;
+	public static final field Unit Lio/github/kotlinmania/serderive/internals/Style;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kotlinmania/serderive/internals/Style;
+	public static fun values ()[Lio/github/kotlinmania/serderive/internals/Style;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Symbol {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getWord ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/internals/SymbolKt {
+	public static final fun getALIAS ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getBORROW ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getBOUND ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getCONTENT ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getCRATE ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getDEFAULT ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getDENY_UNKNOWN_FIELDS ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getDESERIALIZE ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getDESERIALIZE_WITH ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getEXPECTING ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getFIELD_IDENTIFIER ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getFLATTEN ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getFROM ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getGETTER ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getINTO ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getNON_EXHAUSTIVE ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getOTHER ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getREMOTE ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getRENAME ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getRENAME_ALL ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getRENAME_ALL_FIELDS ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getREPR ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSERDE ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSERIALIZE ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSERIALIZE_WITH ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSKIP ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSKIP_DESERIALIZING ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSKIP_SERIALIZING ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getSKIP_SERIALIZING_IF ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getTAG ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getTRANSPARENT ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getTRY_FROM ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getUNTAGGED ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getVARIANT_IDENTIFIER ()Lio/github/kotlinmania/serderive/internals/Symbol;
+	public static final fun getWITH ()Lio/github/kotlinmania/serderive/internals/Symbol;
+}
+
+public abstract class io/github/kotlinmania/serderive/internals/TagType {
+}
+
+public final class io/github/kotlinmania/serderive/internals/TagType$Adjacent : io/github/kotlinmania/serderive/internals/TagType {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getContent ()Ljava/lang/String;
+	public final fun getTag ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/internals/TagType$External : io/github/kotlinmania/serderive/internals/TagType {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/internals/TagType$External;
+}
+
+public final class io/github/kotlinmania/serderive/internals/TagType$Internal : io/github/kotlinmania/serderive/internals/TagType {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getTag ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/internals/TagType$None : io/github/kotlinmania/serderive/internals/TagType {
+	public static final field INSTANCE Lio/github/kotlinmania/serderive/internals/TagType$None;
+}
+
+public final class io/github/kotlinmania/serderive/internals/ThisKt {
+	public static final fun thisType (Lio/github/kotlinmania/serderive/internals/Container;)Lio/github/kotlinmania/syn/Path;
+	public static final fun thisValue (Lio/github/kotlinmania/serderive/internals/Container;)Lio/github/kotlinmania/syn/Path;
+}
+
+public final class io/github/kotlinmania/serderive/internals/Variant {
+	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;Lio/github/kotlinmania/serderive/internals/AttrVariant;Lio/github/kotlinmania/serderive/internals/Style;Ljava/util/List;Lio/github/kotlinmania/syn/Variant;)V
+	public final fun getAttrs ()Lio/github/kotlinmania/serderive/internals/AttrVariant;
+	public final fun getFields ()Ljava/util/List;
+	public final fun getIdent ()Lio/github/kotlinmania/procmacro2/Ident;
+	public final fun getOriginal ()Lio/github/kotlinmania/syn/Variant;
+	public final fun getStyle ()Lio/github/kotlinmania/serderive/internals/Style;
+}
+

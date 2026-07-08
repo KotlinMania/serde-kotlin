@@ -175,8 +175,8 @@ relevant section before acting on a summary line above.
 ## 0. The completion contract — non-negotiable
 
 A session is not done until every focused repo satisfies all of these,
-or the run reports the exact hard blocker that makes a condition physically
-impossible:
+or the run reports the exact hard blocker that makes further progress in
+the current run physically impossible:
 
 1. **The repo matches its local `CLAUDE.md` contract.** If the repo has no
    `CLAUDE.md`, the workspace `CLAUDE.md` + this file are the contract; say so
@@ -229,6 +229,15 @@ the session is **blocked**, not complete, and name the exact blocker
 missing Maven credentials, unpublished dependency, platform runner
 unavailable, gate failure with root cause outside the focused repo). A
 no-change report without that level of blocker is a failed session.
+
+Local repo failures are not blockers. A compiler error, test failure,
+Swift Export failure, CodeQL extraction failure, workflow defect, or build
+logic error in the focused repo is work that belongs to the current run.
+Do not stop after reporting the failure while the diagnostic points to
+editable project code, tests, generated-output patching, Gradle wiring, or
+workflow configuration in the focused repo. Keep fixing until the gate
+passes, the user explicitly stops the run, or the remaining cause is proven
+external to this repo and impossible to change locally.
 
 > **`ast_distance` is never a blocker.** The workspace ships a runnable
 > binary at `/Volumes/stuff/Projects/kotlinmania/bin/ast_distance`

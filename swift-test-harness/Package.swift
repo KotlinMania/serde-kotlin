@@ -3,8 +3,9 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftTestHarness",
+    platforms: [.macOS(.v14)],
     dependencies: [
-        .package(name: "Serde", path: "../build/SPMPackage/macosArm64/Debug")
+        .package(name: "Serde", path: "../serde/build/SPMPackage/macosArm64/Debug")
     ],
     targets: [
         .testTarget(
@@ -27,7 +28,7 @@ let package = Package(
                 // embed task runs with the macOS Xcode-style environment
                 // variables (see .github/workflows/swift.yml).
                 .unsafeFlags([
-                    "-L", "../build/swift-test",
+                    "-L", "../serde/build/swift-test",
                     "-lSerde",
                 ]),
             ]

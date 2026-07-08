@@ -1,0 +1,606 @@
+// Klib ABI Dump
+// Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, wasmWasi, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <serde-kotlin:serde-derive>
+final enum class io.github.kotlinmania.serderive.internals/Derive : kotlin/Enum<io.github.kotlinmania.serderive.internals/Derive> { // io.github.kotlinmania.serderive.internals/Derive|null[0]
+    enum entry Deserialize // io.github.kotlinmania.serderive.internals/Derive.Deserialize|null[0]
+    enum entry Serialize // io.github.kotlinmania.serderive.internals/Derive.Serialize|null[0]
+
+    final val entries // io.github.kotlinmania.serderive.internals/Derive.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.kotlinmania.serderive.internals/Derive> // io.github.kotlinmania.serderive.internals/Derive.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.kotlinmania.serderive.internals/Derive // io.github.kotlinmania.serderive.internals/Derive.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.kotlinmania.serderive.internals/Derive> // io.github.kotlinmania.serderive.internals/Derive.values|values#static(){}[0]
+}
+
+final enum class io.github.kotlinmania.serderive.internals/Identifier : kotlin/Enum<io.github.kotlinmania.serderive.internals/Identifier> { // io.github.kotlinmania.serderive.internals/Identifier|null[0]
+    enum entry Field // io.github.kotlinmania.serderive.internals/Identifier.Field|null[0]
+    enum entry No // io.github.kotlinmania.serderive.internals/Identifier.No|null[0]
+    enum entry Variant // io.github.kotlinmania.serderive.internals/Identifier.Variant|null[0]
+
+    final val entries // io.github.kotlinmania.serderive.internals/Identifier.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.kotlinmania.serderive.internals/Identifier> // io.github.kotlinmania.serderive.internals/Identifier.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun isSome(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/Identifier.isSome|isSome(){}[0]
+    final fun valueOf(kotlin/String): io.github.kotlinmania.serderive.internals/Identifier // io.github.kotlinmania.serderive.internals/Identifier.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.kotlinmania.serderive.internals/Identifier> // io.github.kotlinmania.serderive.internals/Identifier.values|values#static(){}[0]
+}
+
+final enum class io.github.kotlinmania.serderive.internals/RenameRule : kotlin/Enum<io.github.kotlinmania.serderive.internals/RenameRule> { // io.github.kotlinmania.serderive.internals/RenameRule|null[0]
+    enum entry CamelCase // io.github.kotlinmania.serderive.internals/RenameRule.CamelCase|null[0]
+    enum entry KebabCase // io.github.kotlinmania.serderive.internals/RenameRule.KebabCase|null[0]
+    enum entry LowerCase // io.github.kotlinmania.serderive.internals/RenameRule.LowerCase|null[0]
+    enum entry None // io.github.kotlinmania.serderive.internals/RenameRule.None|null[0]
+    enum entry PascalCase // io.github.kotlinmania.serderive.internals/RenameRule.PascalCase|null[0]
+    enum entry ScreamingKebabCase // io.github.kotlinmania.serderive.internals/RenameRule.ScreamingKebabCase|null[0]
+    enum entry ScreamingSnakeCase // io.github.kotlinmania.serderive.internals/RenameRule.ScreamingSnakeCase|null[0]
+    enum entry SnakeCase // io.github.kotlinmania.serderive.internals/RenameRule.SnakeCase|null[0]
+    enum entry UpperCase // io.github.kotlinmania.serderive.internals/RenameRule.UpperCase|null[0]
+
+    final val entries // io.github.kotlinmania.serderive.internals/RenameRule.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.kotlinmania.serderive.internals/RenameRule> // io.github.kotlinmania.serderive.internals/RenameRule.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun applyToField(kotlin/String): kotlin/String // io.github.kotlinmania.serderive.internals/RenameRule.applyToField|applyToField(kotlin.String){}[0]
+    final fun applyToVariant(kotlin/String): kotlin/String // io.github.kotlinmania.serderive.internals/RenameRule.applyToVariant|applyToVariant(kotlin.String){}[0]
+    final fun or(io.github.kotlinmania.serderive.internals/RenameRule): io.github.kotlinmania.serderive.internals/RenameRule // io.github.kotlinmania.serderive.internals/RenameRule.or|or(io.github.kotlinmania.serderive.internals.RenameRule){}[0]
+    final fun valueOf(kotlin/String): io.github.kotlinmania.serderive.internals/RenameRule // io.github.kotlinmania.serderive.internals/RenameRule.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.kotlinmania.serderive.internals/RenameRule> // io.github.kotlinmania.serderive.internals/RenameRule.values|values#static(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serderive.internals/RenameRule.Companion|null[0]
+        final fun fromStr(kotlin/String): io.github.kotlinmania.serderive.internals/RenameRule // io.github.kotlinmania.serderive.internals/RenameRule.Companion.fromStr|fromStr(kotlin.String){}[0]
+    }
+}
+
+final enum class io.github.kotlinmania.serderive.internals/Style : kotlin/Enum<io.github.kotlinmania.serderive.internals/Style> { // io.github.kotlinmania.serderive.internals/Style|null[0]
+    enum entry Newtype // io.github.kotlinmania.serderive.internals/Style.Newtype|null[0]
+    enum entry Struct // io.github.kotlinmania.serderive.internals/Style.Struct|null[0]
+    enum entry Tuple // io.github.kotlinmania.serderive.internals/Style.Tuple|null[0]
+    enum entry Unit // io.github.kotlinmania.serderive.internals/Style.Unit|null[0]
+
+    final val entries // io.github.kotlinmania.serderive.internals/Style.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.kotlinmania.serderive.internals/Style> // io.github.kotlinmania.serderive.internals/Style.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.kotlinmania.serderive.internals/Style // io.github.kotlinmania.serderive.internals/Style.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.kotlinmania.serderive.internals/Style> // io.github.kotlinmania.serderive.internals/Style.values|values#static(){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/AttrContainer { // io.github.kotlinmania.serderive.internals/AttrContainer|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/MultiName, kotlin/Boolean, kotlin/Boolean, io.github.kotlinmania.serderive.internals/Default, io.github.kotlinmania.serderive.internals/RenameAllRules, io.github.kotlinmania.serderive.internals/RenameAllRules, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?, io.github.kotlinmania.serderive.internals/TagType, io.github.kotlinmania.syn/SynType?, io.github.kotlinmania.syn/SynType?, io.github.kotlinmania.syn/SynType?, io.github.kotlinmania.syn/Path?, io.github.kotlinmania.serderive.internals/Identifier, io.github.kotlinmania.syn/Path?, kotlin/Boolean, kotlin/String?, kotlin/Boolean) // io.github.kotlinmania.serderive.internals/AttrContainer.<init>|<init>(io.github.kotlinmania.serderive.internals.MultiName;kotlin.Boolean;kotlin.Boolean;io.github.kotlinmania.serderive.internals.Default;io.github.kotlinmania.serderive.internals.RenameAllRules;io.github.kotlinmania.serderive.internals.RenameAllRules;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?;io.github.kotlinmania.serderive.internals.TagType;io.github.kotlinmania.syn.SynType?;io.github.kotlinmania.syn.SynType?;io.github.kotlinmania.syn.SynType?;io.github.kotlinmania.syn.Path?;io.github.kotlinmania.serderive.internals.Identifier;io.github.kotlinmania.syn.Path?;kotlin.Boolean;kotlin.String?;kotlin.Boolean){}[0]
+
+    final fun deBound(): kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>? // io.github.kotlinmania.serderive.internals/AttrContainer.deBound|deBound(){}[0]
+    final fun default(): io.github.kotlinmania.serderive.internals/Default // io.github.kotlinmania.serderive.internals/AttrContainer.default|default(){}[0]
+    final fun denyUnknownFields(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrContainer.denyUnknownFields|denyUnknownFields(){}[0]
+    final fun expecting(): kotlin/String? // io.github.kotlinmania.serderive.internals/AttrContainer.expecting|expecting(){}[0]
+    final fun identifier(): io.github.kotlinmania.serderive.internals/Identifier // io.github.kotlinmania.serderive.internals/AttrContainer.identifier|identifier(){}[0]
+    final fun isPacked(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrContainer.isPacked|isPacked(){}[0]
+    final fun name(): io.github.kotlinmania.serderive.internals/MultiName // io.github.kotlinmania.serderive.internals/AttrContainer.name|name(){}[0]
+    final fun nonExhaustive(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrContainer.nonExhaustive|nonExhaustive(){}[0]
+    final fun remote(): io.github.kotlinmania.syn/Path? // io.github.kotlinmania.serderive.internals/AttrContainer.remote|remote(){}[0]
+    final fun renameAllFieldsRules(): io.github.kotlinmania.serderive.internals/RenameAllRules // io.github.kotlinmania.serderive.internals/AttrContainer.renameAllFieldsRules|renameAllFieldsRules(){}[0]
+    final fun renameAllRules(): io.github.kotlinmania.serderive.internals/RenameAllRules // io.github.kotlinmania.serderive.internals/AttrContainer.renameAllRules|renameAllRules(){}[0]
+    final fun serBound(): kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>? // io.github.kotlinmania.serderive.internals/AttrContainer.serBound|serBound(){}[0]
+    final fun serdePath(): io.github.kotlinmania.syn/Path? // io.github.kotlinmania.serderive.internals/AttrContainer.serdePath|serdePath(){}[0]
+    final fun tag(): io.github.kotlinmania.serderive.internals/TagType // io.github.kotlinmania.serderive.internals/AttrContainer.tag|tag(){}[0]
+    final fun transparent(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrContainer.transparent|transparent(){}[0]
+    final fun typeFrom(): io.github.kotlinmania.syn/SynType? // io.github.kotlinmania.serderive.internals/AttrContainer.typeFrom|typeFrom(){}[0]
+    final fun typeInto(): io.github.kotlinmania.syn/SynType? // io.github.kotlinmania.serderive.internals/AttrContainer.typeInto|typeInto(){}[0]
+    final fun typeTryFrom(): io.github.kotlinmania.syn/SynType? // io.github.kotlinmania.serderive.internals/AttrContainer.typeTryFrom|typeTryFrom(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serderive.internals/AttrContainer.Companion|null[0]
+        final fun fromAst(io.github.kotlinmania.serderive.internals/Ctxt, io.github.kotlinmania.syn/DeriveInput): io.github.kotlinmania.serderive.internals/AttrContainer // io.github.kotlinmania.serderive.internals/AttrContainer.Companion.fromAst|fromAst(io.github.kotlinmania.serderive.internals.Ctxt;io.github.kotlinmania.syn.DeriveInput){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serderive.internals/AttrField { // io.github.kotlinmania.serderive.internals/AttrField|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/MultiName, kotlin/Boolean, kotlin/Boolean, io.github.kotlinmania.syn/Expr.Path?, io.github.kotlinmania.serderive.internals/Default, io.github.kotlinmania.syn/Expr.Path?, io.github.kotlinmania.syn/Expr.Path?, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?, kotlin.collections/Set<io.github.kotlinmania.syn/Lifetime>, io.github.kotlinmania.syn/Expr.Path?, kotlin/Boolean, kotlin/Boolean) // io.github.kotlinmania.serderive.internals/AttrField.<init>|<init>(io.github.kotlinmania.serderive.internals.MultiName;kotlin.Boolean;kotlin.Boolean;io.github.kotlinmania.syn.Expr.Path?;io.github.kotlinmania.serderive.internals.Default;io.github.kotlinmania.syn.Expr.Path?;io.github.kotlinmania.syn.Expr.Path?;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?;kotlin.collections.Set<io.github.kotlinmania.syn.Lifetime>;io.github.kotlinmania.syn.Expr.Path?;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final fun aliases(): kotlin.collections/Set<io.github.kotlinmania.serderive.internals/Name> // io.github.kotlinmania.serderive.internals/AttrField.aliases|aliases(){}[0]
+    final fun borrowedLifetimes(): kotlin.collections/Set<io.github.kotlinmania.syn/Lifetime> // io.github.kotlinmania.serderive.internals/AttrField.borrowedLifetimes|borrowedLifetimes(){}[0]
+    final fun deBound(): kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>? // io.github.kotlinmania.serderive.internals/AttrField.deBound|deBound(){}[0]
+    final fun default(): io.github.kotlinmania.serderive.internals/Default // io.github.kotlinmania.serderive.internals/AttrField.default|default(){}[0]
+    final fun deserializeWith(): io.github.kotlinmania.syn/Expr.Path? // io.github.kotlinmania.serderive.internals/AttrField.deserializeWith|deserializeWith(){}[0]
+    final fun flatten(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrField.flatten|flatten(){}[0]
+    final fun getter(): io.github.kotlinmania.syn/Expr.Path? // io.github.kotlinmania.serderive.internals/AttrField.getter|getter(){}[0]
+    final fun isNone(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrField.isNone|isNone(){}[0]
+    final fun markTransparent() // io.github.kotlinmania.serderive.internals/AttrField.markTransparent|markTransparent(){}[0]
+    final fun name(): io.github.kotlinmania.serderive.internals/MultiName // io.github.kotlinmania.serderive.internals/AttrField.name|name(){}[0]
+    final fun renameByRules(io.github.kotlinmania.serderive.internals/RenameAllRules) // io.github.kotlinmania.serderive.internals/AttrField.renameByRules|renameByRules(io.github.kotlinmania.serderive.internals.RenameAllRules){}[0]
+    final fun serBound(): kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>? // io.github.kotlinmania.serderive.internals/AttrField.serBound|serBound(){}[0]
+    final fun serializeWith(): io.github.kotlinmania.syn/Expr.Path? // io.github.kotlinmania.serderive.internals/AttrField.serializeWith|serializeWith(){}[0]
+    final fun skipDeserializing(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrField.skipDeserializing|skipDeserializing(){}[0]
+    final fun skipSerializing(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrField.skipSerializing|skipSerializing(){}[0]
+    final fun skipSerializingIf(): io.github.kotlinmania.syn/Expr.Path? // io.github.kotlinmania.serderive.internals/AttrField.skipSerializingIf|skipSerializingIf(){}[0]
+    final fun transparent(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrField.transparent|transparent(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serderive.internals/AttrField.Companion|null[0]
+        final fun fromAst(io.github.kotlinmania.serderive.internals/Ctxt, kotlin/Int, io.github.kotlinmania.syn/Field, io.github.kotlinmania.serderive.internals/AttrVariant?, io.github.kotlinmania.serderive.internals/Default, io.github.kotlinmania.procmacro2/Ident): io.github.kotlinmania.serderive.internals/AttrField // io.github.kotlinmania.serderive.internals/AttrField.Companion.fromAst|fromAst(io.github.kotlinmania.serderive.internals.Ctxt;kotlin.Int;io.github.kotlinmania.syn.Field;io.github.kotlinmania.serderive.internals.AttrVariant?;io.github.kotlinmania.serderive.internals.Default;io.github.kotlinmania.procmacro2.Ident){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serderive.internals/AttrVariant { // io.github.kotlinmania.serderive.internals/AttrVariant|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/MultiName, io.github.kotlinmania.serderive.internals/RenameAllRules, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, io.github.kotlinmania.syn/Expr.Path?, io.github.kotlinmania.syn/Expr.Path?, io.github.kotlinmania.serderive.internals/BorrowAttribute?, kotlin/Boolean) // io.github.kotlinmania.serderive.internals/AttrVariant.<init>|<init>(io.github.kotlinmania.serderive.internals.MultiName;io.github.kotlinmania.serderive.internals.RenameAllRules;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.github.kotlinmania.syn.Expr.Path?;io.github.kotlinmania.syn.Expr.Path?;io.github.kotlinmania.serderive.internals.BorrowAttribute?;kotlin.Boolean){}[0]
+
+    final fun aliases(): kotlin.collections/Set<io.github.kotlinmania.serderive.internals/Name> // io.github.kotlinmania.serderive.internals/AttrVariant.aliases|aliases(){}[0]
+    final fun borrow(): io.github.kotlinmania.serderive.internals/BorrowAttribute? // io.github.kotlinmania.serderive.internals/AttrVariant.borrow|borrow(){}[0]
+    final fun deBound(): kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>? // io.github.kotlinmania.serderive.internals/AttrVariant.deBound|deBound(){}[0]
+    final fun deserializeWith(): io.github.kotlinmania.syn/Expr.Path? // io.github.kotlinmania.serderive.internals/AttrVariant.deserializeWith|deserializeWith(){}[0]
+    final fun name(): io.github.kotlinmania.serderive.internals/MultiName // io.github.kotlinmania.serderive.internals/AttrVariant.name|name(){}[0]
+    final fun other(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrVariant.other|other(){}[0]
+    final fun renameAllRules(): io.github.kotlinmania.serderive.internals/RenameAllRules // io.github.kotlinmania.serderive.internals/AttrVariant.renameAllRules|renameAllRules(){}[0]
+    final fun renameByRules(io.github.kotlinmania.serderive.internals/RenameAllRules) // io.github.kotlinmania.serderive.internals/AttrVariant.renameByRules|renameByRules(io.github.kotlinmania.serderive.internals.RenameAllRules){}[0]
+    final fun serBound(): kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>? // io.github.kotlinmania.serderive.internals/AttrVariant.serBound|serBound(){}[0]
+    final fun serializeWith(): io.github.kotlinmania.syn/Expr.Path? // io.github.kotlinmania.serderive.internals/AttrVariant.serializeWith|serializeWith(){}[0]
+    final fun skipDeserializing(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrVariant.skipDeserializing|skipDeserializing(){}[0]
+    final fun skipSerializing(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrVariant.skipSerializing|skipSerializing(){}[0]
+    final fun untagged(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/AttrVariant.untagged|untagged(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serderive.internals/AttrVariant.Companion|null[0]
+        final fun fromAst(io.github.kotlinmania.serderive.internals/Ctxt, io.github.kotlinmania.syn/Variant): io.github.kotlinmania.serderive.internals/AttrVariant // io.github.kotlinmania.serderive.internals/AttrVariant.Companion.fromAst|fromAst(io.github.kotlinmania.serderive.internals.Ctxt;io.github.kotlinmania.syn.Variant){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serderive.internals/BorrowAttribute { // io.github.kotlinmania.serderive.internals/BorrowAttribute|null[0]
+    constructor <init>(io.github.kotlinmania.syn/Path, kotlin.collections/Set<io.github.kotlinmania.syn/Lifetime>?) // io.github.kotlinmania.serderive.internals/BorrowAttribute.<init>|<init>(io.github.kotlinmania.syn.Path;kotlin.collections.Set<io.github.kotlinmania.syn.Lifetime>?){}[0]
+
+    final val lifetimes // io.github.kotlinmania.serderive.internals/BorrowAttribute.lifetimes|{}lifetimes[0]
+        final fun <get-lifetimes>(): kotlin.collections/Set<io.github.kotlinmania.syn/Lifetime>? // io.github.kotlinmania.serderive.internals/BorrowAttribute.lifetimes.<get-lifetimes>|<get-lifetimes>(){}[0]
+    final val path // io.github.kotlinmania.serderive.internals/BorrowAttribute.path|{}path[0]
+        final fun <get-path>(): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive.internals/BorrowAttribute.path.<get-path>|<get-path>(){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Container { // io.github.kotlinmania.serderive.internals/Container|null[0]
+    constructor <init>(io.github.kotlinmania.procmacro2/Ident, io.github.kotlinmania.serderive.internals/AttrContainer, io.github.kotlinmania.serderive.internals/Data, io.github.kotlinmania.syn/Generics, io.github.kotlinmania.syn/DeriveInput) // io.github.kotlinmania.serderive.internals/Container.<init>|<init>(io.github.kotlinmania.procmacro2.Ident;io.github.kotlinmania.serderive.internals.AttrContainer;io.github.kotlinmania.serderive.internals.Data;io.github.kotlinmania.syn.Generics;io.github.kotlinmania.syn.DeriveInput){}[0]
+
+    final val attrs // io.github.kotlinmania.serderive.internals/Container.attrs|{}attrs[0]
+        final fun <get-attrs>(): io.github.kotlinmania.serderive.internals/AttrContainer // io.github.kotlinmania.serderive.internals/Container.attrs.<get-attrs>|<get-attrs>(){}[0]
+    final val data // io.github.kotlinmania.serderive.internals/Container.data|{}data[0]
+        final fun <get-data>(): io.github.kotlinmania.serderive.internals/Data // io.github.kotlinmania.serderive.internals/Container.data.<get-data>|<get-data>(){}[0]
+    final val generics // io.github.kotlinmania.serderive.internals/Container.generics|{}generics[0]
+        final fun <get-generics>(): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/Container.generics.<get-generics>|<get-generics>(){}[0]
+    final val ident // io.github.kotlinmania.serderive.internals/Container.ident|{}ident[0]
+        final fun <get-ident>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive.internals/Container.ident.<get-ident>|<get-ident>(){}[0]
+    final val original // io.github.kotlinmania.serderive.internals/Container.original|{}original[0]
+        final fun <get-original>(): io.github.kotlinmania.syn/DeriveInput // io.github.kotlinmania.serderive.internals/Container.original.<get-original>|<get-original>(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serderive.internals/Container.Companion|null[0]
+        final fun fromAst(io.github.kotlinmania.serderive.internals/Ctxt, io.github.kotlinmania.syn/DeriveInput, io.github.kotlinmania.serderive.internals/Derive, io.github.kotlinmania.procmacro2/Ident): io.github.kotlinmania.serderive.internals/Container? // io.github.kotlinmania.serderive.internals/Container.Companion.fromAst|fromAst(io.github.kotlinmania.serderive.internals.Ctxt;io.github.kotlinmania.syn.DeriveInput;io.github.kotlinmania.serderive.internals.Derive;io.github.kotlinmania.procmacro2.Ident){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serderive.internals/Ctxt { // io.github.kotlinmania.serderive.internals/Ctxt|null[0]
+    constructor <init>() // io.github.kotlinmania.serderive.internals/Ctxt.<init>|<init>(){}[0]
+
+    final fun check() // io.github.kotlinmania.serderive.internals/Ctxt.check|check(){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.procmacro2/Ident, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.procmacro2.Ident;kotlin.String){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.procmacro2/TokenStream, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.procmacro2.TokenStream;kotlin.String){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.quote/ToTokens, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.quote.ToTokens;kotlin.String){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.syn/Field, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.syn.Field;kotlin.String){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.syn/Path, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.syn.Path;kotlin.String){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.syn/SynType, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.syn.SynType;kotlin.String){}[0]
+    final fun errorSpannedBy(io.github.kotlinmania.syn/Variant, kotlin/String) // io.github.kotlinmania.serderive.internals/Ctxt.errorSpannedBy|errorSpannedBy(io.github.kotlinmania.syn.Variant;kotlin.String){}[0]
+    final fun synError(io.github.kotlinmania.syn/SynError) // io.github.kotlinmania.serderive.internals/Ctxt.synError|synError(io.github.kotlinmania.syn.SynError){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Expr : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive.internals/Expr|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/Fragment) // io.github.kotlinmania.serderive.internals/Expr.<init>|<init>(io.github.kotlinmania.serderive.internals.Fragment){}[0]
+
+    final val fragment // io.github.kotlinmania.serderive.internals/Expr.fragment|{}fragment[0]
+        final fun <get-fragment>(): io.github.kotlinmania.serderive.internals/Fragment // io.github.kotlinmania.serderive.internals/Expr.fragment.<get-fragment>|<get-fragment>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive.internals/Expr.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Field { // io.github.kotlinmania.serderive.internals/Field|null[0]
+    constructor <init>(io.github.kotlinmania.syn/Member, io.github.kotlinmania.serderive.internals/AttrField, io.github.kotlinmania.syn/SynType, io.github.kotlinmania.syn/Field) // io.github.kotlinmania.serderive.internals/Field.<init>|<init>(io.github.kotlinmania.syn.Member;io.github.kotlinmania.serderive.internals.AttrField;io.github.kotlinmania.syn.SynType;io.github.kotlinmania.syn.Field){}[0]
+
+    final val attrs // io.github.kotlinmania.serderive.internals/Field.attrs|{}attrs[0]
+        final fun <get-attrs>(): io.github.kotlinmania.serderive.internals/AttrField // io.github.kotlinmania.serderive.internals/Field.attrs.<get-attrs>|<get-attrs>(){}[0]
+    final val member // io.github.kotlinmania.serderive.internals/Field.member|{}member[0]
+        final fun <get-member>(): io.github.kotlinmania.syn/Member // io.github.kotlinmania.serderive.internals/Field.member.<get-member>|<get-member>(){}[0]
+    final val original // io.github.kotlinmania.serderive.internals/Field.original|{}original[0]
+        final fun <get-original>(): io.github.kotlinmania.syn/Field // io.github.kotlinmania.serderive.internals/Field.original.<get-original>|<get-original>(){}[0]
+    final val ty // io.github.kotlinmania.serderive.internals/Field.ty|{}ty[0]
+        final fun <get-ty>(): io.github.kotlinmania.syn/SynType // io.github.kotlinmania.serderive.internals/Field.ty.<get-ty>|<get-ty>(){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Match : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive.internals/Match|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/Fragment) // io.github.kotlinmania.serderive.internals/Match.<init>|<init>(io.github.kotlinmania.serderive.internals.Fragment){}[0]
+
+    final val fragment // io.github.kotlinmania.serderive.internals/Match.fragment|{}fragment[0]
+        final fun <get-fragment>(): io.github.kotlinmania.serderive.internals/Fragment // io.github.kotlinmania.serderive.internals/Match.fragment.<get-fragment>|<get-fragment>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive.internals/Match.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/MultiName { // io.github.kotlinmania.serderive.internals/MultiName|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/Name, kotlin/Boolean, io.github.kotlinmania.serderive.internals/Name, kotlin/Boolean, kotlin.collections/Set<io.github.kotlinmania.serderive.internals/Name>) // io.github.kotlinmania.serderive.internals/MultiName.<init>|<init>(io.github.kotlinmania.serderive.internals.Name;kotlin.Boolean;io.github.kotlinmania.serderive.internals.Name;kotlin.Boolean;kotlin.collections.Set<io.github.kotlinmania.serderive.internals.Name>){}[0]
+
+    final fun deserializeName(): io.github.kotlinmania.serderive.internals/Name // io.github.kotlinmania.serderive.internals/MultiName.deserializeName|deserializeName(){}[0]
+    final fun serializeName(): io.github.kotlinmania.serderive.internals/Name // io.github.kotlinmania.serderive.internals/MultiName.serializeName|serializeName(){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Name : io.github.kotlinmania.quote/ToTokens, kotlin/Comparable<io.github.kotlinmania.serderive.internals/Name> { // io.github.kotlinmania.serderive.internals/Name|null[0]
+    constructor <init>(kotlin/String, io.github.kotlinmania.procmacro2/Span) // io.github.kotlinmania.serderive.internals/Name.<init>|<init>(kotlin.String;io.github.kotlinmania.procmacro2.Span){}[0]
+
+    final val span // io.github.kotlinmania.serderive.internals/Name.span|{}span[0]
+        final fun <get-span>(): io.github.kotlinmania.procmacro2/Span // io.github.kotlinmania.serderive.internals/Name.span.<get-span>|<get-span>(){}[0]
+
+    final var value // io.github.kotlinmania.serderive.internals/Name.value|{}value[0]
+        final fun <get-value>(): kotlin/String // io.github.kotlinmania.serderive.internals/Name.value.<get-value>|<get-value>(){}[0]
+        final fun <set-value>(kotlin/String) // io.github.kotlinmania.serderive.internals/Name.value.<set-value>|<set-value>(kotlin.String){}[0]
+
+    final fun clone(): io.github.kotlinmania.serderive.internals/Name // io.github.kotlinmania.serderive.internals/Name.clone|clone(){}[0]
+    final fun compareTo(io.github.kotlinmania.serderive.internals/Name): kotlin/Int // io.github.kotlinmania.serderive.internals/Name.compareTo|compareTo(io.github.kotlinmania.serderive.internals.Name){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive.internals/Name.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive.internals/Name.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serderive.internals/Name.toString|toString(){}[0]
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive.internals/Name.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+
+    final object Companion { // io.github.kotlinmania.serderive.internals/Name.Companion|null[0]
+        final fun from(io.github.kotlinmania.procmacro2/Ident): io.github.kotlinmania.serderive.internals/Name // io.github.kotlinmania.serderive.internals/Name.Companion.from|from(io.github.kotlinmania.procmacro2.Ident){}[0]
+        final fun from(io.github.kotlinmania.syn/LitStr): io.github.kotlinmania.serderive.internals/Name // io.github.kotlinmania.serderive.internals/Name.Companion.from|from(io.github.kotlinmania.syn.LitStr){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serderive.internals/ParseError : kotlin/Exception { // io.github.kotlinmania.serderive.internals/ParseError|null[0]
+    constructor <init>(kotlin/String) // io.github.kotlinmania.serderive.internals/ParseError.<init>|<init>(kotlin.String){}[0]
+
+    final val unknown // io.github.kotlinmania.serderive.internals/ParseError.unknown|{}unknown[0]
+        final fun <get-unknown>(): kotlin/String // io.github.kotlinmania.serderive.internals/ParseError.unknown.<get-unknown>|<get-unknown>(){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/RenameAllRules { // io.github.kotlinmania.serderive.internals/RenameAllRules|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/RenameRule, io.github.kotlinmania.serderive.internals/RenameRule) // io.github.kotlinmania.serderive.internals/RenameAllRules.<init>|<init>(io.github.kotlinmania.serderive.internals.RenameRule;io.github.kotlinmania.serderive.internals.RenameRule){}[0]
+
+    final val deserialize // io.github.kotlinmania.serderive.internals/RenameAllRules.deserialize|{}deserialize[0]
+        final fun <get-deserialize>(): io.github.kotlinmania.serderive.internals/RenameRule // io.github.kotlinmania.serderive.internals/RenameAllRules.deserialize.<get-deserialize>|<get-deserialize>(){}[0]
+    final val serialize // io.github.kotlinmania.serderive.internals/RenameAllRules.serialize|{}serialize[0]
+        final fun <get-serialize>(): io.github.kotlinmania.serderive.internals/RenameRule // io.github.kotlinmania.serderive.internals/RenameAllRules.serialize.<get-serialize>|<get-serialize>(){}[0]
+
+    final fun or(io.github.kotlinmania.serderive.internals/RenameAllRules): io.github.kotlinmania.serderive.internals/RenameAllRules // io.github.kotlinmania.serderive.internals/RenameAllRules.or|or(io.github.kotlinmania.serderive.internals.RenameAllRules){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Stmts : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive.internals/Stmts|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/Fragment) // io.github.kotlinmania.serderive.internals/Stmts.<init>|<init>(io.github.kotlinmania.serderive.internals.Fragment){}[0]
+
+    final val fragment // io.github.kotlinmania.serderive.internals/Stmts.fragment|{}fragment[0]
+        final fun <get-fragment>(): io.github.kotlinmania.serderive.internals/Fragment // io.github.kotlinmania.serderive.internals/Stmts.fragment.<get-fragment>|<get-fragment>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive.internals/Stmts.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Symbol { // io.github.kotlinmania.serderive.internals/Symbol|null[0]
+    constructor <init>(kotlin/String) // io.github.kotlinmania.serderive.internals/Symbol.<init>|<init>(kotlin.String){}[0]
+
+    final val word // io.github.kotlinmania.serderive.internals/Symbol.word|{}word[0]
+        final fun <get-word>(): kotlin/String // io.github.kotlinmania.serderive.internals/Symbol.word.<get-word>|<get-word>(){}[0]
+
+    final fun component1(): kotlin/String // io.github.kotlinmania.serderive.internals/Symbol.component1|component1(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive.internals/Symbol.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive.internals/Symbol.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serderive.internals/Symbol.toString|toString(){}[0]
+}
+
+final class io.github.kotlinmania.serderive.internals/Variant { // io.github.kotlinmania.serderive.internals/Variant|null[0]
+    constructor <init>(io.github.kotlinmania.procmacro2/Ident, io.github.kotlinmania.serderive.internals/AttrVariant, io.github.kotlinmania.serderive.internals/Style, kotlin.collections/List<io.github.kotlinmania.serderive.internals/Field>, io.github.kotlinmania.syn/Variant) // io.github.kotlinmania.serderive.internals/Variant.<init>|<init>(io.github.kotlinmania.procmacro2.Ident;io.github.kotlinmania.serderive.internals.AttrVariant;io.github.kotlinmania.serderive.internals.Style;kotlin.collections.List<io.github.kotlinmania.serderive.internals.Field>;io.github.kotlinmania.syn.Variant){}[0]
+
+    final val attrs // io.github.kotlinmania.serderive.internals/Variant.attrs|{}attrs[0]
+        final fun <get-attrs>(): io.github.kotlinmania.serderive.internals/AttrVariant // io.github.kotlinmania.serderive.internals/Variant.attrs.<get-attrs>|<get-attrs>(){}[0]
+    final val fields // io.github.kotlinmania.serderive.internals/Variant.fields|{}fields[0]
+        final fun <get-fields>(): kotlin.collections/List<io.github.kotlinmania.serderive.internals/Field> // io.github.kotlinmania.serderive.internals/Variant.fields.<get-fields>|<get-fields>(){}[0]
+    final val ident // io.github.kotlinmania.serderive.internals/Variant.ident|{}ident[0]
+        final fun <get-ident>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive.internals/Variant.ident.<get-ident>|<get-ident>(){}[0]
+    final val original // io.github.kotlinmania.serderive.internals/Variant.original|{}original[0]
+        final fun <get-original>(): io.github.kotlinmania.syn/Variant // io.github.kotlinmania.serderive.internals/Variant.original.<get-original>|<get-original>(){}[0]
+    final val style // io.github.kotlinmania.serderive.internals/Variant.style|{}style[0]
+        final fun <get-style>(): io.github.kotlinmania.serderive.internals/Style // io.github.kotlinmania.serderive.internals/Variant.style.<get-style>|<get-style>(){}[0]
+}
+
+final class io.github.kotlinmania.serderive/DeImplGenerics : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive/DeImplGenerics|null[0]
+    constructor <init>(io.github.kotlinmania.serderive/Parameters) // io.github.kotlinmania.serderive/DeImplGenerics.<init>|<init>(io.github.kotlinmania.serderive.Parameters){}[0]
+
+    final val params // io.github.kotlinmania.serderive/DeImplGenerics.params|{}params[0]
+        final fun <get-params>(): io.github.kotlinmania.serderive/Parameters // io.github.kotlinmania.serderive/DeImplGenerics.params.<get-params>|<get-params>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive/DeImplGenerics.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
+final class io.github.kotlinmania.serderive/DeTypeGenerics : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive/DeTypeGenerics|null[0]
+    constructor <init>(io.github.kotlinmania.serderive/Parameters) // io.github.kotlinmania.serderive/DeTypeGenerics.<init>|<init>(io.github.kotlinmania.serderive.Parameters){}[0]
+
+    final val params // io.github.kotlinmania.serderive/DeTypeGenerics.params|{}params[0]
+        final fun <get-params>(): io.github.kotlinmania.serderive/Parameters // io.github.kotlinmania.serderive/DeTypeGenerics.params.<get-params>|<get-params>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive/DeTypeGenerics.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
+final class io.github.kotlinmania.serderive/FieldWithAliases { // io.github.kotlinmania.serderive/FieldWithAliases|null[0]
+    constructor <init>(io.github.kotlinmania.procmacro2/Ident, kotlin.collections/Set<io.github.kotlinmania.serderive.internals/Name>) // io.github.kotlinmania.serderive/FieldWithAliases.<init>|<init>(io.github.kotlinmania.procmacro2.Ident;kotlin.collections.Set<io.github.kotlinmania.serderive.internals.Name>){}[0]
+
+    final val aliases // io.github.kotlinmania.serderive/FieldWithAliases.aliases|{}aliases[0]
+        final fun <get-aliases>(): kotlin.collections/Set<io.github.kotlinmania.serderive.internals/Name> // io.github.kotlinmania.serderive/FieldWithAliases.aliases.<get-aliases>|<get-aliases>(){}[0]
+    final val ident // io.github.kotlinmania.serderive/FieldWithAliases.ident|{}ident[0]
+        final fun <get-ident>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/FieldWithAliases.ident.<get-ident>|<get-ident>(){}[0]
+}
+
+final class io.github.kotlinmania.serderive/Parameters { // io.github.kotlinmania.serderive/Parameters|null[0]
+    constructor <init>(io.github.kotlinmania.serderive.internals/Container) // io.github.kotlinmania.serderive/Parameters.<init>|<init>(io.github.kotlinmania.serderive.internals.Container){}[0]
+
+    final val borrowed // io.github.kotlinmania.serderive/Parameters.borrowed|{}borrowed[0]
+        final fun <get-borrowed>(): io.github.kotlinmania.serderive/BorrowedLifetimes // io.github.kotlinmania.serderive/Parameters.borrowed.<get-borrowed>|<get-borrowed>(){}[0]
+    final val generics // io.github.kotlinmania.serderive/Parameters.generics|{}generics[0]
+        final fun <get-generics>(): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive/Parameters.generics.<get-generics>|<get-generics>(){}[0]
+    final val hasGetter // io.github.kotlinmania.serderive/Parameters.hasGetter|{}hasGetter[0]
+        final fun <get-hasGetter>(): kotlin/Boolean // io.github.kotlinmania.serderive/Parameters.hasGetter.<get-hasGetter>|<get-hasGetter>(){}[0]
+    final val isPacked // io.github.kotlinmania.serderive/Parameters.isPacked|{}isPacked[0]
+        final fun <get-isPacked>(): kotlin/Boolean // io.github.kotlinmania.serderive/Parameters.isPacked.<get-isPacked>|<get-isPacked>(){}[0]
+    final val local // io.github.kotlinmania.serderive/Parameters.local|{}local[0]
+        final fun <get-local>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/Parameters.local.<get-local>|<get-local>(){}[0]
+    final val thisType // io.github.kotlinmania.serderive/Parameters.thisType|{}thisType[0]
+        final fun <get-thisType>(): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive/Parameters.thisType.<get-thisType>|<get-thisType>(){}[0]
+    final val thisValue // io.github.kotlinmania.serderive/Parameters.thisValue|{}thisValue[0]
+        final fun <get-thisValue>(): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive/Parameters.thisValue.<get-thisValue>|<get-thisValue>(){}[0]
+
+    final fun genericsWithDeLifetime(): io.github.kotlinmania.serderive/SplitForDeLifetime // io.github.kotlinmania.serderive/Parameters.genericsWithDeLifetime|genericsWithDeLifetime(){}[0]
+    final fun typeName(): kotlin/String // io.github.kotlinmania.serderive/Parameters.typeName|typeName(){}[0]
+}
+
+final class io.github.kotlinmania.serderive/SplitForDeLifetime { // io.github.kotlinmania.serderive/SplitForDeLifetime|null[0]
+    constructor <init>(io.github.kotlinmania.serderive/DeImplGenerics, io.github.kotlinmania.serderive/DeTypeGenerics, io.github.kotlinmania.syn/Generics, io.github.kotlinmania.syn/WhereClause?) // io.github.kotlinmania.serderive/SplitForDeLifetime.<init>|<init>(io.github.kotlinmania.serderive.DeImplGenerics;io.github.kotlinmania.serderive.DeTypeGenerics;io.github.kotlinmania.syn.Generics;io.github.kotlinmania.syn.WhereClause?){}[0]
+
+    final val deImplGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deImplGenerics|{}deImplGenerics[0]
+        final fun <get-deImplGenerics>(): io.github.kotlinmania.serderive/DeImplGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deImplGenerics.<get-deImplGenerics>|<get-deImplGenerics>(){}[0]
+    final val deTyGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deTyGenerics|{}deTyGenerics[0]
+        final fun <get-deTyGenerics>(): io.github.kotlinmania.serderive/DeTypeGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deTyGenerics.<get-deTyGenerics>|<get-deTyGenerics>(){}[0]
+    final val tyGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.tyGenerics|{}tyGenerics[0]
+        final fun <get-tyGenerics>(): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive/SplitForDeLifetime.tyGenerics.<get-tyGenerics>|<get-tyGenerics>(){}[0]
+    final val whereClause // io.github.kotlinmania.serderive/SplitForDeLifetime.whereClause|{}whereClause[0]
+        final fun <get-whereClause>(): io.github.kotlinmania.syn/WhereClause? // io.github.kotlinmania.serderive/SplitForDeLifetime.whereClause.<get-whereClause>|<get-whereClause>(){}[0]
+
+    final fun component1(): io.github.kotlinmania.serderive/DeImplGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.component1|component1(){}[0]
+    final fun component2(): io.github.kotlinmania.serderive/DeTypeGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.component2|component2(){}[0]
+    final fun component3(): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive/SplitForDeLifetime.component3|component3(){}[0]
+    final fun component4(): io.github.kotlinmania.syn/WhereClause? // io.github.kotlinmania.serderive/SplitForDeLifetime.component4|component4(){}[0]
+    final fun copy(io.github.kotlinmania.serderive/DeImplGenerics = ..., io.github.kotlinmania.serderive/DeTypeGenerics = ..., io.github.kotlinmania.syn/Generics = ..., io.github.kotlinmania.syn/WhereClause? = ...): io.github.kotlinmania.serderive/SplitForDeLifetime // io.github.kotlinmania.serderive/SplitForDeLifetime.copy|copy(io.github.kotlinmania.serderive.DeImplGenerics;io.github.kotlinmania.serderive.DeTypeGenerics;io.github.kotlinmania.syn.Generics;io.github.kotlinmania.syn.WhereClause?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive/SplitForDeLifetime.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive/SplitForDeLifetime.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serderive/SplitForDeLifetime.toString|toString(){}[0]
+}
+
+sealed class io.github.kotlinmania.serderive.internals/Data { // io.github.kotlinmania.serderive.internals/Data|null[0]
+    final fun allFields(): kotlin.sequences/Sequence<io.github.kotlinmania.serderive.internals/Field> // io.github.kotlinmania.serderive.internals/Data.allFields|allFields(){}[0]
+    final fun hasGetter(): kotlin/Boolean // io.github.kotlinmania.serderive.internals/Data.hasGetter|hasGetter(){}[0]
+
+    final class Enum : io.github.kotlinmania.serderive.internals/Data { // io.github.kotlinmania.serderive.internals/Data.Enum|null[0]
+        constructor <init>(kotlin.collections/List<io.github.kotlinmania.serderive.internals/Variant>) // io.github.kotlinmania.serderive.internals/Data.Enum.<init>|<init>(kotlin.collections.List<io.github.kotlinmania.serderive.internals.Variant>){}[0]
+
+        final val variants // io.github.kotlinmania.serderive.internals/Data.Enum.variants|{}variants[0]
+            final fun <get-variants>(): kotlin.collections/List<io.github.kotlinmania.serderive.internals/Variant> // io.github.kotlinmania.serderive.internals/Data.Enum.variants.<get-variants>|<get-variants>(){}[0]
+    }
+
+    final class Struct : io.github.kotlinmania.serderive.internals/Data { // io.github.kotlinmania.serderive.internals/Data.Struct|null[0]
+        constructor <init>(io.github.kotlinmania.serderive.internals/Style, kotlin.collections/List<io.github.kotlinmania.serderive.internals/Field>) // io.github.kotlinmania.serderive.internals/Data.Struct.<init>|<init>(io.github.kotlinmania.serderive.internals.Style;kotlin.collections.List<io.github.kotlinmania.serderive.internals.Field>){}[0]
+
+        final val fields // io.github.kotlinmania.serderive.internals/Data.Struct.fields|{}fields[0]
+            final fun <get-fields>(): kotlin.collections/List<io.github.kotlinmania.serderive.internals/Field> // io.github.kotlinmania.serderive.internals/Data.Struct.fields.<get-fields>|<get-fields>(){}[0]
+        final val style // io.github.kotlinmania.serderive.internals/Data.Struct.style|{}style[0]
+            final fun <get-style>(): io.github.kotlinmania.serderive.internals/Style // io.github.kotlinmania.serderive.internals/Data.Struct.style.<get-style>|<get-style>(){}[0]
+    }
+}
+
+sealed class io.github.kotlinmania.serderive.internals/Default { // io.github.kotlinmania.serderive.internals/Default|null[0]
+    final class Path : io.github.kotlinmania.serderive.internals/Default { // io.github.kotlinmania.serderive.internals/Default.Path|null[0]
+        constructor <init>(io.github.kotlinmania.syn/Expr.Path) // io.github.kotlinmania.serderive.internals/Default.Path.<init>|<init>(io.github.kotlinmania.syn.Expr.Path){}[0]
+
+        final val path // io.github.kotlinmania.serderive.internals/Default.Path.path|{}path[0]
+            final fun <get-path>(): io.github.kotlinmania.syn/Expr.Path // io.github.kotlinmania.serderive.internals/Default.Path.path.<get-path>|<get-path>(){}[0]
+    }
+
+    final object None : io.github.kotlinmania.serderive.internals/Default // io.github.kotlinmania.serderive.internals/Default.None|null[0]
+
+    final object Plain : io.github.kotlinmania.serderive.internals/Default // io.github.kotlinmania.serderive.internals/Default.Plain|null[0]
+}
+
+sealed class io.github.kotlinmania.serderive.internals/Fragment { // io.github.kotlinmania.serderive.internals/Fragment|null[0]
+    final fun asRef(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/Fragment.asRef|asRef(){}[0]
+
+    final class Block : io.github.kotlinmania.serderive.internals/Fragment { // io.github.kotlinmania.serderive.internals/Fragment.Block|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive.internals/Fragment.Block.<init>|<init>(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+
+        final val block // io.github.kotlinmania.serderive.internals/Fragment.Block.block|{}block[0]
+            final fun <get-block>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/Fragment.Block.block.<get-block>|<get-block>(){}[0]
+
+        final fun component1(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/Fragment.Block.component1|component1(){}[0]
+        final fun copy(io.github.kotlinmania.procmacro2/TokenStream = ...): io.github.kotlinmania.serderive.internals/Fragment.Block // io.github.kotlinmania.serderive.internals/Fragment.Block.copy|copy(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive.internals/Fragment.Block.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive.internals/Fragment.Block.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serderive.internals/Fragment.Block.toString|toString(){}[0]
+    }
+
+    final class Expr : io.github.kotlinmania.serderive.internals/Fragment { // io.github.kotlinmania.serderive.internals/Fragment.Expr|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive.internals/Fragment.Expr.<init>|<init>(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+
+        final val expr // io.github.kotlinmania.serderive.internals/Fragment.Expr.expr|{}expr[0]
+            final fun <get-expr>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/Fragment.Expr.expr.<get-expr>|<get-expr>(){}[0]
+
+        final fun component1(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/Fragment.Expr.component1|component1(){}[0]
+        final fun copy(io.github.kotlinmania.procmacro2/TokenStream = ...): io.github.kotlinmania.serderive.internals/Fragment.Expr // io.github.kotlinmania.serderive.internals/Fragment.Expr.copy|copy(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive.internals/Fragment.Expr.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive.internals/Fragment.Expr.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serderive.internals/Fragment.Expr.toString|toString(){}[0]
+    }
+}
+
+sealed class io.github.kotlinmania.serderive.internals/TagType { // io.github.kotlinmania.serderive.internals/TagType|null[0]
+    final class Adjacent : io.github.kotlinmania.serderive.internals/TagType { // io.github.kotlinmania.serderive.internals/TagType.Adjacent|null[0]
+        constructor <init>(kotlin/String, kotlin/String) // io.github.kotlinmania.serderive.internals/TagType.Adjacent.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+        final val content // io.github.kotlinmania.serderive.internals/TagType.Adjacent.content|{}content[0]
+            final fun <get-content>(): kotlin/String // io.github.kotlinmania.serderive.internals/TagType.Adjacent.content.<get-content>|<get-content>(){}[0]
+        final val tag // io.github.kotlinmania.serderive.internals/TagType.Adjacent.tag|{}tag[0]
+            final fun <get-tag>(): kotlin/String // io.github.kotlinmania.serderive.internals/TagType.Adjacent.tag.<get-tag>|<get-tag>(){}[0]
+    }
+
+    final class Internal : io.github.kotlinmania.serderive.internals/TagType { // io.github.kotlinmania.serderive.internals/TagType.Internal|null[0]
+        constructor <init>(kotlin/String) // io.github.kotlinmania.serderive.internals/TagType.Internal.<init>|<init>(kotlin.String){}[0]
+
+        final val tag // io.github.kotlinmania.serderive.internals/TagType.Internal.tag|{}tag[0]
+            final fun <get-tag>(): kotlin/String // io.github.kotlinmania.serderive.internals/TagType.Internal.tag.<get-tag>|<get-tag>(){}[0]
+    }
+
+    final object External : io.github.kotlinmania.serderive.internals/TagType // io.github.kotlinmania.serderive.internals/TagType.External|null[0]
+
+    final object None : io.github.kotlinmania.serderive.internals/TagType // io.github.kotlinmania.serderive.internals/TagType.None|null[0]
+}
+
+sealed class io.github.kotlinmania.serderive/BorrowedLifetimes { // io.github.kotlinmania.serderive/BorrowedLifetimes|null[0]
+    final fun deLifetime(): io.github.kotlinmania.syn/Lifetime // io.github.kotlinmania.serderive/BorrowedLifetimes.deLifetime|deLifetime(){}[0]
+    final fun deLifetimeParam(): io.github.kotlinmania.syn/GenericParam.LifetimeParam? // io.github.kotlinmania.serderive/BorrowedLifetimes.deLifetimeParam|deLifetimeParam(){}[0]
+
+    final class Borrowed : io.github.kotlinmania.serderive/BorrowedLifetimes { // io.github.kotlinmania.serderive/BorrowedLifetimes.Borrowed|null[0]
+        constructor <init>(kotlin.collections/Set<io.github.kotlinmania.syn/Lifetime>) // io.github.kotlinmania.serderive/BorrowedLifetimes.Borrowed.<init>|<init>(kotlin.collections.Set<io.github.kotlinmania.syn.Lifetime>){}[0]
+
+        final val lifetimes // io.github.kotlinmania.serderive/BorrowedLifetimes.Borrowed.lifetimes|{}lifetimes[0]
+            final fun <get-lifetimes>(): kotlin.collections/Set<io.github.kotlinmania.syn/Lifetime> // io.github.kotlinmania.serderive/BorrowedLifetimes.Borrowed.lifetimes.<get-lifetimes>|<get-lifetimes>(){}[0]
+    }
+
+    final object Static : io.github.kotlinmania.serderive/BorrowedLifetimes // io.github.kotlinmania.serderive/BorrowedLifetimes.Static|null[0]
+}
+
+sealed class io.github.kotlinmania.serderive/StructForm { // io.github.kotlinmania.serderive/StructForm|null[0]
+    final class ExternallyTagged : io.github.kotlinmania.serderive/StructForm { // io.github.kotlinmania.serderive/StructForm.ExternallyTagged|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/Ident) // io.github.kotlinmania.serderive/StructForm.ExternallyTagged.<init>|<init>(io.github.kotlinmania.procmacro2.Ident){}[0]
+
+        final val variantIdent // io.github.kotlinmania.serderive/StructForm.ExternallyTagged.variantIdent|{}variantIdent[0]
+            final fun <get-variantIdent>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/StructForm.ExternallyTagged.variantIdent.<get-variantIdent>|<get-variantIdent>(){}[0]
+    }
+
+    final class InternallyTagged : io.github.kotlinmania.serderive/StructForm { // io.github.kotlinmania.serderive/StructForm.InternallyTagged|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/Ident) // io.github.kotlinmania.serderive/StructForm.InternallyTagged.<init>|<init>(io.github.kotlinmania.procmacro2.Ident){}[0]
+
+        final val variantIdent // io.github.kotlinmania.serderive/StructForm.InternallyTagged.variantIdent|{}variantIdent[0]
+            final fun <get-variantIdent>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/StructForm.InternallyTagged.variantIdent.<get-variantIdent>|<get-variantIdent>(){}[0]
+    }
+
+    final class Untagged : io.github.kotlinmania.serderive/StructForm { // io.github.kotlinmania.serderive/StructForm.Untagged|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/Ident) // io.github.kotlinmania.serderive/StructForm.Untagged.<init>|<init>(io.github.kotlinmania.procmacro2.Ident){}[0]
+
+        final val variantIdent // io.github.kotlinmania.serderive/StructForm.Untagged.variantIdent|{}variantIdent[0]
+            final fun <get-variantIdent>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/StructForm.Untagged.variantIdent.<get-variantIdent>|<get-variantIdent>(){}[0]
+    }
+
+    final object Struct : io.github.kotlinmania.serderive/StructForm // io.github.kotlinmania.serderive/StructForm.Struct|null[0]
+}
+
+sealed class io.github.kotlinmania.serderive/TupleForm { // io.github.kotlinmania.serderive/TupleForm|null[0]
+    final class ExternallyTagged : io.github.kotlinmania.serderive/TupleForm { // io.github.kotlinmania.serderive/TupleForm.ExternallyTagged|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/Ident) // io.github.kotlinmania.serderive/TupleForm.ExternallyTagged.<init>|<init>(io.github.kotlinmania.procmacro2.Ident){}[0]
+
+        final val variantIdent // io.github.kotlinmania.serderive/TupleForm.ExternallyTagged.variantIdent|{}variantIdent[0]
+            final fun <get-variantIdent>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/TupleForm.ExternallyTagged.variantIdent.<get-variantIdent>|<get-variantIdent>(){}[0]
+    }
+
+    final class Untagged : io.github.kotlinmania.serderive/TupleForm { // io.github.kotlinmania.serderive/TupleForm.Untagged|null[0]
+        constructor <init>(io.github.kotlinmania.procmacro2/Ident) // io.github.kotlinmania.serderive/TupleForm.Untagged.<init>|<init>(io.github.kotlinmania.procmacro2.Ident){}[0]
+
+        final val variantIdent // io.github.kotlinmania.serderive/TupleForm.Untagged.variantIdent|{}variantIdent[0]
+            final fun <get-variantIdent>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/TupleForm.Untagged.variantIdent.<get-variantIdent>|<get-variantIdent>(){}[0]
+    }
+
+    final object Tuple : io.github.kotlinmania.serderive/TupleForm // io.github.kotlinmania.serderive/TupleForm.Tuple|null[0]
+}
+
+final val io.github.kotlinmania.serderive.internals/ALIAS // io.github.kotlinmania.serderive.internals/ALIAS|{}ALIAS[0]
+    final fun <get-ALIAS>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/ALIAS.<get-ALIAS>|<get-ALIAS>(){}[0]
+final val io.github.kotlinmania.serderive.internals/BORROW // io.github.kotlinmania.serderive.internals/BORROW|{}BORROW[0]
+    final fun <get-BORROW>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/BORROW.<get-BORROW>|<get-BORROW>(){}[0]
+final val io.github.kotlinmania.serderive.internals/BOUND // io.github.kotlinmania.serderive.internals/BOUND|{}BOUND[0]
+    final fun <get-BOUND>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/BOUND.<get-BOUND>|<get-BOUND>(){}[0]
+final val io.github.kotlinmania.serderive.internals/CONTENT // io.github.kotlinmania.serderive.internals/CONTENT|{}CONTENT[0]
+    final fun <get-CONTENT>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/CONTENT.<get-CONTENT>|<get-CONTENT>(){}[0]
+final val io.github.kotlinmania.serderive.internals/CRATE // io.github.kotlinmania.serderive.internals/CRATE|{}CRATE[0]
+    final fun <get-CRATE>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/CRATE.<get-CRATE>|<get-CRATE>(){}[0]
+final val io.github.kotlinmania.serderive.internals/DEFAULT // io.github.kotlinmania.serderive.internals/DEFAULT|{}DEFAULT[0]
+    final fun <get-DEFAULT>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+final val io.github.kotlinmania.serderive.internals/DENY_UNKNOWN_FIELDS // io.github.kotlinmania.serderive.internals/DENY_UNKNOWN_FIELDS|{}DENY_UNKNOWN_FIELDS[0]
+    final fun <get-DENY_UNKNOWN_FIELDS>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/DENY_UNKNOWN_FIELDS.<get-DENY_UNKNOWN_FIELDS>|<get-DENY_UNKNOWN_FIELDS>(){}[0]
+final val io.github.kotlinmania.serderive.internals/DESERIALIZE // io.github.kotlinmania.serderive.internals/DESERIALIZE|{}DESERIALIZE[0]
+    final fun <get-DESERIALIZE>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/DESERIALIZE.<get-DESERIALIZE>|<get-DESERIALIZE>(){}[0]
+final val io.github.kotlinmania.serderive.internals/DESERIALIZE_WITH // io.github.kotlinmania.serderive.internals/DESERIALIZE_WITH|{}DESERIALIZE_WITH[0]
+    final fun <get-DESERIALIZE_WITH>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/DESERIALIZE_WITH.<get-DESERIALIZE_WITH>|<get-DESERIALIZE_WITH>(){}[0]
+final val io.github.kotlinmania.serderive.internals/EXPECTING // io.github.kotlinmania.serderive.internals/EXPECTING|{}EXPECTING[0]
+    final fun <get-EXPECTING>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/EXPECTING.<get-EXPECTING>|<get-EXPECTING>(){}[0]
+final val io.github.kotlinmania.serderive.internals/FIELD_IDENTIFIER // io.github.kotlinmania.serderive.internals/FIELD_IDENTIFIER|{}FIELD_IDENTIFIER[0]
+    final fun <get-FIELD_IDENTIFIER>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/FIELD_IDENTIFIER.<get-FIELD_IDENTIFIER>|<get-FIELD_IDENTIFIER>(){}[0]
+final val io.github.kotlinmania.serderive.internals/FLATTEN // io.github.kotlinmania.serderive.internals/FLATTEN|{}FLATTEN[0]
+    final fun <get-FLATTEN>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/FLATTEN.<get-FLATTEN>|<get-FLATTEN>(){}[0]
+final val io.github.kotlinmania.serderive.internals/FROM // io.github.kotlinmania.serderive.internals/FROM|{}FROM[0]
+    final fun <get-FROM>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/FROM.<get-FROM>|<get-FROM>(){}[0]
+final val io.github.kotlinmania.serderive.internals/GETTER // io.github.kotlinmania.serderive.internals/GETTER|{}GETTER[0]
+    final fun <get-GETTER>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/GETTER.<get-GETTER>|<get-GETTER>(){}[0]
+final val io.github.kotlinmania.serderive.internals/INTO // io.github.kotlinmania.serderive.internals/INTO|{}INTO[0]
+    final fun <get-INTO>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/INTO.<get-INTO>|<get-INTO>(){}[0]
+final val io.github.kotlinmania.serderive.internals/NON_EXHAUSTIVE // io.github.kotlinmania.serderive.internals/NON_EXHAUSTIVE|{}NON_EXHAUSTIVE[0]
+    final fun <get-NON_EXHAUSTIVE>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/NON_EXHAUSTIVE.<get-NON_EXHAUSTIVE>|<get-NON_EXHAUSTIVE>(){}[0]
+final val io.github.kotlinmania.serderive.internals/OTHER // io.github.kotlinmania.serderive.internals/OTHER|{}OTHER[0]
+    final fun <get-OTHER>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/OTHER.<get-OTHER>|<get-OTHER>(){}[0]
+final val io.github.kotlinmania.serderive.internals/REMOTE // io.github.kotlinmania.serderive.internals/REMOTE|{}REMOTE[0]
+    final fun <get-REMOTE>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/REMOTE.<get-REMOTE>|<get-REMOTE>(){}[0]
+final val io.github.kotlinmania.serderive.internals/RENAME // io.github.kotlinmania.serderive.internals/RENAME|{}RENAME[0]
+    final fun <get-RENAME>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/RENAME.<get-RENAME>|<get-RENAME>(){}[0]
+final val io.github.kotlinmania.serderive.internals/RENAME_ALL // io.github.kotlinmania.serderive.internals/RENAME_ALL|{}RENAME_ALL[0]
+    final fun <get-RENAME_ALL>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/RENAME_ALL.<get-RENAME_ALL>|<get-RENAME_ALL>(){}[0]
+final val io.github.kotlinmania.serderive.internals/RENAME_ALL_FIELDS // io.github.kotlinmania.serderive.internals/RENAME_ALL_FIELDS|{}RENAME_ALL_FIELDS[0]
+    final fun <get-RENAME_ALL_FIELDS>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/RENAME_ALL_FIELDS.<get-RENAME_ALL_FIELDS>|<get-RENAME_ALL_FIELDS>(){}[0]
+final val io.github.kotlinmania.serderive.internals/REPR // io.github.kotlinmania.serderive.internals/REPR|{}REPR[0]
+    final fun <get-REPR>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/REPR.<get-REPR>|<get-REPR>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SERDE // io.github.kotlinmania.serderive.internals/SERDE|{}SERDE[0]
+    final fun <get-SERDE>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SERDE.<get-SERDE>|<get-SERDE>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SERIALIZE // io.github.kotlinmania.serderive.internals/SERIALIZE|{}SERIALIZE[0]
+    final fun <get-SERIALIZE>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SERIALIZE.<get-SERIALIZE>|<get-SERIALIZE>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SERIALIZE_WITH // io.github.kotlinmania.serderive.internals/SERIALIZE_WITH|{}SERIALIZE_WITH[0]
+    final fun <get-SERIALIZE_WITH>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SERIALIZE_WITH.<get-SERIALIZE_WITH>|<get-SERIALIZE_WITH>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SKIP // io.github.kotlinmania.serderive.internals/SKIP|{}SKIP[0]
+    final fun <get-SKIP>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SKIP.<get-SKIP>|<get-SKIP>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SKIP_DESERIALIZING // io.github.kotlinmania.serderive.internals/SKIP_DESERIALIZING|{}SKIP_DESERIALIZING[0]
+    final fun <get-SKIP_DESERIALIZING>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SKIP_DESERIALIZING.<get-SKIP_DESERIALIZING>|<get-SKIP_DESERIALIZING>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SKIP_SERIALIZING // io.github.kotlinmania.serderive.internals/SKIP_SERIALIZING|{}SKIP_SERIALIZING[0]
+    final fun <get-SKIP_SERIALIZING>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SKIP_SERIALIZING.<get-SKIP_SERIALIZING>|<get-SKIP_SERIALIZING>(){}[0]
+final val io.github.kotlinmania.serderive.internals/SKIP_SERIALIZING_IF // io.github.kotlinmania.serderive.internals/SKIP_SERIALIZING_IF|{}SKIP_SERIALIZING_IF[0]
+    final fun <get-SKIP_SERIALIZING_IF>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/SKIP_SERIALIZING_IF.<get-SKIP_SERIALIZING_IF>|<get-SKIP_SERIALIZING_IF>(){}[0]
+final val io.github.kotlinmania.serderive.internals/TAG // io.github.kotlinmania.serderive.internals/TAG|{}TAG[0]
+    final fun <get-TAG>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/TAG.<get-TAG>|<get-TAG>(){}[0]
+final val io.github.kotlinmania.serderive.internals/TRANSPARENT // io.github.kotlinmania.serderive.internals/TRANSPARENT|{}TRANSPARENT[0]
+    final fun <get-TRANSPARENT>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/TRANSPARENT.<get-TRANSPARENT>|<get-TRANSPARENT>(){}[0]
+final val io.github.kotlinmania.serderive.internals/TRY_FROM // io.github.kotlinmania.serderive.internals/TRY_FROM|{}TRY_FROM[0]
+    final fun <get-TRY_FROM>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/TRY_FROM.<get-TRY_FROM>|<get-TRY_FROM>(){}[0]
+final val io.github.kotlinmania.serderive.internals/UNTAGGED // io.github.kotlinmania.serderive.internals/UNTAGGED|{}UNTAGGED[0]
+    final fun <get-UNTAGGED>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/UNTAGGED.<get-UNTAGGED>|<get-UNTAGGED>(){}[0]
+final val io.github.kotlinmania.serderive.internals/VARIANT_IDENTIFIER // io.github.kotlinmania.serderive.internals/VARIANT_IDENTIFIER|{}VARIANT_IDENTIFIER[0]
+    final fun <get-VARIANT_IDENTIFIER>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/VARIANT_IDENTIFIER.<get-VARIANT_IDENTIFIER>|<get-VARIANT_IDENTIFIER>(){}[0]
+final val io.github.kotlinmania.serderive.internals/WITH // io.github.kotlinmania.serderive.internals/WITH|{}WITH[0]
+    final fun <get-WITH>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/WITH.<get-WITH>|<get-WITH>(){}[0]
+
+final fun io.github.kotlinmania.serderive.internals/allowDeprecated(io.github.kotlinmania.syn/DeriveInput): io.github.kotlinmania.procmacro2/TokenStream? // io.github.kotlinmania.serderive.internals/allowDeprecated|allowDeprecated(io.github.kotlinmania.syn.DeriveInput){}[0]
+final fun io.github.kotlinmania.serderive.internals/check(io.github.kotlinmania.serderive.internals/Ctxt, io.github.kotlinmania.serderive.internals/Container, io.github.kotlinmania.serderive.internals/Derive) // io.github.kotlinmania.serderive.internals/check|check(io.github.kotlinmania.serderive.internals.Ctxt;io.github.kotlinmania.serderive.internals.Container;io.github.kotlinmania.serderive.internals.Derive){}[0]
+final fun io.github.kotlinmania.serderive.internals/pretendUsed(io.github.kotlinmania.serderive.internals/Container, kotlin/Boolean): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/pretendUsed|pretendUsed(io.github.kotlinmania.serderive.internals.Container;kotlin.Boolean){}[0]
+final fun io.github.kotlinmania.serderive.internals/replaceReceiver(io.github.kotlinmania.syn/DeriveInput) // io.github.kotlinmania.serderive.internals/replaceReceiver|replaceReceiver(io.github.kotlinmania.syn.DeriveInput){}[0]
+final fun io.github.kotlinmania.serderive.internals/thisType(io.github.kotlinmania.serderive.internals/Container): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive.internals/thisType|thisType(io.github.kotlinmania.serderive.internals.Container){}[0]
+final fun io.github.kotlinmania.serderive.internals/thisValue(io.github.kotlinmania.serderive.internals/Container): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive.internals/thisValue|thisValue(io.github.kotlinmania.serderive.internals.Container){}[0]
+final fun io.github.kotlinmania.serderive.internals/ungroup(io.github.kotlinmania.syn/SynType): io.github.kotlinmania.syn/SynType // io.github.kotlinmania.serderive.internals/ungroup|ungroup(io.github.kotlinmania.syn.SynType){}[0]
+final fun io.github.kotlinmania.serderive.internals/withBound(io.github.kotlinmania.serderive.internals/Container, io.github.kotlinmania.syn/Generics, kotlin/Function2<io.github.kotlinmania.serderive.internals/Field, io.github.kotlinmania.serderive.internals/Variant?, kotlin/Boolean>, io.github.kotlinmania.syn/Path): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withBound|withBound(io.github.kotlinmania.serderive.internals.Container;io.github.kotlinmania.syn.Generics;kotlin.Function2<io.github.kotlinmania.serderive.internals.Field,io.github.kotlinmania.serderive.internals.Variant?,kotlin.Boolean>;io.github.kotlinmania.syn.Path){}[0]
+final fun io.github.kotlinmania.serderive.internals/withLifetimeBound(io.github.kotlinmania.syn/Generics, kotlin/String): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withLifetimeBound|withLifetimeBound(io.github.kotlinmania.syn.Generics;kotlin.String){}[0]
+final fun io.github.kotlinmania.serderive.internals/withSelfBound(io.github.kotlinmania.serderive.internals/Container, io.github.kotlinmania.syn/Generics, io.github.kotlinmania.syn/Path): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withSelfBound|withSelfBound(io.github.kotlinmania.serderive.internals.Container;io.github.kotlinmania.syn.Generics;io.github.kotlinmania.syn.Path){}[0]
+final fun io.github.kotlinmania.serderive.internals/withWherePredicates(io.github.kotlinmania.syn/Generics, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withWherePredicates|withWherePredicates(io.github.kotlinmania.syn.Generics;kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>){}[0]
+final fun io.github.kotlinmania.serderive.internals/withWherePredicatesFromFields(io.github.kotlinmania.serderive.internals/Container, io.github.kotlinmania.syn/Generics, kotlin/Function1<io.github.kotlinmania.serderive.internals/AttrField, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?>): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withWherePredicatesFromFields|withWherePredicatesFromFields(io.github.kotlinmania.serderive.internals.Container;io.github.kotlinmania.syn.Generics;kotlin.Function1<io.github.kotlinmania.serderive.internals.AttrField,kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?>){}[0]
+final fun io.github.kotlinmania.serderive.internals/withWherePredicatesFromVariants(io.github.kotlinmania.serderive.internals/Container, io.github.kotlinmania.syn/Generics, kotlin/Function1<io.github.kotlinmania.serderive.internals/AttrVariant, kotlin.collections/List<io.github.kotlinmania.syn/WherePredicate>?>): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withWherePredicatesFromVariants|withWherePredicatesFromVariants(io.github.kotlinmania.serderive.internals.Container;io.github.kotlinmania.syn.Generics;kotlin.Function1<io.github.kotlinmania.serderive.internals.AttrVariant,kotlin.collections.List<io.github.kotlinmania.syn.WherePredicate>?>){}[0]
+final fun io.github.kotlinmania.serderive.internals/withoutDefaults(io.github.kotlinmania.syn/Generics): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive.internals/withoutDefaults|withoutDefaults(io.github.kotlinmania.syn.Generics){}[0]
+final fun io.github.kotlinmania.serderive.internals/wrapInConst(io.github.kotlinmania.syn/Path?, io.github.kotlinmania.procmacro2/TokenStream): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/wrapInConst|wrapInConst(io.github.kotlinmania.syn.Path?;io.github.kotlinmania.procmacro2.TokenStream){}[0]
+final fun io.github.kotlinmania.serderive/deriveDeserialize(io.github.kotlinmania.procmacro2/TokenStream): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/deriveDeserialize|deriveDeserialize(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+final fun io.github.kotlinmania.serderive/deriveSerialize(io.github.kotlinmania.procmacro2/TokenStream): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/deriveSerialize|deriveSerialize(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+final fun io.github.kotlinmania.serderive/expandDeriveDeserialize(io.github.kotlinmania.syn/DeriveInput): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/expandDeriveDeserialize|expandDeriveDeserialize(io.github.kotlinmania.syn.DeriveInput){}[0]
+final fun io.github.kotlinmania.serderive/expandDeriveSerialize(io.github.kotlinmania.syn/DeriveInput): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/expandDeriveSerialize|expandDeriveSerialize(io.github.kotlinmania.syn.DeriveInput){}[0]
