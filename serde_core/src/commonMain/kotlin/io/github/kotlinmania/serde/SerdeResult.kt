@@ -3,6 +3,7 @@ package io.github.kotlinmania.serde
 import io.github.kotlinmania.serde.SerdeResult
 
 import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serdecore.StdError
 
 /**
  * The result of a serde serialization or deserialization operation.
@@ -167,7 +168,9 @@ inline fun <T> serdeCatching(block: () -> T): SerdeResult<T> =
 class SerdeError(
     val message: String,
     val source: SerdeError? = null,
-) {
+) : StdError {
+    override fun source(): StdError? = source
+
     override fun equals(other: Any?): Boolean = other is SerdeError && other.message == message && other.source == source
 
     override fun hashCode(): Int = message.hashCode() * 31 + (source?.hashCode() ?: 0)
