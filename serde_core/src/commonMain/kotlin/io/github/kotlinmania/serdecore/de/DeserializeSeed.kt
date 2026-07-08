@@ -16,3 +16,13 @@ interface DeserializeSeed<Value> {
     fun <D> deserialize(deserializer: D): SerdeResult<Value>
         where D : Deserializer
 }
+
+/**
+ * Adapts a stateless [Deserialize] implementation into a [DeserializeSeed].
+ */
+internal fun <T> seedFromDeserialize(deserialize: Deserialize<T>): DeserializeSeed<T> =
+    object : DeserializeSeed<T> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<T>
+            where D : Deserializer =
+            deserialize.deserialize(deserializer)
+    }

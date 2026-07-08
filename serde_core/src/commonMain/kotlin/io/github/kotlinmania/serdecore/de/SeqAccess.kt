@@ -23,6 +23,13 @@ interface SeqAccess {
     fun <T> nextElement(seed: DeserializeSeed<T>): SerdeResult<T?> = nextElementSeed(seed)
 
     /**
+     * This returns `SerdeResult.success(value)` for the next value in the sequence, or
+     * `SerdeResult.success(null)` if there are no more remaining items.
+     */
+    fun <T> nextElement(deserialize: Deserialize<T>): SerdeResult<T?> =
+        nextElementSeed(seedFromDeserialize(deserialize))
+
+    /**
      * Returns the number of elements remaining in the sequence, if known.
      */
     fun sizeHint(): Int? = null

@@ -17,9 +17,22 @@ interface MapAccess {
     fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?>
 
     /**
+     * This returns `SerdeResult.success(key)` for the next key in the map, or `SerdeResult.success(null)` if
+     * there are no more remaining entries.
+     */
+    fun <K> nextKey(deserialize: Deserialize<K>): SerdeResult<K?> =
+        nextKeySeed(seedFromDeserialize(deserialize))
+
+    /**
      * This returns a `SerdeResult.success(value)` for the next value in the map.
      */
     fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V>
+
+    /**
+     * This returns a `SerdeResult.success(value)` for the next value in the map.
+     */
+    fun <V> nextValue(deserialize: Deserialize<V>): SerdeResult<V> =
+        nextValueSeed(seedFromDeserialize(deserialize))
 
     /**
      * This returns `SerdeResult.success(Pair(key, value))` for the next key-value pair in the map, or
@@ -37,6 +50,19 @@ interface MapAccess {
                 key to nextValueSeed(valueSeed).getOrThrow()
             }
         }
+
+    /**
+     * This returns `SerdeResult.success(Pair(key, value))` for the next key-value pair in the map, or
+     * `SerdeResult.success(null)` if there are no more remaining items.
+     */
+    fun <K, V> nextEntry(
+        keyDeserialize: Deserialize<K>,
+        valueDeserialize: Deserialize<V>,
+    ): SerdeResult<Pair<K, V>?> =
+        nextEntrySeed(
+            seedFromDeserialize(keyDeserialize),
+            seedFromDeserialize(valueDeserialize),
+        )
 
     /**
      * Returns the number of entries remaining in the map, if known.

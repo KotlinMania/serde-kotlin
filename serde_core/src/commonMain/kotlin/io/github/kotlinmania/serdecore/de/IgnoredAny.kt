@@ -100,7 +100,7 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
     override fun <A> visitSeq(access: A): SerdeResult<IgnoredAny>
         where A : SeqAccess =
         serdeCatching {
-            while (access.nextElement(IgnoredAny).getOrThrow() != null) {
+            while (access.nextElementSeed(IgnoredAny).getOrThrow() != null) {
                 // Gobble
             }
             IgnoredAny

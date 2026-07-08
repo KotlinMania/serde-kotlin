@@ -301,13 +301,17 @@ public abstract interface class io/github/kotlinmania/serdecore/de/IntoDeseriali
 }
 
 public abstract interface class io/github/kotlinmania/serdecore/de/MapAccess {
+	public fun nextEntry (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextEntrySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun nextKey (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun nextKeySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun nextValue (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
 }
 
 public abstract interface class io/github/kotlinmania/serdecore/de/SeqAccess {
+	public fun nextElement (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextElement (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun nextElementSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
