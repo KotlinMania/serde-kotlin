@@ -13,6 +13,8 @@ internal class Error private constructor(
 ) : StdError {
     fun description(): String = message
 
+    fun fmt(): String = message
+
     override fun toString(): String = message
 
     companion object {

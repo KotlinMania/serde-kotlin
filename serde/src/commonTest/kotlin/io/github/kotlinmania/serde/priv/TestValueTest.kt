@@ -18,6 +18,8 @@ import io.github.kotlinmania.serdecore.de.value.MapDeserializer
 import io.github.kotlinmania.serdecore.de.value.StrDeserializer
 import io.github.kotlinmania.serdecore.de.value.U128Deserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
+import io.github.kotlinmania.serdecore.de.value.MapEntry
+import io.github.kotlinmania.serdecore.de.value.mapDeserializer
 import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -225,12 +227,12 @@ class TestValueTest {
     @Test
     fun testMapAccessToEnum() {
         val inner =
-            MapDeserializer(
-                listOf(StrDeserializer.new("lj_sigma") to F64Deserializer.new(14.0)).iterator(),
+            mapDeserializer(
+                listOf(MapEntry(StrDeserializer.new("lj_sigma"), F64Deserializer.new(14.0))).iterator(),
             )
         val outer =
-            MapDeserializer(
-                listOf(StrDeserializer.new("Airebo") to inner).iterator(),
+            mapDeserializer(
+                listOf(MapEntry(StrDeserializer.new("Airebo"), inner)).iterator(),
             )
 
         val expected = Potential(PotentialKind.Airebo(Airebo(ljSigma = 14.0)))

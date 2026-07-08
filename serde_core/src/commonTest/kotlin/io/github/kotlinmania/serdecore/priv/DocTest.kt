@@ -11,6 +11,7 @@ public class DocTest {
         val error = Error.custom("documentation serializer failure")
 
         assertEquals("documentation serializer failure", error.description())
+        assertEquals("documentation serializer failure", error.fmt())
         assertEquals("documentation serializer failure", error.toString())
         assertNull(error.source)
     }

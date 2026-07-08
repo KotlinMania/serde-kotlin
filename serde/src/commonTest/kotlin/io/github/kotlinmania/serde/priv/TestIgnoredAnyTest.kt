@@ -14,6 +14,9 @@ import io.github.kotlinmania.serdecore.de.Visitor
 import io.github.kotlinmania.serdecore.de.value.MapDeserializer
 import io.github.kotlinmania.serdecore.de.value.SeqDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
+import io.github.kotlinmania.serdecore.de.value.mapDeserializer
+import io.github.kotlinmania.serdecore.de.value.MapEntry
+import io.github.kotlinmania.serdecore.de.value.seqDeserializer
 import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -138,7 +141,7 @@ private class TestEnumDeserializer(
         len: Int,
         visitor: Visitor<V>,
     ): SerdeResult<V> {
-        val seq = SeqDeserializer(listOf(1.intoDeserializer(), 2.intoDeserializer()).iterator())
+        val seq = seqDeserializer(listOf(1.intoDeserializer(), 2.intoDeserializer()).iterator())
         return visitor.visitSeq(seq)
     }
 
@@ -146,7 +149,7 @@ private class TestEnumDeserializer(
         fields: List<String>,
         visitor: Visitor<V>,
     ): SerdeResult<V> {
-        val map = MapDeserializer(listOf("a".intoDeserializer() to 10.intoDeserializer()).iterator())
+        val map = mapDeserializer(listOf(MapEntry("a".intoDeserializer(), 10.intoDeserializer())).iterator())
         return visitor.visitMap(map)
     }
 }

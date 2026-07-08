@@ -1322,7 +1322,7 @@ class BorrowedBytesDeserializer private constructor(
 /**
  * A deserializer that iterates over a sequence.
  */
-class SeqDeserializer<T : IntoDeserializer>(
+class SeqDeserializer<T : IntoDeserializer> internal constructor(
     private val iter: Iterator<T>,
 ) : Deserializer,
     SeqAccess,
@@ -1443,6 +1443,13 @@ class SeqDeserializer<T : IntoDeserializer>(
 
 fun <T : IntoDeserializer> Iterable<T>.intoDeserializer(): SeqDeserializer<T> = SeqDeserializer(iterator())
 
+/**
+ * Creates a [SeqDeserializer] from an iterator of values that can be converted
+ * to deserializers. Use this instead of the constructor when constructing from
+ * Swift or other interop boundaries.
+ */
+fun <T : IntoDeserializer> seqDeserializer(iter: Iterator<T>): SeqDeserializer<T> = SeqDeserializer(iter)
+
 // //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -1542,10 +1549,20 @@ class SeqAccessDeserializer<A : SeqAccess>(
 // //////////////////////////////////////////////////////////////////////////////
 
 /**
+ * A key-value entry carried by [MapDeserializer]. Replaces a raw [Pair] in the
+ * public constructor so the Swift Export bridge can express the generic
+ * constraint without type-erasing to `Any?`.
+ */
+data class MapEntry<K, V>(
+    val key: K,
+    val value: V,
+)
+
+/**
  * A deserializer that iterates over a map.
  */
-class MapDeserializer<K, V>(
-    private val iter: Iterator<Pair<K, V>>,
+class MapDeserializer<K, V> internal constructor(
+    private val iter: Iterator<MapEntry<K, V>>,
 ) : Deserializer,
     MapAccess,
     SeqAccess,
@@ -1561,8 +1578,8 @@ class MapDeserializer<K, V>(
                 null
             } else {
                 count += 1
-                pendingValue = next.second
-                seed.deserialize(next.first.intoDeserializer()).getOrThrow()
+                pendingValue = next.value
+                seed.deserialize(next.key.intoDeserializer()).getOrThrow()
             }
         }
 
@@ -1580,7 +1597,7 @@ class MapDeserializer<K, V>(
             if (next == null) {
                 null
             } else {
-                val pairDeserializer = PairDeserializer(next.first, next.second)
+                val pairDeserializer = PairDeserializer(next.key, next.value)
                 seed.deserialize(pairDeserializer).getOrThrow()
             }
         }
@@ -1830,7 +1847,15 @@ class MapDeserializer<K, V>(
 }
 
 fun <K : IntoDeserializer, V : IntoDeserializer> Map<K, V>.intoDeserializer(): MapDeserializer<K, V> =
-    MapDeserializer(entries.map { it.key to it.value }.iterator())
+    MapDeserializer(entries.map { MapEntry(it.key, it.value) }.iterator())
+
+/**
+ * Creates a [MapDeserializer] from an iterator of entries. Use this instead of
+ * the constructor when constructing from Swift or other interop boundaries.
+ */
+fun <K : IntoDeserializer, V : IntoDeserializer> mapDeserializer(
+    iter: Iterator<MapEntry<K, V>>,
+): MapDeserializer<K, V> = MapDeserializer(iter)
 
 // //////////////////////////////////////////////////////////////////////////////
 

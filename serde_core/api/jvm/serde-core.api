@@ -6,13 +6,14 @@ public final class io/github/kotlinmania/serde/LibKt {
 	public static final fun __requireSerdeNotSerdeCore ()V
 }
 
-public final class io/github/kotlinmania/serde/SerdeError {
+public final class io/github/kotlinmania/serde/SerdeError : io/github/kotlinmania/serdecore/StdError {
 	public static final field Companion Lio/github/kotlinmania/serde/SerdeError$Companion;
 	public fun <init> (Ljava/lang/String;Lio/github/kotlinmania/serde/SerdeError;)V
 	public synthetic fun <init> (Ljava/lang/String;Lio/github/kotlinmania/serde/SerdeError;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getMessage ()Ljava/lang/String;
-	public final fun getSource ()Lio/github/kotlinmania/serde/SerdeError;
+	public fun getSource ()Lio/github/kotlinmania/serde/SerdeError;
+	public synthetic fun getSource ()Lio/github/kotlinmania/serdecore/StdError;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -106,6 +107,10 @@ public abstract interface class io/github/kotlinmania/serdecore/ForwardToDeseria
 	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/StdError {
+	public fun getSource ()Lio/github/kotlinmania/serdecore/StdError;
 }
 
 public final class io/github/kotlinmania/serdecore/de/BooleanDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
@@ -926,7 +931,6 @@ public final class io/github/kotlinmania/serdecore/de/value/MapAccessDeserialize
 }
 
 public final class io/github/kotlinmania/serdecore/de/value/MapDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer, io/github/kotlinmania/serdecore/de/MapAccess, io/github/kotlinmania/serdecore/de/SeqAccess {
-	public fun <init> (Ljava/util/Iterator;)V
 	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -964,6 +968,19 @@ public final class io/github/kotlinmania/serdecore/de/value/MapDeserializer : io
 	public fun nextKeySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/MapEntry {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/value/MapEntry;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/value/MapEntry;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/value/MapEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Ljava/lang/Object;
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/kotlinmania/serdecore/de/value/NeverDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
@@ -1080,7 +1097,6 @@ public final class io/github/kotlinmania/serdecore/de/value/SeqAccessDeserialize
 }
 
 public final class io/github/kotlinmania/serdecore/de/value/SeqDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer, io/github/kotlinmania/serdecore/de/SeqAccess {
-	public fun <init> (Ljava/util/Iterator;)V
 	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeBool (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeByteBuf (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -1353,6 +1369,8 @@ public final class io/github/kotlinmania/serdecore/de/value/ValueKt {
 	public static final fun intoIsizeDeserializer (J)Lio/github/kotlinmania/serdecore/de/value/IsizeDeserializer;
 	public static final fun intoU128Deserializer (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/U128Deserializer;
 	public static final fun intoUsizeDeserializer-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/UsizeDeserializer;
+	public static final fun mapDeserializer (Ljava/util/Iterator;)Lio/github/kotlinmania/serdecore/de/value/MapDeserializer;
+	public static final fun seqDeserializer (Ljava/util/Iterator;)Lio/github/kotlinmania/serdecore/de/value/SeqDeserializer;
 }
 
 public abstract interface class io/github/kotlinmania/serdecore/priv/Content {
@@ -1603,13 +1621,6 @@ public final class io/github/kotlinmania/serdecore/priv/ContentMapEntry {
 	public final fun getValue ()Lio/github/kotlinmania/serdecore/priv/Content;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/kotlinmania/serdecore/priv/InPlaceSeed : io/github/kotlinmania/serdecore/de/DeserializeSeed {
-	public fun <init> (Lio/github/kotlinmania/serdecore/de/Deserialize;)V
-	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
-	public final fun getValue ()Lio/github/kotlinmania/serdecore/de/Deserialize;
-	public final fun setValue (Lio/github/kotlinmania/serdecore/de/Deserialize;)V
 }
 
 public abstract interface class io/github/kotlinmania/serdecore/priv/IteratorWithSizeHint : java/util/Iterator, kotlin/jvm/internal/markers/KMappedMarker {
