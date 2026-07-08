@@ -17,11 +17,11 @@ public sealed class Fragment {
 }
 
 public class Expr(public val fragment: Fragment) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         when (val frag = fragment) {
-            is Fragment.Expr -> frag.expr.toTokens(out)
+            is Fragment.Expr -> frag.expr.toTokens(tokens)
             is Fragment.Block -> {
-                Brace.default().surround(out) { inner ->
+                Brace.default().surround(tokens) { inner ->
                     frag.block.toTokens(inner)
                 }
             }
@@ -30,23 +30,23 @@ public class Expr(public val fragment: Fragment) : ToTokens {
 }
 
 public class Stmts(public val fragment: Fragment) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         when (val frag = fragment) {
-            is Fragment.Expr -> frag.expr.toTokens(out)
-            is Fragment.Block -> frag.block.toTokens(out)
+            is Fragment.Expr -> frag.expr.toTokens(tokens)
+            is Fragment.Block -> frag.block.toTokens(tokens)
         }
     }
 }
 
 public class Match(public val fragment: Fragment) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         when (val frag = fragment) {
             is Fragment.Expr -> {
-                frag.expr.toTokens(out)
-                Comma.default().toTokens(out)
+                frag.expr.toTokens(tokens)
+                Comma.default().toTokens(tokens)
             }
             is Fragment.Block -> {
-                Brace.default().surround(out) { inner ->
+                Brace.default().surround(tokens) { inner ->
                     frag.block.toTokens(inner)
                 }
             }

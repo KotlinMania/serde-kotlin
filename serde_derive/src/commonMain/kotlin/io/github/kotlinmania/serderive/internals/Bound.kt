@@ -142,7 +142,7 @@ public fun withBound(
                 is SynType.Array -> visitType(ty.elem)
                 is SynType.BareFn -> {
                     for (arg in ty.inputs.toList()) {
-                        visitType((arg as BareFnArg).ty)
+                        visitType(arg.ty)
                     }
                     visitReturnType(ty.output)
                 }
@@ -274,7 +274,7 @@ public fun withBound(
         dstPredicates.pushValue(makeWhereBoundedType(boundedTy, bound))
     }
     for (boundedTy in associatedTypeUsage) {
-        dstPredicates.pushValue(makeWhereBoundedType(boundedTy.deepCopy() as SynType.Path, bound))
+        dstPredicates.pushValue(makeWhereBoundedType(boundedTy.deepCopy(), bound))
     }
     return dstGenerics
 }

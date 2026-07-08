@@ -3,12 +3,9 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.appendAll
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.quote.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
-import io.github.kotlinmania.serderive.internals.AttrField
-import io.github.kotlinmania.serderive.internals.AttrVariant
 import io.github.kotlinmania.serderive.internals.Container
 import io.github.kotlinmania.serderive.internals.Ctxt
 import io.github.kotlinmania.serderive.internals.Data
@@ -25,8 +22,8 @@ import io.github.kotlinmania.serderive.internals.Variant
 import io.github.kotlinmania.serderive.internals.allowDeprecated
 import io.github.kotlinmania.serderive.internals.pretendUsed
 import io.github.kotlinmania.serderive.internals.replaceReceiver
-import io.github.kotlinmania.serderive.internals.thisType
-import io.github.kotlinmania.serderive.internals.thisValue
+import io.github.kotlinmania.serderive.internals.thisType as thisTypeFn
+import io.github.kotlinmania.serderive.internals.thisValue as thisValueFn
 import io.github.kotlinmania.serderive.internals.withBound
 import io.github.kotlinmania.serderive.internals.withLifetimeBound
 import io.github.kotlinmania.serderive.internals.withWherePredicates
@@ -36,12 +33,15 @@ import io.github.kotlinmania.serderive.internals.withoutDefaults
 import io.github.kotlinmania.serderive.internals.wrapInConst
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Expr
+import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
+import io.github.kotlinmania.syn.Path
+import io.github.kotlinmania.syn.PathParse
 import io.github.kotlinmania.syn.SynType
-import io.github.kotlinmania.syn.parseQuote
-import io.github.kotlinmania.quote.Spanned
+import io.github.kotlinmania.syn.parse2
+import io.github.kotlinmania.syn.span
 
 public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
     replaceReceiver(input)
@@ -56,7 +56,7 @@ public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
     ctxt.check()
 
     val ident = cont.ident
-    val params = Parameters(cont)
+    val params = SerParameters(cont)
     val (implGenerics, tyGenerics, whereClause) = params.generics.splitForImpl()
     val body = Stmts(serializeBody(cont, params))
     val allowDeprecated = allowDeprecated(input)
@@ -108,67 +108,65 @@ private fun precondition(cx: Ctxt, cont: Container) {
     }
 }
 
-private class Parameters(cont: Container) {
+private class SerParameters(cont: Container) {
     // Variable holding the value being serialized. Either `self` for local
     // types or `__self` for remote types.
-    val selfVar: Ident
+    val selfVar: Ident = if (cont.attrs.remote() != null) {
+        Ident.new("__self", Span.callSite())
+    } else {
+        Ident.new("self", Span.callSite())
+    }
 
     // Path to the type the impl is for. Either a single Ident for local
     // types (does not include generic parameters) or some::remote::Path for
     // remote types.
-    val thisType: io.github.kotlinmania.syn.Path
+    val thisType: Path = thisTypeFn(cont)
 
     // Same as thisType but using ::<T> for generic parameters for use in
     // expression position.
-    val thisValue: io.github.kotlinmania.syn.Path
+    val thisValue: Path = thisValueFn(cont)
 
     // Generics including any explicit and inferred bounds for the impl.
-    val generics: io.github.kotlinmania.syn.Generics
+    val generics: Generics = buildGenerics(cont)
 
     // Type has a serde(remote = "...") attribute.
-    val isRemote: Boolean
+    val isRemote: Boolean = cont.attrs.remote() != null
 
     // Type has a repr(packed) attribute.
-    val isPacked: Boolean
-
-    init {
-        isRemote = cont.attrs.remote() != null
-        selfVar = if (isRemote) {
-            Ident.new("__self", Span.callSite())
-        } else {
-            Ident.new("self", Span.callSite())
-        }
-        thisType = thisType(cont)
-        thisValue = thisValue(cont)
-        isPacked = cont.attrs.isPacked()
-        generics = buildGenerics(cont)
-    }
+    val isPacked: Boolean = cont.attrs.isPacked()
 
     // Type name to use in error messages and &'static str arguments to
     // various Serializer methods.
     fun typeName(): String {
-        return thisType.segments.last().ident.toString()
+        return thisType.segments.last()!!.ident.toString()
     }
 }
 
 // All the generics in the input, plus a bound T: Serialize for each generic
 // field type that will be serialized by us.
-private fun buildGenerics(cont: Container): io.github.kotlinmania.syn.Generics {
-    val generics = withoutDefaults(cont.generics)
+private fun buildGenerics(cont: Container): Generics {
+    val g0 = withoutDefaults(cont.generics)
 
-    val generics = withWherePredicatesFromFields(cont, generics) { field -> field.serBound() }
+    val g1 = withWherePredicatesFromFields(cont, g0) { field -> field.serBound() }
 
-    val generics = withWherePredicatesFromVariants(cont, generics) { variant -> variant.serBound() }
+    val g2 = withWherePredicatesFromVariants(cont, g1) { variant -> variant.serBound() }
 
     return when (val serBound = cont.attrs.serBound()) {
         null -> withBound(
             cont,
-            generics,
+            g2,
             ::needsSerializeBound,
-            parseQuote("_serde.Serialize")
+            parseQuotePath("_serde.Serialize")
         )
-        else -> withWherePredicates(generics, serBound)
+        else -> withWherePredicates(g2, serBound)
     }
+}
+
+// Parse a quote string into a Path, equivalent to Rust's parse_quote!().
+private fun parseQuotePath(template: String): Path {
+    val tokens = quote(template)
+    val result = parse2(PathParse, tokens)
+    return result.getOrThrow()
 }
 
 // Fields with a skip_serializing or serialize_with attribute, or which
@@ -176,14 +174,14 @@ private fun buildGenerics(cont: Container): io.github.kotlinmania.syn.Generics {
 // are not serialized by us so we do not generate a bound. Fields with a bound
 // attribute specify their own bound so we do not generate one. All other fields
 // may need a T: Serialize bound where T is the type of the field.
-private fun needsSerializeBound(field: AttrField, variant: AttrVariant?): Boolean {
-    return !field.skipSerializing()
-        && field.serializeWith() == null
-        && field.serBound() == null
-        && (variant == null || (!variant.skipSerializing() && variant.serializeWith() == null && variant.serBound() == null))
+private fun needsSerializeBound(field: Field, variant: Variant?): Boolean {
+    return !field.attrs.skipSerializing()
+        && field.attrs.serializeWith() == null
+        && field.attrs.serBound() == null
+        && (variant == null || (!variant.attrs.skipSerializing() && variant.attrs.serializeWith() == null && variant.attrs.serBound() == null))
 }
 
-private fun serializeBody(cont: Container, params: Parameters): Fragment {
+private fun serializeBody(cont: Container, params: SerParameters): Fragment {
     if (cont.attrs.transparent()) {
         return serializeTransparent(cont, params)
     }
@@ -199,7 +197,7 @@ private fun serializeBody(cont: Container, params: Parameters): Fragment {
     }
 }
 
-private fun serializeTransparent(cont: Container, params: Parameters): Fragment {
+private fun serializeTransparent(cont: Container, params: SerParameters): Fragment {
     val fields = (cont.data as Data.Struct).fields
     val selfVar = params.selfVar
     val transparentField = fields.first { it.attrs.transparent() }
@@ -216,7 +214,7 @@ private fun serializeTransparent(cont: Container, params: Parameters): Fragment 
     return Fragment.Block(quote("`#`path(&`#`selfVar.`#`member, __serializer)"))
 }
 
-private fun serializeInto(params: Parameters, typeInto: SynType): Fragment {
+private fun serializeInto(params: SerParameters, typeInto: SynType): Fragment {
     val selfVar = params.selfVar
     return Fragment.Block(quote("""
         _serde.Serialize.serialize(
@@ -231,7 +229,7 @@ private fun serializeUnitStruct(cattrs: AttrContainer): Fragment {
 }
 
 private fun serializeNewtypeStruct(
-    params: Parameters,
+    params: SerParameters,
     field: Field,
     cattrs: AttrContainer
 ): Fragment {
@@ -240,7 +238,7 @@ private fun serializeNewtypeStruct(
     var fieldExpr = getMember(
         params,
         field,
-        Member.Unnamed(Index(0u))
+        Member.Unnamed(Index(0u, Span.callSite()))
     )
     field.attrs.serializeWith()?.let { path ->
         fieldExpr = wrapSerializeFieldWith(params, field.ty, path, fieldExpr)
@@ -252,7 +250,7 @@ private fun serializeNewtypeStruct(
 }
 
 private fun serializeTupleStruct(
-    params: Parameters,
+    params: SerParameters,
     fields: List<Field>,
     cattrs: AttrContainer
 ): Fragment {
@@ -272,7 +270,7 @@ private fun serializeTupleStruct(
             when (val path = field.attrs.skipSerializingIf()) {
                 null -> quote("1")
                 else -> {
-                    val index = Index(i.toUInt())
+                    val index = Index(i.toUInt(), Span.callSite())
                     val fieldExpr = getMember(params, field, Member.Unnamed(index))
                     quote("if `#`path(`#`fieldExpr) { 0 } else { 1 }")
                 }
@@ -280,18 +278,15 @@ private fun serializeTupleStruct(
         }
         .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr") }
 
-    val result = TokenStream.new()
-    result.appendAll(
-        quote("let `#`letMut __serde_state = _serde.Serializer.serialize_tuple_struct(__serializer, `#`typeName, `#`len)?;"),
-    )
-    for (stmt in serializeStmts) {
-        result.appendAll(stmt)
-    }
-    result.appendAll(quote("_serde.ser.SerializeTupleStruct::end(__serde_state)"))
-    return Fragment.Block(result)
+    val stmts = serializeStmts.joinToString(separator = "") { it.toString() }
+    return Fragment.Block(quote("""
+        let `#`letMut __serde_state = _serde.Serializer.serialize_tuple_struct(__serializer, `#`typeName, `#`len)?;
+        `#`stmts
+        _serde.ser.SerializeTupleStruct::end(__serde_state)
+    """))
 }
 
-private fun serializeStruct(params: Parameters, fields: List<Field>, cattrs: AttrContainer): Fragment {
+private fun serializeStruct(params: SerParameters, fields: List<Field>, cattrs: AttrContainer): Fragment {
     check(fields.size.toLong() <= UInt.MAX_VALUE.toLong()) {
         "too many fields in ${cattrs.name().serializeName()}: ${fields.size}, maximum supported count is ${UInt.MAX_VALUE}"
     }
@@ -316,7 +311,7 @@ private fun serializeStructTagField(cattrs: AttrContainer, structTrait: StructTr
 }
 
 private fun serializeStructAsStruct(
-    params: Parameters,
+    params: SerParameters,
     fields: List<Field>,
     cattrs: AttrContainer
 ): Fragment {
@@ -346,20 +341,17 @@ private fun serializeStructAsStruct(
             quote("`#`sum + `#`expr")
         }
 
-    val result = TokenStream.new()
-    result.appendAll(
-        quote("let `#`letMut __serde_state = _serde.Serializer::serialize_struct(__serializer, `#`typeName, `#`len)?;"),
-    )
-    result.appendAll(tagField)
-    for (stmt in serializeFields) {
-        result.appendAll(stmt)
-    }
-    result.appendAll(quote("_serde::ser::SerializeStruct::end(__serde_state)"))
-    return Fragment.Block(result)
+    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
+    return Fragment.Block(quote("""
+        let `#`letMut __serde_state = _serde.Serializer::serialize_struct(__serializer, `#`typeName, `#`len)?;
+        `#`tagField
+        `#`stmts
+        _serde::ser::SerializeStruct::end(__serde_state)
+    """))
 }
 
 private fun serializeStructAsMap(
-    params: Parameters,
+    params: SerParameters,
     fields: List<Field>,
     cattrs: AttrContainer
 ): Fragment {
@@ -373,19 +365,16 @@ private fun serializeStructAsMap(
 
     val letMut = mutIf(serializedFields.isNotEmpty() || tagFieldExists)
 
-    val result = TokenStream.new()
-    result.appendAll(
-        quote("let `#`letMut __serde_state = _serde::Serializer::serialize_map(__serializer, _serde.`#`Private.None)?;"),
-    )
-    result.appendAll(tagField)
-    for (stmt in serializeFields) {
-        result.appendAll(stmt)
-    }
-    result.appendAll(quote("_serde::ser::SerializeMap::end(__serde_state)"))
-    return Fragment.Block(result)
+    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
+    return Fragment.Block(quote("""
+        let `#`letMut __serde_state = _serde::Serializer::serialize_map(__serializer, _serde.`#`Private.None)?;
+        `#`tagField
+        `#`stmts
+        _serde::ser::SerializeMap::end(__serde_state)
+    """))
 }
 
-private fun serializeEnum(params: Parameters, variants: List<Variant>, cattrs: AttrContainer): Fragment {
+private fun serializeEnum(params: SerParameters, variants: List<Variant>, cattrs: AttrContainer): Fragment {
     check(variants.size.toLong() <= UInt.MAX_VALUE.toLong())
 
     val selfVar = params.selfVar
@@ -402,17 +391,16 @@ private fun serializeEnum(params: Parameters, variants: List<Variant>, cattrs: A
         """))
     }
 
-    val result = TokenStream.new()
-    result.appendAll(quote("match *`#`selfVar {"))
-    for (arm in arms) {
-        result.appendAll(arm)
-    }
-    result.appendAll(quote("}"))
-    return Fragment.Expr(result)
+    val armsStr = arms.joinToString(separator = "") { it.toString() }
+    return Fragment.Expr(quote("""
+        match *`#`selfVar {
+            `#`armsStr
+        }
+    """))
 }
 
 private fun serializeVariant(
-    params: Parameters,
+    params: SerParameters,
     variant: Variant,
     variantIndex: UInt,
     cattrs: AttrContainer
@@ -474,7 +462,7 @@ private fun serializeVariant(
 }
 
 private fun serializeExternallyTaggedVariant(
-    params: Parameters,
+    params: SerParameters,
     variant: Variant,
     variantIndex: UInt,
     cattrs: AttrContainer
@@ -495,7 +483,7 @@ private fun serializeExternallyTaggedVariant(
         """))
     }
 
-    return when (effectiveStyle(variant)) {
+    return when (effectiveSerializeStyle(variant)) {
         Style.Unit -> Fragment.Expr(quote("""
             _serde::Serializer::serialize_unit_variant(
                 __serializer,
@@ -538,7 +526,7 @@ private fun serializeExternallyTaggedVariant(
 }
 
 private fun serializeInternallyTaggedVariant(
-    params: Parameters,
+    params: SerParameters,
     variant: Variant,
     cattrs: AttrContainer,
     tag: String
@@ -563,7 +551,7 @@ private fun serializeInternallyTaggedVariant(
         """))
     }
 
-    return when (effectiveStyle(variant)) {
+    return when (effectiveSerializeStyle(variant)) {
         Style.Unit -> Fragment.Block(quote("""
             let mut __struct = _serde::Serializer::serialize_struct(
                 __serializer, `#`typeName, 1)?;
@@ -602,7 +590,7 @@ private fun serializeInternallyTaggedVariant(
 }
 
 private fun serializeAdjacentlyTaggedVariant(
-    params: Parameters,
+    params: SerParameters,
     variant: Variant,
     cattrs: AttrContainer,
     variantIndex: UInt,
@@ -623,7 +611,7 @@ private fun serializeAdjacentlyTaggedVariant(
     val inner = Stmts(variant.attrs.serializeWith()?.let { path ->
         val ser = wrapSerializeVariantWith(params, path, variant)
         Fragment.Expr(quote("_serde::Serialize::serialize(`#`ser, __serializer)"))
-    } ?: when (effectiveStyle(variant)) {
+    } ?: when (effectiveSerializeStyle(variant)) {
         Style.Unit -> return Fragment.Block(quote("""
             let mut __struct = _serde::Serializer::serialize_struct(
                 __serializer, `#`typeName, 1)?;
@@ -676,7 +664,7 @@ private fun serializeAdjacentlyTaggedVariant(
     val (_, tyGenerics, whereClause) = params.generics.splitForImpl()
 
     val wrapperGenerics = if (fieldsIdent.isEmpty()) {
-        params.generics.clone()
+        params.generics.copy()
     } else {
         withLifetimeBound(params.generics, "'__a")
     }
@@ -715,7 +703,7 @@ private fun serializeAdjacentlyTaggedVariant(
 }
 
 private fun serializeUntaggedVariant(
-    params: Parameters,
+    params: SerParameters,
     variant: Variant,
     cattrs: AttrContainer
 ): Fragment {
@@ -724,7 +712,7 @@ private fun serializeUntaggedVariant(
         return Fragment.Expr(quote("_serde::Serialize::serialize(`#`ser, __serializer)"))
     }
 
-    return when (effectiveStyle(variant)) {
+    return when (effectiveSerializeStyle(variant)) {
         Style.Unit -> Fragment.Expr(quote("_serde::Serializer::serialize_unit(__serializer)"))
         Style.Newtype -> {
             val field = variant.fields[0]
@@ -752,7 +740,7 @@ private sealed class TupleVariant {
 
 private fun serializeTupleVariant(
     context: TupleVariant,
-    params: Parameters,
+    params: SerParameters,
     fields: List<Field>
 ): Fragment {
     val tupleTrait = when (context) {
@@ -780,38 +768,31 @@ private fun serializeTupleVariant(
         }
         .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr") }
 
+    val stmts = serializeStmts.joinToString(separator = "") { it.toString() }
     return when (context) {
         is TupleVariant.ExternallyTagged -> {
             val typeName = context.typeName
             val variantIndex = context.variantIndex
             val variantName = context.variantName
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_tuple_variant(
                     __serializer,
                     `#`typeName,
                     `#`variantIndex,
                     `#`variantName,
                     `#`len)?;
+                `#`stmts
+                _serde::ser::SerializeTupleVariant::end(__serde_state)
             """))
-            for (stmt in serializeStmts) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeTupleVariant::end(__serde_state)"))
-            Fragment.Block(result)
         }
         TupleVariant.Untagged -> {
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_tuple(
                     __serializer,
                     `#`len)?;
+                `#`stmts
+                _serde::ser::SerializeTuple::end(__serde_state)
             """))
-            for (stmt in serializeStmts) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeTuple::end(__serde_state)"))
-            Fragment.Block(result)
         }
     }
 }
@@ -824,7 +805,7 @@ private sealed class StructVariant {
 
 private fun serializeStructVariant(
     context: StructVariant,
-    params: Parameters,
+    params: SerParameters,
     fields: List<Field>,
     name: Name
 ): Fragment {
@@ -853,12 +834,12 @@ private fun serializeStructVariant(
         }
         .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr") }
 
+    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
     return when (context) {
         is StructVariant.ExternallyTagged -> {
             val variantIndex = context.variantIndex
             val variantName = context.variantName
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_struct_variant(
                     __serializer,
                     `#`name,
@@ -866,58 +847,45 @@ private fun serializeStructVariant(
                     `#`variantName,
                     `#`len,
                 )?;
+                `#`stmts
+                _serde::ser::SerializeStructVariant::end(__serde_state)
             """))
-            for (stmt in serializeFields) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeStructVariant::end(__serde_state)"))
-            Fragment.Block(result)
         }
         is StructVariant.InternallyTagged -> {
             val tag = context.tag
             val variantName = context.variantName
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let mut __serde_state = _serde::Serializer::serialize_struct(
                     __serializer,
                     `#`name,
                     `#`len + 1,
                 )?;
-            """))
-            result.appendAll(quote("""
                 _serde::ser::SerializeStruct::serialize_field(
                     &mut __serde_state,
                     `#`tag,
                     `#`variantName,
                 )?;
+                `#`stmts
+                _serde::ser::SerializeStruct::end(__serde_state)
             """))
-            for (stmt in serializeFields) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeStruct::end(__serde_state)"))
-            Fragment.Block(result)
         }
         StructVariant.Untagged -> {
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_struct(
                     __serializer,
                     `#`name,
                     `#`len,
                 )?;
+                `#`stmts
+                _serde::ser::SerializeStruct::end(__serde_state)
             """))
-            for (stmt in serializeFields) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeStruct::end(__serde_state)"))
-            Fragment.Block(result)
         }
     }
 }
 
 private fun serializeStructVariantWithFlatten(
     context: StructVariant,
-    params: Parameters,
+    params: SerParameters,
     fields: List<Field>,
     name: Name
 ): Fragment {
@@ -928,6 +896,7 @@ private fun serializeStructVariantWithFlatten(
 
     val letMut = mutIf(serializedFields.isNotEmpty())
 
+    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
     return when (context) {
         is StructVariant.ExternallyTagged -> {
             val variantIndex = context.variantIndex
@@ -957,7 +926,7 @@ private fun serializeStructVariantWithFlatten(
                         let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                             __serializer,
                             _serde.`#`Private.None)?;
-                        `#`(`#`serializeFields)*
+                        `#`stmts
                         _serde::ser::SerializeMap::end(__serde_state)
                     }
                 }
@@ -976,44 +945,34 @@ private fun serializeStructVariantWithFlatten(
         is StructVariant.InternallyTagged -> {
             val tag = context.tag
             val variantName = context.variantName
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                     __serializer,
                     _serde.`#`Private.None)?;
-            """))
-            result.appendAll(quote("""
                 _serde::ser::SerializeMap::serialize_entry(
                     &mut __serde_state,
                     `#`tag,
                     `#`variantName,
                 )?;
+                `#`stmts
+                _serde::ser::SerializeMap::end(__serde_state)
             """))
-            for (stmt in serializeFields) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeMap::end(__serde_state)"))
-            Fragment.Block(result)
         }
         StructVariant.Untagged -> {
-            val result = TokenStream.new()
-            result.appendAll(quote("""
+            Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                     __serializer,
                     _serde.`#`Private.None)?;
+                `#`stmts
+                _serde::ser::SerializeMap::end(__serde_state)
             """))
-            for (stmt in serializeFields) {
-                result.appendAll(stmt)
-            }
-            result.appendAll(quote("_serde::ser::SerializeMap::end(__serde_state)"))
-            Fragment.Block(result)
         }
     }
 }
 
 private fun serializeTupleStructVisitor(
     fields: List<Field>,
-    params: Parameters,
+    params: SerParameters,
     isEnum: Boolean,
     tupleTrait: TupleTrait
 ): List<TokenStream> {
@@ -1030,7 +989,7 @@ private fun serializeTupleStructVisitor(
             getMember(
                 params,
                 field,
-                Member.Unnamed(Index(i.toUInt()))
+                Member.Unnamed(Index(i.toUInt(), Span.callSite()))
             )
         }
 
@@ -1056,7 +1015,7 @@ private fun serializeTupleStructVisitor(
 
 private fun serializeStructVisitor(
     fields: List<Field>,
-    params: Parameters,
+    params: SerParameters,
     isEnum: Boolean,
     structTrait: StructTrait
 ): List<TokenStream> {
@@ -1119,7 +1078,7 @@ private fun serializeStructVisitor(
 }
 
 private fun wrapSerializeFieldWith(
-    params: Parameters,
+    params: SerParameters,
     fieldTy: SynType,
     serializeWith: Expr.Path,
     fieldExpr: TokenStream
@@ -1128,14 +1087,14 @@ private fun wrapSerializeFieldWith(
 }
 
 private fun wrapSerializeVariantWith(
-    params: Parameters,
+    params: SerParameters,
     serializeWith: Expr.Path,
     variant: Variant
 ): TokenStream {
     val fieldTys = variant.fields.map { it.ty }
     val fieldExprs = variant.fields.map { field ->
         val id = when (val member = field.member) {
-            is Member.Named -> member.ident.clone()
+            is Member.Named -> member.ident
             is Member.Unnamed -> fieldI(member.index.index.toInt())
         }
         quote("`#`id")
@@ -1144,7 +1103,7 @@ private fun wrapSerializeVariantWith(
 }
 
 private fun wrapSerializeWith(
-    params: Parameters,
+    params: SerParameters,
     serializeWith: Expr.Path,
     fieldTys: List<SynType>,
     fieldExprs: List<TokenStream>
@@ -1153,14 +1112,14 @@ private fun wrapSerializeWith(
     val (_, tyGenerics, whereClause) = params.generics.splitForImpl()
 
     val wrapperGenerics = if (fieldExprs.isEmpty()) {
-        params.generics.clone()
+        params.generics.copy()
     } else {
         withLifetimeBound(params.generics, "'__a")
     }
     val (wrapperImplGenerics, wrapperTyGenerics, _) = wrapperGenerics.splitForImpl()
 
     val fieldAccess = (0 until fieldExprs.size).map { n ->
-        Member.Unnamed(Index(n.toUInt()))
+        Member.Unnamed(Index(n.toUInt(), Span.callSite()))
     }
 
     val selfVar = quote("self")
@@ -1214,7 +1173,7 @@ private fun mutIf(isMut: Boolean): TokenStream? {
     }
 }
 
-private fun getMember(params: Parameters, field: Field, member: Member): TokenStream {
+private fun getMember(params: SerParameters, field: Field, member: Member): TokenStream {
     val selfVar = params.selfVar
     return when {
         !params.isRemote && field.attrs.getter() == null -> {
@@ -1244,7 +1203,7 @@ private fun getMember(params: Parameters, field: Field, member: Member): TokenSt
     }
 }
 
-private fun effectiveStyle(variant: Variant): Style {
+private fun effectiveSerializeStyle(variant: Variant): Style {
     return if (variant.style == Style.Newtype && variant.fields[0].attrs.skipSerializing()) {
         Style.Unit
     } else {

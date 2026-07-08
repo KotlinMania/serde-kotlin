@@ -15,8 +15,8 @@ import io.github.kotlinmania.syn.parseMacroInput
 internal object Private : ToTokens {
     fun ident(): Ident = Ident.new("__private0", Span.callSite())
 
-    override fun toTokens(out: TokenStream) {
-        out.append(ident())
+    override fun toTokens(tokens: TokenStream) {
+        tokens.append(ident())
     }
 }
 

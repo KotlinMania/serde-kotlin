@@ -253,7 +253,7 @@ private fun deserializeBody(cont: Container, params: Parameters): Fragment {
     cont.attrs.typeTryFrom()?.let { return deserializeTryFrom(it) }
     if (cont.attrs.identifier() == Identifier.No) {
         return when (val data = cont.data) {
-            is Data.Enum -> deserializeEnum(params, data.variants as List<Variant>, cont.attrs)
+            is Data.Enum -> deserializeEnum(params, data.variants, cont.attrs)
             is Data.Struct -> when (data.style) {
                 Style.Struct -> deserializeStruct(params, data.fields, cont.attrs, StructForm.Struct)
                 Style.Tuple, Style.Newtype -> deserializeTuple(params, data.fields, cont.attrs, TupleForm.Tuple)
@@ -262,7 +262,7 @@ private fun deserializeBody(cont: Container, params: Parameters): Fragment {
         }
     } else {
         return when (val data = cont.data) {
-            is Data.Enum -> deserializeCustomIdentifier(params, data.variants as List<Variant>, cont.attrs)
+            is Data.Enum -> deserializeCustomIdentifier(params, data.variants, cont.attrs)
             is Data.Struct -> error("checked in serde_derive_internals")
         }
     }
@@ -460,7 +460,7 @@ internal fun hasFlatten(fields: List<Field>): Boolean {
 }
 
 class DeImplGenerics(val params: Parameters) : ToTokens {
-    override fun toTokens(out: TokenStream) {
+    override fun toTokens(tokens: TokenStream) {
         var generics = params.generics.copy()
         val deLifetime = params.borrowed.deLifetimeParam()
         if (deLifetime != null) {
@@ -474,13 +474,13 @@ class DeImplGenerics(val params: Parameters) : ToTokens {
             })
         }
         val split = generics.splitForImpl()
-        split.implGenerics.toTokens(out)
+        split.implGenerics.toTokens(tokens)
     }
 }
 
 class DeTypeGenerics(val params: Parameters) : ToTokens {
-    override fun toTokens(out: TokenStream) {
-        deTypeGenericsToTokens(params.generics.copy(), params.borrowed, out)
+    override fun toTokens(tokens: TokenStream) {
+        deTypeGenericsToTokens(params.generics.copy(), params.borrowed, tokens)
     }
 }
 

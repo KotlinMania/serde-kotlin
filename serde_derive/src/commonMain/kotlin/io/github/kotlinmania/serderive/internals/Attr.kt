@@ -17,16 +17,10 @@ private fun Path.toTokenStream(): TokenStream {
     return out
 }
 
-private fun SynType.toTokenStream(): TokenStream {
-    val out = TokenStream.new()
-    toTokens(out)
-    return out
-}
-
 // Wrap a Path as a ToTokens for passing to Attr.set / Ctxt.errorSpannedBy
 private class PathTokens(private val path: Path) : ToTokens {
-    override fun toTokens(out: TokenStream) {
-        path.toTokens(out)
+    override fun toTokens(tokens: TokenStream) {
+        path.toTokens(tokens)
     }
 }
 
@@ -1111,13 +1105,11 @@ private fun getLitStr2(
         val token = iter.next()
         if (token is TokenTree.Literal && !iter.hasNext()) {
             val lit = token.value
-            if (lit is io.github.kotlinmania.procmacro2.Literal) {
-                // Try to extract as string literal
-                val text = lit.toString()
-                if (text.startsWith("\"") && text.endsWith("\"")) {
-                    val inner = text.substring(1, text.length - 1)
-                    return LitStr.new(inner, lit.span())
-                }
+            // Try to extract as string literal
+            val text = lit.toString()
+            if (text.startsWith("\"") && text.endsWith("\"")) {
+                val inner = text.substring(1, text.length - 1)
+                return LitStr.new(inner, lit.span())
             }
         }
     }
@@ -1323,7 +1315,7 @@ private fun getWherePredicates(
     val (ser, de) = getSerAndDe(cx, BOUND, meta) { cx2, attrName, metaItemName, m ->
         parseLitIntoWhere(cx2, attrName, metaItemName, m)
     }
-    return Pair(ser?.atMostOne(), de?.atMostOne())
+    return Pair(ser.atMostOne(), de.atMostOne())
 }
 
 private fun getRenames(
@@ -1334,7 +1326,7 @@ private fun getRenames(
     val (ser, de) = getSerAndDe(cx, attrName, meta) { cx2, _, metaItemName, m ->
         getLitStr2(cx2, attrName, metaItemName, m)
     }
-    return Pair(ser?.atMostOne(), de?.atMostOne())
+    return Pair(ser.atMostOne(), de.atMostOne())
 }
 
 private fun getMultipleRenames(
@@ -1344,7 +1336,7 @@ private fun getMultipleRenames(
     val (ser, de) = getSerAndDe(cx, RENAME, meta) { cx2, _, metaItemName, m ->
         getLitStr2(cx2, RENAME, metaItemName, m)
     }
-    return Pair(ser?.atMostOne(), de?.get() ?: emptyList())
+    return Pair(ser.atMostOne(), de.get())
 }
 
 // Generic helper: parse `serialize = "..."` / `deserialize = "..."` sub-attributes
