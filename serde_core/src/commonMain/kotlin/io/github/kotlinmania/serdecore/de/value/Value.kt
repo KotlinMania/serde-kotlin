@@ -588,7 +588,7 @@ class U32Deserializer private constructor(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
-        seed.deserialize(this).map { it to Private.UnitOnly }
+        seed.deserialize(this).map(::unitOnly)
 
     override fun intoDeserializer(): Deserializer = this
 }
@@ -787,7 +787,7 @@ class StrDeserializer private constructor(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
-        seed.deserialize(this).map { it to Private.UnitOnly }
+        seed.deserialize(this).map(::unitOnly)
 
     override fun intoDeserializer(): Deserializer = this
 }
@@ -890,7 +890,7 @@ class BorrowedStrDeserializer private constructor(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
-        seed.deserialize(this).map { it to Private.UnitOnly }
+        seed.deserialize(this).map(::unitOnly)
 
     override fun intoDeserializer(): Deserializer = this
 }
@@ -995,7 +995,7 @@ class StringDeserializer private constructor(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
-        seed.deserialize(this).map { it to Private.UnitOnly }
+        seed.deserialize(this).map(::unitOnly)
 
     override fun intoDeserializer(): Deserializer = this
 }
@@ -1111,7 +1111,7 @@ class CowStrDeserializer private constructor(
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
-        seed.deserialize(this).map { it to Private.UnitOnly }
+        seed.deserialize(this).map(::unitOnly)
 
     override fun intoDeserializer(): Deserializer = this
 }
@@ -1957,7 +1957,7 @@ class MapAccessDeserializer<A : MapAccess>(
         serdeCatching {
             val key = map.nextKeySeed(seed).getOrThrow()
             if (key != null) {
-                key to Private.MapAsEnum(map)
+                key to mapAsEnum(map)
             } else {
                 throw SerdeException(
                     SerdeError.invalidType(
@@ -2068,6 +2068,10 @@ class EnumAccessDeserializer<A : EnumAccess>(
 }
 
 // //////////////////////////////////////////////////////////////////////////////
+
+private fun <T> unitOnly(value: T): Pair<T, VariantAccess> = value to Private.UnitOnly
+
+private fun <A : MapAccess> mapAsEnum(map: A): VariantAccess = Private.MapAsEnum(map)
 
 private object Private {
     object UnitOnly : VariantAccess {

@@ -103,6 +103,14 @@ configurations.configureEach {
     }
 }
 
+allprojects {
+    configurations.configureEach {
+        if (name.contains("Android", ignoreCase = true) && name.endsWith("RuntimeClasspath")) {
+            exclude(group = "org.jetbrains", module = "annotations")
+        }
+    }
+}
+
 // Opt-ins shared across Kotlin targets.
 val commonOptIns =
     listOf(
