@@ -237,6 +237,18 @@ interface Serializer<Ok>
 
     /**
      * Collect an iterator as a sequence.
+     *
+     * The default implementation serializes each item yielded by the iterable using
+     * `serializeSeq`. Implementors should not need to override this method.
+     *
+     * ```kotlin
+     * class SecretlyOneHigher(
+     *     private val data: List<Int>,
+     * ) : Serialize {
+     *     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+     *         serializer.collectSeq(data.map { it + 1 })
+     * }
+     * ```
      */
     fun <T> collectSeq(iter: Iterable<T>): SerdeResult<Ok>
         where T : Serialize =
@@ -250,6 +262,18 @@ interface Serializer<Ok>
 
     /**
      * Collect an iterator as a map.
+     *
+     * The default implementation serializes each pair yielded by the iterable using
+     * `serializeMap`. Implementors should not need to override this method.
+     *
+     * ```kotlin
+     * class MapToUnit(
+     *     private val keys: Set<Int>,
+     * ) : Serialize {
+     *     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+     *         serializer.collectMap(keys.map { key -> key to UnitValue })
+     * }
+     * ```
      */
     fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): SerdeResult<Ok>
         where K : Serialize,
@@ -264,11 +288,21 @@ interface Serializer<Ok>
 
     /**
      * Serialize a string produced by an implementation of `toString`.
+     *
+     * The default implementation delegates to `serializeStr`. Serializers are encouraged to provide
+     * a more efficient implementation if possible.
      */
     fun collectStr(value: String): SerdeResult<Ok> = serializeStr(value)
 
     /**
      * Determine whether `Serialize` implementations should serialize in human-readable form.
+     *
+     * Some types have a human-readable form that may be somewhat expensive to construct, as well as
+     * a binary form that is compact and efficient. Generally text-based formats prefer the
+     * human-readable form and binary formats prefer the compact one.
+     *
+     * The default implementation returns `true`. Data formats may override this to `false` to
+     * request compact representations from types that support one.
      */
     fun isHumanReadable(): Boolean = true
 }

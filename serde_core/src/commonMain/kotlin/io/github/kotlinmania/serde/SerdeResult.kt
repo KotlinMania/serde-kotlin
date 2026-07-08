@@ -167,10 +167,8 @@ inline fun <T> serdeCatching(block: () -> T): SerdeResult<T> =
  */
 class SerdeError(
     val message: String,
-    val source: SerdeError? = null,
+    override val source: SerdeError? = null,
 ) : StdError {
-    override fun source(): StdError? = source
-
     override fun equals(other: Any?): Boolean = other is SerdeError && other.message == message && other.source == source
 
     override fun hashCode(): Int = message.hashCode() * 31 + (source?.hashCode() ?: 0)

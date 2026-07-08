@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import kotlin.jvm.optionals.getOrNull
@@ -25,6 +26,74 @@ val projectCompileSdk = providers.gradleProperty("android.compileSdk").getOrElse
 val projectMinSdk = providers.gradleProperty("android.minSdk").getOrElse("24").toInt()
 val frameworkName = providers.gradleProperty("project.frameworkName").getOrElse("KmIo")
 val projectNamespace = providers.gradleProperty("project.namespace").getOrElse("io.github.kotlinmania.io")
+
+val patchSwiftExportCoroutineSupport =
+    tasks.register("patchSwiftExportCoroutineSupport") {
+        description = "Patches generated Swift Export coroutine support so strict Kotlin warnings remain source-only."
+        dependsOn(tasks.matching { it.name.endsWith("DebugSwiftExport") })
+        doLast {
+            val swiftExportDir =
+                layout.buildDirectory
+                .dir("SwiftExport")
+                .get()
+                .asFile
+            if (!swiftExportDir.exists()) return@doLast
+            swiftExportDir
+                .walkTopDown()
+                .filter { it.isFile && it.name == "KotlinCoroutineSupport.kt" }
+                .forEach { supportFile ->
+                    val text = supportFile.readText()
+                    val patched =
+                        text.replace(
+                            "@file:kotlin.Suppress(\"DEPRECATION_ERROR\")",
+                            "@file:kotlin.Suppress(\n" +
+                                "    \"DEPRECATION_ERROR\",\n" +
+                                "    \"OPT_IN_OVERRIDE\",\n" +
+                                "    \"OPT_IN_USAGE\",\n" +
+                                "    \"OPT_IN_USAGE_ERROR\",\n" +
+                                "    \"OPT_IN_USAGE_FUTURE_ERROR\",\n" +
+                                "    \"REDUNDANT_ELVIS_RETURN_NULL\",\n" +
+                                "    \"RETURN_VALUE_NOT_USED\",\n" +
+                                "    \"UNCHECKED_CAST\",\n" +
+                                "    \"UNUSED_EXPRESSION\",\n" +
+                                "    \"USELESS_ELVIS\",\n" +
+                                ")\n" +
+                                "@file:kotlin.OptIn(\n" +
+                                "    kotlinx.coroutines.InternalCoroutinesApi::class,\n" +
+                                "    kotlin.concurrent.atomics.ExperimentalAtomicApi::class,\n" +
+                                ")",
+                        ).replace(
+                            "val _result = kotlinFun(arg0, _arg1)\n            _result",
+                            "kotlinFun(arg0, _arg1)",
+                        ).replace(
+                            "if (if (cancellationCallback(true)) Unit) Unit",
+                            "cancellationCallback(true).let { }",
+                        ).replace(
+                            "if (cancellationCallback(true)) Unit",
+                            "cancellationCallback(true).let { }",
+                        ).replace(
+                            "\n                cancellationCallback(true)\n",
+                            "\n                cancellationCallback(true).let { }\n",
+                        ).replace(
+                            "return state.error?.let { throw it } ?: null",
+                            "{\n                    state.error?.let { throw it }\n                    return null\n                }",
+                        ).replace(
+                            "is State.Completed -> state.error?.let { throw it }\n                    return null",
+                            "is State.Completed -> {\n                    state.error?.let { throw it }\n                    return null\n                }",
+                        )
+                    if (patched != text) {
+                        supportFile.writeText(patched)
+                    }
+                }
+        }
+    }
+
+tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    if (name.startsWith("compileSwiftExport")) {
+        dependsOn(patchSwiftExportCoroutineSupport)
+        compilerOptions.allWarningsAsErrors.set(false)
+    }
+}
 
 kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)

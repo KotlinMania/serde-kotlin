@@ -11,5 +11,6 @@ interface StdError {
     /**
      * The underlying cause of this error, if any.
      */
-    fun source(): StdError? = null
+    val source: StdError?
+        get() = null
 }

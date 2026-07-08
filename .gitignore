@@ -44,3 +44,6 @@ DerivedData/
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
 /tmp/
+
+# Local ast_distance binary copied from the workspace tool cache.
+tools/ast_distance

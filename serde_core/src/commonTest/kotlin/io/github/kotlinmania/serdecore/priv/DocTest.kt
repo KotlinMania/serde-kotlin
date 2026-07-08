@@ -12,6 +12,6 @@ public class DocTest {
 
         assertEquals("documentation serializer failure", error.description())
         assertEquals("documentation serializer failure", error.toString())
-        assertNull(error.source())
+        assertNull(error.source)
     }
 }
