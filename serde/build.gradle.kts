@@ -119,6 +119,13 @@ fun patchSwiftPackage(packageDir: File) {
                             "                .unsafeFlags([\"-fno-objc-arc\"])\n" +
                             "            ]",
                     )
+            if (!patched.contains("platforms:")) {
+                patched =
+                    patched.replaceFirst(
+                        Regex("(name:\\s*\"[^\"]*\",)"),
+                        "\$1\n    platforms: [.macOS(.v14)],",
+                    )
+            }
             if (patched != text) {
                 packageSwift.writeText(patched)
             }
@@ -242,5 +249,4 @@ tasks.register("test") {
     dependsOn("swiftExportSmokeTest")
     // dependsOn("hostTests") if needed
 }
-
 

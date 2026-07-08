@@ -224,7 +224,9 @@ private enum class Unsupported {
 internal sealed interface Content : Serialize {
     data class Bool(
         val value: Boolean,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = if (value) 1231 else 1237
+    }
 
     data class U8(
         val value: UByte,
@@ -244,31 +246,48 @@ internal sealed interface Content : Serialize {
 
     data class I8(
         val value: Byte,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = value.toInt()
+    }
 
     data class I16(
         val value: Short,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = value.toInt()
+    }
 
     data class I32(
         val value: Int,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = value
+    }
 
     data class I64(
         val value: Long,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = (value xor (value ushr 32)).toInt()
+    }
 
     data class F32(
         val value: Float,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = value.toBits()
+    }
 
     data class F64(
         val value: Double,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int {
+            val bits = value.toBits()
+            return (bits xor (bits ushr 32)).toInt()
+        }
+    }
 
     data class Char(
         val value: kotlin.Char,
-    ) : Content
+    ) : Content {
+        override fun hashCode(): Int = value.code
+    }
 
     data class String(
         val value: kotlin.String,

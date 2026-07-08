@@ -6,7 +6,8 @@ import io.github.kotlinmania.serdecore.de.DeserializeSeed
 import io.github.kotlinmania.serdecore.de.Deserializer
 import io.github.kotlinmania.serdecore.de.EnumAccess
 import io.github.kotlinmania.serdecore.de.Visitor
-import io.github.kotlinmania.serdecore.`private`.Content
+import io.github.kotlinmania.serdecore.priv.Content
+import io.github.kotlinmania.serdecore.priv.ContentMapEntry
 import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -71,7 +72,7 @@ public class TestEnumUntaggedDeTest {
     public fun enumMapDeserializesSingleKeyVariant() {
         val value =
             ContentDeserializer
-                .new(Content.Map(listOf(Content.String("Newtype") to Content.U32(5u))))
+                .new(Content.Map(listOf(ContentMapEntry(Content.StringValue("Newtype"), Content.U32(5u)))))
                 .deserializeEnum("E", listOf("Newtype", "Null"), EnumNewtypeVisitor)
                 .getOrThrow()
 

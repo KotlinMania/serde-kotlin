@@ -5,6 +5,19 @@ import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
 
+private fun unsignedDecimal(value: UInt): String {
+    val bits = value.toInt()
+    return if (bits >= 0) bits.toString() else (bits.toLong() and 0xffff_ffffL).toString()
+}
+
+private fun unsignedDecimal(value: ULong): String {
+    val bits = value.toLong()
+    if (bits >= 0) return bits.toString()
+
+    val quotient = (bits ushr 1) / 5
+    val remainder = bits - quotient * 10
+    return quotient.toString() + remainder.toString()
+}
 
 /**
  * ```kotlin
@@ -50,9 +63,9 @@ class FormatterSerializer(
 
     override fun serializeU16(v: UShort): SerdeResult<Unit> = display(v.toString())
 
-    override fun serializeU32(v: UInt): SerdeResult<Unit> = display(v.toString())
+    override fun serializeU32(v: UInt): SerdeResult<Unit> = display(unsignedDecimal(v))
 
-    override fun serializeU64(v: ULong): SerdeResult<Unit> = display(v.toString())
+    override fun serializeU64(v: ULong): SerdeResult<Unit> = display(unsignedDecimal(v))
 
     override fun serializeU128(value: String): SerdeResult<Unit> = display(value)
 

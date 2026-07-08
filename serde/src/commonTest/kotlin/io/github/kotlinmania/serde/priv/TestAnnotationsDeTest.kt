@@ -6,7 +6,8 @@ import io.github.kotlinmania.serdecore.de.DeserializeSeed
 import io.github.kotlinmania.serdecore.de.Deserializer
 import io.github.kotlinmania.serdecore.de.EnumAccess
 import io.github.kotlinmania.serdecore.de.Visitor
-import io.github.kotlinmania.serdecore.`private`.Content
+import io.github.kotlinmania.serdecore.priv.Content
+import io.github.kotlinmania.serdecore.priv.ContentMapEntry
 import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,7 +17,7 @@ public class TestAnnotationsDeTest {
     public fun flatMapDeserializerFindsVariantInFlattenedData() {
         val value =
             FlatMapDeserializer(
-                mutableListOf(Content.String("B") to Content.Bool(true)),
+                FlatMapBuffer(mutableListOf(ContentMapEntry(Content.StringValue("B"), Content.Bool(true)))),
             ).deserializeEnum("E", listOf("B"), FlatBoolEnumVisitor)
                 .getOrThrow()
 

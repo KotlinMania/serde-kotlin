@@ -52,6 +52,25 @@ private fun invalidUnsigned(
     exp: Expected,
 ): SerdeResult<Nothing> = SerdeResult.failure(SerdeError.invalidValue(Unexpected.Unsigned(v), exp))
 
+private fun unsignedLessOrEqual(
+    value: UInt,
+    max: UInt,
+): Boolean = (value.toInt() xor Int.MIN_VALUE) <= (max.toInt() xor Int.MIN_VALUE)
+
+private fun unsignedLessOrEqual(
+    value: ULong,
+    max: ULong,
+): Boolean = (value.toLong() xor Long.MIN_VALUE) <= (max.toLong() xor Long.MIN_VALUE)
+
+private fun unsignedDecimal(value: ULong): String {
+    val bits = value.toLong()
+    if (bits >= 0) return bits.toString()
+
+    val quotient = (bits ushr 1) / 5
+    val remainder = bits - quotient * 10
+    return quotient.toString() + remainder.toString()
+}
+
 private data object I8Visitor : Visitor<Byte> {
     override fun expecting(): String = "i8"
 
@@ -76,7 +95,7 @@ private data object I8Visitor : Visitor<Byte> {
         if (v.toLong() <= Byte.MAX_VALUE.toLong()) SerdeResult.success(v.toByte()) else invalidUnsigned(v.toULong(), this)
 
     override fun visitU64(v: ULong): SerdeResult<Byte> =
-        if (v <= Byte.MAX_VALUE.toULong()) SerdeResult.success(v.toByte()) else invalidUnsigned(v, this)
+        if (unsignedLessOrEqual(v, Byte.MAX_VALUE.toULong())) SerdeResult.success(v.toByte()) else invalidUnsigned(v, this)
 }
 
 data object I8Deserialize : Deserialize<Byte> {
@@ -106,7 +125,7 @@ private data object I16Visitor : Visitor<Short> {
         if (v.toLong() <= Short.MAX_VALUE.toLong()) SerdeResult.success(v.toShort()) else invalidUnsigned(v.toULong(), this)
 
     override fun visitU64(v: ULong): SerdeResult<Short> =
-        if (v <= Short.MAX_VALUE.toULong()) SerdeResult.success(v.toShort()) else invalidUnsigned(v, this)
+        if (unsignedLessOrEqual(v, Short.MAX_VALUE.toULong())) SerdeResult.success(v.toShort()) else invalidUnsigned(v, this)
 }
 
 data object I16Deserialize : Deserialize<Short> {
@@ -132,12 +151,10 @@ private data object I32Visitor : Visitor<Int> {
     override fun visitU16(v: UShort): SerdeResult<Int> = SerdeResult.success(v.toInt())
 
     override fun visitU32(v: UInt): SerdeResult<Int> =
-        if (v <= Int.MAX_VALUE.toUInt()) SerdeResult.success(v.toInt()) else invalidUnsigned(v.toULong(), this)
+        if (unsignedLessOrEqual(v, Int.MAX_VALUE.toUInt())) SerdeResult.success(v.toInt()) else invalidUnsigned(v.toULong(), this)
 
     override fun visitU64(v: ULong): SerdeResult<Int> =
-        if (v <=
-            Int.MAX_VALUE.toULong()
-        ) {
+        if (unsignedLessOrEqual(v, Int.MAX_VALUE.toULong())) {
             SerdeResult.success(v.toInt())
         } else {
             invalidUnsigned(v, this)
@@ -167,7 +184,7 @@ private data object I64Visitor : Visitor<Long> {
     override fun visitU32(v: UInt): SerdeResult<Long> = SerdeResult.success(v.toLong())
 
     override fun visitU64(v: ULong): SerdeResult<Long> =
-        if (v <= Long.MAX_VALUE.toULong()) SerdeResult.success(v.toLong()) else invalidUnsigned(v, this)
+        if (unsignedLessOrEqual(v, Long.MAX_VALUE.toULong())) SerdeResult.success(v.toLong()) else invalidUnsigned(v, this)
 }
 
 data object I64Deserialize : Deserialize<Long> {
@@ -196,10 +213,10 @@ private data object U8Visitor : Visitor<UByte> {
         if (v <= UByte.MAX_VALUE.toUShort()) SerdeResult.success(v.toUByte()) else invalidUnsigned(v.toULong(), this)
 
     override fun visitU32(v: UInt): SerdeResult<UByte> =
-        if (v <= UByte.MAX_VALUE.toUInt()) SerdeResult.success(v.toUByte()) else invalidUnsigned(v.toULong(), this)
+        if (unsignedLessOrEqual(v, UByte.MAX_VALUE.toUInt())) SerdeResult.success(v.toUByte()) else invalidUnsigned(v.toULong(), this)
 
     override fun visitU64(v: ULong): SerdeResult<UByte> =
-        if (v <= UByte.MAX_VALUE.toULong()) SerdeResult.success(v.toUByte()) else invalidUnsigned(v, this)
+        if (unsignedLessOrEqual(v, UByte.MAX_VALUE.toULong())) SerdeResult.success(v.toUByte()) else invalidUnsigned(v, this)
 }
 
 data object U8Deserialize : Deserialize<UByte> {
@@ -232,10 +249,10 @@ private data object U16Visitor : Visitor<UShort> {
         if (v in 0L..UShort.MAX_VALUE.toLong()) SerdeResult.success(v.toUShort()) else invalidSigned(v, this)
 
     override fun visitU32(v: UInt): SerdeResult<UShort> =
-        if (v <= UShort.MAX_VALUE.toUInt()) SerdeResult.success(v.toUShort()) else invalidUnsigned(v.toULong(), this)
+        if (unsignedLessOrEqual(v, UShort.MAX_VALUE.toUInt())) SerdeResult.success(v.toUShort()) else invalidUnsigned(v.toULong(), this)
 
     override fun visitU64(v: ULong): SerdeResult<UShort> =
-        if (v <= UShort.MAX_VALUE.toULong()) SerdeResult.success(v.toUShort()) else invalidUnsigned(v, this)
+        if (unsignedLessOrEqual(v, UShort.MAX_VALUE.toULong())) SerdeResult.success(v.toUShort()) else invalidUnsigned(v, this)
 }
 
 data object U16Deserialize : Deserialize<UShort> {
@@ -263,7 +280,7 @@ private data object U32Visitor : Visitor<UInt> {
         if (v in 0L..UInt.MAX_VALUE.toLong()) SerdeResult.success(v.toUInt()) else invalidSigned(v, this)
 
     override fun visitU64(v: ULong): SerdeResult<UInt> =
-        if (v <= UInt.MAX_VALUE.toULong()) SerdeResult.success(v.toUInt()) else invalidUnsigned(v, this)
+        if (unsignedLessOrEqual(v, UInt.MAX_VALUE.toULong())) SerdeResult.success(v.toUInt()) else invalidUnsigned(v, this)
 }
 
 data object U32Deserialize : Deserialize<UInt> {
@@ -383,13 +400,13 @@ private data object I128Visitor : Visitor<String> {
 
     override fun visitI64(v: Long): SerdeResult<String> = SerdeResult.success(v.toString())
 
-    override fun visitU8(v: UByte): SerdeResult<String> = SerdeResult.success(v.toULong().toString())
+    override fun visitU8(v: UByte): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v.toULong()))
 
-    override fun visitU16(v: UShort): SerdeResult<String> = SerdeResult.success(v.toULong().toString())
+    override fun visitU16(v: UShort): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v.toULong()))
 
-    override fun visitU32(v: UInt): SerdeResult<String> = SerdeResult.success(v.toULong().toString())
+    override fun visitU32(v: UInt): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v.toULong()))
 
-    override fun visitU64(v: ULong): SerdeResult<String> = SerdeResult.success(v.toString())
+    override fun visitU64(v: ULong): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v))
 
     override fun visitU128(v: String): SerdeResult<String> =
         if (compareUnsignedDecimal(v, I128_MAX_AS_U128) <= 0) SerdeResult.success(v) else invalidOther("u128", this)
@@ -406,13 +423,13 @@ private data object U128Visitor : Visitor<String> {
 
     override fun visitU128(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-    override fun visitU8(v: UByte): SerdeResult<String> = SerdeResult.success(v.toULong().toString())
+    override fun visitU8(v: UByte): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v.toULong()))
 
-    override fun visitU16(v: UShort): SerdeResult<String> = SerdeResult.success(v.toULong().toString())
+    override fun visitU16(v: UShort): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v.toULong()))
 
-    override fun visitU32(v: UInt): SerdeResult<String> = SerdeResult.success(v.toULong().toString())
+    override fun visitU32(v: UInt): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v.toULong()))
 
-    override fun visitU64(v: ULong): SerdeResult<String> = SerdeResult.success(v.toString())
+    override fun visitU64(v: ULong): SerdeResult<String> = SerdeResult.success(unsignedDecimal(v))
 
     override fun visitI8(v: Byte): SerdeResult<String> =
         if (v >=

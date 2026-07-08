@@ -224,7 +224,8 @@ private data object IgnoredAnyStructVisitor : Visitor<Target> {
                 if (key == "a") {
                     a = access.nextValueSeed(IgnoredAnyIntSeed).getOrThrow()
                 } else {
-                    access.nextValueSeed(IgnoredAny).getOrThrow()
+                    val ignored = access.nextValueSeed(IgnoredAny).getOrThrow()
+                    check(ignored == IgnoredAny)
                 }
             }
             Target.Struct(a ?: throw AssertionError("missing field a"))
@@ -241,9 +242,9 @@ public class TestIgnoredAnyTest {
         assertEquals(Target.Struct(a = 10), Target.deserialize(TestEnumDeserializer("Struct")).getOrThrow())
 
         // Now try IgnoredAny.
-        IgnoredAny.deserialize(TestEnumDeserializer("Unit")).getOrThrow()
-        IgnoredAny.deserialize(TestEnumDeserializer("Newtype")).getOrThrow()
-        IgnoredAny.deserialize(TestEnumDeserializer("Tuple")).getOrThrow()
-        IgnoredAny.deserialize(TestEnumDeserializer("Struct")).getOrThrow()
+        assertEquals(IgnoredAny, IgnoredAny.deserialize(TestEnumDeserializer("Unit")).getOrThrow())
+        assertEquals(IgnoredAny, IgnoredAny.deserialize(TestEnumDeserializer("Newtype")).getOrThrow())
+        assertEquals(IgnoredAny, IgnoredAny.deserialize(TestEnumDeserializer("Tuple")).getOrThrow())
+        assertEquals(IgnoredAny, IgnoredAny.deserialize(TestEnumDeserializer("Struct")).getOrThrow())
     }
 }

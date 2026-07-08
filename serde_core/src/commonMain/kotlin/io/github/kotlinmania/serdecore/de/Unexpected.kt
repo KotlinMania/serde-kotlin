@@ -15,7 +15,9 @@ sealed class Unexpected {
      */
     data class Bool(
         val value: Boolean,
-    ) : Unexpected()
+    ) : Unexpected() {
+        override fun hashCode(): Int = if (value) 1231 else 1237
+    }
 
     /**
      * The input contained an unsigned integer `UByte`, `UShort`, `UInt` or `ULong` that was not
@@ -30,21 +32,30 @@ sealed class Unexpected {
      */
     data class Signed(
         val value: Long,
-    ) : Unexpected()
+    ) : Unexpected() {
+        override fun hashCode(): Int = (value xor (value ushr 32)).toInt()
+    }
 
     /**
      * The input contained a floating point `Float` or `Double` that was not expected.
      */
     data class FloatValue(
         val value: Double,
-    ) : Unexpected()
+    ) : Unexpected() {
+        override fun hashCode(): Int {
+            val bits = value.toBits()
+            return (bits xor (bits ushr 32)).toInt()
+        }
+    }
 
     /**
      * The input contained a `Char` that was not expected.
      */
     data class CharValue(
         val value: Char,
-    ) : Unexpected()
+    ) : Unexpected() {
+        override fun hashCode(): Int = value.code
+    }
 
     /**
      * The input contained a `String` that was not expected.

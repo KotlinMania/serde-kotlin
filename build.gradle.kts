@@ -661,6 +661,81 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
     versions.kotlinWebHelpers.version = providers.gradleProperty("node.kotlinWebHelpers.version").getOrElse("3.1.0")
 }
 
+fun patchRootSwiftPackage(packageDir: File) {
+    if (!packageDir.exists()) return
+
+    val staleLexErrorWrapper =
+        Regex(
+            """\n\s+public func from\(\n\s+err: ExportedKotlinPackages\.io\.github\.kotlinmania\.procmacro2\.LexError\n\s+\) -> ExportedKotlinPackages\.io\.github\.kotlinmania\.syn\.SynError \{\n\s+return ExportedKotlinPackages\.io\.github\.kotlinmania\.syn\.SynError\.__createClassWrapper\(externalRCRef: io_github_kotlinmania_syn_SynError_Companion_from__TypesOfArguments__ExportedKotlinPackages_io_github_kotlinmania_procmacro2_LexError__\(self\.__externalRCRef\(\), err\.__externalRCRef\(\)\)\)\n\s+\}""",
+        )
+    val staleLexErrorBridge =
+        Regex(
+            """\n@ExportedBridge\("io_github_kotlinmania_syn_SynError_Companion_from__TypesOfArguments__ExportedKotlinPackages_io_github_kotlinmania_procmacro2_LexError__"\)\npublic fun io_github_kotlinmania_syn_SynError_Companion_from__TypesOfArguments__ExportedKotlinPackages_io_github_kotlinmania_procmacro2_LexError__\(self: kotlin\.native\.internal\.NativePtr, err: kotlin\.native\.internal\.NativePtr\): kotlin\.native\.internal\.NativePtr \{\n\s+val __self = kotlin\.native\.internal\.ref\.dereferenceExternalRCRef\(self\) as io\.github\.kotlinmania\.syn\.SynError\.Companion\n\s+val __err = kotlin\.native\.internal\.ref\.dereferenceExternalRCRef\(err\) as io\.github\.kotlinmania\.procmacro2\.LexError\n\s+val _result = run \{ __self\.from\(__err\) \}\n\s+return kotlin\.native\.internal\.ref\.createRetainedExternalRCRef\(_result\)\n\}""",
+        )
+
+    packageDir
+        .walkTopDown()
+        .filter { it.isFile && (it.extension == "swift" || it.extension == "kt") }
+        .forEach { generatedFile ->
+            val text = generatedFile.readText()
+            val patched =
+                staleLexErrorBridge.replace(
+                    staleLexErrorWrapper.replace(text, ""),
+                    "",
+                )
+            if (patched != text) {
+                generatedFile.writeText(patched)
+            }
+        }
+}
+
+val patchMacosArm64DebugSwiftPackage =
+    tasks.register("patchMacosArm64DebugSwiftPackage") {
+        dependsOn("macosArm64DebugGenerateSPMPackage")
+        doLast {
+            patchRootSwiftPackage(
+                layout.buildDirectory
+                    .dir("SPMPackage/macosArm64/Debug")
+                    .get()
+                    .asFile,
+            )
+        }
+    }
+
+tasks.configureEach {
+    if (name == "macosArm64DebugBuildSPMPackage") {
+        dependsOn(patchMacosArm64DebugSwiftPackage)
+    }
+}
+
+project(":serde-derive") {
+    val patchSerdeDeriveMacosArm64DebugSwiftPackage =
+        tasks.register("patchMacosArm64DebugSwiftPackage") {
+            dependsOn("macosArm64DebugGenerateSPMPackage")
+            dependsOn("macosArm64DebugSwiftExport")
+            doLast {
+                patchRootSwiftPackage(
+                    layout.buildDirectory
+                        .dir("SPMPackage/macosArm64/Debug")
+                        .get()
+                        .asFile,
+                )
+                patchRootSwiftPackage(
+                    layout.buildDirectory
+                        .dir("SwiftExport/macosArm64/Debug/files")
+                        .get()
+                        .asFile,
+                )
+            }
+        }
+
+    tasks.configureEach {
+        if (name == "macosArm64DebugBuildSPMPackage") {
+            dependsOn(patchSerdeDeriveMacosArm64DebugSwiftPackage)
+        }
+    }
+}
+
 // ============================================================================
 // Maven Central publishing
 // ============================================================================
