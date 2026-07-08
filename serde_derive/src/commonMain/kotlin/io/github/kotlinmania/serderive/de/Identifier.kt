@@ -203,7 +203,7 @@ private fun deserializeIdentifier(
         val ident = field.ident
         // `aliases` also contains a main name
         val byteAliases = field.aliases.map { alias ->
-            Literal.byteString(alias.value.toByteArray())
+            Literal.byteString(alias.value.encodeToByteArray())
         }
         quote("`#`(`#`byteAliases),* => _serde.`#`Private::Ok(`#`thisValue::`#`ident),")
     }

@@ -1,5 +1,5 @@
+// port-lint: source internals/symbol.rs
 package io.github.kotlinmania.serderive.internals
-
 
 import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Path
@@ -58,6 +58,3 @@ public val TRY_FROM: Symbol = Symbol("try_from")
 public val UNTAGGED: Symbol = Symbol("untagged")
 public val VARIANT_IDENTIFIER: Symbol = Symbol("variant_identifier")
 public val WITH: Symbol = Symbol("with")
-
-// Removed invalid Companion extensions
-
