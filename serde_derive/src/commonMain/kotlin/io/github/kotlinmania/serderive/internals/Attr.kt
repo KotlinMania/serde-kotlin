@@ -1288,7 +1288,14 @@ private fun parseTypeParamBounds(input: io.github.kotlinmania.syn.ParseBuffer): 
             // Parse a trait path.
             val pathResult = input.parse(io.github.kotlinmania.syn.PathParse)
             if (pathResult.isFailure) break
-            list.pushValue(io.github.kotlinmania.syn.TypeParamBound.Trait(pathResult.getOrThrow()))
+            list.pushValue(
+                io.github.kotlinmania.syn.TypeParamBound.Trait(
+                    parenToken = null,
+                    modifier = io.github.kotlinmania.syn.TraitBoundModifier.None,
+                    lifetimes = null,
+                    path = pathResult.getOrThrow(),
+                )
+            )
         }
         if (!input.peek(io.github.kotlinmania.syn.PlusPeek)) break
         val plusResult = input.parse(io.github.kotlinmania.syn.PlusParse)
@@ -1538,4 +1545,3 @@ public sealed class Default {
     public object Plain : Default()
     public class Path(public val path: io.github.kotlinmania.syn.Expr.Path) : Default()
 }
-

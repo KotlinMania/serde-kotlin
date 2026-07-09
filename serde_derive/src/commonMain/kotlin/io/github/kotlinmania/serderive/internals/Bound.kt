@@ -20,6 +20,7 @@ import io.github.kotlinmania.syn.ReturnType
 import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.TypeParamBoundList
+import io.github.kotlinmania.syn.TraitBoundModifier
 import io.github.kotlinmania.syn.WherePredicate
 import io.github.kotlinmania.syn.BareFnArg
 import io.github.kotlinmania.syn.WherePredicateList
@@ -252,7 +253,14 @@ public fun withBound(
 
     fun makeWhereBoundedType(boundedTy: SynType.Path, bound: Path): WherePredicate {
         val boundsList = TypeParamBoundList()
-        boundsList.pushValue(TypeParamBound.Trait(bound.deepCopy()))
+        boundsList.pushValue(
+            TypeParamBound.Trait(
+                parenToken = null,
+                modifier = TraitBoundModifier.None,
+                lifetimes = null,
+                path = bound.deepCopy(),
+            )
+        )
         return WherePredicate.TypePredicate(
             boundedTy = boundedTy,
             colonToken = Colon.default(),
@@ -286,7 +294,14 @@ public fun withSelfBound(
 ): Generics {
     val mutGenerics = generics.copy()
     val boundsList = TypeParamBoundList()
-    boundsList.pushValue(TypeParamBound.Trait(bound.deepCopy()))
+    boundsList.pushValue(
+        TypeParamBound.Trait(
+            parenToken = null,
+            modifier = TraitBoundModifier.None,
+            lifetimes = null,
+            path = bound.deepCopy(),
+        )
+    )
     mutGenerics.makeWhereClause().predicates.pushValue(
         WherePredicate.TypePredicate(
             boundedTy = typeOfItem(cont),
