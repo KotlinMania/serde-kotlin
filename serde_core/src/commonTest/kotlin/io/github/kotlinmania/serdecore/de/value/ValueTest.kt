@@ -38,6 +38,36 @@ public class ValueTest {
         assertEquals("Variant", variant)
         assertEquals(Unit, access.unitVariant().getOrThrow())
     }
+
+    @Test
+    public fun mapDeserializerNextEntrySeedConsumesKeyAndValueTogether() {
+        val deserializer =
+            mapDeserializer(
+                listOf(
+                    MapEntry("left".intoDeserializer(), "1".intoDeserializer()),
+                    MapEntry("right".intoDeserializer(), "2".intoDeserializer()),
+                ).iterator(),
+            )
+
+        assertEquals("left" to "1", deserializer.nextEntrySeed(StringSeed, StringSeed).getOrThrow())
+        assertEquals("right" to "2", deserializer.nextEntrySeed(StringSeed, StringSeed).getOrThrow())
+        assertEquals(null, deserializer.nextEntrySeed(StringSeed, StringSeed).getOrThrow())
+        assertEquals(Unit, deserializer.end().getOrThrow())
+    }
+
+    @Test
+    public fun mapDeserializerNextKeyStoresValueForNextValue() {
+        val deserializer =
+            mapDeserializer(
+                listOf(
+                    MapEntry("key".intoDeserializer(), "value".intoDeserializer()),
+                ).iterator(),
+            )
+
+        assertEquals("key", deserializer.nextKeySeed(StringSeed).getOrThrow())
+        assertEquals("value", deserializer.nextValueSeed(StringSeed).getOrThrow())
+        assertEquals(null, deserializer.nextKeySeed(StringSeed).getOrThrow())
+    }
 }
 
 private data object StringKindVisitor : Visitor<String> {

@@ -982,6 +982,7 @@ public final class io/github/kotlinmania/serdecore/de/value/MapDeserializer : io
 	public final fun end ()Lio/github/kotlinmania/serde/SerdeResult;
 	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
 	public fun nextElementSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun nextEntrySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextKeySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
