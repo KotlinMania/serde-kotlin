@@ -24,7 +24,7 @@ import io.github.kotlinmania.syn.token.Gt
 import io.github.kotlinmania.syn.token.Lt
 import io.github.kotlinmania.syn.token.PathSep
 
-public fun replaceReceiver(input: DeriveInput) {
+public fun replaceReceiver(input: DeriveInput): DeriveInput {
     val ident = input.ident
     val tyGenerics = input.generics.splitForImpl().typeGenerics
     val selfTyTokens = TokenStream.new()
@@ -33,8 +33,10 @@ public fun replaceReceiver(input: DeriveInput) {
     val selfTy = parseSelfTy(selfTyTokens)
 
     val visitor = ReplaceReceiver(selfTy)
-    require(visitor.visitGenericsMut(input.generics) === input.generics)
-    require(visitor.visitDataMut(input.data) === input.data)
+    return input.copy(
+        generics = visitor.visitGenericsMut(input.generics),
+        data = visitor.visitDataMut(input.data),
+    )
 }
 
 private fun parseSelfTy(tokens: TokenStream): SynType.Path {

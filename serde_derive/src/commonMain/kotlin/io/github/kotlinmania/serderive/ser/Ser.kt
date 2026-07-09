@@ -44,10 +44,10 @@ import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.span
 
 public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
-    replaceReceiver(input)
+    val rewrittenInput = replaceReceiver(input)
 
     val ctxt = Ctxt()
-    val cont = Container.fromAst(ctxt, input, Derive.Serialize, Private.ident())
+    val cont = Container.fromAst(ctxt, rewrittenInput, Derive.Serialize, Private.ident())
     if (cont == null) {
         ctxt.check()
         return TokenStream.new()
@@ -59,11 +59,11 @@ public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
     val params = SerParameters(cont)
     val (implGenerics, tyGenerics, whereClause) = params.generics.splitForImpl()
     val body = Stmts(serializeBody(cont, params))
-    val allowDeprecated = allowDeprecated(input)
+    val allowDeprecated = allowDeprecated(rewrittenInput)
 
     val implBlock = if (cont.attrs.remote() != null) {
         val remote = cont.attrs.remote()!!
-        val vis = input.vis
+        val vis = rewrittenInput.vis
         val used = pretendUsed(cont, params.isPacked)
         quote("""
             `#`[automatically_derived]
@@ -164,7 +164,7 @@ private fun buildGenerics(cont: Container): Generics {
 
 // Parse a quote string into a Path, equivalent to Rust's parse_quote!().
 private fun parseQuotePath(template: String): Path {
-    val tokens = quote(template)
+    val tokens = quote(template.replace(".", "::"))
     val result = parse2(PathParse, tokens)
     return result.getOrThrow()
 }

@@ -25,10 +25,55 @@ private class PathTokens(private val path: Path) : ToTokens {
 
 private fun Path.asToTokens(): ToTokens = PathTokens(this)
 
+private fun parseNestedMetaCompat(
+    attr: Attribute,
+    logic: (ParseNestedMeta) -> SynResult<Unit>,
+): SynResult<Unit> {
+    val meta = attr.meta as? Meta.List ?: return SynResult.failure(SynError.newSpanned(attr, "expected attribute arguments"))
+    return parseNestedMetaTokensCompat(meta.tokens, logic)
+}
+
+private fun parseNestedMetaCompat(
+    meta: ParseNestedMeta,
+    logic: (ParseNestedMeta) -> SynResult<Unit>,
+): SynResult<Unit> {
+    val tokens = meta.input.toList()
+    val group = tokens.singleOrNull() as? TokenTree.Group
+    return parseNestedMetaTokensCompat(group?.value?.stream() ?: meta.input, logic)
+}
+
+private fun parseNestedMetaTokensCompat(
+    tokens: TokenStream,
+    logic: (ParseNestedMeta) -> SynResult<Unit>,
+): SynResult<Unit> {
+    val entries = mutableListOf<MutableList<TokenTree>>(mutableListOf())
+    for (token in tokens) {
+        if (token is TokenTree.Punct && token.value.asChar() == ',') {
+            entries.add(mutableListOf())
+        } else {
+            entries.last() += token
+        }
+    }
+
+    for (entry in entries.filter { it.isNotEmpty() }) {
+        val inputStart = entry.indexOfFirst { token ->
+            token is TokenTree.Group || token is TokenTree.Punct && token.value.asChar() == '='
+        }.let { if (it == -1) entry.size else it }
+        val pathResult = parse2(PathParse, TokenStream.fromTokenTrees(entry.take(inputStart)))
+        if (pathResult.isFailure) return SynResult.failure(pathResult.exceptionOrNull()!!)
+        val result = logic(ParseNestedMeta(pathResult.getOrThrow(), TokenStream.fromTokenTrees(entry.drop(inputStart))))
+        if (result.isFailure) return result
+    }
+    return SynResult.success(Unit)
+}
+
 // Helper: build a PathSegmentList from a list of PathSegments
 private fun pathSegmentListFrom(segments: List<PathSegment>): PathSegmentList {
     val list = PathSegmentList()
-    for (seg in segments) {
+    for ((index, seg) in segments.withIndex()) {
+        if (index > 0) {
+            list.pushPunct(io.github.kotlinmania.syn.token.PathSep.default())
+        }
         list.pushValue(seg)
     }
     return list
@@ -255,7 +300,7 @@ public class AttrContainer(
                 }
 
                 try {
-                    attr.parseNestedMeta { meta ->
+                    val parseResult = parseNestedMetaCompat(attr) { meta ->
                         if (RENAME == meta.path) {
                             val (ser, de) = getRenames(cx, RENAME, meta)
                             serName.setOpt(meta.path, ser?.let { Name.from(it) })
@@ -397,6 +442,9 @@ public class AttrContainer(
                             throw meta.error("unknown serde container attribute `$pathStr`")
                         }
                         SynResult.success(Unit)
+                    }
+                    if (parseResult.isFailure) {
+                        cx.synError(parseResult.exceptionOrNull()!!)
                     }
                 } catch (err: SynError) {
                     cx.synError(err)
@@ -623,7 +671,7 @@ public class AttrVariant(
                 }
 
                 try {
-                    attr.parseNestedMeta { meta ->
+                    val parseResult = parseNestedMetaCompat(attr) { meta ->
                         if (RENAME == meta.path) {
                             val (ser, de) = getMultipleRenames(cx, meta)
                             serName.setOpt(meta.path, ser?.let { Name.from(it) })
@@ -706,6 +754,9 @@ public class AttrVariant(
                             throw meta.error("unknown serde variant attribute `$pathStr`")
                         }
                         SynResult.success(Unit)
+                    }
+                    if (parseResult.isFailure) {
+                        cx.synError(parseResult.exceptionOrNull()!!)
                     }
                 } catch (err: SynError) {
                     cx.synError(err)
@@ -840,7 +891,7 @@ public class AttrField(
             }
 
             try {
-                attr.parseNestedMeta { meta ->
+                val parseResult = parseNestedMetaCompat(attr) { meta ->
                     if (RENAME == meta.path) {
                         val (ser, de) = getMultipleRenames(cx, meta)
                         serName.setOpt(meta.path, ser?.let { Name.from(it) })
@@ -934,6 +985,9 @@ public class AttrField(
                         throw meta.error("unknown serde field attribute `$pathStr`")
                     }
                     SynResult.success(Unit)
+                }
+                if (parseResult.isFailure) {
+                    cx.synError(parseResult.exceptionOrNull()!!)
                 }
             } catch (err: SynError) {
                 cx.synError(err)
@@ -1093,21 +1147,22 @@ private fun getLitStr2(
     meta: ParseNestedMeta
 ): LitStr? {
     val valueTokens = meta.value()
-    // Parse the token stream manually: a string literal is a single Lit.Str token.
-    val iter = valueTokens.iterator()
-    if (iter.hasNext()) {
-        val token = iter.next()
-        if (token is TokenTree.Literal && !iter.hasNext()) {
-            val lit = token.value
-            // Try to extract as string literal
-            val text = lit.toString()
-            if (text.startsWith("\"") && text.endsWith("\"")) {
-                val inner = text.substring(1, text.length - 1)
-                return LitStr.new(inner, lit.span())
-            }
-        }
+    val tokens = valueTokens.toList()
+    val valueStart =
+        if (tokens.firstOrNull().let { it is TokenTree.Punct && it.value.asChar() == '=' }) 1 else 0
+    val literalTokens = TokenStream.fromTokenTrees(tokens.drop(valueStart))
+    val litResult = parse2(LitParse, literalTokens)
+    if (litResult.isFailure) {
+        cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
+        return null
     }
-    cx.errorSpannedBy(valueTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
+    val lit = litResult.getOrThrow()
+    if (lit is Lit.Str) {
+        return lit.value
+    }
+    val errorTokens = TokenStream.new()
+    lit.toTokens(errorTokens)
+    cx.errorSpannedBy(errorTokens, "expected serde $attrName attribute to be a string: `$metaItemName = \"...\"`")
     return null
 }
 
@@ -1117,7 +1172,8 @@ private fun parseLitIntoPath(
     meta: ParseNestedMeta
 ): Path? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse, string.toTokenStream())
+    val tokens = TokenStream.fromString(string.value()).getOrThrow()
+    val result = parse2(PathParse, tokens)
     if (result.isFailure) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
         return null
@@ -1131,9 +1187,8 @@ private fun parseLitIntoExprPath(
     meta: ParseNestedMeta
 ): io.github.kotlinmania.syn.Expr.Path? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    // Workaround: ExprParse is internal in syn-kotlin 0.2.0 metadata.
-    // Parse the string as a Path, then wrap it in an Expr.Path.
-    val pathResult = io.github.kotlinmania.syn.parseStr(io.github.kotlinmania.syn.PathParse, string.value())
+    val tokens = TokenStream.fromString(string.value()).getOrThrow()
+    val pathResult = parse2(PathParse, tokens)
     if (pathResult.isFailure) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.value()}")
         return null
@@ -1369,7 +1424,7 @@ private fun <T> getSerAndDe(
         }
     } else {
         // Try parsing as `(serialize = "...", deserialize = "...")`
-        meta.parseNestedMeta { subMeta ->
+        val parseResult = parseNestedMetaCompat(meta) { subMeta ->
             if (subMeta.path == SERIALIZE) {
                 val v = f(cx, attrName, SERIALIZE, subMeta)
                 if (v != null) {
@@ -1381,11 +1436,14 @@ private fun <T> getSerAndDe(
                     deMeta.insert(subMeta.path, v)
                 }
             } else {
-                return@parseNestedMeta io.github.kotlinmania.syn.SynResult.failure(
+                    return@parseNestedMetaCompat io.github.kotlinmania.syn.SynResult.failure(
                     subMeta.error("malformed $attrName attribute, expected `$attrName(serialize = ..., deserialize = ...)`")
                 )
             }
             io.github.kotlinmania.syn.SynResult.success(Unit)
+        }
+        if (parseResult.isFailure) {
+            cx.synError(parseResult.exceptionOrNull()!!)
         }
     }
 

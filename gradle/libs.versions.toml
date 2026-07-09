@@ -12,7 +12,7 @@ kotlinxBenchmark = "0.4.17"
 # Sibling KotlinMania ports consumed by :serde-derive (the serde_derive analogue)
 syn = "0.3.1"
 quote = "0.2.0"
-procMacro2 = "0.1.6"
+procMacro2 = "0.1.5"
 # build-logic convention-plugin toolchain + plugin deps (mirrors km-io)
 multi-release-toolchain = "17"
 dokka = "2.2.0"

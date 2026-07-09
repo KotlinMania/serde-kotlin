@@ -47,12 +47,14 @@ import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.WhereClause
 import io.github.kotlinmania.syn.span
+import io.github.kotlinmania.syn.token.Comma
+import io.github.kotlinmania.syn.token.Plus
 
 public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
-    replaceReceiver(input)
+    val rewrittenInput = replaceReceiver(input)
 
     val ctxt = Ctxt()
-    val cont = Container.fromAst(ctxt, input, Derive.Deserialize, Private.ident())
+    val cont = Container.fromAst(ctxt, rewrittenInput, Derive.Deserialize, Private.ident())
     if (cont == null) {
         ctxt.check()
         return TokenStream.new()
@@ -65,11 +67,11 @@ public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
     val (deImplGenerics, _, tyGenerics, whereClause) = params.genericsWithDeLifetime()
     val body = Stmts(deserializeBody(cont, params))
     val delife = params.borrowed.deLifetime()
-    val allowDeprecated = allowDeprecated(input)
+    val allowDeprecated = allowDeprecated(rewrittenInput)
 
     val implBlock = if (cont.attrs.remote() != null) {
         val remote = cont.attrs.remote()!!
-        val vis = input.vis
+        val vis = rewrittenInput.vis
         val used = pretendUsed(cont, params.isPacked)
         quote("""
             `#`[automatically_derived]
@@ -172,22 +174,21 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
         null -> {
             val g3 = when (cont.attrs.default()) {
                 is Default.Plain ->
-                    withSelfBound(cont, g2, parseQuotePath("_serde.`#`Private.Default"))
+                    withSelfBound(cont, g2, parseQuotePath("_serde::`#`Private::Default", "Private" to Private))
                 is Default.None,
                 is Default.Path -> g2
             }
 
-            val delife = borrowed.deLifetime()
             val g4 = withBound(
                 cont, g3,
                 ::needsDeserializeBound,
-                parseQuotePath("_serde.Deserialize<`#`delife>")
+                parseQuotePath("_serde::Deserialize")
             )
 
             withBound(
                 cont, g4,
                 ::requiresDefault,
-                parseQuotePath("_serde.`#`Private.Default")
+                parseQuotePath("_serde::`#`Private::Default", "Private" to Private)
             )
         }
         else -> withWherePredicates(g2, deBound)
@@ -223,7 +224,7 @@ sealed class BorrowedLifetimes {
                 lifetime = Lifetime.new("'de", Span.callSite()),
                 colonToken = null,
                 bounds = io.github.kotlinmania.syn.LifetimeList().also { ll ->
-                    for (lt in lifetimes) ll.pushValue(lt)
+                    for (lt in lifetimes) ll.push(lt) { Plus.default() }
                 }
             )
             is Static -> null
@@ -470,7 +471,7 @@ class DeImplGenerics(val params: Parameters) : ToTokens {
                 newParams.add(p)
             }
             generics = generics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
-                for (p in newParams) gpl.pushValue(p)
+                for (p in newParams) gpl.push(p) { Comma.default() }
             })
         }
         val split = generics.splitForImpl()
@@ -501,7 +502,7 @@ private fun deTypeGenericsToTokens(
             newParams.add(p)
         }
         mutGenerics = mutGenerics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
-            for (p in newParams) gpl.pushValue(p)
+            for (p in newParams) gpl.push(p) { Comma.default() }
         })
     }
     val split = mutGenerics.splitForImpl()
@@ -509,8 +510,11 @@ private fun deTypeGenericsToTokens(
 }
 
 // Parse a quote string into a Path, equivalent to Rust's parse_quote!().
-private fun parseQuotePath(template: String): Path {
-    val tokens = quote(template)
+private fun parseQuotePath(
+    template: String,
+    vararg substitutions: Pair<String, Any?>,
+): Path {
+    val tokens = quote(template, *substitutions)
     val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse, tokens)
     return result.getOrThrow()
 }
