@@ -1,12 +1,12 @@
 {
   "type": "port",
-  "name": "serde",
+  "name": "serde_derive",
   "source": {
-    "path": "tmp/serde/serde/src/private",
+    "path": "../tmp/serde/serde_derive/src",
     "lang": "rust"
   },
   "target": {
-    "path": "serde/src/commonMain/kotlin/io/github/kotlinmania/serde/priv",
+    "path": "src/commonMain/kotlin/io/github/kotlinmania/serderive",
     "lang": "kotlin"
   },
   "checks": {
