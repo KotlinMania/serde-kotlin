@@ -8,6 +8,16 @@ import kotlin.test.assertEquals
 
 public class SerializerTest {
     @Test
+    public fun collectSeqSerializesIterableItemsWithLengthHint() {
+        val result =
+            SequenceRecordingSerializer()
+                .collectSeq(listOf(SerializerLiteralSerialize("a"), SerializerLiteralSerialize("b")))
+                .getOrThrow()
+
+        assertEquals("Seq(2:a,b)", result)
+    }
+
+    @Test
     public fun collectSeqSerializesLazySequenceItems() {
         val result =
             SequenceRecordingSerializer()
@@ -15,6 +25,20 @@ public class SerializerTest {
                 .getOrThrow()
 
         assertEquals("Seq(null:a,b)", result)
+    }
+
+    @Test
+    public fun collectMapSerializesIterablePairsWithLengthHint() {
+        val result =
+            SequenceRecordingSerializer()
+                .collectMap(
+                    listOf(
+                        SerializerLiteralSerialize("left") to SerializerLiteralSerialize("1"),
+                        SerializerLiteralSerialize("right") to SerializerLiteralSerialize("2"),
+                    ),
+                ).getOrThrow()
+
+        assertEquals("Map(2:left=1,right=2)", result)
     }
 
     @Test
