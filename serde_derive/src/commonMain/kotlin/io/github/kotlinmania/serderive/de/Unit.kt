@@ -1,7 +1,7 @@
 // port-lint: source de/unit.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.quote
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.AttrContainer
 

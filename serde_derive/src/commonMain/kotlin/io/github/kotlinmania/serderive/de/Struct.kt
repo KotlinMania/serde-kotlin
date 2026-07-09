@@ -3,8 +3,8 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.quote
+import io.github.kotlinmania.serderive.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Default
 import io.github.kotlinmania.serderive.internals.Expr

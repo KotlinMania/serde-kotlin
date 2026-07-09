@@ -5,8 +5,8 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.quote
+import io.github.kotlinmania.serderive.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.AttrField
 import io.github.kotlinmania.serderive.internals.AttrVariant
@@ -316,13 +316,13 @@ private fun deserializeInPlaceBody(cont: Container, params: Parameters): Stmts? 
     val stmts = Stmts(code)
 
     return Stmts(Fragment.Block(quote("""
-        fun deserialize_in_place<__D>(__deserializer: __D, __place: var this) -> _serde.`#`Private.Result<(), __D.Error>
+        fn deserialize_in_place<__D>(__deserializer: __D, __place: &mut Self) -> _serde::`#`Private::Result<(), __D::Error>
         where
-            __D: _serde.Deserializer<`#`delife>,
+            __D: _serde::Deserializer<`#`delife>,
         {
             `#`stmts
         }
-    """)))
+    """, mapOf("Private" to Private, "delife" to delife, "stmts" to stmts))))
 }
 
 private fun deserializeTransparent(cont: Container, params: Parameters): Fragment {
@@ -418,11 +418,11 @@ internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {
         is Default.Plain -> {
             val span = field.original.span()
-            return Fragment.Expr(quoteSpanned(span, "_serde.`#`Private.Default::default()"))
+            return Fragment.Expr(quoteSpanned(span, "_serde::`#`Private::Default::default()", "Private" to Private))
         }
         is Default.Path -> {
             val p = (field.attrs.default() as Default.Path).path
-            return Fragment.Expr(quoteSpanned(p.span(), "`#`p()"))
+            return Fragment.Expr(quoteSpanned(p.span(), "`#`p()", "p" to p))
         }
         is Default.None -> {}
     }
@@ -431,15 +431,15 @@ internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
         is Default.Plain,
         is Default.Path -> {
             val member = field.member
-            return Fragment.Expr(quote("__default.`#`member"))
+            return Fragment.Expr(quote("__default.`#`member", "member" to member))
         }
         is Default.None -> {}
     }
 
     val name = field.attrs.name().deserializeName()
     return when (field.attrs.deserializeWith()) {
-        null -> Fragment.Expr(quote("_serde.`#`Private.de::missing_field(`#`name)?"))
-        else -> Fragment.Expr(quote("return _serde.`#`Private.Err(<__A.Error as _serde::de::Error>::missing_field(`#`name))"))
+        null -> Fragment.Expr(quote("_serde::`#`Private::de::missing_field(`#`name)?", mapOf("Private" to Private, "name" to name)))
+        else -> Fragment.Expr(quote("return _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::missing_field(`#`name))", mapOf("Private" to Private, "name" to name)))
     }
 }
 
@@ -449,11 +449,15 @@ internal fun exprIsMissingSeq(
     when (field.attrs.default()) {
         is Default.Plain -> {
             val span = field.original.span()
-            return quoteSpanned(span, "`#`assignTo _serde.`#`Private.Default::default()")
+            return quoteSpanned(
+                span,
+                "`#`assignTo _serde::`#`Private::Default::default()",
+                mapOf("assignTo" to assignTo, "Private" to Private),
+            )
         }
         is Default.Path -> {
             val p = (field.attrs.default() as Default.Path).path
-            return quoteSpanned(p.span(), "`#`assignTo `#`p()")
+            return quoteSpanned(p.span(), "`#`assignTo `#`p()", mapOf("assignTo" to assignTo, "p" to p))
         }
         is Default.None -> {}
     }
@@ -462,10 +466,13 @@ internal fun exprIsMissingSeq(
         is Default.Plain,
         is Default.Path -> {
             val member = field.member
-            quote("`#`assignTo __default.`#`member")
+            quote("`#`assignTo __default.`#`member", mapOf("assignTo" to assignTo, "member" to member))
         }
         is Default.None -> {
-            quote("return _serde.`#`Private.Err(_serde::de::Error::invalid_length(`#`index, &`#`expecting))")
+            quote(
+                "return _serde::`#`Private::Err(_serde::de::Error::invalid_length(`#`index, &`#`expecting))",
+                mapOf("Private" to Private, "index" to index, "expecting" to expecting),
+            )
         }
     }
 }
@@ -565,14 +572,18 @@ internal fun deserializeSeq(
     val letValues = vars.zip(fields).map { (varIdent, field) ->
         if (field.attrs.skipDeserializing()) {
             val default = Expr(exprIsMissing(field, cattrs))
-            quote("val `#`varIdent = `#`default")
+            quote("let `#`varIdent = `#`default;", mapOf("varIdent" to varIdent, "default" to default))
         } else {
             val visit = when (val path = field.attrs.deserializeWith()) {
                 null -> {
                     val fieldTy = field.ty
                     val span = field.original.span()
-                    val func = quoteSpanned(span, "_serde::de::SeqAccess::next_element::<`#`fieldTy>")
-                    quote("`#`func(&mut __seq)?")
+                    val func = quoteSpanned(
+                        span,
+                        "_serde::de::SeqAccess::next_element::<`#`fieldTy>",
+                        "fieldTy" to fieldTy,
+                    )
+                    quote("`#`func(&mut __seq)?", "func" to func)
                 }
                 else -> {
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
@@ -581,17 +592,22 @@ internal fun deserializeSeq(
                         _serde.`#`Private::Option::map(
                             _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq)?,
                             |__wrap| __wrap.value)
-                    }""")
+                    }""", mapOf("wrapper" to wrapper, "Private" to Private, "wrapperTy" to wrapperTy))
                 }
             }
             val valueIfNone = exprIsMissingSeq(null, indexInSeq, field, cattrs, expectingVal)
             indexInSeq += 1
             quote("""
-                val `#`varIdent = when `#`visit {
-                    _serde.`#`Private::Some(__value) -> __value
-                    _serde.`#`Private::None -> `#`valueIfNone
-                }
-            """)
+                let `#`varIdent = match `#`visit {
+                    _serde::`#`Private::Some(__value) => __value,
+                    _serde::`#`Private::None => `#`valueIfNone,
+                };
+            """, mapOf(
+                "varIdent" to varIdent,
+                "visit" to visit,
+                "Private" to Private,
+                "valueIfNone" to valueIfNone,
+            ))
         }
     }
 
@@ -599,25 +615,28 @@ internal fun deserializeSeq(
         val nameAssigns = fields.mapIndexed { i, field ->
             val member = field.member
             val v = vars[i]
-            quote("`#`member: `#`v")
+            quote("`#`member: `#`v", mapOf("member" to member, "v" to v))
         }
-        quote("`#`typePath { `#`(`#`nameAssigns),* }")
+        quote("`#`typePath { `#`(`#`nameAssigns),* }", mapOf("typePath" to typePath, "nameAssigns" to nameAssigns))
     } else {
-        quote("`#`typePath(`#`(`#`vars),*)")
+        quote("`#`typePath(`#`(`#`vars),*)", mapOf("typePath" to typePath, "vars" to vars))
     }
 
     if (params.hasGetter) {
         val thisType = params.thisType
         val split = params.generics.splitForImpl()
         val tyGenerics = split.typeGenerics
-        result = quote("_serde.`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)")
+        result = quote(
+            "_serde::`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)",
+            mapOf("Private" to Private, "thisType" to thisType, "tyGenerics" to tyGenerics, "result" to result),
+        )
     }
 
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("val __default: Self.Value = _serde.`#`Private::Default::default()")
+        is Default.Plain -> quote("let __default: Self::Value = _serde::`#`Private::Default::default();", "Private" to Private)
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
-            quoteSpanned(p.span(), "val __default: Self.Value = `#`p()")
+            quoteSpanned(p.span(), "let __default: Self::Value = `#`p();", "p" to p)
         }
         is Default.None -> quote("")
     }
@@ -625,8 +644,13 @@ internal fun deserializeSeq(
     return Fragment.Block(quote("""
         `#`letDefault
         `#`(`#`letValues)*
-        _serde.`#`Private::Ok(`#`result)
-    """))
+        _serde::`#`Private::Ok(`#`result)
+    """, mapOf(
+        "letDefault" to letDefault,
+        "letValues" to letValues,
+        "Private" to Private,
+        "result" to result,
+    )))
 }
 
 // Generates the sequence of write-statements for in-place deserialization
@@ -651,33 +675,45 @@ internal fun deserializeSeqInPlace(
 
         if (field.attrs.skipDeserializing()) {
             val default = Expr(exprIsMissing(field, cattrs))
-            quote("self.place.`#`member = `#`default")
+            quote("self.place.`#`member = `#`default;", mapOf("member" to member, "default" to default))
         } else {
-            val valueIfNone = exprIsMissingSeq(quote("self.place.`#`member = "), indexInSeq, field, cattrs, expectingVal)
+            val valueIfNone = exprIsMissingSeq(
+                quote("self.place.`#`member = ", "member" to member),
+                indexInSeq,
+                field,
+                cattrs,
+                expectingVal,
+            )
             val write = when (val path = field.attrs.deserializeWith()) {
                 null -> quote("""
-                    if _serde.`#`Private::None == _serde::de::SeqAccess::next_element_seed(&mut __seq,
-                        _serde.`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
+                    if let _serde::`#`Private::None = _serde::de::SeqAccess::next_element_seed(&mut __seq,
+                        _serde::`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
                     {
-                        `#`valueIfNone
+                        `#`valueIfNone;
                     }
-                """)
+                """, mapOf("Private" to Private, "member" to member, "valueIfNone" to valueIfNone))
                 else -> {
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
                     quote("""{
                         `#`wrapper
-                        when _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq) {
-                            _serde.`#`Private::Ok(_serde.`#`Private::Some(__wrap)) -> {
-                                self.place.`#`member = __wrap.value
+                        match _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq) {
+                            _serde::`#`Private::Ok(_serde::`#`Private::Some(__wrap)) => {
+                                self.place.`#`member = __wrap.value;
                             }
-                            _serde.`#`Private::Ok(_serde.`#`Private::None) -> {
-                                `#`valueIfNone
+                            _serde::`#`Private::Ok(_serde::`#`Private::None) => {
+                                `#`valueIfNone;
                             }
-                            _serde.`#`Private::Err(__err) -> {
-                                return _serde.`#`Private::Err(__err)
+                            _serde::`#`Private::Err(__err) => {
+                                return _serde::`#`Private::Err(__err);
                             }
                         }
-                    }""")
+                    }""", mapOf(
+                        "wrapper" to wrapper,
+                        "wrapperTy" to wrapperTy,
+                        "Private" to Private,
+                        "member" to member,
+                        "valueIfNone" to valueIfNone,
+                    ))
                 }
             }
             indexInSeq += 1
@@ -689,10 +725,17 @@ internal fun deserializeSeqInPlace(
     val split = params.generics.splitForImpl()
     val tyGenerics = split.typeGenerics
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("val __default: `#`thisType `#`tyGenerics = _serde.`#`Private::Default::default()")
+        is Default.Plain -> quote(
+            "let __default: `#`thisType `#`tyGenerics = _serde::`#`Private::Default::default();",
+            mapOf("thisType" to thisType, "tyGenerics" to tyGenerics, "Private" to Private),
+        )
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
-            quoteSpanned(p.span(), "val __default: `#`thisType `#`tyGenerics = `#`p()")
+            quoteSpanned(
+                p.span(),
+                "let __default: `#`thisType `#`tyGenerics = `#`p();",
+                mapOf("thisType" to thisType, "tyGenerics" to tyGenerics, "p" to p),
+            )
         }
         is Default.None -> quote("")
     }
@@ -700,8 +743,8 @@ internal fun deserializeSeqInPlace(
     return Fragment.Block(quote("""
         `#`letDefault
         `#`(`#`writeValues)*
-        _serde.`#`Private::Ok(())
-    """))
+        _serde::`#`Private::Ok(())
+    """, mapOf("letDefault" to letDefault, "writeValues" to writeValues, "Private" to Private)))
 }
 
 // Wraps the expression in a serde deserializeWith attribute in a trait
@@ -718,30 +761,45 @@ internal fun wrapDeserializeWith(
 
     // If the path returns the wrong type, the error will be reported on the
     // span of the path itself — the same span the user wrote in the attribute.
-    val value = quoteSpanned(deserializeWith.span(), "`#`deserializeWith(`#`deserializerVar)?")
+    val value = quoteSpanned(
+        deserializeWith.span(),
+        "`#`deserializeWith(`#`deserializerVar)?",
+        mapOf("deserializeWith" to deserializeWith, "deserializerVar" to deserializerVar),
+    )
     val wrapper = quote("""
         `#`[doc(hidden)]
         struct __DeserializeWith `#`deImplGenerics `#`whereClause {
             value: `#`valueTy,
-            phantom: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            phantom: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`deImplGenerics _serde::Deserialize<`#`delife> for __DeserializeWith `#`deTyGenerics `#`whereClause {
-            fun deserialize<__D>(`#`deserializerVar: __D) -> _serde.`#`Private::Result<this, __D.Error>
+            fn deserialize<__D>(`#`deserializerVar: __D) -> _serde::`#`Private::Result<Self, __D::Error>
             where
                 __D: _serde::Deserializer<`#`delife>,
             {
-                _serde.`#`Private::Ok(__DeserializeWith {
+                _serde::`#`Private::Ok(__DeserializeWith {
                     value: `#`value,
-                    phantom: _serde.`#`Private::PhantomData,
-                    lifetime: _serde.`#`Private::PhantomData,
+                    phantom: _serde::`#`Private::PhantomData,
+                    lifetime: _serde::`#`Private::PhantomData,
                 })
             }
         }
-    """)
-    val wrapperTy = quote("__DeserializeWith `#`deTyGenerics")
+    """, mapOf(
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "valueTy" to valueTy,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "delife" to delife,
+        "deTyGenerics" to deTyGenerics,
+        "deserializerVar" to deserializerVar,
+        "value" to value,
+    ))
+    val wrapperTy = quote("__DeserializeWith `#`deTyGenerics", "deTyGenerics" to deTyGenerics)
     return Pair(wrapper, wrapperTy)
 }
 
@@ -750,7 +808,7 @@ internal fun wrapDeserializeFieldWith(
     fieldTy: SynType,
     deserializeWith: io.github.kotlinmania.syn.Expr.Path
 ): Pair<TokenStream, TokenStream> {
-    return wrapDeserializeWith(params, quote("`#`fieldTy"), deserializeWith)
+    return wrapDeserializeWith(params, quote("`#`fieldTy", "fieldTy" to fieldTy), deserializeWith)
 }
 
 // Generates a closure that converts a single input parameter to the final value.

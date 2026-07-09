@@ -11,8 +11,7 @@ ktlint = "14.2.0"
 kotlinxBenchmark = "0.4.17"
 # Sibling KotlinMania ports consumed by :serde-derive (the serde_derive analogue)
 syn = "0.3.1"
-quote = "0.2.0"
-procMacro2 = "0.1.5"
+quote = "0.2.2"
 # build-logic convention-plugin toolchain + plugin deps (mirrors km-io)
 multi-release-toolchain = "17"
 dokka = "2.2.0"
@@ -46,7 +45,7 @@ kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-
 # Sibling KotlinMania ports — published Maven artifacts consumed by :serde-derive only
 syn-kotlin = { module = "io.github.kotlinmania:syn-kotlin", version.ref = "syn" }
 quote-kotlin = { module = "io.github.kotlinmania:quote-kotlin", version.ref = "quote" }
-proc-macro2-kotlin = { module = "io.github.kotlinmania:proc-macro2-kotlin", version.ref = "procMacro2" }
+proc-macro2-kotlin = { module = "io.github.kotlinmania:proc-macro2-kotlin", version = { strictly = "0.1.5" } }
 
 [bundles]
 # :serde-core (serde_core analogue) — the runtime data-model deps

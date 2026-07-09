@@ -4,7 +4,7 @@ package io.github.kotlinmania.serderive
 import io.github.kotlinmania.procmacro2.Literal
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.quote
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Fragment
@@ -41,7 +41,10 @@ internal fun deserializeCustom(
             // last variant (checked in checkIdentifier), so all preceding
             // are ordinary variants.
             val ordinary = variants.subList(0, variants.size - 1)
-            val fallthrough = quote("_serde.`#`Private::Ok(`#`thisValue::`#`lastIdent)")
+            val fallthrough = quote(
+                "_serde::`#`Private::Ok(`#`thisValue::`#`lastIdent)",
+                mapOf("Private" to Private, "thisValue" to thisValue, "lastIdent" to lastIdent),
+            )
             Triple(ordinary, fallthrough, null)
         } else if (last.style == Style.Newtype) {
             val ordinary = variants.subList(0, variants.size - 1)
@@ -52,12 +55,17 @@ internal fun deserializeCustom(
                             _serde.`#`Private::de::IdentifierDeserializer::from(`#`value)
                         ),
                         `#`thisValue::`#`lastIdent)
-                """)
+                """, mapOf(
+                    "Private" to Private,
+                    "value" to value,
+                    "thisValue" to thisValue,
+                    "lastIdent" to lastIdent,
+                ))
             }
             Triple(
                 ordinary,
                 fallthrough(quote("__value")),
-                fallthrough(quote("_serde.`#`Private::de::Borrowed(__value)"))
+                fallthrough(quote("_serde::`#`Private::de::Borrowed(__value)", "Private" to Private))
             )
         } else {
             Triple(variants, null, null)
@@ -81,12 +89,12 @@ internal fun deserializeCustom(
         quote("""
             `#`[doc(hidden)]
             const VARIANTS: &'static [&'static str] = &[ `#`(`#`names),* ];
-        """)
+        """, "names" to names)
     } else {
         quote("""
             `#`[doc(hidden)]
             const FIELDS: &'static [&'static str] = &[ `#`(`#`names),* ];
-        """)
+        """, "names" to names)
     }
 
     val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.genericsWithDeLifetime()
@@ -123,7 +131,17 @@ internal fun deserializeCustom(
             lifetime: _serde.`#`Private::PhantomData,
         };
         _serde::Deserializer::deserialize_identifier(__deserializer, __visitor)
-    """))
+    """, mapOf(
+        "namesConst" to namesConst,
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "visitorImpl" to visitorImpl,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "delife" to delife,
+        "deTyGenerics" to deTyGenerics,
+    )))
 }
 
 internal fun deserializeGenerated(
@@ -180,7 +198,13 @@ internal fun deserializeGenerated(
                 _serde::Deserializer::deserialize_identifier(__deserializer, __FieldVisitor)
             }
         }
-    """))
+    """, mapOf(
+        "lifetime" to lifetime,
+        "fieldIdents" to fieldIdents,
+        "ignoreVariant" to ignoreVariant,
+        "visitorImpl" to visitorImpl,
+        "Private" to Private,
+    )))
 }
 
 private fun deserializeIdentifier(
@@ -196,7 +220,10 @@ private fun deserializeIdentifier(
         val ident = field.ident
         val aliases = field.aliases
         // aliases also contains a main name
-        quote("`#`(`#`aliases),* => _serde.`#`Private::Ok(`#`thisValue::`#`ident),")
+        quote(
+            "`#`(`#`aliases),* => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
+            mapOf("aliases" to aliases, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
+        )
     }
 
     val bytesMapping = deserializedFields.map { field ->
@@ -205,7 +232,10 @@ private fun deserializeIdentifier(
         val byteAliases = field.aliases.map { alias ->
             Literal.byteString(alias.value.encodeToByteArray())
         }
-        quote("`#`(`#`byteAliases),* => _serde.`#`Private::Ok(`#`thisValue::`#`ident),")
+        quote(
+            "`#`(`#`byteAliases),* => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
+            mapOf("byteAliases" to byteAliases, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
+        )
     }
 
     val expectingVal = expecting ?: if (isVariant) "variant identifier" else "field identifier"
@@ -213,16 +243,16 @@ private fun deserializeIdentifier(
     val bytesToStr = if (fallthrough != null || collectOtherFields) {
         null
     } else {
-        quote("let __value = &_serde.`#`Private::from_utf8_lossy(__value);")
+        quote("let __value = &_serde::`#`Private::from_utf8_lossy(__value);", "Private" to Private)
     }
 
     val (valueAsStrContent, valueAsBorrowedStrContent, valueAsBytesContent, valueAsBorrowedBytesContent) =
         if (collectOtherFields) {
             Quad(
-                quote("let __value = _serde.`#`Private::de::Content::String(_serde.`#`Private::ToString::to_string(__value));"),
-                quote("let __value = _serde.`#`Private::de::Content::Str(__value);"),
-                quote("let __value = _serde.`#`Private::de::Content::ByteBuf(__value.to_vec());"),
-                quote("let __value = _serde.`#`Private::de::Content::Bytes(__value);")
+                quote("let __value = _serde::`#`Private::de::Content::String(_serde::`#`Private::ToString::to_string(__value));", "Private" to Private),
+                quote("let __value = _serde::`#`Private::de::Content::Str(__value);", "Private" to Private),
+                quote("let __value = _serde::`#`Private::de::Content::ByteBuf(__value.to_vec());", "Private" to Private),
+                quote("let __value = _serde::`#`Private::de::Content::Bytes(__value);", "Private" to Private)
             )
         } else {
             Quad(null, null, null, null)
@@ -231,9 +261,9 @@ private fun deserializeIdentifier(
     val fallthroughArm = if (fallthrough != null) {
         fallthrough
     } else if (isVariant) {
-        quote("_serde.`#`Private::Err(_serde::de::Error::unknown_variant(__value, VARIANTS))")
+        quote("_serde::`#`Private::Err(_serde::de::Error::unknown_variant(__value, VARIANTS))", "Private" to Private)
     } else {
-        quote("_serde.`#`Private::Err(_serde::de::Error::unknown_field(__value, FIELDS))")
+        quote("_serde::`#`Private::Err(_serde::de::Error::unknown_field(__value, FIELDS))", "Private" to Private)
     }
 
     val visitOther = if (collectOtherFields) {
@@ -328,11 +358,14 @@ private fun deserializeIdentifier(
             {
                 _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Unit))
             }
-        """)
+        """, "Private" to Private)
     } else {
         val u64Mapping = deserializedFields.mapIndexed { i, field ->
             val ident = field.ident
-            quote("`#`i => _serde.`#`Private::Ok(`#`thisValue::`#`ident)")
+            quote(
+                "`#`i => _serde::`#`Private::Ok(`#`thisValue::`#`ident)",
+                mapOf("i" to i, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
+            )
         }
 
         val u64FallthroughArm = if (fallthrough != null) {
@@ -345,7 +378,7 @@ private fun deserializeIdentifier(
                     _serde::de::Unexpected::Unsigned(__value),
                     &`#`fallthroughMsg,
                 ))
-            """)
+            """, mapOf("Private" to Private, "fallthroughMsg" to fallthroughMsg))
         }
 
         quote("""
@@ -358,7 +391,11 @@ private fun deserializeIdentifier(
                     _ => `#`u64FallthroughArm,
                 }
             }
-        """)
+        """, mapOf(
+            "Private" to Private,
+            "u64Mapping" to u64Mapping,
+            "u64FallthroughArm" to u64FallthroughArm,
+        ))
     }
 
     val visitBorrowed = if (fallthroughBorrowed != null || collectOtherFields) {
@@ -390,7 +427,15 @@ private fun deserializeIdentifier(
                     }
                 }
             }
-        """)
+        """, mapOf(
+            "Private" to Private,
+            "strMapping" to strMapping,
+            "valueAsBorrowedStrContent" to valueAsBorrowedStrContent,
+            "fallthroughBorrowedArm" to fallthroughBorrowedArm,
+            "bytesMapping" to bytesMapping,
+            "bytesToStr" to bytesToStr,
+            "valueAsBorrowedBytesContent" to valueAsBorrowedBytesContent,
+        ))
     } else {
         null
     }
@@ -430,7 +475,18 @@ private fun deserializeIdentifier(
         }
 
         `#`visitBorrowed
-    """))
+    """, mapOf(
+        "Private" to Private,
+        "expectingVal" to expectingVal,
+        "visitOther" to visitOther,
+        "strMapping" to strMapping,
+        "valueAsStrContent" to valueAsStrContent,
+        "fallthroughArm" to fallthroughArm,
+        "bytesMapping" to bytesMapping,
+        "bytesToStr" to bytesToStr,
+        "valueAsBytesContent" to valueAsBytesContent,
+        "visitBorrowed" to visitBorrowed,
+    )))
 }
 
 private data class Quad<A, B, C, D>(

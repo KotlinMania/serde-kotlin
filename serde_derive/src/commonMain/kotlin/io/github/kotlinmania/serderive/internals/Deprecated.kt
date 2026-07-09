@@ -1,7 +1,7 @@
 package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.quote
 import io.github.kotlinmania.syn.Attribute
 import io.github.kotlinmania.syn.Data
 import io.github.kotlinmania.syn.DeriveInput

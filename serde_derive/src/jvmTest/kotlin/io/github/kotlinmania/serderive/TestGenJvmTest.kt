@@ -12,6 +12,7 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.concurrent.thread
 
 class TestGenJvmTest {
     @Test
@@ -143,7 +144,7 @@ private fun compileDerives(
         edition = "2021"
 
         [dependencies]
-        serde = "1"
+        serde = { path = "${root.resolve("tmp/serde/serde")}" }
         """.trimIndent() + "\n",
     )
     fixture.resolve("src/lib.rs").writeText(
@@ -158,15 +159,22 @@ private fun compileDerives(
     )
 
     val process =
-        ProcessBuilder("cargo", "check", "--quiet", "--manifest-path", fixture.resolve("Cargo.toml").toString())
+        ProcessBuilder("cargo", "check", "--offline", "--quiet", "--manifest-path", fixture.resolve("Cargo.toml").toString())
             .redirectErrorStream(true)
             .start()
+    val diagnostics = StringBuilder()
+    val outputReader = thread(name = "cargo-output-$fixtureName") {
+        process.inputStream.bufferedReader().useLines { lines ->
+            lines.forEach { diagnostics.appendLine(it) }
+        }
+    }
     val finished = process.waitFor(2, TimeUnit.MINUTES)
     if (!finished) {
         process.destroyForcibly()
     }
+    outputReader.join()
     assertTrue(finished, "cargo check timed out for $fixtureName")
-    return CargoOutput(process.exitValue(), process.inputStream.bufferedReader().readText())
+    return CargoOutput(process.exitValue(), diagnostics.toString())
 }
 
 private fun renderRust(tokens: TokenStream): String =

@@ -3,8 +3,8 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.quote
+import io.github.kotlinmania.serderive.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Container
 import io.github.kotlinmania.serderive.internals.Ctxt
@@ -323,7 +323,10 @@ private fun serializeStructTagField(cattrs: AttrContainer, structTrait: StructTr
         is TagType.Internal -> {
             val typeName = cattrs.name().serializeName()
             val func = structTrait.serializeField(Span.callSite())
-            quote("`#`func(&mut __serde_state, `#`tag, `#`typeName)?;")
+            quote(
+                "`#`func(&mut __serde_state, `#`tag, `#`typeName)?;",
+                mapOf("func" to func, "tag" to tag.tag, "typeName" to typeName),
+            )
         }
         else -> TokenStream.new()
     }
@@ -352,21 +355,29 @@ private fun serializeStructAsStruct(
                 null -> quote("1")
                 else -> {
                     val fieldExpr = getMember(params, field, field.member)
-                    quote("if `#`path(`#`fieldExpr) { 0 } else { 1 }")
+                    quote(
+                        "if `#`path(`#`fieldExpr) { 0 } else { 1 }",
+                        mapOf("path" to path, "fieldExpr" to fieldExpr),
+                    )
                 }
             }
         }
         .fold(if (tagFieldExists) quote("1") else quote("0")) { sum, expr ->
-            quote("`#`sum + `#`expr")
+            quote("`#`sum + `#`expr", mapOf("sum" to sum, "expr" to expr))
         }
 
-    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
     return Fragment.Block(quote("""
-        let `#`letMut __serde_state = _serde.Serializer::serialize_struct(__serializer, `#`typeName, `#`len)?;
+        let `#`letMut __serde_state = _serde::Serializer::serialize_struct(__serializer, `#`typeName, `#`len)?;
         `#`tagField
-        `#`stmts
+        `#`(`#`serializeFields)*
         _serde::ser::SerializeStruct::end(__serde_state)
-    """))
+    """, mapOf(
+        "letMut" to letMut,
+        "typeName" to typeName,
+        "len" to len,
+        "tagField" to tagField,
+        "serializeFields" to serializeFields,
+    )))
 }
 
 private fun serializeStructAsMap(
@@ -384,13 +395,17 @@ private fun serializeStructAsMap(
 
     val letMut = mutIf(serializedFields.isNotEmpty() || tagFieldExists)
 
-    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
     return Fragment.Block(quote("""
-        let `#`letMut __serde_state = _serde::Serializer::serialize_map(__serializer, _serde.`#`Private.None)?;
+        let `#`letMut __serde_state = _serde::Serializer::serialize_map(__serializer, _serde::`#`Private::None)?;
         `#`tagField
-        `#`stmts
+        `#`(`#`serializeFields)*
         _serde::ser::SerializeMap::end(__serde_state)
-    """))
+    """, mapOf(
+        "letMut" to letMut,
+        "Private" to Private,
+        "tagField" to tagField,
+        "serializeFields" to serializeFields,
+    )))
 }
 
 private fun serializeEnum(params: SerParameters, variants: List<Variant>, cattrs: AttrContainer): Fragment {
@@ -1047,7 +1062,7 @@ private fun serializeStructVisitor(
         val member = field.member
 
         var fieldExpr = if (isEnum) {
-            quote("`#`member")
+            quote("`#`member", "member" to member)
         } else {
             getMember(params, field, member)
         }
@@ -1055,7 +1070,7 @@ private fun serializeStructVisitor(
         val keyExpr = field.attrs.name().serializeName()
 
         val skip = field.attrs.skipSerializingIf()?.let { path ->
-            quote("`#`path(`#`fieldExpr)")
+            quote("`#`path(`#`fieldExpr)", mapOf("path" to path, "fieldExpr" to fieldExpr))
         }
 
         field.attrs.serializeWith()?.let { path ->
@@ -1065,10 +1080,16 @@ private fun serializeStructVisitor(
         val span = field.original.span()
         val ser = if (field.attrs.flatten()) {
             val func = quoteSpanned(span, "_serde::Serialize::serialize")
-            quote("`#`func(&`#`fieldExpr, _serde.`#`Private.ser::FlatMapSerializer(&mut __serde_state))?;")
+            quote(
+                "`#`func(&`#`fieldExpr, _serde::`#`Private::ser::FlatMapSerializer(&mut __serde_state))?;",
+                mapOf("func" to func, "fieldExpr" to fieldExpr, "Private" to Private),
+            )
         } else {
             val func = structTrait.serializeField(span)
-            quote("`#`func(&mut __serde_state, `#`keyExpr, `#`fieldExpr)?;")
+            quote(
+                "`#`func(&mut __serde_state, `#`keyExpr, `#`fieldExpr)?;",
+                mapOf("func" to func, "keyExpr" to keyExpr, "fieldExpr" to fieldExpr),
+            )
         }
 
         dstFields.add(when (skip) {
@@ -1082,13 +1103,13 @@ private fun serializeStructVisitor(
                         } else {
                             `#`skipFunc(&mut __serde_state, `#`keyExpr)?;
                         }
-                    """)
+                    """, mapOf("skip" to skip, "ser" to ser, "skipFunc" to skipFunc, "keyExpr" to keyExpr))
                 } else {
                     quote("""
                         if !`#`skip {
                             `#`ser
                         }
-                    """)
+                    """, mapOf("skip" to skip, "ser" to ser))
                 }
             }
         })
@@ -1102,7 +1123,12 @@ private fun wrapSerializeFieldWith(
     serializeWith: Expr.Path,
     fieldExpr: TokenStream
 ): TokenStream {
-    return wrapSerializeWith(params, serializeWith, listOf(fieldTy), listOf(quote("`#`fieldExpr")))
+    return wrapSerializeWith(
+        params,
+        serializeWith,
+        listOf(fieldTy),
+        listOf(quote("`#`fieldExpr", "fieldExpr" to fieldExpr)),
+    )
 }
 
 private fun wrapSerializeVariantWith(
@@ -1116,7 +1142,7 @@ private fun wrapSerializeVariantWith(
             is Member.Named -> member.ident
             is Member.Unnamed -> fieldI(member.index.index.toInt())
         }
-        quote("`#`id")
+        quote("`#`id", "id" to id)
     }
     return wrapSerializeWith(params, serializeWith, fieldTys, fieldExprs)
 }
@@ -1149,7 +1175,12 @@ private fun wrapSerializeWith(
     // will be reported on the serde with attribute.
     val wrapperSerialize = quoteSpanned(serializeWith.span(), """
         `#`serializeWith(`#`(`#`selfVar.values.`#`fieldAccess, )* `#`serializerVar)
-    """)
+    """, mapOf(
+        "serializeWith" to serializeWith,
+        "selfVar" to selfVar,
+        "fieldAccess" to fieldAccess,
+        "serializerVar" to serializerVar,
+    ))
 
     return quote("""
         &{
@@ -1174,7 +1205,19 @@ private fun wrapSerializeWith(
                 phantom: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             }
         }
-    """)
+    """, mapOf(
+        "wrapperImplGenerics" to wrapperImplGenerics,
+        "whereClause" to whereClause,
+        "fieldTys" to fieldTys,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "wrapperTyGenerics" to wrapperTyGenerics,
+        "selfVar" to selfVar,
+        "serializerVar" to serializerVar,
+        "wrapperSerialize" to wrapperSerialize,
+        "fieldExprs" to fieldExprs,
+    ))
 }
 
 // Serialization of an empty struct produces a state token that does not
@@ -1193,24 +1236,30 @@ private fun getMember(params: SerParameters, field: Field, member: Member): Toke
     return when {
         !params.isRemote && field.attrs.getter() == null -> {
             if (params.isPacked) {
-                quote("&{ `#`selfVar.`#`member }")
+                quote("&{ `#`selfVar.`#`member }", mapOf("selfVar" to selfVar, "member" to member))
             } else {
-                quote("&`#`selfVar.`#`member")
+                quote("&`#`selfVar.`#`member", mapOf("selfVar" to selfVar, "member" to member))
             }
         }
         params.isRemote && field.attrs.getter() == null -> {
             val inner = if (params.isPacked) {
-                quote("&{ `#`selfVar.`#`member }")
+                quote("&{ `#`selfVar.`#`member }", mapOf("selfVar" to selfVar, "member" to member))
             } else {
-                quote("&`#`selfVar.`#`member")
+                quote("&`#`selfVar.`#`member", mapOf("selfVar" to selfVar, "member" to member))
             }
             val ty = field.ty
-            quote("_serde.`#`Private.ser::constrain::<`#`ty>(`#`inner)")
+            quote(
+                "_serde::`#`Private::ser::constrain::<`#`ty>(`#`inner)",
+                mapOf("Private" to Private, "ty" to ty, "inner" to inner),
+            )
         }
         params.isRemote -> {
             val ty = field.ty
             val getter = field.attrs.getter()!!
-            quote("_serde.`#`Private.ser::constrain::<`#`ty>(&`#`getter(`#`selfVar))")
+            quote(
+                "_serde::`#`Private::ser::constrain::<`#`ty>(&`#`getter(`#`selfVar))",
+                mapOf("Private" to Private, "ty" to ty, "getter" to getter, "selfVar" to selfVar),
+            )
         }
         else -> {
             error("getter is only allowed for remote impls")
