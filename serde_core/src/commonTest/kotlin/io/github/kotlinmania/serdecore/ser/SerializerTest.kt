@@ -39,6 +39,13 @@ public class SerializerTest {
 
         assertEquals("Map(null:key=value)", map.end().getOrThrow())
     }
+
+    @Test
+    public fun collectStrSerializesDisplayValue() {
+        val result = FieldRecordingSerializer().collectStr(DisplayValue("displayed")).getOrThrow()
+
+        assertEquals("displayed", result)
+    }
 }
 
 private class SequenceRecordingSerializer : FailingSerializer() {
@@ -94,4 +101,10 @@ private data class SerializerLiteralSerialize(
     private val text: String,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeStr(text)
+}
+
+private data class DisplayValue(
+    private val text: String,
+) {
+    override fun toString(): String = text
 }

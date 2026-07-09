@@ -1642,7 +1642,7 @@ public final class io/github/kotlinmania/serdecore/priv/StringKt {
 
 public final class io/github/kotlinmania/serdecore/ser/FormatterSerializer : io/github/kotlinmania/serdecore/ser/Serializer {
 	public fun <init> (Ljava/lang/Appendable;)V
-	public fun collectStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun collectStr (Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun serializeBool (Z)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun serializeBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun serializeChar (C)Lio/github/kotlinmania/serde/SerdeResult;
@@ -1795,7 +1795,7 @@ public abstract interface class io/github/kotlinmania/serdecore/ser/Serializer {
 	public fun collectMap (Lkotlin/sequences/Sequence;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun collectSeq (Ljava/lang/Iterable;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun collectSeq (Lkotlin/sequences/Sequence;)Lio/github/kotlinmania/serde/SerdeResult;
-	public fun collectStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun collectStr (Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun isHumanReadable ()Z
 	public abstract fun serializeBool (Z)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun serializeBytes ([B)Lio/github/kotlinmania/serde/SerdeResult;

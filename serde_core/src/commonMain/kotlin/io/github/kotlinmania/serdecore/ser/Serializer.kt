@@ -319,7 +319,7 @@ interface Serializer<Ok>
      * The default implementation delegates to `serializeStr`. Serializers are encouraged to provide
      * a more efficient implementation if possible.
      */
-    fun collectStr(value: String): SerdeResult<Ok> = serializeStr(value)
+    fun collectStr(value: Any): SerdeResult<Ok> = serializeStr(value.toString())
 
     /**
      * Determine whether `Serialize` implementations should serialize in human-readable form.

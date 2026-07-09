@@ -138,7 +138,7 @@ class FormatterSerializer(
         len: Int,
     ): SerdeResult<SerializeStructVariant<Unit>> = fmtError()
 
-    override fun collectStr(value: String): SerdeResult<Unit> = display(value)
+    override fun collectStr(value: Any): SerdeResult<Unit> = display(value.toString())
 
     private fun display(value: String): SerdeResult<Unit> =
         serdeCatching {
