@@ -52,14 +52,10 @@ val fullTargetBuildTasks = listOf(
     "wasmWasiTestClasses",
     "wasmWasiNodeTest",
     "wasmWasiTest",
-    "androidNativeArm32Binaries",
-    "androidNativeArm32TestBinaries",
     "androidNativeArm64Binaries",
     "androidNativeArm64TestBinaries",
     "androidNativeX64Binaries",
     "androidNativeX64TestBinaries",
-    "androidNativeX86Binaries",
-    "androidNativeX86TestBinaries",
     "iosArm64Binaries",
     "iosArm64TestBinaries",
     "iosSimulatorArm64Binaries",
@@ -249,4 +245,3 @@ tasks.register("test") {
     dependsOn("swiftExportSmokeTest")
     // dependsOn("hostTests") if needed
 }
-
