@@ -1,8 +1,6 @@
 // port-lint: source ser/impossible.rs
 package io.github.kotlinmania.serdecore.ser
 
-import io.github.kotlinmania.serde.SerdeError
-
 import io.github.kotlinmania.serde.SerdeResult
 
 /**
@@ -29,8 +27,10 @@ import io.github.kotlinmania.serde.SerdeResult
  * }
  * ```
  */
-class Impossible<Ok> private constructor(
+class Impossible<Ok, Error> private constructor(
     private val void: Void,
+    private val ok: Ok?,
+    private val error: Error?,
 ) : SerializeSeq<Ok>,
     SerializeTuple<Ok>,
     SerializeTupleStruct<Ok>,
