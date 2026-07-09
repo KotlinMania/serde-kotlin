@@ -40,24 +40,36 @@ class Impossible<Ok, Error> private constructor(
     SerializeStructVariant<Ok>
     {
     override fun <T> serializeElement(value: T): SerdeResult<Unit>
-        where T : Serialize = absurd(void)
+        where T : Serialize {
+        return absurd(void)
+    }
 
-    override fun end(): SerdeResult<Ok> = absurd(void)
+    override fun end(): SerdeResult<Ok> {
+        return absurd(void)
+    }
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
-        where T : Serialize = absurd(void)
+        where T : Serialize {
+        return absurd(void)
+    }
 
     override fun <T> serializeKey(key: T): SerdeResult<Unit>
-        where T : Serialize = absurd(void)
+        where T : Serialize {
+        return absurd(void)
+    }
 
     override fun <T> serializeValue(value: T): SerdeResult<Unit>
-        where T : Serialize = absurd(void)
+        where T : Serialize {
+        return absurd(void)
+    }
 
     override fun <T> serializeField(
         key: String,
         value: T,
     ): SerdeResult<Unit>
-        where T : Serialize = absurd(void)
+        where T : Serialize {
+        return absurd(void)
+    }
 
     override fun skipField(key: String): SerdeResult<Unit> = SerdeResult.success(Unit)
 }

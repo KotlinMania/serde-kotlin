@@ -1,8 +1,8 @@
 # port-lint Proposed Changes
 
-**Generated:** 2026-06-20
-**Source:** tmp/serde/serde_derive
-**Target:** serde_derive
+**Generated:** 2026-07-09
+**Source:** tmp/serde/serde_derive/src
+**Target:** serde_derive/src/commonMain/kotlin/io/github/kotlinmania/serderive
 
 These are review proposals only. They are emitted when a Rust -> Kotlin pair matches only after fallback normalization, so the existing `port-lint` header is not an exact provenance match.
 
