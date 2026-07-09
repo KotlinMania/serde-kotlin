@@ -245,10 +245,8 @@ private fun KotlinMultiplatformExtension.nativeTargets() {
     watchosSimulatorArm64()
     watchosDeviceArm64()
 
-    androidNativeArm32()
     androidNativeArm64()
     androidNativeX64()
-    androidNativeX86()
 
     linuxX64()
     linuxArm64()

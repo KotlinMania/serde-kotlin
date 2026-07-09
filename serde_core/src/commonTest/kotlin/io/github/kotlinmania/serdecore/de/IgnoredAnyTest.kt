@@ -56,6 +56,27 @@ public class IgnoredAnyTest {
         assertEquals("key" to "value", access.nextEntry(LabelDeserialize, LabelDeserialize).getOrThrow())
         assertEquals(null, access.nextEntry(LabelDeserialize, LabelDeserialize).getOrThrow())
     }
+
+    @Test
+    public fun visitSomeDiscardsNestedValue() {
+        assertEquals(IgnoredAny, IgnoredAny.visitSome(CountingDeserializer("some")).getOrThrow())
+    }
+
+    @Test
+    public fun visitNewtypeStructDiscardsNestedValue() {
+        assertEquals(IgnoredAny, IgnoredAny.visitNewtypeStruct(CountingDeserializer("newtype")).getOrThrow())
+    }
+
+    @Test
+    public fun visitEnumDiscardsVariantAndPayload() {
+        val access = RecordingEnumAccess(
+            variant = CountingDeserializer("variant"),
+            payload = CountingDeserializer("payload"),
+        )
+
+        assertEquals(IgnoredAny, IgnoredAny.visitEnum(access).getOrThrow())
+        assertEquals(listOf("variant", "payload"), access.consumedLabels)
+    }
 }
 
 private class RecordingSeqAccess(
@@ -89,6 +110,40 @@ private class RecordingMapAccess(
         pendingValue = null
         consumedLabels += value.label
         return seed.deserialize(value)
+    }
+}
+
+private class RecordingEnumAccess(
+    private val variant: CountingDeserializer,
+    payload: CountingDeserializer,
+) : EnumAccess {
+    private val variantAccess = RecordingVariantAccess(payload)
+    val consumedLabels: MutableList<String> = mutableListOf()
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> {
+        consumedLabels += variant.label
+        return seed.deserialize(variant).map { it to variantAccess }
+    }
+
+    private inner class RecordingVariantAccess(
+        private val payload: CountingDeserializer,
+    ) : VariantAccess {
+        override fun unitVariant(): SerdeResult<Unit> = SerdeResult.success(Unit)
+
+        override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> {
+            consumedLabels += payload.label
+            return seed.deserialize(payload)
+        }
+
+        override fun <V> tupleVariant(
+            len: Int,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("tuple variant was not expected"))
+
+        override fun <V> structVariant(
+            fields: List<String>,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("struct variant was not expected"))
     }
 }
 
