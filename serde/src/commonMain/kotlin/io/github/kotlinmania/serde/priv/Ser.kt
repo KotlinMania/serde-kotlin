@@ -188,7 +188,7 @@ private class TaggedSerializer<Ok, S>(
             SerializeStructVariantAsMapValue(map = map, name = variant, len = len)
         }
 
-    override fun collectStr(value: String): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.String))
+    override fun collectStr(value: Any): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.String))
 }
 
 private enum class Unsupported {
