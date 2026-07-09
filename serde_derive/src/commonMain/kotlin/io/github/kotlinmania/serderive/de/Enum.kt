@@ -10,13 +10,13 @@ import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.TagType
 import io.github.kotlinmania.serderive.internals.Variant
 
-// Generates `Deserialize::deserialize` body for an `enum Enum {...}`
+// Generates the deserialize body for an enum.
 internal fun deserializeEnum(
     params: Parameters,
     variants: List<Variant>,
     cattrs: AttrContainer
 ): Fragment {
-    // The variants have already been checked (in ast.rs) that all untagged variants appear at the end
+    // The variants have already been checked (in Ast.kt) that all untagged variants appear at the end
     val untaggedIdx = variants.indexOfFirst { it.attrs.untagged() }
     return if (untaggedIdx >= 0) {
         val tagged = variants.subList(0, untaggedIdx)

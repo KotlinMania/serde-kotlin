@@ -1,8 +1,8 @@
 // port-lint: source internals/case.rs
 package io.github.kotlinmania.serderive.internals
 
-// Code to convert the Rust-styled field/variant (e.g. `my_field`, `MyType`) to
-// the case of the source (e.g. `my-field`, `MY_FIELD`).
+// Code to convert the styled field/variant (e.g. myField, MyType) to
+// the case of the source (e.g. my-field, MY_FIELD).
 
 // The different possible ways to change case of fields in a struct, or
 // variants in an enum.

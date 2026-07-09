@@ -15,7 +15,7 @@ import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.span
 
-// Generates `Deserialize::deserialize` body for a `struct Struct {...}`
+// Generates the deserialize body for a struct with named fields.
 internal fun deserializeStruct(
     params: Parameters,
     fields: List<Field>,
@@ -29,7 +29,7 @@ internal fun deserializeStruct(
     val delife = params.borrowed.deLifetime()
 
     // If there are getters (implying private fields), construct the local type
-    // and use an `Into` conversion to get the remote type. If there are no
+    // and use an Into conversion to get the remote type. If there are no
     // getters then construct the target type directly.
     val construct = if (params.hasGetter) {
         val local = params.local
@@ -80,7 +80,7 @@ internal fun deserializeStruct(
     val hasFlatten = hasFlatten(fields)
     val fieldVisitor = Stmts(deserializeFieldIdentifier(deserializedFields, cattrs, hasFlatten))
 
-    // untagged struct variants do not get a visit_seq method. The same applies to
+    // Untagged struct variants do not get a visitSeq method. The same applies to
     // structs that only have a map representation.
     val visitSeq = when (form) {
         is StructForm.Untagged -> null
@@ -444,10 +444,9 @@ private fun deserializeMap(
     val letDefault = when (cattrs.default()) {
         is Default.Plain -> quote("let __default: Self::Value = _serde.`#`Private::Default::default();",
             "Private" to Private)
-        // If #path returns wrong type, error will be reported here (^^^^^).
-        // We attach span of the path to the function so it will be reported
-        // on the #[serde(default = "...")]
-        //                          ^^^^^
+        // If the path returns the wrong type, the error will be reported here.
+        // We attach the span of the path to the function so it will be reported
+        // on the serde default attribute.
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
             quoteSpanned(p.span(), "let __default: Self::Value = `#`p();",
@@ -504,7 +503,7 @@ private fun deserializeMap(
         "resultExpr" to resultExpr))
 }
 
-// Generates `Deserialize::deserialize_in_place` body for a `struct Struct {...}`
+// Generates the deserialize-in-place body for a struct with named fields.
 internal fun deserializeStructInPlace(
     params: Parameters,
     fields: List<Field>,
@@ -619,7 +618,7 @@ private fun deserializeMapInPlace(
         Pair(field, fieldI(i))
     }
 
-    // For deserialize_in_place, declare booleans for each field that will be
+    // For in-place deserialization, declare booleans for each field that will be
     // deserialized.
     val letFlags = fieldsNames
         .filter { (field, _) -> !field.attrs.skipDeserializing() }
@@ -751,10 +750,9 @@ private fun deserializeMapInPlace(
             "thisType" to thisType,
             "tyGenerics" to tyGenerics,
             "Private" to Private)
-        // If #path returns wrong type, error will be reported here (^^^^^).
-        // We attach span of the path to the function so it will be reported
-        // on the #[serde(default = "...")]
-        //                          ^^^^^
+        // If the path returns the wrong type, the error will be reported here.
+        // We attach the span of the path to the function so it will be reported
+        // on the serde default attribute.
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
             quoteSpanned(p.span(), "let __default: `#`thisType `#`tyGenerics = `#`p();",
@@ -787,8 +785,8 @@ private fun deserializeMapInPlace(
         "Private" to Private))
 }
 
-// Generates enum and its `Deserialize` implementation that represents each
-// non-skipped field of the struct
+// Generates the enum and its Deserialize implementation that represents each
+// non-skipped field of the struct.
 private fun deserializeFieldIdentifier(
     deserializedFields: List<FieldWithAliases>,
     cattrs: AttrContainer,

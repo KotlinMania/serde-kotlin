@@ -14,7 +14,7 @@ import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 import io.github.kotlinmania.syn.span
 
-// Generates `Deserialize::deserialize` body for an `enum Enum {...}` without additional attributes
+// Generates the deserialize body for an enum without additional attributes.
 internal fun deserializeEnumExternally(
     params: Parameters,
     variants: List<Variant>,

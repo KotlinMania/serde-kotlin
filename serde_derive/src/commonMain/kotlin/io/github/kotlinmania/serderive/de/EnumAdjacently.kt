@@ -11,7 +11,7 @@ import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 import io.github.kotlinmania.syn.span
 
-// Generates `Deserialize::deserialize` body for an `enum Enum {...}` with `#[serde(tag, content)]` attributes
+// Generates the deserialize body for an enum with the tag and content attributes.
 internal fun deserializeEnumAdjacently(
     params: Parameters,
     variants: List<Variant>,

@@ -11,7 +11,7 @@ import io.github.kotlinmania.syn.ParseMacroSynResult
 import io.github.kotlinmania.syn.parseMacroInput
 
 // The private sentinel type used in generated code to access serde's
-// private API surface. Maps to `struct private` in upstream lib.rs.
+// private API surface. Maps to the private sentinel in upstream.
 internal object Private : ToTokens {
     fun ident(): Ident = Ident.new("__private0", Span.callSite())
 
@@ -20,7 +20,7 @@ internal object Private : ToTokens {
     }
 }
 
-// Entry point for #[derive(Serialize)]. Parses the token stream into a
+// Entry point for the Serialize derive. Parses the token stream into a
 // DeriveInput, delegates to expandDeriveSerialize, and converts errors to
 // compile errors.
 public fun deriveSerialize(input: TokenStream): TokenStream {
@@ -31,7 +31,7 @@ public fun deriveSerialize(input: TokenStream): TokenStream {
     }
 }
 
-// Entry point for #[derive(Deserialize)]. Parses the token stream into a
+// Entry point for the Deserialize derive. Parses the token stream into a
 // DeriveInput, delegates to expandDeriveDeserialize, and converts errors to
 // compile errors.
 public fun deriveDeserialize(input: TokenStream): TokenStream {
