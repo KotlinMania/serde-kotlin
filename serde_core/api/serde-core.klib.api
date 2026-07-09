@@ -1030,6 +1030,18 @@ final class io.github.kotlinmania.serdecore.de.value/CowStrDeserializer : io.git
     }
 }
 
+final class io.github.kotlinmania.serdecore.de.value/Error { // io.github.kotlinmania.serdecore.de.value/Error|null[0]
+    final fun description(): kotlin/String // io.github.kotlinmania.serdecore.de.value/Error.description|description(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de.value/Error.equals|equals(kotlin.Any?){}[0]
+    final fun fmt(): kotlin/String // io.github.kotlinmania.serdecore.de.value/Error.fmt|fmt(){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de.value/Error.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de.value/Error.toString|toString(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serdecore.de.value/Error.Companion|null[0]
+        final fun custom(kotlin/String): io.github.kotlinmania.serdecore.de.value/Error // io.github.kotlinmania.serdecore.de.value/Error.Companion.custom|custom(kotlin.String){}[0]
+    }
+}
+
 final class io.github.kotlinmania.serdecore.de.value/F32Deserializer : io.github.kotlinmania.serdecore.de.value/PrimitiveDeserializer<kotlin/Float> { // io.github.kotlinmania.serdecore.de.value/F32Deserializer|null[0]
     final object Companion { // io.github.kotlinmania.serdecore.de.value/F32Deserializer.Companion|null[0]
         final fun new(kotlin/Float): io.github.kotlinmania.serdecore.de.value/F32Deserializer // io.github.kotlinmania.serdecore.de.value/F32Deserializer.Companion.new|new(kotlin.Float){}[0]

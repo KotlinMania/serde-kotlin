@@ -31,6 +31,23 @@ import io.github.kotlinmania.serde.serdeCatching
  * Not a `Throwable` subclass — avoids Swift export's Class Stdlib hazard
  * (unchecked-cast bridge on `Throwable.getStackTrace()`).
  */
+class Error private constructor(
+    private val err: String,
+) {
+    fun fmt(): String = err
+
+    fun description(): String = err
+
+    override fun toString(): String = fmt()
+
+    override fun equals(other: Any?): Boolean = other is Error && other.err == err
+
+    override fun hashCode(): Int = err.hashCode()
+
+    companion object {
+        fun custom(msg: String): Error = Error(msg)
+    }
+}
 
 
 // //////////////////////////////////////////////////////////////////////////////

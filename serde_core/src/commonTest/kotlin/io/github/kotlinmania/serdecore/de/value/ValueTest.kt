@@ -10,6 +10,17 @@ import kotlin.test.assertEquals
 
 public class ValueTest {
     @Test
+    public fun errorCustomCarriesDisplayAndDescriptionText() {
+        val error = Error.custom("expected unit")
+
+        assertEquals("expected unit", error.fmt())
+        assertEquals("expected unit", error.description())
+        assertEquals("expected unit", error.toString())
+        assertEquals(Error.custom("expected unit"), error)
+        assertEquals(Error.custom("expected unit").hashCode(), error.hashCode())
+    }
+
+    @Test
     public fun strDeserializerVisitsBorrowedStringPath() {
         assertEquals("str:value", StrDeserializer.new("value").deserializeAny(StringKindVisitor).getOrThrow())
         assertEquals("str:value", StrDeserializer.new("value").deserializeString(StringKindVisitor).getOrThrow())
