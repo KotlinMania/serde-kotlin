@@ -28,4 +28,4 @@ interface Serialize {
      * implement this method.
      */
     fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        }
+}
