@@ -1792,7 +1792,9 @@ public abstract interface class io/github/kotlinmania/serdecore/ser/SerializeTup
 
 public abstract interface class io/github/kotlinmania/serdecore/ser/Serializer {
 	public fun collectMap (Ljava/lang/Iterable;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun collectMap (Lkotlin/sequences/Sequence;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun collectSeq (Ljava/lang/Iterable;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun collectSeq (Lkotlin/sequences/Sequence;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun collectStr (Ljava/lang/String;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun isHumanReadable ()Z
 	public abstract fun serializeBool (Z)Lio/github/kotlinmania/serde/SerdeResult;

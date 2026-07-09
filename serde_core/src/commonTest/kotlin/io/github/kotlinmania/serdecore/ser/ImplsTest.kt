@@ -74,7 +74,7 @@ public class ImplsTest {
 
 private data object TestError : Error()
 
-private open class FailingSerializer : Serializer<String> {
+internal open class FailingSerializer : Serializer<String> {
     protected fun <T> unexpected(): SerdeResult<T> = SerdeResult.failure(SerdeError("unexpected serializer method"))
 
     override fun serializeBool(v: Boolean): SerdeResult<String> = unexpected()
@@ -174,7 +174,7 @@ private class StructRecordingSerializer : FailingSerializer() {
     ): SerdeResult<SerializeStruct<String>> = SerdeResult.success(RecordingStruct(name, len))
 }
 
-private class FieldRecordingSerializer : FailingSerializer() {
+internal class FieldRecordingSerializer : FailingSerializer() {
     override fun serializeStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 
     override fun serializeU32(v: UInt): SerdeResult<String> = SerdeResult.success(v.toString())

@@ -261,6 +261,19 @@ interface Serializer<Ok>
         }
 
     /**
+     * Collect a lazy sequence as a sequence.
+     */
+    fun <T> collectSeq(iter: Sequence<T>): SerdeResult<Ok>
+        where T : Serialize =
+        serdeCatching {
+            val serializer = serializeSeq(iteratorLenHint(iter)).getOrThrow()
+            for (item in iter) {
+                serializer.serializeElement(item).getOrThrow()
+            }
+            serializer.end().getOrThrow()
+        }
+
+    /**
      * Collect an iterator as a map.
      *
      * The default implementation serializes each pair yielded by the iterable using
@@ -276,6 +289,20 @@ interface Serializer<Ok>
      * ```
      */
     fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): SerdeResult<Ok>
+        where K : Serialize,
+              V : Serialize =
+        serdeCatching {
+            val serializer = serializeMap(iteratorLenHint(iter)).getOrThrow()
+            for ((key, value) in iter) {
+                serializer.serializeEntry(key, value).getOrThrow()
+            }
+            serializer.end().getOrThrow()
+        }
+
+    /**
+     * Collect a lazy sequence as a map.
+     */
+    fun <K, V> collectMap(iter: Sequence<Pair<K, V>>): SerdeResult<Ok>
         where K : Serialize,
               V : Serialize =
         serdeCatching {

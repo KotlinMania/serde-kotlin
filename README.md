@@ -162,12 +162,12 @@ dependencies {
 - Wasm-JS (browser + Node.js)
 - Wasm-WASI (Node.js)
 - Android (API 24+)
-- Android Native arm32 / arm64 / x86 / x64
+- Android Native arm64 / x64
 - JVM
 
 ### Porting guidelines
 
-See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) for translator discipline, port-lint header convention, and Rust → Kotlin idiom mapping.
+See [AGENTS.md](AGENTS.md) for translator discipline, port-lint header convention, and Rust → Kotlin idiom mapping.
 
 ### License
 
