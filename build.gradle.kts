@@ -342,9 +342,7 @@ val jvmToolchainVersion = providers.gradleProperty("jvm.toolchain").getOrElse("2
 // ============================================================================
 // kotlin { … }
 // ----------------------------------------------------------------------------
-// watchosArm32: retired by workspace product policy (kmp-watchosarm32-retirement
-//   per AGENTS.md §5.5.1, effective 2026-05-24). Upstream KGP still ships it as
-//   Tier 2 — this is a deliberate product decision, not a framework deprecation.
+// Retired native targets stay out of the configured target surface.
 // Deprecated by KGP since 2.3.20 (never re-add): macosX64, tvosX64, watchosX64.
 // Every other target is built unconditionally — KotlinMania supports the full
 //   target surface, so there are NO opt-in build gates. The build gate is the
