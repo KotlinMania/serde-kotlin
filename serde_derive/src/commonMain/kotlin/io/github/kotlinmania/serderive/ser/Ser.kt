@@ -66,31 +66,50 @@ public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
         val vis = rewrittenInput.vis
         val used = pretendUsed(cont, params.isPacked)
         quote("""
-            `#`[automatically_derived]
+            #[automatically_derived]
             `#`allowDeprecated
             impl `#`implGenerics `#`ident `#`tyGenerics `#`whereClause {
-                `#`vis fun serialize<__S>(__self: &`#`remote `#`tyGenerics, __serializer: __S) -> _serde.`#`Private.Result<__S.Ok, __S.Error>
+                `#`vis fn serialize<__S>(__self: &`#`remote `#`tyGenerics, __serializer: __S) -> _serde::`#`Private::Result<__S::Ok, __S::Error>
                 where
-                    __S: _serde.Serializer,
+                    __S: _serde::Serializer,
                 {
                     `#`used
                     `#`body
                 }
             }
-        """)
+        """, mapOf(
+            "allowDeprecated" to allowDeprecated,
+            "implGenerics" to implGenerics,
+            "ident" to ident,
+            "tyGenerics" to tyGenerics,
+            "whereClause" to whereClause,
+            "vis" to vis,
+            "remote" to remote,
+            "Private" to Private,
+            "used" to used,
+            "body" to body,
+        ))
     } else {
         quote("""
-            `#`[automatically_derived]
+            #[automatically_derived]
             `#`allowDeprecated
-            impl `#`implGenerics _serde.Serialize for `#`ident `#`tyGenerics `#`whereClause {
-                fun serialize<__S>(&self, __serializer: __S) -> _serde.`#`Private.Result<__S.Ok, __S.Error>
+            impl `#`implGenerics _serde::Serialize for `#`ident `#`tyGenerics `#`whereClause {
+                fn serialize<__S>(&self, __serializer: __S) -> _serde::`#`Private::Result<__S::Ok, __S::Error>
                 where
-                    __S: _serde.Serializer,
+                    __S: _serde::Serializer,
                 {
                     `#`body
                 }
             }
-        """)
+        """, mapOf(
+            "allowDeprecated" to allowDeprecated,
+            "implGenerics" to implGenerics,
+            "ident" to ident,
+            "tyGenerics" to tyGenerics,
+            "whereClause" to whereClause,
+            "Private" to Private,
+            "body" to body,
+        ))
     }
 
     return wrapInConst(cont.attrs.serdePath(), implBlock)

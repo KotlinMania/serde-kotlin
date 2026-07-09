@@ -1,7 +1,10 @@
 // port-lint: tests test_suite/tests/test_gen.rs
 package io.github.kotlinmania.serderive
 
+import io.github.kotlinmania.procmacro2.Delimiter
+import io.github.kotlinmania.procmacro2.Spacing
 import io.github.kotlinmania.procmacro2.TokenStream
+import io.github.kotlinmania.procmacro2.TokenTree
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -129,8 +132,8 @@ private fun compileDerives(
     fixture.toFile().deleteRecursively()
     Files.createDirectories(fixture.resolve("src"))
 
-    val serialize = deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()).toString()
-    val deserialize = deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()).toString()
+    val serialize = renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    val deserialize = renderRust(deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()))
 
     fixture.resolve("Cargo.toml").writeText(
         """
@@ -165,6 +168,35 @@ private fun compileDerives(
     assertTrue(finished, "cargo check timed out for $fixtureName")
     return CargoOutput(process.exitValue(), process.inputStream.bufferedReader().readText())
 }
+
+private fun renderRust(tokens: TokenStream): String =
+    buildString {
+        for (token in tokens) {
+            when (token) {
+                is TokenTree.Group -> {
+                    val (open, close) =
+                        when (token.value.delimiter()) {
+                            Delimiter.Parenthesis -> "(" to ")"
+                            Delimiter.Brace -> "{" to "}"
+                            Delimiter.Bracket -> "[" to "]"
+                            Delimiter.None -> "" to ""
+                        }
+                    append(open)
+                    append(renderRust(token.value.stream()))
+                    append(close)
+                    append(' ')
+                }
+                is TokenTree.Punct -> {
+                    append(token.value.asChar())
+                    if (token.value.spacing() == Spacing.Alone) append(' ')
+                }
+                else -> {
+                    append(token.toString())
+                    append(' ')
+                }
+            }
+        }
+    }.trim()
 
 private fun findRepositoryRoot(): Path {
     var current = Path.of(System.getProperty("user.dir")).toAbsolutePath()

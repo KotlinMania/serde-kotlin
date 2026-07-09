@@ -74,35 +74,57 @@ public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
         val vis = rewrittenInput.vis
         val used = pretendUsed(cont, params.isPacked)
         quote("""
-            `#`[automatically_derived]
+            #[automatically_derived]
             `#`allowDeprecated
             impl `#`deImplGenerics `#`ident `#`tyGenerics `#`whereClause {
-                `#`vis fun deserialize<__D>(__deserializer: __D) -> _serde.`#`Private.Result<`#`remote `#`tyGenerics, __D.Error>
+                `#`vis fn deserialize<__D>(__deserializer: __D) -> _serde::`#`Private::Result<`#`remote `#`tyGenerics, __D::Error>
                 where
-                    __D: _serde.Deserializer<`#`delife>,
+                    __D: _serde::Deserializer<`#`delife>,
                 {
                     `#`used
                     `#`body
                 }
             }
-        """)
+        """, mapOf(
+            "allowDeprecated" to allowDeprecated,
+            "deImplGenerics" to deImplGenerics,
+            "ident" to ident,
+            "tyGenerics" to tyGenerics,
+            "whereClause" to whereClause,
+            "vis" to vis,
+            "remote" to remote,
+            "Private" to Private,
+            "delife" to delife,
+            "used" to used,
+            "body" to body,
+        ))
     } else {
         val fnDeserializeInPlace = deserializeInPlaceBody(cont, params)
 
         quote("""
-            `#`[automatically_derived]
+            #[automatically_derived]
             `#`allowDeprecated
-            impl `#`deImplGenerics _serde.Deserialize<`#`delife> for `#`ident `#`tyGenerics `#`whereClause {
-                fun deserialize<__D>(__deserializer: __D) -> _serde.`#`Private.Result<this, __D.Error>
+            impl `#`deImplGenerics _serde::Deserialize<`#`delife> for `#`ident `#`tyGenerics `#`whereClause {
+                fn deserialize<__D>(__deserializer: __D) -> _serde::`#`Private::Result<Self, __D::Error>
                 where
-                    __D: _serde.Deserializer<`#`delife>,
+                    __D: _serde::Deserializer<`#`delife>,
                 {
                     `#`body
                 }
 
                 `#`fnDeserializeInPlace
             }
-        """)
+        """, mapOf(
+            "allowDeprecated" to allowDeprecated,
+            "deImplGenerics" to deImplGenerics,
+            "delife" to delife,
+            "ident" to ident,
+            "tyGenerics" to tyGenerics,
+            "whereClause" to whereClause,
+            "Private" to Private,
+            "body" to body,
+            "fnDeserializeInPlace" to fnDeserializeInPlace,
+        ))
     }
 
     return wrapInConst(cont.attrs.serdePath(), implBlock)
