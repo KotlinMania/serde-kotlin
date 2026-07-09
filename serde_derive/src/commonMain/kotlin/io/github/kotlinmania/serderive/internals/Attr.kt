@@ -9,8 +9,7 @@ import io.github.kotlinmania.syn.*
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.Data as SynData
 
-// Extension: convert any object with a toTokens(TokenStream) method to a TokenStream.
-// Needed because syn-kotlin Path doesn't implement ToTokens.
+// Convert a Path to a TokenStream.
 private fun Path.toTokenStream(): TokenStream {
     val out = TokenStream.new()
     toTokens(out)
@@ -1045,10 +1044,6 @@ private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
 }
 
 private fun isReference(ty: SynType, elem: (SynType) -> Boolean): Boolean {
-    // syn-kotlin 0.2.0 SynType.Reference does not expose a `mutability` field;
-    // it only has `lifetime` and `elem`. A non-mutable reference is the only kind
-    // representable, so we treat all references as non-mutable (matching the Rust
-    // `ty.mutability.is_none()` check against the available API).
     return when (val ungrouped = ungroup(ty)) {
         is SynType.Reference -> elem(ungrouped.elem)
         else -> false
@@ -1081,7 +1076,7 @@ private fun isPrimitiveType(ty: SynType, primitive: String): Boolean {
     }
 }
 
-// Helper functions ported from upstream Rust attr.rs
+// Helper functions for parsing literal strings from attribute metadata.
 
 private fun getLitStr(
     cx: Ctxt,
@@ -1098,7 +1093,6 @@ private fun getLitStr2(
     meta: ParseNestedMeta
 ): LitStr? {
     val valueTokens = meta.value()
-    // Workaround: ExprParse is internal in syn-kotlin 0.2.0 metadata.
     // Parse the token stream manually: a string literal is a single Lit.Str token.
     val iter = valueTokens.iterator()
     if (iter.hasNext()) {
@@ -1158,9 +1152,6 @@ private fun parseLitIntoTy(
     meta: ParseNestedMeta
 ): SynType? {
     val string = getLitStr(cx, attrName, meta) ?: return null
-    // syn-kotlin 0.2.0 does not expose a public Parse<SynType> object (SynTypeParse
-    // parses a SynTypeToken, not a SynType). Implement a Parse<SynType> by parsing
-    // an Expr and converting path/struct expressions to SynType.
     val typeParse = object : io.github.kotlinmania.syn.Parse<SynType> {
         override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<SynType> {
             val pathResult = input.parse(io.github.kotlinmania.syn.PathParse)
@@ -1178,7 +1169,7 @@ private fun parseLitIntoTy(
 }
 
 // Convert an Expr to a SynType. Only path and tuple/struct expressions are
-// supported, which covers the use cases of #[serde(from = "...", into = "...")].
+// supported, which covers the use cases of the from and into attributes.
 private fun exprToSynType(expr: io.github.kotlinmania.syn.Expr): SynType {
     return when (expr) {
         is io.github.kotlinmania.syn.Expr.Path -> SynType.Path(expr.qself, expr.path)
@@ -1209,9 +1200,8 @@ private fun parseLitIntoWhere(
     meta: ParseNestedMeta
 ): List<WherePredicate> {
     val string = getLitStr2(cx, attrName, metaItemName, meta) ?: return emptyList()
-    // Parse as a comma-separated list of WherePredicate.
-    // syn-kotlin 0.2.0 does not expose a Parse<WherePredicate> object, so we
-    // implement one: a where predicate is either `Type: bounds` or `'lt: bounds`.
+    // Parse as a comma-separated list of WherePredicate. Each predicate is
+    // either a type with bounds or a lifetime with bounds.
     val whereParse = object : io.github.kotlinmania.syn.Parse<MutableList<WherePredicate>> {
         override fun parse(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<MutableList<WherePredicate>> {
             val predicates = mutableListOf<WherePredicate>()
@@ -1263,8 +1253,7 @@ private fun parseLitIntoWhere(
     return result.getOrThrow()
 }
 
-// Parse a SynType from a ParseBuffer by parsing an Expr and converting it.
-// Workaround: ExprParse is internal in syn-kotlin 0.2.0. Using PathParse for path expressions.
+// Parse a SynType from a ParseBuffer by parsing a path expression and converting it.
 private fun exprToSynTypeResult(input: io.github.kotlinmania.syn.ParseBuffer): io.github.kotlinmania.syn.SynResult<SynType> {
     val pathResult = input.parse(io.github.kotlinmania.syn.PathParse)
     return pathResult.map { path ->

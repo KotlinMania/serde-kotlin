@@ -109,8 +109,8 @@ private fun precondition(cx: Ctxt, cont: Container) {
 }
 
 private class SerParameters(cont: Container) {
-    // Variable holding the value being serialized. Either `self` for local
-    // types or `__self` for remote types.
+    // Variable holding the value being serialized. Either self for local
+    // types or __self for remote types.
     val selfVar: Ident = if (cont.attrs.remote() != null) {
         Ident.new("__self", Span.callSite())
     } else {
@@ -118,31 +118,31 @@ private class SerParameters(cont: Container) {
     }
 
     // Path to the type the impl is for. Either a single Ident for local
-    // types (does not include generic parameters) or some::remote::Path for
+    // types (does not include generic parameters) or a remote path for
     // remote types.
     val thisType: Path = thisTypeFn(cont)
 
-    // Same as thisType but using ::<T> for generic parameters for use in
+    // Same as thisType but using explicit generic parameters for use in
     // expression position.
     val thisValue: Path = thisValueFn(cont)
 
     // Generics including any explicit and inferred bounds for the impl.
     val generics: Generics = buildGenerics(cont)
 
-    // Type has a serde(remote = "...") attribute.
+    // Type has a serde remote attribute.
     val isRemote: Boolean = cont.attrs.remote() != null
 
-    // Type has a repr(packed) attribute.
+    // Type has a packed representation attribute.
     val isPacked: Boolean = cont.attrs.isPacked()
 
-    // Type name to use in error messages and &'static str arguments to
+    // Type name to use in error messages and static string arguments to
     // various Serializer methods.
     fun typeName(): String {
         return thisType.segments.last()!!.ident.toString()
     }
 }
 
-// All the generics in the input, plus a bound T: Serialize for each generic
+// All the generics in the input, plus a Serialize bound for each generic
 // field type that will be serialized by us.
 private fun buildGenerics(cont: Container): Generics {
     val g0 = withoutDefaults(cont.generics)
@@ -169,11 +169,11 @@ private fun parseQuotePath(template: String): Path {
     return result.getOrThrow()
 }
 
-// Fields with a skip_serializing or serialize_with attribute, or which
-// belong to a variant with a skip_serializing or serialize_with attribute,
+// Fields with a skipSerializing or serializeWith attribute, or which
+// belong to a variant with a skipSerializing or serializeWith attribute,
 // are not serialized by us so we do not generate a bound. Fields with a bound
 // attribute specify their own bound so we do not generate one. All other fields
-// may need a T: Serialize bound where T is the type of the field.
+// may need a Serialize bound where T is the type of the field.
 private fun needsSerializeBound(field: Field, variant: Variant?): Boolean {
     return !field.attrs.skipSerializing()
         && field.attrs.serializeWith() == null
@@ -1125,10 +1125,9 @@ private fun wrapSerializeWith(
     val selfVar = quote("self")
     val serializerVar = quote("__s")
 
-    // If the serialize_with path returns the wrong type, the error will be
+    // If the serializeWith path returns the wrong type, the error will be
     // reported on this piece. We attach the span of the path so the error
-    // will be reported on the #[serde(with = "...")]
-    //                       ^^^^^
+    // will be reported on the serde with attribute.
     val wrapperSerialize = quoteSpanned(serializeWith.span(), """
         `#`serializeWith(`#`(`#`selfVar.values.`#`fieldAccess, )* `#`serializerVar)
     """)
@@ -1159,12 +1158,9 @@ private fun wrapSerializeWith(
     """)
 }
 
-// Serialization of an empty struct results in code like:
-//
-//     let mut __serde_state = serializer.serialize_struct("S", 0)?;
-//     _serde::ser::SerializeStruct::end(__serde_state)
-//
-// where we want to omit the mut to avoid a warning.
+// Serialization of an empty struct produces a state token that does not
+// need to be mutable. This helper omits the mut keyword in that case to
+// avoid a compiler warning.
 private fun mutIf(isMut: Boolean): TokenStream? {
     return if (isMut) {
         quote("mut")

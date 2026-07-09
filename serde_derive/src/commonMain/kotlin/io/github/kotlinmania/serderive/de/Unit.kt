@@ -5,7 +5,7 @@ import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.AttrContainer
 
-// Generates `Deserialize::deserialize` body for a `struct Unit;`
+// Generates the deserialize body for a unit struct.
 internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragment {
     val thisType = params.thisType
     val thisValue = params.thisValue

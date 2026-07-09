@@ -14,7 +14,7 @@ import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 import io.github.kotlinmania.syn.span
 
-// Generates `Deserialize::deserialize` body for an `enum Enum {...}` with `#[serde(untagged)]` attribute
+// Generates the deserialize body for an enum with the untagged attribute.
 internal fun deserializeEnumUntagged(
     params: Parameters,
     variants: List<Variant>,
@@ -96,7 +96,7 @@ internal fun deserializeVariant(
 }
 
 // Also used by internally tagged enums
-// Implicitly (via `generate_variant`) used by adjacently tagged enums
+// Also used by adjacently tagged enums (via generateVariant).
 internal fun deserializeNewtypeVariant(
     variantIdent: Ident,
     params: Parameters,

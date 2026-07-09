@@ -13,7 +13,7 @@ import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 import io.github.kotlinmania.procmacro2.Span
 
-// Generates `Deserialize::deserialize` body for an `enum Enum {...}` with `#[serde(tag)]` attribute
+// Generates the deserialize body for an enum with the tag attribute.
 internal fun deserializeEnumInternally(
     params: Parameters,
     variants: List<Variant>,

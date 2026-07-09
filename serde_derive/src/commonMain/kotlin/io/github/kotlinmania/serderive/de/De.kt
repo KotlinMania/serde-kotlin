@@ -678,7 +678,7 @@ internal fun deserializeSeqInPlace(
     """))
 }
 
-// Wraps the expression in `#[serde(deserialize_with = "...")]` in a trait
+// Wraps the expression in a serde deserializeWith attribute in a trait
 // to prevent it from accessing the internal Deserialize state.
 internal fun wrapDeserializeWith(
     params: Parameters,

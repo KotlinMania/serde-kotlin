@@ -10,7 +10,7 @@ import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.syn.span
 
-// Generates `Deserialize::deserialize` body for a `struct Tuple(...);` including `struct Newtype(T);`
+// Generates the deserialize body for a tuple struct, including newtype structs.
 internal fun deserializeTuple(
     params: Parameters,
     fields: List<Field>,
@@ -27,7 +27,7 @@ internal fun deserializeTuple(
     val delife = params.borrowed.deLifetime()
 
     // If there are getters (implying private fields), construct the local type
-    // and use an `Into` conversion to get the remote type. If there are no
+    // and use an Into conversion to get the remote type. If there are no
     // getters then construct the target type directly.
     val construct = if (params.hasGetter) {
         quote("`#`local")
@@ -144,7 +144,7 @@ private fun deserializeNewtypeStructTuple(
     """)
 }
 
-// Generates `Deserialize::deserialize_in_place` body for a `struct Tuple(...);` including `struct Newtype(T);`
+// Generates the deserialize-in-place body for a tuple struct, including newtype structs.
 internal fun deserializeTupleInPlace(
     params: Parameters,
     fields: List<Field>,

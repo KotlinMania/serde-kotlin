@@ -15,10 +15,10 @@ import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 
 // Deserialization of struct field identifiers and enum variant identifiers by
-// way of a Rust enum.
+// way of an enum.
 
-// Generates `Deserialize::deserialize` body for an enum with
-// `serde(field_identifier)` or `serde(variant_identifier)` attribute.
+// Generates the deserialize body for an enum with
+// the fieldIdentifier or variantIdentifier attribute.
 internal fun deserializeCustom(
     params: Parameters,
     variants: List<Variant>,
@@ -37,8 +37,8 @@ internal fun deserializeCustom(
         val last = variants.last()
         val lastIdent = last.ident
         if (last.attrs.other()) {
-            // Process `serde(other)` attribute. It would always be found on the
-            // last variant (checked in `check_identifier`), so all preceding
+            // Process the serde other attribute. It would always be found on the
+            // last variant (checked in checkIdentifier), so all preceding
             // are ordinary variants.
             val ordinary = variants.subList(0, variants.size - 1)
             val fallthrough = quote("_serde.`#`Private::Ok(`#`thisValue::`#`lastIdent)")
@@ -195,13 +195,13 @@ private fun deserializeIdentifier(
     val strMapping = deserializedFields.map { field ->
         val ident = field.ident
         val aliases = field.aliases
-        // `aliases` also contains a main name
+        // aliases also contains a main name
         quote("`#`(`#`aliases),* => _serde.`#`Private::Ok(`#`thisValue::`#`ident),")
     }
 
     val bytesMapping = deserializedFields.map { field ->
         val ident = field.ident
-        // `aliases` also contains a main name
+        // aliases also contains a main name
         val byteAliases = field.aliases.map { alias ->
             Literal.byteString(alias.value.encodeToByteArray())
         }
