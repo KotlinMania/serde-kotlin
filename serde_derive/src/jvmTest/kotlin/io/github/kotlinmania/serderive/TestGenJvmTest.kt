@@ -114,7 +114,70 @@ class TestGenJvmTest {
 
         assertEquals(0, output.exitCode, output.diagnostics)
     }
+
+    @Test
+    fun emptyTupleAndSkippedTupleFieldsCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val cases = listOf(
+            CompileCase(
+                fixtureName = "test_gen_empty_tuple",
+                deriveInput = "pub struct EmptyTuple();",
+                declaration = "pub struct EmptyTuple();",
+                verifyType = "EmptyTuple",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_tuple_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub struct EmptyTupleDenyUnknown();
+                """.trimIndent(),
+                declaration = "pub struct EmptyTupleDenyUnknown();",
+                verifyType = "EmptyTupleDenyUnknown",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_tuple_skip_all",
+                deriveInput = "pub struct TupleSkipAll(#[serde(skip_deserializing)] u8);",
+                declaration = "pub struct TupleSkipAll(u8);",
+                verifyType = "TupleSkipAll",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_tuple_skip_all_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub struct TupleSkipAllDenyUnknown(#[serde(skip_deserializing)] u8);
+                """.trimIndent(),
+                declaration = "pub struct TupleSkipAllDenyUnknown(u8);",
+                verifyType = "TupleSkipAllDenyUnknown",
+            ),
+        )
+
+        for (case in cases) {
+            val output = compileDerives(
+                fixtureName = case.fixtureName,
+                deriveInput = case.deriveInput,
+                declaration = case.declaration,
+                support = support,
+                verify = "fn verify() { assert_traits::<${case.verifyType}>(); }",
+            )
+
+            assertEquals(0, output.exitCode, output.diagnostics)
+        }
+    }
 }
+
+private data class CompileCase(
+    val fixtureName: String,
+    val deriveInput: String,
+    val declaration: String,
+    val verifyType: String,
+)
 
 private data class CargoOutput(
     val exitCode: Int,

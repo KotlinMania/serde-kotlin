@@ -30,15 +30,24 @@ internal fun deserializeTuple(
     // and use an Into conversion to get the remote type. If there are no
     // getters then construct the target type directly.
     val construct = if (params.hasGetter) {
-        quote("`#`local")
+        val local = params.local
+        quote("`#`local", "local" to local)
     } else {
-        quote("`#`thisValue")
+        quote("`#`thisValue", "thisValue" to thisValue)
     }
 
     val typePath = when (form) {
         TupleForm.Tuple -> construct
-        is TupleForm.ExternallyTagged -> quote("`#`construct::`#`variantIdent")
-        is TupleForm.Untagged -> quote("`#`construct::`#`variantIdent")
+        is TupleForm.ExternallyTagged -> quote(
+            "`#`construct::`#`variantIdent",
+            "construct" to construct,
+            "variantIdent" to form.variantIdent,
+        )
+        is TupleForm.Untagged -> quote(
+            "`#`construct::`#`variantIdent",
+            "construct" to construct,
+            "variantIdent" to form.variantIdent,
+        )
     }
     val expecting = when (form) {
         TupleForm.Tuple -> "tuple struct ${params.typeName()}"
@@ -63,17 +72,34 @@ internal fun deserializeTuple(
             marker: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             lifetime: _serde.`#`Private::PhantomData,
         }
-    """)
+    """, mapOf("Private" to Private, "thisType" to thisType, "tyGenerics" to tyGenerics))
     val dispatch = when (form) {
         TupleForm.Tuple -> if (nfields == 1) {
             val typeName = cattrs.name().deserializeName()
-            quote("_serde::Deserializer::deserialize_newtype_struct(__deserializer, `#`typeName, `#`visitorExpr)")
+            quote(
+                "_serde::Deserializer::deserialize_newtype_struct(__deserializer, `#`typeName, `#`visitorExpr)",
+                "typeName" to typeName,
+                "visitorExpr" to visitorExpr,
+            )
         } else {
             val typeName = cattrs.name().deserializeName()
-            quote("_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)")
+            quote(
+                "_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)",
+                "typeName" to typeName,
+                "fieldCount" to fieldCount,
+                "visitorExpr" to visitorExpr,
+            )
         }
-        is TupleForm.ExternallyTagged -> quote("_serde::de::VariantAccess::tuple_variant(__variant, `#`fieldCount, `#`visitorExpr)")
-        is TupleForm.Untagged -> quote("_serde::Deserializer::deserialize_tuple(__deserializer, `#`fieldCount, `#`visitorExpr)")
+        is TupleForm.ExternallyTagged -> quote(
+            "_serde::de::VariantAccess::tuple_variant(__variant, `#`fieldCount, `#`visitorExpr)",
+            "fieldCount" to fieldCount,
+            "visitorExpr" to visitorExpr,
+        )
+        is TupleForm.Untagged -> quote(
+            "_serde::Deserializer::deserialize_tuple(__deserializer, `#`fieldCount, `#`visitorExpr)",
+            "fieldCount" to fieldCount,
+            "visitorExpr" to visitorExpr,
+        )
     }
 
     val visitorVar = if (fieldCount == 0) quote("_") else quote("mut __seq")
@@ -105,7 +131,20 @@ internal fun deserializeTuple(
         }
 
         `#`dispatch
-    """))
+    """, mapOf(
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "delife" to delife,
+        "deTyGenerics" to deTyGenerics,
+        "expectingVal" to expectingVal,
+        "visitNewtypeStruct" to visitNewtypeStruct,
+        "visitorVar" to visitorVar,
+        "visitSeq" to visitSeq,
+        "dispatch" to dispatch,
+    )))
 }
 
 private fun deserializeNewtypeStructTuple(
@@ -118,18 +157,30 @@ private fun deserializeNewtypeStructTuple(
     val deserializerVar = quote("__e")
 
     val value = field.attrs.deserializeWith()?.let { path ->
-        quoteSpanned(path.span(), "`#`path(`#`deserializerVar)?")
+        quoteSpanned(
+            path.span(),
+            "`#`path(`#`deserializerVar)?",
+            "path" to path,
+            "deserializerVar" to deserializerVar,
+        )
     } ?: run {
         val span = field.original.span()
-        val func = quoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize")
-        quote("`#`func(`#`deserializerVar)?")
+        val func = quoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize", "fieldTy" to fieldTy)
+        quote("`#`func(`#`deserializerVar)?", "func" to func, "deserializerVar" to deserializerVar)
     }
 
-    var result = quote("`#`typePath(__field0)")
+    var result = quote("`#`typePath(__field0)", "typePath" to typePath)
     if (params.hasGetter) {
         val thisType = params.thisType
         val split = params.generics.splitForImpl()
-        result = quote("_serde.`#`Private::Into::<`#`thisType `#`split::typeGenerics>::into(`#`result)")
+        val tyGenerics = split.typeGenerics
+        result = quote(
+            "_serde.`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)",
+            "Private" to Private,
+            "thisType" to thisType,
+            "tyGenerics" to tyGenerics,
+            "result" to result,
+        )
     }
 
     return quote("""
@@ -141,7 +192,14 @@ private fun deserializeNewtypeStructTuple(
             let __field0: `#`fieldTy = `#`value;
             _serde.`#`Private::Ok(`#`result)
         }
-    """)
+    """, mapOf(
+        "deserializerVar" to deserializerVar,
+        "Private" to Private,
+        "delife" to delife,
+        "fieldTy" to fieldTy,
+        "value" to value,
+        "result" to result,
+    ))
 }
 
 // Generates the deserialize-in-place body for a tuple struct, including newtype structs.
@@ -173,7 +231,7 @@ internal fun deserializeTupleInPlace(
             {
                 _serde::Deserialize::deserialize_in_place(__e, &mut self.place.0)
             }
-        """)
+        """, "Private" to Private, "delife" to delife)
     } else {
         quote("")
     }
@@ -185,13 +243,22 @@ internal fun deserializeTupleInPlace(
             place: __place,
             lifetime: _serde.`#`Private::PhantomData,
         }
-    """)
+    """, "Private" to Private)
 
     val typeName = cattrs.name().deserializeName()
     val dispatch = if (nfields == 1) {
-        quote("_serde::Deserializer::deserialize_newtype_struct(__deserializer, `#`typeName, `#`visitorExpr)")
+        quote(
+            "_serde::Deserializer::deserialize_newtype_struct(__deserializer, `#`typeName, `#`visitorExpr)",
+            "typeName" to typeName,
+            "visitorExpr" to visitorExpr,
+        )
     } else {
-        quote("_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)")
+        quote(
+            "_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)",
+            "typeName" to typeName,
+            "fieldCount" to fieldCount,
+            "visitorExpr" to visitorExpr,
+        )
     }
 
     val visitorVar = if (fieldCount == 0) quote("_") else quote("mut __seq")
@@ -223,5 +290,18 @@ internal fun deserializeTupleInPlace(
         }
 
         `#`dispatch
-    """))
+    """, mapOf(
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "delife" to delife,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "Private" to Private,
+        "deTyGenerics" to deTyGenerics,
+        "expectingVal" to expectingVal,
+        "visitNewtypeStruct" to visitNewtypeStruct,
+        "visitorVar" to visitorVar,
+        "visitSeq" to visitSeq,
+        "dispatch" to dispatch,
+    )))
 }

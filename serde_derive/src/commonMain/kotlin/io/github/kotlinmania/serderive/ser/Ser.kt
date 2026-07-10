@@ -265,7 +265,12 @@ private fun serializeNewtypeStruct(
 
     val span = field.original.span()
     val func = quoteSpanned(span, "_serde.Serializer.serialize_newtype_struct")
-    return Fragment.Expr(quote("`#`func(__serializer, `#`typeName, `#`fieldExpr)"))
+    return Fragment.Expr(
+        quote(
+            "`#`func(__serializer, `#`typeName, `#`fieldExpr)",
+            mapOf("func" to func, "typeName" to typeName, "fieldExpr" to fieldExpr),
+        )
+    )
 }
 
 private fun serializeTupleStruct(
@@ -291,18 +296,21 @@ private fun serializeTupleStruct(
                 else -> {
                     val index = Index(i.toUInt(), Span.callSite())
                     val fieldExpr = getMember(params, field, Member.Unnamed(index))
-                    quote("if `#`path(`#`fieldExpr) { 0 } else { 1 }")
+                    quote(
+                        "if `#`path(`#`fieldExpr) { 0 } else { 1 }",
+                        mapOf("path" to path, "fieldExpr" to fieldExpr),
+                    )
                 }
             }
         }
-        .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr") }
+        .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
     val stmts = serializeStmts.joinToString(separator = "") { it.toString() }
     return Fragment.Block(quote("""
         let `#`letMut __serde_state = _serde.Serializer.serialize_tuple_struct(__serializer, `#`typeName, `#`len)?;
         `#`stmts
         _serde.ser.SerializeTupleStruct::end(__serde_state)
-    """))
+    """, mapOf("letMut" to letMut, "typeName" to typeName, "len" to len, "stmts" to stmts)))
 }
 
 private fun serializeStruct(params: SerParameters, fields: List<Field>, cattrs: AttrContainer): Fragment {
