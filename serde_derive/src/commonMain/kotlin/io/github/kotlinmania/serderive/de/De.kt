@@ -554,7 +554,7 @@ class InPlaceImplGenerics(val params: Parameters) : ToTokens {
         val placeLife = placeLifetime()
         var generics = params.generics.copy()
 
-        // Add 'place bound to all existing lifetime and type parameters.
+        // Add the in-place bound to all existing generic parameters.
         for (p in generics.params.toList()) {
             when (p) {
                 is GenericParam.LifetimeParam -> {
@@ -628,7 +628,7 @@ private fun deTypeGenericsToTokens(
     out.extendTokenStreams(listOf(generatedTypeGenerics(mutGenerics)))
 }
 
-// Parse a quote string into a Path, equivalent to Rust's parse_quote!().
+// Parse a generated token template into a path.
 private fun parseQuotePath(
     template: String,
     vararg substitutions: Pair<String, Any?>,
@@ -942,7 +942,7 @@ internal fun unwrapToVariantClosure(
     }
 }
 
-// The lifetime parameter used for in-place deserialization.
+// The generated parameter used for in-place deserialization.
 internal fun placeLifetime(): GenericParam.LifetimeParam {
     return GenericParam.LifetimeParam(
         attrs = mutableListOf(),
