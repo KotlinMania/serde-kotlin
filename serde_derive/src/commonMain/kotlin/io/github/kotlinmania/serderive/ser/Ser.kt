@@ -57,7 +57,9 @@ public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
 
     val ident = cont.ident
     val params = SerParameters(cont)
-    val (implGenerics, tyGenerics, whereClause) = params.generics.splitForImpl()
+    val implGenerics = generatedImplGenerics(params.generics)
+    val tyGenerics = generatedTypeGenerics(params.generics)
+    val whereClause = generatedWhereClause(params.generics.whereClause)
     val body = Stmts(serializeBody(cont, params))
     val allowDeprecated = allowDeprecated(rewrittenInput)
 
@@ -237,14 +239,14 @@ private fun serializeInto(params: SerParameters, typeInto: SynType): Fragment {
     val selfVar = params.selfVar
     return Fragment.Block(quote("""
         _serde.Serialize.serialize(
-            &_serde.`#`Private.Into::<`#`typeInto>::into(_serde.`#`Private.Clone::clone(`#`selfVar)),
+            &_serde::`#`Private::Into::<`#`typeInto>::into(_serde::`#`Private::Clone::clone(`#`selfVar)),
             __serializer)
     """))
 }
 
 private fun serializeUnitStruct(cattrs: AttrContainer): Fragment {
     val typeName = cattrs.name().serializeName()
-    return Fragment.Expr(quote("_serde.Serializer.serialize_unit_struct(__serializer, `#`typeName)"))
+    return Fragment.Expr(quote("_serde::Serializer::serialize_unit_struct(__serializer, `#`typeName)"))
 }
 
 private fun serializeNewtypeStruct(
@@ -264,7 +266,7 @@ private fun serializeNewtypeStruct(
     }
 
     val span = field.original.span()
-    val func = quoteSpanned(span, "_serde.Serializer.serialize_newtype_struct")
+    val func = quoteSpanned(span, "_serde::Serializer::serialize_newtype_struct")
     return Fragment.Expr(
         quote(
             "`#`func(__serializer, `#`typeName, `#`fieldExpr)",
@@ -305,11 +307,11 @@ private fun serializeTupleStruct(
         }
         .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
-    val stmts = serializeStmts.joinToString(separator = "") { it.toString() }
+    val stmts = quote("`#`(`#`serializeStmts)*", "serializeStmts" to serializeStmts)
     return Fragment.Block(quote("""
-        let `#`letMut __serde_state = _serde.Serializer.serialize_tuple_struct(__serializer, `#`typeName, `#`len)?;
+        let `#`letMut __serde_state = _serde::Serializer::serialize_tuple_struct(__serializer, `#`typeName, `#`len)?;
         `#`stmts
-        _serde.ser.SerializeTupleStruct::end(__serde_state)
+        _serde::ser::SerializeTupleStruct::end(__serde_state)
     """, mapOf("letMut" to letMut, "typeName" to typeName, "len" to len, "stmts" to stmts)))
 }
 
@@ -429,7 +431,7 @@ private fun serializeEnum(params: SerParameters, variants: List<Variant>, cattrs
 
     if (cattrs.remote() != null && cattrs.nonExhaustive()) {
         arms.add(quote("""
-            ref unrecognized => _serde.`#`Private.Err(_serde::ser::Error::custom(_serde.`#`Private.ser::CannotSerializeVariant(unrecognized))),
+            ref unrecognized => _serde::`#`Private::Err(_serde::ser::Error::custom(_serde::`#`Private::ser::CannotSerializeVariant(unrecognized))),
         """))
     }
 
@@ -452,7 +454,7 @@ private fun serializeVariant(
 
     return if (variant.attrs.skipSerializing()) {
         val skippedMsg = "the enum variant ${params.typeName()}::$variantIdent cannot be serialized"
-        val skippedErr = quote("_serde.`#`Private.Err(_serde::ser::Error::custom(`#`skippedMsg))")
+        val skippedErr = quote("_serde::`#`Private::Err(_serde::ser::Error::custom(`#`skippedMsg))")
         val fieldsPat = when (variant.style) {
             Style.Unit -> TokenStream.new()
             Style.Newtype, Style.Tuple -> quote("(..)")
@@ -582,7 +584,7 @@ private fun serializeInternallyTaggedVariant(
     variant.attrs.serializeWith()?.let { path ->
         val ser = wrapSerializeVariantWith(params, path, variant)
         return Fragment.Expr(quote("""
-            _serde.`#`Private.ser::serialize_tagged_newtype(
+            _serde::`#`Private::ser::serialize_tagged_newtype(
                 __serializer,
                 `#`enumIdentStr,
                 `#`variantIdentStr,
@@ -609,7 +611,7 @@ private fun serializeInternallyTaggedVariant(
             }
 
             val span = field.original.span()
-            val func = quoteSpanned(span, "_serde.`#`Private.ser::serialize_tagged_newtype")
+            val func = quoteSpanned(span, "_serde::`#`Private::ser::serialize_tagged_newtype")
             Fragment.Expr(quote("""
                 `#`func(
                     __serializer,
@@ -643,7 +645,7 @@ private fun serializeAdjacentlyTaggedVariant(
     val typeName = cattrs.name().serializeName()
     val variantName = variant.attrs.name().serializeName()
     val serializeVariant = quote("""
-        &_serde.`#`Private.ser::AdjacentlyTaggedEnumVariant {
+        &_serde::`#`Private::ser::AdjacentlyTaggedEnumVariant {
             enum_name: `#`typeName,
             variant_index: `#`variantIndex,
             variant_name: `#`variantName,
@@ -703,25 +705,27 @@ private fun serializeAdjacentlyTaggedVariant(
         Style.Struct -> variant.fields.map { it.member }
     }
 
-    val (_, tyGenerics, whereClause) = params.generics.splitForImpl()
+    val tyGenerics = generatedTypeGenerics(params.generics)
+    val whereClause = generatedWhereClause(params.generics.whereClause)
 
     val wrapperGenerics = if (fieldsIdent.isEmpty()) {
         params.generics.copy()
     } else {
         withLifetimeBound(params.generics, "'__a")
     }
-    val (wrapperImplGenerics, wrapperTyGenerics, _) = wrapperGenerics.splitForImpl()
+    val wrapperImplGenerics = generatedImplGenerics(wrapperGenerics)
+    val wrapperTyGenerics = generatedTypeGenerics(wrapperGenerics)
 
     return Fragment.Block(quote("""
         `#`[doc(hidden)]
-        struct __AdjacentlyTagged `#`wrapperGenerics `#`whereClause {
-            data: (`#`(&'__a `#`fieldsTy,)*),
-            phantom: _serde.`#`Private.PhantomData<`#`thisType `#`tyGenerics>,
-        }
+            struct __AdjacentlyTagged `#`wrapperImplGenerics `#`whereClause {
+                data: (`#`(&'__a `#`fieldsTy,)*),
+                phantom: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            }
 
-        `#`[automatically_derived]
-        impl `#`wrapperImplGenerics _serde::Serialize for __AdjacentlyTagged `#`wrapperTyGenerics `#`whereClause {
-            fn serialize<__S>(&self, __serializer: __S) -> _serde.`#`Private.Result<__S::Ok, __S::Error>
+            `#`[automatically_derived]
+            impl `#`wrapperImplGenerics _serde::Serialize for __AdjacentlyTagged `#`wrapperTyGenerics `#`whereClause {
+            fn serialize<__S>(&self, __serializer: __S) -> _serde::`#`Private::Result<__S::Ok, __S::Error>
             where
                 __S: _serde::Serializer,
             {
@@ -738,7 +742,7 @@ private fun serializeAdjacentlyTaggedVariant(
         _serde::ser::SerializeStruct::serialize_field(
             &mut __struct, `#`content, &__AdjacentlyTagged {
                 data: (`#`(`#`fieldsIdent,)*),
-                phantom: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+                phantom: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             })?;
         _serde::ser::SerializeStruct::end(__struct)
     """))
@@ -947,27 +951,29 @@ private fun serializeStructVariantWithFlatten(
             val fieldsTy = fields.map { it.ty }
             val members = fields.map { it.member }
 
-            val (_, tyGenerics, whereClause) = params.generics.splitForImpl()
+            val tyGenerics = generatedTypeGenerics(params.generics)
+            val whereClause = generatedWhereClause(params.generics.whereClause)
             val wrapperGenerics = withLifetimeBound(params.generics, "'__a")
-            val (wrapperImplGenerics, wrapperTyGenerics, _) = wrapperGenerics.splitForImpl()
+            val wrapperImplGenerics = generatedImplGenerics(wrapperGenerics)
+            val wrapperTyGenerics = generatedTypeGenerics(wrapperGenerics)
 
             Fragment.Block(quote("""
                 `#`[doc(hidden)]
-                struct __EnumFlatten `#`wrapperGenerics `#`whereClause {
+                struct __EnumFlatten `#`wrapperImplGenerics `#`whereClause {
                     data: (`#`(&'__a `#`fieldsTy,)*),
-                    phantom: _serde.`#`Private.PhantomData<`#`thisType `#`tyGenerics>,
+                    phantom: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
                 }
 
                 `#`[automatically_derived]
                 impl `#`wrapperImplGenerics _serde::Serialize for __EnumFlatten `#`wrapperTyGenerics `#`whereClause {
-                    fn serialize<__S>(&self, __serializer: __S) -> _serde.`#`Private.Result<__S::Ok, __S::Error>
+                    fn serialize<__S>(&self, __serializer: __S) -> _serde::`#`Private::Result<__S::Ok, __S::Error>
                     where
                         __S: _serde::Serializer,
                     {
                         let (`#`(`#`members: `#`members,)*) = self.data;
                         let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                             __serializer,
-                            _serde.`#`Private.None)?;
+                            _serde::`#`Private::None)?;
                         `#`stmts
                         _serde::ser::SerializeMap::end(__serde_state)
                     }
@@ -980,7 +986,7 @@ private fun serializeStructVariantWithFlatten(
                     `#`variantName,
                     &__EnumFlatten {
                         data: (`#`(`#`members,)*),
-                        phantom: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+                        phantom: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
                     })
             """))
         }
@@ -990,7 +996,7 @@ private fun serializeStructVariantWithFlatten(
             Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                     __serializer,
-                    _serde.`#`Private.None)?;
+                    _serde::`#`Private::None)?;
                 _serde::ser::SerializeMap::serialize_entry(
                     &mut __serde_state,
                     `#`tag,
@@ -1004,7 +1010,7 @@ private fun serializeStructVariantWithFlatten(
             Fragment.Block(quote("""
                 let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                     __serializer,
-                    _serde.`#`Private.None)?;
+                    _serde::`#`Private::None)?;
                 `#`stmts
                 _serde::ser::SerializeMap::end(__serde_state)
             """))
@@ -1162,14 +1168,16 @@ private fun wrapSerializeWith(
     fieldExprs: List<TokenStream>
 ): TokenStream {
     val thisType = params.thisType
-    val (_, tyGenerics, whereClause) = params.generics.splitForImpl()
+    val tyGenerics = generatedTypeGenerics(params.generics)
+    val whereClause = generatedWhereClause(params.generics.whereClause)
 
     val wrapperGenerics = if (fieldExprs.isEmpty()) {
         params.generics.copy()
     } else {
         withLifetimeBound(params.generics, "'__a")
     }
-    val (wrapperImplGenerics, wrapperTyGenerics, _) = wrapperGenerics.splitForImpl()
+    val wrapperImplGenerics = generatedImplGenerics(wrapperGenerics)
+    val wrapperTyGenerics = generatedTypeGenerics(wrapperGenerics)
 
     val fieldAccess = (0 until fieldExprs.size).map { n ->
         Member.Unnamed(Index(n.toUInt(), Span.callSite()))
@@ -1195,12 +1203,12 @@ private fun wrapSerializeWith(
             `#`[doc(hidden)]
             struct __SerializeWith `#`wrapperImplGenerics `#`whereClause {
                 values: (`#`(&'__a `#`fieldTys, )*),
-                phantom: _serde.`#`Private.PhantomData<`#`thisType `#`tyGenerics>,
+                phantom: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
             }
 
             `#`[automatically_derived]
             impl `#`wrapperImplGenerics _serde::Serialize for __SerializeWith `#`wrapperTyGenerics `#`whereClause {
-                fn serialize<__S>(&`#`selfVar, `#`serializerVar: __S) -> _serde.`#`Private.Result<__S::Ok, __S::Error>
+                fn serialize<__S>(&`#`selfVar, `#`serializerVar: __S) -> _serde::`#`Private::Result<__S::Ok, __S::Error>
                 where
                     __S: _serde::Serializer,
                 {
@@ -1210,7 +1218,7 @@ private fun wrapSerializeWith(
 
             __SerializeWith {
                 values: (`#`(`#`fieldExprs, )*),
-                phantom: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+                phantom: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             }
         }
     """, mapOf(

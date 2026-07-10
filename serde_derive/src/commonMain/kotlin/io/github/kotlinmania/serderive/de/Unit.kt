@@ -21,24 +21,24 @@ internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragmen
         """
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
-            marker: _serde.`#`Private.PhantomData<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private.PhantomData<&`#`delife ()>,
+            marker: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`deImplGenerics _serde.de.Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
             type Value = `#`thisType `#`tyGenerics;
 
-            fn expecting(self, __formatter: var _serde.`#`Private.Formatter) -> _serde.`#`Private.fmt.Result {
-                _serde.`#`Private.Formatter.write_str(__formatter, `#`expecting)
+            fn expecting(self, __formatter: var _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt.Result {
+                _serde::`#`Private::Formatter.write_str(__formatter, `#`expecting)
             }
 
             `#`[inline]
-            fn visit_unit<__E>(self) -> _serde.`#`Private.Result<Self.Value, __E>
+            fn visit_unit<__E>(self) -> _serde::`#`Private::Result<Self.Value, __E>
             where
                 __E: _serde.de.Error,
             {
-                _serde.`#`Private.Ok(`#`thisValue)
+                _serde::`#`Private::Ok(`#`thisValue)
             }
         }
 
@@ -46,8 +46,8 @@ internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragmen
             __deserializer,
             `#`typeName,
             __Visitor {
-                marker: _serde.`#`Private.PhantomData.<`#`thisType `#`tyGenerics>,
-                lifetime: _serde.`#`Private.PhantomData,
+                marker: _serde::`#`Private::PhantomData.<`#`thisType `#`tyGenerics>,
+                lifetime: _serde::`#`Private::PhantomData,
             },
         )
         """,

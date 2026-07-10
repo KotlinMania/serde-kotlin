@@ -69,8 +69,8 @@ internal fun deserializeTuple(
 
     val visitorExpr = quote("""
         __Visitor {
-            marker: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData,
+            marker: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData,
         }
     """, mapOf("Private" to Private, "thisType" to thisType, "tyGenerics" to tyGenerics))
     val dispatch = when (form) {
@@ -107,22 +107,22 @@ internal fun deserializeTuple(
     return Fragment.Block(quote("""
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
-            marker: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            marker: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`deImplGenerics _serde::de::Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
             type Value = `#`thisType `#`tyGenerics;
 
-            fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
-                _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
+            fn expecting(&self, __formatter: &mut _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt::Result {
+                _serde::`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
             }
 
             `#`visitNewtypeStruct
 
             `#`[inline]
-            fn visit_seq<__A>(self, `#`visitorVar: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
+            fn visit_seq<__A>(self, `#`visitorVar: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
             where
                 __A: _serde::de::SeqAccess<`#`delife>,
             {
@@ -175,7 +175,7 @@ private fun deserializeNewtypeStructTuple(
         val split = params.generics.splitForImpl()
         val tyGenerics = split.typeGenerics
         result = quote(
-            "_serde.`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)",
+            "_serde::`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)",
             "Private" to Private,
             "thisType" to thisType,
             "tyGenerics" to tyGenerics,
@@ -185,12 +185,12 @@ private fun deserializeNewtypeStructTuple(
 
     return quote("""
         `#`[inline]
-        fn visit_newtype_struct<__E>(self, `#`deserializerVar: __E) -> _serde.`#`Private::Result<Self::Value, __E::Error>
+        fn visit_newtype_struct<__E>(self, `#`deserializerVar: __E) -> _serde::`#`Private::Result<Self::Value, __E::Error>
         where
             __E: _serde::Deserializer<`#`delife>,
         {
             let __field0: `#`fieldTy = `#`value;
-            _serde.`#`Private::Ok(`#`result)
+            _serde::`#`Private::Ok(`#`result)
         }
     """, mapOf(
         "deserializerVar" to deserializerVar,
@@ -225,7 +225,7 @@ internal fun deserializeTupleInPlace(
         check(fields[0].attrs.deserializeWith() == null)
         quote("""
             `#`[inline]
-            fn visit_newtype_struct<__E>(self, __e: __E) -> _serde.`#`Private::Result<Self::Value, __E::Error>
+            fn visit_newtype_struct<__E>(self, __e: __E) -> _serde::`#`Private::Result<Self::Value, __E::Error>
             where
                 __E: _serde::Deserializer<`#`delife>,
             {
@@ -241,7 +241,7 @@ internal fun deserializeTupleInPlace(
     val visitorExpr = quote("""
         __Visitor {
             place: __place,
-            lifetime: _serde.`#`Private::PhantomData,
+            lifetime: _serde::`#`Private::PhantomData,
         }
     """, "Private" to Private)
 
@@ -267,21 +267,21 @@ internal fun deserializeTupleInPlace(
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
             place: &`#`delife mut `#`thisType `#`tyGenerics,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`deImplGenerics _serde::de::Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
             type Value = ();
 
-            fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
-                _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
+            fn expecting(&self, __formatter: &mut _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt::Result {
+                _serde::`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
             }
 
             `#`visitNewtypeStruct
 
             `#`[inline]
-            fn visit_seq<__A>(self, `#`visitorVar: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
+            fn visit_seq<__A>(self, `#`visitorVar: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
             where
                 __A: _serde::de::SeqAccess<`#`delife>,
             {

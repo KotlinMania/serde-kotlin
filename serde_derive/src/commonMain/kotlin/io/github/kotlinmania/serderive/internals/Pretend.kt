@@ -47,8 +47,8 @@ private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): Token
     val placeholders = fields.indices.map { i -> formatIdent("__v$i") }
 
     return quote("""
-        when (_serde.`#`Private.None::<&`#`typeIdent `#`tyGenerics> ) {
-            _serde.`#`Private.Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) -> {}
+        when (_serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde::`#`Private::Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) -> {}
             _ => {}
         }
     """)
@@ -61,10 +61,10 @@ private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>):
     val members = fields.map { it.member }
 
     return quote("""
-        when (_serde.`#`Private.None::<&`#`typeIdent `#`tyGenerics> ) {
-            _serde.`#`Private.Some(__v @ `#`typeIdent { `#`(`#`members: _),* }) => {
+        when (_serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> ) {
+            _serde::`#`Private::Some(__v @ `#`typeIdent { `#`(`#`members: _),* }) => {
                 `#`(
-                    let _ = _serde.`#`Private.ptr.addr_of!(__v.`#`members);
+                    let _ = _serde::`#`Private::ptr.addr_of!(__v.`#`members);
                 )*
             }
             _ => {}
@@ -90,9 +90,9 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
     }
 
     return quote("""
-        when (_serde.`#`Private.None::<&`#`typeIdent `#`tyGenerics> ) {
+        when (_serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> ) {
             `#`(
-                _serde.`#`Private.Some(`#`patterns) => {}
+                _serde::`#`Private::Some(`#`patterns) => {}
             )*
             _ => {}
         }
@@ -123,8 +123,8 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
         }
 
         quote("""
-            when (_serde.`#`Private.None ) {
-                _serde.`#`Private.Some((`#`(`#`placeholders,)*)) => {
+            when (_serde::`#`Private::None ) {
+                _serde::`#`Private::Some((`#`(`#`placeholders,)*)) => {
                     let _ = `#`typeIdent::`#`variantIdent `#`turbofish `#`pat;
                 }
                 _ => {}

@@ -172,18 +172,30 @@ class Parameters(cont: Container) {
     }
 
     fun genericsWithDeLifetime(): SplitForDeLifetime {
-        val deImplGenerics = DeImplGenerics(this)
-        val deTyGenerics = DeTypeGenerics(this)
-        val split = generics.splitForImpl()
-        return SplitForDeLifetime(deImplGenerics, deTyGenerics, split.typeGenerics, split.typeGenerics.whereClause)
+        val deGenerics = genericsWithInsertedDeLifetime()
+        val deImplGenerics = generatedImplGenerics(deGenerics)
+        val deTyGenerics = generatedTypeGenerics(deGenerics)
+        val tyGenerics = generatedTypeGenerics(generics)
+        val whereClause = generatedWhereClause(generics.whereClause)
+        return SplitForDeLifetime(deImplGenerics, deTyGenerics, tyGenerics, whereClause)
+    }
+
+    private fun genericsWithInsertedDeLifetime(): Generics {
+        val deLifetime = borrowed.deLifetimeParam() ?: return generics.copy()
+        val newParams = io.github.kotlinmania.syn.GenericParamList()
+        newParams.push(deLifetime) { Comma.default() }
+        for (p in generics.params.toList()) {
+            newParams.push(p) { Comma.default() }
+        }
+        return generics.copy(params = newParams)
     }
 }
 
 data class SplitForDeLifetime(
-    val deImplGenerics: DeImplGenerics,
-    val deTyGenerics: DeTypeGenerics,
-    val tyGenerics: io.github.kotlinmania.syn.Generics,
-    val whereClause: WhereClause?
+    val deImplGenerics: TokenStream,
+    val deTyGenerics: TokenStream,
+    val tyGenerics: TokenStream,
+    val whereClause: TokenStream
 )
 private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generics {
     val g0 = withoutDefaults(cont.generics)
@@ -345,20 +357,20 @@ private fun deserializeTransparent(cont: Container, params: Parameters): Fragmen
         } else {
             val value = when (field.attrs.default()) {
                 is Default.Plain ->
-                    quote("_serde.`#`Private.Default::default()")
+                    quote("_serde::`#`Private::Default::default()")
                 is Default.Path -> {
                     val p = (field.attrs.default() as Default.Path).path
                     quoteSpanned(p.span(), "`#`p()")
                 }
                 is Default.None ->
-                    quote("_serde.`#`Private.PhantomData")
+                    quote("_serde::`#`Private::PhantomData")
             }
             quote("`#`member: `#`value")
         }
     }
 
     return Fragment.Expr(quote("""
-        _serde.`#`Private.Result::map(
+        _serde::`#`Private::Result::map(
             `#`path(__deserializer),
             |__transparent| `#`thisValue { `#`(`#`assign),* })
     """))
@@ -366,17 +378,17 @@ private fun deserializeTransparent(cont: Container, params: Parameters): Fragmen
 
 private fun deserializeFrom(typeFrom: SynType): Fragment {
     return Fragment.Expr(quote("""
-        _serde.`#`Private.Result::map(
+        _serde::`#`Private::Result::map(
             <`#`typeFrom as _serde.Deserialize>::deserialize(__deserializer),
-            _serde.`#`Private.From::from)
+            _serde::`#`Private::From::from)
     """))
 }
 
 private fun deserializeTryFrom(typeTryFrom: SynType): Fragment {
     return Fragment.Expr(quote("""
-        _serde.`#`Private.Result::and_then(
+        _serde::`#`Private::Result::and_then(
             <`#`typeTryFrom as _serde.Deserialize>::deserialize(__deserializer),
-            |v| _serde.`#`Private.TryFrom::try_from(v).map_err(_serde::de::Error::custom))
+            |v| _serde::`#`Private::TryFrom::try_from(v).map_err(_serde::de::Error::custom))
     """))
 }
 
@@ -589,7 +601,7 @@ internal fun deserializeSeq(
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
                     quote("""{
                         `#`wrapper
-                        _serde.`#`Private::Option::map(
+                        _serde::`#`Private::Option::map(
                             _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq)?,
                             |__wrap| __wrap.value)
                     }""", mapOf("wrapper" to wrapper, "Private" to Private, "wrapperTy" to wrapperTy))

@@ -50,9 +50,9 @@ internal fun deserializeCustom(
             val ordinary = variants.subList(0, variants.size - 1)
             val fallthrough = { value: TokenStream ->
                 quote("""
-                    _serde.`#`Private::Result::map(
+                    _serde::`#`Private::Result::map(
                         _serde::Deserialize::deserialize(
-                            _serde.`#`Private::de::IdentifierDeserializer::from(`#`value)
+                            _serde::`#`Private::de::IdentifierDeserializer::from(`#`value)
                         ),
                         `#`thisValue::`#`lastIdent)
                 """, mapOf(
@@ -115,8 +115,8 @@ internal fun deserializeCustom(
 
         `#`[doc(hidden)]
         struct __FieldVisitor `#`deImplGenerics `#`whereClause {
-            marker: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            marker: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
@@ -127,8 +127,8 @@ internal fun deserializeCustom(
         }
 
         let __visitor = __FieldVisitor {
-            marker: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData,
+            marker: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData,
         };
         _serde::Deserializer::deserialize_identifier(__deserializer, __visitor)
     """, mapOf(
@@ -174,7 +174,7 @@ internal fun deserializeGenerated(
         `#`[allow(non_camel_case_types)]
         `#`[doc(hidden)]
         enum __Field `#`lifetime {
-            `#`(`#`fieldIdents),*
+            `#`(`#`fieldIdents,)*
             `#`ignoreVariant
         }
 
@@ -191,7 +191,7 @@ internal fun deserializeGenerated(
         `#`[automatically_derived]
         impl<'de> _serde::Deserialize<'de> for __Field `#`lifetime {
             `#`[inline]
-            fn deserialize<__D>(__deserializer: __D) -> _serde.`#`Private::Result<Self, __D::Error>
+            fn deserialize<__D>(__deserializer: __D) -> _serde::`#`Private::Result<Self, __D::Error>
             where
                 __D: _serde::Deserializer<'de>,
             {
@@ -268,95 +268,95 @@ private fun deserializeIdentifier(
 
     val visitOther = if (collectOtherFields) {
         quote("""
-            fn visit_bool<__E>(self, __value: bool) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_bool<__E>(self, __value: bool) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Bool(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::Bool(__value)))
             }
 
-            fn visit_i8<__E>(self, __value: i8) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_i8<__E>(self, __value: i8) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I8(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::I8(__value)))
             }
 
-            fn visit_i16<__E>(self, __value: i16) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_i16<__E>(self, __value: i16) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I16(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::I16(__value)))
             }
 
-            fn visit_i32<__E>(self, __value: i32) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_i32<__E>(self, __value: i32) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I32(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::I32(__value)))
             }
 
-            fn visit_i64<__E>(self, __value: i64) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_i64<__E>(self, __value: i64) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::I64(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::I64(__value)))
             }
 
-            fn visit_u8<__E>(self, __value: u8) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_u8<__E>(self, __value: u8) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U8(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::U8(__value)))
             }
 
-            fn visit_u16<__E>(self, __value: u16) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_u16<__E>(self, __value: u16) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U16(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::U16(__value)))
             }
 
-            fn visit_u32<__E>(self, __value: u32) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_u32<__E>(self, __value: u32) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U32(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::U32(__value)))
             }
 
-            fn visit_u64<__E>(self, __value: u64) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_u64<__E>(self, __value: u64) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::U64(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::U64(__value)))
             }
 
-            fn visit_f32<__E>(self, __value: f32) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_f32<__E>(self, __value: f32) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::F32(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::F32(__value)))
             }
 
-            fn visit_f64<__E>(self, __value: f64) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_f64<__E>(self, __value: f64) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::F64(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::F64(__value)))
             }
 
-            fn visit_char<__E>(self, __value: char) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_char<__E>(self, __value: char) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Char(__value)))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::Char(__value)))
             }
 
-            fn visit_unit<__E>(self) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_unit<__E>(self) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
-                _serde.`#`Private::Ok(__Field::__other(_serde.`#`Private::de::Content::Unit))
+                _serde::`#`Private::Ok(__Field::__other(_serde::`#`Private::de::Content::Unit))
             }
         """, "Private" to Private)
     } else {
@@ -374,7 +374,7 @@ private fun deserializeIdentifier(
             val indexExpecting = if (isVariant) "variant" else "field"
             val fallthroughMsg = "$indexExpecting index 0 <= i < ${deserializedFields.size}"
             quote("""
-                _serde.`#`Private::Err(_serde::de::Error::invalid_value(
+                _serde::`#`Private::Err(_serde::de::Error::invalid_value(
                     _serde::de::Unexpected::Unsigned(__value),
                     &`#`fallthroughMsg,
                 ))
@@ -382,7 +382,7 @@ private fun deserializeIdentifier(
         }
 
         quote("""
-            fn visit_u64<__E>(self, __value: u64) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_u64<__E>(self, __value: u64) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
@@ -401,7 +401,7 @@ private fun deserializeIdentifier(
     val visitBorrowed = if (fallthroughBorrowed != null || collectOtherFields) {
         val fallthroughBorrowedArm = fallthroughBorrowed ?: fallthroughArm
         quote("""
-            fn visit_borrowed_str<__E>(self, __value: &'de str) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_borrowed_str<__E>(self, __value: &'de str) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
@@ -414,7 +414,7 @@ private fun deserializeIdentifier(
                 }
             }
 
-            fn visit_borrowed_bytes<__E>(self, __value: &'de [u8]) -> _serde.`#`Private::Result<Self::Value, __E>
+            fn visit_borrowed_bytes<__E>(self, __value: &'de [u8]) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
             {
@@ -441,13 +441,13 @@ private fun deserializeIdentifier(
     }
 
     return Fragment.Block(quote("""
-        fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
-            _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
+        fn expecting(&self, __formatter: &mut _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt::Result {
+            _serde::`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
         }
 
         `#`visitOther
 
-        fn visit_str<__E>(self, __value: &str) -> _serde.`#`Private::Result<Self::Value, __E>
+        fn visit_str<__E>(self, __value: &str) -> _serde::`#`Private::Result<Self::Value, __E>
         where
             __E: _serde::de::Error,
         {
@@ -460,7 +460,7 @@ private fun deserializeIdentifier(
             }
         }
 
-        fn visit_bytes<__E>(self, __value: &[u8]) -> _serde.`#`Private::Result<Self::Value, __E>
+        fn visit_bytes<__E>(self, __value: &[u8]) -> _serde::`#`Private::Result<Self::Value, __E>
         where
             __E: _serde::de::Error,
         {

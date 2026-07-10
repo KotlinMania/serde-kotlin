@@ -26,8 +26,8 @@ internal fun deserializeEnum(
         // can fall through to the untagged variants. This may be infallible so we
         // need to provide the error type.
         val firstAttempt = quote("""
-            if let _serde.`#`Private::Result::<_, __D::Error>::Ok(__ok) = (|| `#`taggedFrag)() {
-                return _serde.`#`Private::Ok(__ok);
+            if let _serde::`#`Private::Result::<_, __D::Error>::Ok(__ok) = (|| `#`taggedFrag)() {
+                return _serde::`#`Private::Ok(__ok);
             }
         """)
         deserializeEnumUntagged(params, untagged, cattrs, firstAttempt)
@@ -57,7 +57,7 @@ internal fun prepareEnumVariantEnum(variants: List<Variant>): Pair<TokenStream, 
     val fallthrough = deserializedVariants.find { (_, variant) -> variant.attrs.other() }
         ?.let { (i, _) ->
             val ignoreVariant = fieldI(i)
-            quote("_serde.`#`Private::Ok(__Field::`#`ignoreVariant)")
+            quote("_serde::`#`Private::Ok(__Field::`#`ignoreVariant)")
         }
 
     val variantsStmt = quote("""

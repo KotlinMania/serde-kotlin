@@ -43,8 +43,8 @@ internal fun deserializeEnumInternally(
 
         let (__tag, __content) = _serde::Deserializer::deserialize_any(
             __deserializer,
-            _serde.`#`Private::de::TaggedContentVisitor::<__Field>::new(`#`tag, `#`expectingVal))?;
-        let __deserializer = _serde.`#`Private::de::ContentDeserializer::<__D::Error>::new(__content);
+            _serde::`#`Private::de::TaggedContentVisitor::<__Field>::new(`#`tag, `#`expectingVal))?;
+        let __deserializer = _serde::`#`Private::de::ContentDeserializer::<__D::Error>::new(__content);
 
         match __tag {
             `#`(`#`variantArms)*
@@ -63,7 +63,7 @@ private fun deserializeInternallyTaggedVariant(
     if (path != null) {
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
         return Fragment.Block(quote("""
-            _serde.`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
+            _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
         """))
     }
 
@@ -79,8 +79,8 @@ private fun deserializeInternallyTaggedVariant(
                 quote("(`#`defaultExpr)")
             } ?: quote("")
             Fragment.Block(quote("""
-                _serde::Deserializer::deserialize_any(__deserializer, _serde.`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
-                _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
+                _serde::Deserializer::deserialize_any(__deserializer, _serde::`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
+                _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
             """))
         }
         Style.Newtype -> {

@@ -29,18 +29,18 @@ internal fun deserializeEnumUntagged(
     val fallthroughMsgVal = cattrs.expecting() ?: fallthroughMsg
 
     return Fragment.Block(quote("""
-        let __content = _serde::de::DeserializeSeed::deserialize(_serde.`#`Private::de::ContentVisitor::new(), __deserializer)?;
-        let __deserializer = _serde.`#`Private::de::ContentRefDeserializer::<__D::Error>::new(&__content);
+        let __content = _serde::de::DeserializeSeed::deserialize(_serde::`#`Private::de::ContentVisitor::new(), __deserializer)?;
+        let __deserializer = _serde::`#`Private::de::ContentRefDeserializer::<__D::Error>::new(&__content);
 
         `#`firstAttempt
 
         `#`(
-            if let _serde.`#`Private::Ok(__ok) = `#`attempts {
-                return _serde.`#`Private::Ok(__ok);
+            if let _serde::`#`Private::Ok(__ok) = `#`attempts {
+                return _serde::`#`Private::Ok(__ok);
             }
         )*
 
-        _serde.`#`Private::Err(_serde::de::Error::custom(`#`fallthroughMsgVal))
+        _serde::`#`Private::Err(_serde::de::Error::custom(`#`fallthroughMsgVal))
     """))
 }
 
@@ -54,7 +54,7 @@ internal fun deserializeVariant(
     if (path != null) {
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
         return Fragment.Block(quote("""
-            _serde.`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
+            _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
         """))
     }
 
@@ -72,10 +72,10 @@ internal fun deserializeVariant(
             Fragment.Expr(quote("""
                 match _serde::Deserializer::deserialize_any(
                     __deserializer,
-                    _serde.`#`Private::de::UntaggedUnitVisitor::new(`#`typeName, `#`variantName)
+                    _serde::`#`Private::de::UntaggedUnitVisitor::new(`#`typeName, `#`variantName)
                 ) {
-                    _serde.`#`Private::Ok(()) => _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default),
-                    _serde.`#`Private::Err(__err) => _serde.`#`Private::Err(__err),
+                    _serde::`#`Private::Ok(()) => _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default),
+                    _serde::`#`Private::Err(__err) => _serde::`#`Private::Err(__err),
                 }
             """))
         }
@@ -109,12 +109,12 @@ internal fun deserializeNewtypeVariant(
         val span = field.original.span()
         val func = quoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize")
         Fragment.Expr(quote("""
-            _serde.`#`Private::Result::map(`#`func(__deserializer), `#`thisValue::`#`variantIdent)
+            _serde::`#`Private::Result::map(`#`func(__deserializer), `#`thisValue::`#`variantIdent)
         """))
     } else {
         Fragment.Block(quote("""
-            let __value: _serde.`#`Private::Result<`#`fieldTy, _> = `#`fieldPath(__deserializer);
-            _serde.`#`Private::Result::map(__value, `#`thisValue::`#`variantIdent)
+            let __value: _serde::`#`Private::Result<`#`fieldTy, _> = `#`fieldPath(__deserializer);
+            _serde::`#`Private::Result::map(__value, `#`thisValue::`#`variantIdent)
         """))
     }
 }

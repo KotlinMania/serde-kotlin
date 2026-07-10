@@ -97,7 +97,7 @@ internal fun deserializeStruct(
 
             quote("""
                 `#`[inline]
-                fn visit_seq<__A>(self, `#`mutSeq: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
+                fn visit_seq<__A>(self, `#`mutSeq: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
                 where
                     __A: _serde::de::SeqAccess<`#`delife>,
                 {
@@ -126,7 +126,7 @@ internal fun deserializeStruct(
                 impl `#`deImplGenerics _serde::de::DeserializeSeed<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
                     type Value = `#`thisType `#`tyGenerics;
 
-                    fn deserialize<__D>(self, __deserializer: __D) -> _serde.`#`Private::Result<Self::Value, __D::Error>
+                    fn deserialize<__D>(self, __deserializer: __D) -> _serde::`#`Private::Result<Self::Value, __D::Error>
                     where
                         __D: _serde::Deserializer<`#`delife>,
                     {
@@ -159,8 +159,8 @@ internal fun deserializeStruct(
 
     val visitorExpr = quote("""
         __Visitor {
-            marker: _serde.`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData,
+            marker: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData,
         }
     """,
         "Private" to Private,
@@ -202,22 +202,22 @@ internal fun deserializeStruct(
 
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
-            marker: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            marker: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`deImplGenerics _serde::de::Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
             type Value = `#`thisType `#`tyGenerics;
 
-            fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
-                _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
+            fn expecting(&self, __formatter: &mut _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt::Result {
+                _serde::`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
             }
 
             `#`visitSeq
 
             `#`[inline]
-            fn visit_map<__A>(self, mut __map: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
+            fn visit_map<__A>(self, mut __map: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
             where
                 __A: _serde::de::MapAccess<`#`delife>,
             {
@@ -265,7 +265,7 @@ private fun deserializeMap(
         .map { (field, name) ->
             val fieldTy = field.ty
             quote("""
-                let mut `#`name: _serde.`#`Private::Option<`#`fieldTy> = _serde.`#`Private::None;
+                let mut `#`name: _serde::`#`Private::Option<`#`fieldTy> = _serde::`#`Private::None;
             """,
                 "name" to name,
                 "Private" to Private,
@@ -275,9 +275,9 @@ private fun deserializeMap(
     // Collect contents for flatten fields into a buffer
     val letCollect = if (hasFlatten) {
         quote("""
-            let mut __collect = _serde.`#`Private::Vec::<_serde.`#`Private::Option<(
-                _serde.`#`Private::de::Content,
-                _serde.`#`Private::de::Content
+            let mut __collect = _serde::`#`Private::Vec::<_serde::`#`Private::Option<(
+                _serde::`#`Private::de::Content,
+                _serde::`#`Private::de::Content
             )>>::new();
         """, "Private" to Private)
     } else {
@@ -303,9 +303,9 @@ private fun deserializeMap(
                     quote("""{
                         `#`wrapper
                         match _serde::de::MapAccess::next_value::<`#`wrapperTy>(&mut __map) {
-                            _serde.`#`Private::Ok(__wrapper) => __wrapper.value,
-                            _serde.`#`Private::Err(__err) => {
-                                return _serde.`#`Private::Err(__err);
+                            _serde::`#`Private::Ok(__wrapper) => __wrapper.value,
+                            _serde::`#`Private::Err(__err) => {
+                                return _serde::`#`Private::Err(__err);
                             }
                         }
                     }""",
@@ -317,10 +317,10 @@ private fun deserializeMap(
 
             quote("""
                 __Field::`#`name => {
-                    if _serde.`#`Private::Option::is_some(&`#`name) {
-                        return _serde.`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`deserName));
+                    if _serde::`#`Private::Option::is_some(&`#`name) {
+                        return _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`deserName));
                     }
-                    `#`name = _serde.`#`Private::Some(`#`visit);
+                    `#`name = _serde::`#`Private::Some(`#`visit);
                 }
             """,
                 "name" to name,
@@ -333,9 +333,9 @@ private fun deserializeMap(
     val ignoredArm = if (hasFlatten) {
         quote("""
             __Field::__other(__name) => {
-                __collect.push(_serde.`#`Private::Some((
+                __collect.push(_serde::`#`Private::Some((
                     __name,
-                    _serde::de::MapAccess::next_value_seed(&mut __map, _serde.`#`Private::de::ContentVisitor::new())?)));
+                    _serde::de::MapAccess::next_value_seed(&mut __map, _serde::`#`Private::de::ContentVisitor::new())?)));
             }
         """, "Private" to Private)
     } else if (cattrs.denyUnknownFields()) {
@@ -350,14 +350,14 @@ private fun deserializeMap(
     val matchKeys = if (cattrs.denyUnknownFields() && allSkipped) {
         quote("""
             // FIXME: Once feature(exhaustive_patterns) is stable:
-            // let _serde.`#`Private::None::<__Field> = _serde::de::MapAccess::next_key(&mut __map)?;
-            _serde.`#`Private::Option::map(
+            // let _serde::`#`Private::None::<__Field> = _serde::de::MapAccess::next_key(&mut __map)?;
+            _serde::`#`Private::Option::map(
                 _serde::de::MapAccess::next_key::<__Field>(&mut __map)?,
                 |__impossible| match __impossible {});
         """, "Private" to Private)
     } else {
         quote("""
-            while let _serde.`#`Private::Some(__key) = _serde::de::MapAccess::next_key::<__Field>(&mut __map)? {
+            while let _serde::`#`Private::Some(__key) = _serde::de::MapAccess::next_key::<__Field>(&mut __map)? {
                 match __key {
                     `#`(`#`valueArms)*
                     `#`ignoredArm
@@ -376,8 +376,8 @@ private fun deserializeMap(
 
             quote("""
                 let `#`name = match `#`name {
-                    _serde.`#`Private::Some(`#`name) => `#`name,
-                    _serde.`#`Private::None => `#`missingExpr
+                    _serde::`#`Private::Some(`#`name) => `#`name,
+                    _serde::`#`Private::None => `#`missingExpr
                 };
             """,
                 "name" to name,
@@ -399,9 +399,9 @@ private fun deserializeMap(
 
             quote("""
                 let `#`name: `#`fieldTy = `#`func(
-                    _serde.`#`Private::de::FlatMapDeserializer(
+                    _serde::`#`Private::de::FlatMapDeserializer(
                         &mut __collect,
-                        _serde.`#`Private::PhantomData))?;
+                        _serde::`#`Private::PhantomData))?;
             """,
                 "name" to name,
                 "fieldTy" to fieldTy,
@@ -411,14 +411,14 @@ private fun deserializeMap(
 
     val collectedDenyUnknownFields = if (hasFlatten && cattrs.denyUnknownFields()) {
         quote("""
-            if let _serde.`#`Private::Some(_serde.`#`Private::Some((__key, _))) =
-                __collect.into_iter().filter(_serde.`#`Private::Option::is_some).next()
+            if let _serde::`#`Private::Some(_serde::`#`Private::Some((__key, _))) =
+                __collect.into_iter().filter(_serde::`#`Private::Option::is_some).next()
             {
-                if let _serde.`#`Private::Some(__key) = _serde.`#`Private::de::content_as_str(&__key) {
-                    return _serde.`#`Private::Err(
+                if let _serde::`#`Private::Some(__key) = _serde::`#`Private::de::content_as_str(&__key) {
+                    return _serde::`#`Private::Err(
                         _serde::de::Error::custom(format_args!("unknown field `{}`", &__key)));
                 } else {
-                    return _serde.`#`Private::Err(
+                    return _serde::`#`Private::Err(
                         _serde::de::Error::custom(format_args!("unexpected map key")));
                 }
             }
@@ -442,7 +442,7 @@ private fun deserializeMap(
     }
 
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("let __default: Self::Value = _serde.`#`Private::Default::default();",
+        is Default.Plain -> quote("let __default: Self::Value = _serde::`#`Private::Default::default();",
             "Private" to Private)
         // If the path returns the wrong type, the error will be reported here.
         // We attach the span of the path to the function so it will be reported
@@ -467,7 +467,7 @@ private fun deserializeMap(
         val split = params.generics.splitForImpl()
         val tyGenerics = split.typeGenerics
         resultExpr = quote("""
-            _serde.`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`resultExpr)
+            _serde::`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`resultExpr)
         """,
             "Private" to Private,
             "thisType" to thisType,
@@ -490,7 +490,7 @@ private fun deserializeMap(
 
         `#`collectedDenyUnknownFields
 
-        _serde.`#`Private::Ok(`#`resultExpr)
+        _serde::`#`Private::Ok(`#`resultExpr)
     """,
         "letValues" to letValues,
         "letCollect" to letCollect,
@@ -553,19 +553,19 @@ internal fun deserializeStructInPlace(
         `#`[doc(hidden)]
         struct __Visitor `#`inPlaceImplGenerics `#`whereClause {
             place: &`#`placeLife mut `#`thisType `#`tyGenerics,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`inPlaceImplGenerics _serde::de::Visitor<`#`delife> for __Visitor `#`inPlaceTyGenerics `#`whereClause {
             type Value = ();
 
-            fn expecting(&self, __formatter: &mut _serde.`#`Private::Formatter) -> _serde.`#`Private::fmt::Result {
-                _serde.`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
+            fn expecting(&self, __formatter: &mut _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt::Result {
+                _serde::`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
             }
 
             `#`[inline]
-            fn visit_seq<__A>(self, `#`mutSeq: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
+            fn visit_seq<__A>(self, `#`mutSeq: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
             where
                 __A: _serde::de::SeqAccess<`#`delife>,
             {
@@ -573,7 +573,7 @@ internal fun deserializeStructInPlace(
             }
 
             `#`[inline]
-            fn visit_map<__A>(self, mut __map: __A) -> _serde.`#`Private::Result<Self::Value, __A::Error>
+            fn visit_map<__A>(self, mut __map: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
             where
                 __A: _serde::de::MapAccess<`#`delife>,
             {
@@ -586,7 +586,7 @@ internal fun deserializeStructInPlace(
 
         _serde::Deserializer::deserialize_struct(__deserializer, `#`typeName, FIELDS, __Visitor {
             place: __place,
-            lifetime: _serde.`#`Private::PhantomData,
+            lifetime: _serde::`#`Private::PhantomData,
         })
     """,
         "fieldVisitor" to fieldVisitor,
@@ -638,7 +638,7 @@ private fun deserializeMapInPlace(
             val visit = when (val path = field.attrs.deserializeWith()) {
                 null -> {
                     quote("""
-                        _serde::de::MapAccess::next_value_seed(&mut __map, _serde.`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
+                        _serde::de::MapAccess::next_value_seed(&mut __map, _serde::`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
                     """,
                         "Private" to Private,
                         "member" to member)
@@ -648,9 +648,9 @@ private fun deserializeMapInPlace(
                     quote("""{
                         `#`wrapper
                         self.place.`#`member = match _serde::de::MapAccess::next_value::<`#`wrapperTy>(&mut __map) {
-                            _serde.`#`Private::Ok(__wrapper) => __wrapper.value,
-                            _serde.`#`Private::Err(__err) => {
-                                return _serde.`#`Private::Err(__err);
+                            _serde::`#`Private::Ok(__wrapper) => __wrapper.value,
+                            _serde::`#`Private::Err(__err) => {
+                                return _serde::`#`Private::Err(__err);
                             }
                         };
                     }""",
@@ -664,7 +664,7 @@ private fun deserializeMapInPlace(
             quote("""
                 __Field::`#`name => {
                     if `#`name {
-                        return _serde.`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`deserName));
+                        return _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`deserName));
                     }
                     `#`visit;
                     `#`name = true;
@@ -690,14 +690,14 @@ private fun deserializeMapInPlace(
     val matchKeys = if (cattrs.denyUnknownFields() && allSkipped) {
         quote("""
             // FIXME: Once feature(exhaustive_patterns) is stable:
-            // let _serde.`#`Private::None::<__Field> = _serde::de::MapAccess::next_key(&mut __map)?;
-            _serde.`#`Private::Option::map(
+            // let _serde::`#`Private::None::<__Field> = _serde::de::MapAccess::next_key(&mut __map)?;
+            _serde::`#`Private::Option::map(
                 _serde::de::MapAccess::next_key::<__Field>(&mut __map)?,
                 |__impossible| match __impossible {});
         """, "Private" to Private)
     } else {
         quote("""
-            while let _serde.`#`Private::Some(__key) = _serde::de::MapAccess::next_key::<__Field>(&mut __map)? {
+            while let _serde::`#`Private::Some(__key) = _serde::de::MapAccess::next_key::<__Field>(&mut __map)? {
                 match __key {
                     `#`(`#`valueArmsFrom)*
                     `#`ignoredArm
@@ -746,7 +746,7 @@ private fun deserializeMapInPlace(
     val tyGenerics = split.typeGenerics
 
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("let __default: `#`thisType `#`tyGenerics = _serde.`#`Private::Default::default();",
+        is Default.Plain -> quote("let __default: `#`thisType `#`tyGenerics = _serde::`#`Private::Default::default();",
             "thisType" to thisType,
             "tyGenerics" to tyGenerics,
             "Private" to Private)
@@ -776,7 +776,7 @@ private fun deserializeMapInPlace(
 
         `#`(`#`checkFlags)*
 
-        _serde.`#`Private::Ok(())
+        _serde::`#`Private::Ok(())
     """,
         "letFlags" to letFlags,
         "matchKeys" to matchKeys,
@@ -793,14 +793,14 @@ private fun deserializeFieldIdentifier(
     hasFlatten: Boolean
 ): Fragment {
     val (ignoreVariant, fallthrough) = if (hasFlatten) {
-        val ignoreVariant = quote("__other(_serde.`#`Private::de::Content<'de>),", "Private" to Private)
-        val fallthrough = quote("_serde.`#`Private::Ok(__Field::__other(__value))", "Private" to Private)
+        val ignoreVariant = quote("__other(_serde::`#`Private::de::Content<'de>),", "Private" to Private)
+        val fallthrough = quote("_serde::`#`Private::Ok(__Field::__other(__value))", "Private" to Private)
         Pair(ignoreVariant, fallthrough)
     } else if (cattrs.denyUnknownFields()) {
         Pair(null, null)
     } else {
         val ignoreVariant = quote("__ignore,")
-        val fallthrough = quote("_serde.`#`Private::Ok(__Field::__ignore)", "Private" to Private)
+        val fallthrough = quote("_serde::`#`Private::Ok(__Field::__ignore)", "Private" to Private)
         Pair(ignoreVariant, fallthrough)
     }
 
