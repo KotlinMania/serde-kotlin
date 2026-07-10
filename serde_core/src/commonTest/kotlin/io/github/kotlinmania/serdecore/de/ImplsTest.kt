@@ -5,8 +5,42 @@ import io.github.kotlinmania.serde.SerdeResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 public class ImplsTest {
+    @Test
+    public fun stringDeserializesFromStringStrAndChar() {
+        assertEquals("abc", StringDeserialize.deserialize(StringDeserializer("abc")).getOrThrow())
+        assertEquals("abc", StringDeserialize.deserialize(StrDeserializer("abc")).getOrThrow())
+        assertEquals("a", StringDeserialize.deserialize(CharDeserializer('a')).getOrThrow())
+    }
+
+    @Test
+    public fun stringDeserializeInPlaceUsesStringVisitor() {
+        var place = "overwritten"
+
+        StringDeserialize.deserializeInPlace(StrDeserializer("abc")) { place = it }.getOrThrow()
+        assertEquals("abc", place)
+
+        StringDeserialize.deserializeInPlace(StringDeserializer("owned")) { place = it }.getOrThrow()
+        assertEquals("owned", place)
+
+        StringDeserialize.deserializeInPlace(BytesDeserializer("bytes".encodeToByteArray())) { place = it }.getOrThrow()
+        assertEquals("bytes", place)
+    }
+
+    @Test
+    public fun stringFromUnitFailsWithStringExpectation() {
+        val failure = StringDeserialize.deserialize(UnitDeserializer).exceptionOrNull()
+
+        assertTrue(failure?.message?.contains("expected a string") == true)
+    }
+
+    @Test
+    public fun stringFromBorrowedStrDeserializesOwnedValue() {
+        assertEquals("owned", StringDeserialize.deserialize(BorrowedStrDeserializer("owned")).getOrThrow())
+    }
+
     @Test
     public fun optionDeserializesUnitNoneAndSome() {
         val deserialize = nullableDeserialize(I32Deserialize)
@@ -73,6 +107,44 @@ private class StringDeserializer(
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeString(visitor)
 
     override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = visitor.visitString(value)
+}
+
+private class StrDeserializer(
+    private val value: String,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeStr(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = visitor.visitStr(value)
+}
+
+private class BorrowedStrDeserializer(
+    private val value: String,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeStr(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBorrowedStr(value)
+}
+
+private class CharDeserializer(
+    private val value: Char,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeChar(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = visitor.visitChar(value)
+}
+
+private class BytesDeserializer(
+    private val value: ByteArray,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeByteBuf(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = visitor.visitByteBuf(value)
+}
+
+private data object UnitDeserializer : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeUnit(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = visitor.visitUnit()
 }
 
 private abstract class ForwardingDeserializer : Deserializer {

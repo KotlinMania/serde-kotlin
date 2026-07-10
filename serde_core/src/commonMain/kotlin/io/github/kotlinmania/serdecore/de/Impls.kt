@@ -502,6 +502,31 @@ private data object StringVisitor : Visitor<String> {
     override fun visitByteBuf(v: ByteArray): SerdeResult<String> = visitBytes(v)
 }
 
+private class StringInPlaceVisitor(
+    private val place: (String) -> Unit,
+) : Visitor<Unit> {
+    override fun expecting(): String = "a string"
+
+    override fun visitStr(v: String): SerdeResult<Unit> {
+        place(v)
+        return SerdeResult.success(Unit)
+    }
+
+    override fun visitString(v: String): SerdeResult<Unit> {
+        place(v)
+        return SerdeResult.success(Unit)
+    }
+
+    override fun visitBytes(v: ByteArray): SerdeResult<Unit> =
+        serdeCatching {
+            place(v.decodeToString(throwOnInvalidSequence = true))
+        }.recoverCatching {
+            throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this))
+        }
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<Unit> = visitBytes(v)
+}
+
 data object StringDeserialize : Deserialize<String> {
     override fun <D> deserialize(deserializer: D): SerdeResult<String>
         where D : Deserializer =
@@ -511,7 +536,8 @@ data object StringDeserialize : Deserialize<String> {
         deserializer: D,
         place: (String) -> Unit,
     ): SerdeResult<Unit>
-        where D : Deserializer = deserialize(deserializer).map { place(it) }
+        where D : Deserializer =
+        deserializer.deserializeString(StringInPlaceVisitor(place))
 }
 
 // //////////////////////////////////////////////////////////////////////////////
