@@ -20,6 +20,7 @@ internal fun deserializeTuple(
     check(!hasFlatten(fields)) { "tuples and tuple variants cannot have flatten fields" }
 
     val fieldCount = fields.count { !it.attrs.skipDeserializing() }
+    val fieldCountToken = rustUsizeLiteral(fieldCount)
 
     val thisType = params.thisType
     val thisValue = params.thisValue
@@ -86,18 +87,18 @@ internal fun deserializeTuple(
             quote(
                 "_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)",
                 "typeName" to typeName,
-                "fieldCount" to fieldCount,
+                "fieldCount" to fieldCountToken,
                 "visitorExpr" to visitorExpr,
             )
         }
         is TupleForm.ExternallyTagged -> quote(
             "_serde::de::VariantAccess::tuple_variant(__variant, `#`fieldCount, `#`visitorExpr)",
-            "fieldCount" to fieldCount,
+            "fieldCount" to fieldCountToken,
             "visitorExpr" to visitorExpr,
         )
         is TupleForm.Untagged -> quote(
             "_serde::Deserializer::deserialize_tuple(__deserializer, `#`fieldCount, `#`visitorExpr)",
-            "fieldCount" to fieldCount,
+            "fieldCount" to fieldCountToken,
             "visitorExpr" to visitorExpr,
         )
     }
@@ -211,10 +212,12 @@ internal fun deserializeTupleInPlace(
     check(!hasFlatten(fields)) { "tuples and tuple variants cannot have flatten fields" }
 
     val fieldCount = fields.count { !it.attrs.skipDeserializing() }
+    val fieldCountToken = rustUsizeLiteral(fieldCount)
 
     val thisType = params.thisType
-    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.genericsWithDeLifetime()
+    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.inPlaceGenericsWithDeLifetime()
     val delife = params.borrowed.deLifetime()
+    val placeLife = placeLifetime()
 
     val expecting = "tuple struct ${params.typeName()}"
     val expectingVal = cattrs.expecting() ?: expecting
@@ -223,15 +226,16 @@ internal fun deserializeTupleInPlace(
 
     val visitNewtypeStruct = if (nfields == 1) {
         check(fields[0].attrs.deserializeWith() == null)
+        val index = rustUnsuffixedLiteral(0u)
         quote("""
             `#`[inline]
             fn visit_newtype_struct<__E>(self, __e: __E) -> _serde::`#`Private::Result<Self::Value, __E::Error>
             where
                 __E: _serde::Deserializer<`#`delife>,
             {
-                _serde::Deserialize::deserialize_in_place(__e, &mut self.place.0)
+                _serde::Deserialize::deserialize_in_place(__e, &mut self.place.`#`index)
             }
-        """, "Private" to Private, "delife" to delife)
+        """, "Private" to Private, "delife" to delife, "index" to index)
     } else {
         quote("")
     }
@@ -256,7 +260,7 @@ internal fun deserializeTupleInPlace(
         quote(
             "_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)",
             "typeName" to typeName,
-            "fieldCount" to fieldCount,
+            "fieldCount" to fieldCountToken,
             "visitorExpr" to visitorExpr,
         )
     }
@@ -266,7 +270,7 @@ internal fun deserializeTupleInPlace(
     return Fragment.Block(quote("""
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
-            place: &`#`delife mut `#`thisType `#`tyGenerics,
+            place: &`#`placeLife mut `#`thisType `#`tyGenerics,
             lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
@@ -293,6 +297,7 @@ internal fun deserializeTupleInPlace(
     """, mapOf(
         "deImplGenerics" to deImplGenerics,
         "whereClause" to whereClause,
+        "placeLife" to placeLife,
         "delife" to delife,
         "thisType" to thisType,
         "tyGenerics" to tyGenerics,

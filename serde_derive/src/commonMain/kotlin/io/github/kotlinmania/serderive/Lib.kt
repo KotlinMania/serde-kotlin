@@ -13,12 +13,21 @@ import io.github.kotlinmania.syn.parseMacroInput
 // The private sentinel type used in generated code to access serde's
 // private API surface. Maps to the private sentinel in upstream.
 internal object Private : ToTokens {
-    fun ident(): Ident = Ident.new("__private0", Span.callSite())
+    fun ident(): Ident = Ident.new("__private228", Span.callSite())
 
     override fun toTokens(tokens: TokenStream) {
         tokens.append(ident())
     }
 }
+
+internal fun rustUsizeLiteral(value: Int): TokenStream =
+    TokenStream.fromString("${value}usize").getOrThrow()
+
+internal fun rustU64Literal(value: Int): TokenStream =
+    TokenStream.fromString("${value}u64").getOrThrow()
+
+internal fun rustUnsuffixedLiteral(value: UInt): TokenStream =
+    TokenStream.fromString(value.toLong().toString()).getOrThrow()
 
 // Entry point for the Serialize derive. Parses the token stream into a
 // DeriveInput, delegates to expandDeriveSerialize, and converts errors to

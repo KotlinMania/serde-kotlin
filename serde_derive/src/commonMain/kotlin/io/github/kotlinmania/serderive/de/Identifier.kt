@@ -361,10 +361,11 @@ private fun deserializeIdentifier(
         """, "Private" to Private)
     } else {
         val u64Mapping = deserializedFields.mapIndexed { i, field ->
+            val index = rustU64Literal(i)
             val ident = field.ident
             quote(
                 "`#`i => _serde::`#`Private::Ok(`#`thisValue::`#`ident)",
-                mapOf("i" to i, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
+                mapOf("i" to index, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
             )
         }
 
@@ -387,7 +388,7 @@ private fun deserializeIdentifier(
                 __E: _serde::de::Error,
             {
                 match __value {
-                    `#`(`#`u64Mapping),*
+                    `#`(`#`u64Mapping,)*
                     _ => `#`u64FallthroughArm,
                 }
             }

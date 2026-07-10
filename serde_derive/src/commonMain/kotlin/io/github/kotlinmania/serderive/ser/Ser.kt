@@ -290,22 +290,24 @@ private fun serializeTupleStruct(
         .toList()
 
     val letMut = mutIf(serializedFields.isNotEmpty())
+    val zero = rustUsizeLiteral(0)
+    val one = rustUsizeLiteral(1)
 
     val len = serializedFields
         .map { (i, field) ->
             when (val path = field.attrs.skipSerializingIf()) {
-                null -> quote("1")
+                null -> one
                 else -> {
                     val index = Index(i.toUInt(), Span.callSite())
                     val fieldExpr = getMember(params, field, Member.Unnamed(index))
                     quote(
-                        "if `#`path(`#`fieldExpr) { 0 } else { 1 }",
-                        mapOf("path" to path, "fieldExpr" to fieldExpr),
+                        "if `#`path(`#`fieldExpr) { `#`zero } else { `#`one }",
+                        mapOf("path" to path, "fieldExpr" to fieldExpr, "zero" to zero, "one" to one),
                     )
                 }
             }
         }
-        .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
+        .fold(zero) { sum, expr -> quote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
     val stmts = quote("`#`(`#`serializeStmts)*", "serializeStmts" to serializeStmts)
     return Fragment.Block(quote("""
@@ -358,21 +360,23 @@ private fun serializeStructAsStruct(
     val serializedFields = fields.filter { !it.attrs.skipSerializing() }
 
     val letMut = mutIf(serializedFields.isNotEmpty() || tagFieldExists)
+    val zero = rustUsizeLiteral(0)
+    val one = rustUsizeLiteral(1)
 
     val len = serializedFields
         .map { field ->
             when (val path = field.attrs.skipSerializingIf()) {
-                null -> quote("1")
+                null -> one
                 else -> {
                     val fieldExpr = getMember(params, field, field.member)
                     quote(
-                        "if `#`path(`#`fieldExpr) { 0 } else { 1 }",
-                        mapOf("path" to path, "fieldExpr" to fieldExpr),
+                        "if `#`path(`#`fieldExpr) { `#`zero } else { `#`one }",
+                        mapOf("path" to path, "fieldExpr" to fieldExpr, "zero" to zero, "one" to one),
                     )
                 }
             }
         }
-        .fold(if (tagFieldExists) quote("1") else quote("0")) { sum, expr ->
+        .fold(if (tagFieldExists) one else zero) { sum, expr ->
             quote("`#`sum + `#`expr", mapOf("sum" to sum, "expr" to expr))
         }
 
@@ -801,18 +805,26 @@ private fun serializeTupleVariant(
         .toList()
 
     val letMut = mutIf(serializedFields.isNotEmpty())
+    val zero = rustUsizeLiteral(0)
+    val one = rustUsizeLiteral(1)
 
     val len = serializedFields
         .map { (i, field) ->
             when (val path = field.attrs.skipSerializingIf()) {
-                null -> quote("1")
+                null -> one
                 else -> {
                     val fieldExpr = fieldI(i)
-                    quote("if `#`path(`#`fieldExpr) { 0 } else { 1 }")
+                    quote(
+                        "if `#`path(`#`fieldExpr) { `#`zero } else { `#`one }",
+                        "path" to path,
+                        "fieldExpr" to fieldExpr,
+                        "zero" to zero,
+                        "one" to one,
+                    )
                 }
             }
         }
-        .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr") }
+        .fold(zero) { sum, expr -> quote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
     val stmts = serializeStmts.joinToString(separator = "") { it.toString() }
     return when (context) {
@@ -869,16 +881,24 @@ private fun serializeStructVariant(
     val serializedFields = fields.filter { !it.attrs.skipSerializing() }
 
     val letMut = mutIf(serializedFields.isNotEmpty())
+    val zero = rustUsizeLiteral(0)
+    val one = rustUsizeLiteral(1)
 
     val len = serializedFields
         .map { field ->
             val member = field.member
             when (val path = field.attrs.skipSerializingIf()) {
-                null -> quote("1")
-                else -> quote("if `#`path(`#`member) { 0 } else { 1 }")
+                null -> one
+                else -> quote(
+                    "if `#`path(`#`member) { `#`zero } else { `#`one }",
+                    "path" to path,
+                    "member" to member,
+                    "zero" to zero,
+                    "one" to one,
+                )
             }
         }
-        .fold(quote("0")) { sum, expr -> quote("`#`sum + `#`expr") }
+        .fold(zero) { sum, expr -> quote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
     val stmts = serializeFields.joinToString(separator = "") { it.toString() }
     return when (context) {

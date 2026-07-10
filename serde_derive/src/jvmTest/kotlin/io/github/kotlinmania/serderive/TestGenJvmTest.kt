@@ -199,6 +199,7 @@ private fun compileDerives(
     val serialize = renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
     val deserialize = renderRust(deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()))
 
+    val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')
     fixture.resolve("Cargo.toml").writeText(
         """
         [package]
@@ -207,7 +208,7 @@ private fun compileDerives(
         edition = "2021"
 
         [dependencies]
-        serde = { path = "${root.resolve("tmp/serde/serde")}" }
+        serde = { path = "$serdePath" }
         """.trimIndent() + "\n",
     )
     fixture.resolve("src/lib.rs").writeText(
@@ -271,7 +272,7 @@ private fun renderRust(tokens: TokenStream): String =
 
 private fun findRepositoryRoot(): Path {
     var current = Path.of(System.getProperty("user.dir")).toAbsolutePath()
-    while (!Files.exists(current.resolve("tmp/serde/serde/Cargo.toml"))) {
+    while (!Files.exists(current.resolve("settings.gradle.kts"))) {
         current = current.parent ?: error("cannot locate serde-kotlin repository root")
     }
     return current

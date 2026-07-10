@@ -12,23 +12,23 @@ private object EmptyTokens : ToTokens {
     override fun toTokens(tokens: TokenStream) = Unit
 }
 
-public fun quote(
+internal fun quote(
     template: String,
     interpolations: Map<String, *> = emptyMap<String, Any?>(),
 ): TokenStream =
     quoteKotlin(template, checkedInterpolations(template, interpolations))
 
-public fun quote(template: String, vararg pairs: Pair<String, *>): TokenStream =
+internal fun quote(template: String, vararg pairs: Pair<String, *>): TokenStream =
     quote(template, mapOf(*pairs))
 
-public fun quoteSpanned(
+internal fun quoteSpanned(
     span: Span,
     template: String,
     interpolations: Map<String, *> = emptyMap<String, Any?>(),
 ): TokenStream =
     quoteSpannedKotlin(span, template, checkedInterpolations(template, interpolations))
 
-public fun quoteSpanned(
+internal fun quoteSpanned(
     span: Span,
     template: String,
     vararg pairs: Pair<String, *>,

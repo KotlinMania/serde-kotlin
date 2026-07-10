@@ -637,10 +637,7 @@ public class AttrVariant(
         if (!name.deserializeRenamed) {
             name.deserialize.value = rules.deserialize.applyToVariant(name.deserialize.value)
         }
-        val aliases = name.deserializeAliases().toList()
-        for (alias in aliases) {
-            alias.value = rules.deserialize.applyToVariant(alias.value)
-        }
+        name.applyDeserializeAliasRule { alias -> rules.deserialize.applyToVariant(alias) }
     }
 
     public companion object {
@@ -830,10 +827,7 @@ public class AttrField(
         if (!name.deserializeRenamed) {
             name.deserialize.value = rules.deserialize.applyToField(name.deserialize.value)
         }
-        val aliases = name.deserializeAliases().toList()
-        for (alias in aliases) {
-            alias.value = rules.deserialize.applyToField(alias.value)
-        }
+        name.applyDeserializeAliasRule { alias -> rules.deserialize.applyToField(alias) }
     }
 
     public companion object {

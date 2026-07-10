@@ -45,6 +45,7 @@ import io.github.kotlinmania.syn.Lifetime
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.SynType
+import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.WhereClause
 import io.github.kotlinmania.syn.span
 import io.github.kotlinmania.syn.token.Comma
@@ -180,6 +181,14 @@ class Parameters(cont: Container) {
         return SplitForDeLifetime(deImplGenerics, deTyGenerics, tyGenerics, whereClause)
     }
 
+    fun inPlaceGenericsWithDeLifetime(): InPlaceSplitForDeLifetime {
+        val deImplGenerics = InPlaceImplGenerics(this)
+        val deTyGenerics = InPlaceTypeGenerics(this)
+        val tyGenerics = generatedTypeGenerics(generics)
+        val whereClause = generatedWhereClause(generics.whereClause)
+        return InPlaceSplitForDeLifetime(deImplGenerics, deTyGenerics, tyGenerics, whereClause)
+    }
+
     private fun genericsWithInsertedDeLifetime(): Generics {
         val deLifetime = borrowed.deLifetimeParam() ?: return generics.copy()
         val newParams = io.github.kotlinmania.syn.GenericParamList()
@@ -194,6 +203,13 @@ class Parameters(cont: Container) {
 data class SplitForDeLifetime(
     val deImplGenerics: TokenStream,
     val deTyGenerics: TokenStream,
+    val tyGenerics: TokenStream,
+    val whereClause: TokenStream
+)
+
+data class InPlaceSplitForDeLifetime(
+    val deImplGenerics: InPlaceImplGenerics,
+    val deTyGenerics: InPlaceTypeGenerics,
     val tyGenerics: TokenStream,
     val whereClause: TokenStream
 )
@@ -213,10 +229,11 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
                 is Default.Path -> g2
             }
 
+            val delife = borrowed.deLifetime()
             val g4 = withBound(
                 cont, g3,
                 ::needsDeserializeBound,
-                parseQuotePath("_serde::Deserialize")
+                parseQuotePath("_serde::Deserialize<`#`delife>", "delife" to delife)
             )
 
             withBound(
@@ -414,6 +431,12 @@ internal fun fieldI(i: Int): Ident {
     return Ident.new("__field$i", Span.callSite())
 }
 
+internal fun memberAccess(member: Member): TokenStream =
+    when (member) {
+        is Member.Named -> member.toTokenStream()
+        is Member.Unnamed -> rustUnsuffixedLiteral(member.index.index)
+    }
+
 // The submodule functions are implemented in the sibling files:
 //   Enum.kt — deserializeEnum, deserializeCustomIdentifier, prepareEnumVariantEnum
 //   Struct.kt — deserializeStruct, deserializeStructInPlace
@@ -458,6 +481,7 @@ internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
 internal fun exprIsMissingSeq(
     assignTo: TokenStream?, index: Int, field: Field, cattrs: AttrContainer, expecting: String
 ): TokenStream {
+    val indexToken = rustUsizeLiteral(index)
     when (field.attrs.default()) {
         is Default.Plain -> {
             val span = field.original.span()
@@ -483,7 +507,7 @@ internal fun exprIsMissingSeq(
         is Default.None -> {
             quote(
                 "return _serde::`#`Private::Err(_serde::de::Error::invalid_length(`#`index, &`#`expecting))",
-                mapOf("Private" to Private, "index" to index, "expecting" to expecting),
+                mapOf("Private" to Private, "index" to indexToken, "expecting" to expecting),
             )
         }
     }
@@ -515,14 +539,69 @@ class DeImplGenerics(val params: Parameters) : ToTokens {
                 for (p in newParams) gpl.push(p) { Comma.default() }
             })
         }
-        val split = generics.splitForImpl()
-        split.implGenerics.toTokens(tokens)
+        tokens.extendTokenStreams(listOf(generatedImplGenerics(generics)))
     }
 }
 
 class DeTypeGenerics(val params: Parameters) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         deTypeGenericsToTokens(params.generics.copy(), params.borrowed, tokens)
+    }
+}
+
+class InPlaceImplGenerics(val params: Parameters) : ToTokens {
+    override fun toTokens(tokens: TokenStream) {
+        val placeLife = placeLifetime()
+        var generics = params.generics.copy()
+
+        // Add 'place bound to all existing lifetime and type parameters.
+        for (p in generics.params.toList()) {
+            when (p) {
+                is GenericParam.LifetimeParam -> {
+                    if (p.colonToken == null) {
+                        p.colonToken = io.github.kotlinmania.syn.token.Colon.default()
+                    }
+                    p.bounds.push(placeLife.lifetime.deepCopy()) { Plus.default() }
+                }
+                is GenericParam.TypeParam -> {
+                    if (p.colonToken == null) {
+                        p.colonToken = io.github.kotlinmania.syn.token.Colon.default()
+                    }
+                    p.bounds.push(TypeParamBound.LifetimeBound(placeLife.lifetime.deepCopy())) { Plus.default() }
+                }
+                is GenericParam.ConstParam -> {}
+            }
+        }
+
+        val newParams = mutableListOf<GenericParam>()
+        newParams.add(placeLife)
+        for (p in generics.params.toList()) {
+            newParams.add(p)
+        }
+        val deLifetime = params.borrowed.deLifetimeParam()
+        if (deLifetime != null) {
+            newParams.add(0, deLifetime)
+        }
+        generics = generics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
+            for (p in newParams) gpl.push(p) { Comma.default() }
+        })
+        tokens.extendTokenStreams(listOf(generatedImplGenerics(generics)))
+    }
+}
+
+class InPlaceTypeGenerics(val params: Parameters) : ToTokens {
+    override fun toTokens(tokens: TokenStream) {
+        var generics = params.generics.copy()
+        val placeLife = placeLifetime()
+        val newParams = mutableListOf<GenericParam>()
+        newParams.add(placeLife)
+        for (p in generics.params.toList()) {
+            newParams.add(p)
+        }
+        generics = generics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
+            for (p in newParams) gpl.push(p) { Comma.default() }
+        })
+        deTypeGenericsToTokens(generics, params.borrowed, tokens)
     }
 }
 
@@ -546,8 +625,7 @@ private fun deTypeGenericsToTokens(
             for (p in newParams) gpl.push(p) { Comma.default() }
         })
     }
-    val split = mutGenerics.splitForImpl()
-    split.typeGenerics.toTokens(out)
+    out.extendTokenStreams(listOf(generatedTypeGenerics(mutGenerics)))
 }
 
 // Parse a quote string into a Path, equivalent to Rust's parse_quote!().
@@ -683,7 +761,7 @@ internal fun deserializeSeqInPlace(
 
     var indexInSeq = 0
     val writeValues = fields.map { field ->
-        val member = field.member
+        val member = memberAccess(field.member)
 
         if (field.attrs.skipDeserializing()) {
             val default = Expr(exprIsMissing(field, cattrs))

@@ -517,7 +517,7 @@ internal fun deserializeStructInPlace(
 
     val thisType = params.thisType
     val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) =
-        params.genericsWithDeLifetime()
+        params.inPlaceGenericsWithDeLifetime()
     val delife = params.borrowed.deLifetime()
 
     val expecting = "struct ${params.typeName()}"
@@ -543,8 +543,8 @@ internal fun deserializeStructInPlace(
     val fieldNames = deserializedFields.flatMap { field -> field.aliases.toList() }
     val typeName = cattrs.name().deserializeName()
 
-    val inPlaceImplGenerics = DeImplGenerics(params)
-    val inPlaceTyGenerics = DeTypeGenerics(params)
+    val inPlaceImplGenerics = InPlaceImplGenerics(params)
+    val inPlaceTyGenerics = InPlaceTypeGenerics(params)
     val placeLife = placeLifetime()
 
     return Fragment.Block(quote("""

@@ -31,7 +31,7 @@ import io.github.kotlinmania.serde.serdeCatching
  * Not a `Throwable` subclass — avoids Swift export's Class Stdlib hazard
  * (unchecked-cast bridge on `Throwable.getStackTrace()`).
  */
-class Error private constructor(
+class ValueError private constructor(
     private val err: String,
 ) {
     fun fmt(): String = err
@@ -40,12 +40,12 @@ class Error private constructor(
 
     override fun toString(): String = fmt()
 
-    override fun equals(other: Any?): Boolean = other is Error && other.err == err
+    override fun equals(other: Any?): Boolean = other is ValueError && other.err == err
 
     override fun hashCode(): Int = err.hashCode()
 
     companion object {
-        fun custom(msg: String): Error = Error(msg)
+        fun custom(msg: String): ValueError = ValueError(msg)
     }
 }
 

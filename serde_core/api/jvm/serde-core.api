@@ -813,19 +813,6 @@ public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializ
 	public final fun new (Lio/github/kotlinmania/serdecore/de/EnumAccess;)Lio/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer;
 }
 
-public final class io/github/kotlinmania/serdecore/de/value/Error {
-	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/Error$Companion;
-	public final fun description ()Ljava/lang/String;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun fmt ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/kotlinmania/serdecore/de/value/Error$Companion {
-	public final fun custom (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/Error;
-}
-
 public final class io/github/kotlinmania/serdecore/de/value/F32Deserializer : io/github/kotlinmania/serdecore/de/value/PrimitiveDeserializer {
 	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/F32Deserializer$Companion;
 	public synthetic fun getValue ()Ljava/lang/Object;
@@ -1363,6 +1350,19 @@ public final class io/github/kotlinmania/serdecore/de/value/UsizeDeserializer : 
 
 public final class io/github/kotlinmania/serdecore/de/value/UsizeDeserializer$Companion {
 	public final fun new-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/UsizeDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/ValueError {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/ValueError$Companion;
+	public final fun description ()Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun fmt ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/ValueError$Companion {
+	public final fun custom (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/ValueError;
 }
 
 public final class io/github/kotlinmania/serdecore/de/value/ValueKt {

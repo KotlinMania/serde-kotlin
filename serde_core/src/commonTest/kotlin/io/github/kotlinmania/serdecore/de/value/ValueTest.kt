@@ -14,13 +14,13 @@ import kotlin.test.assertEquals
 public class ValueTest {
     @Test
     public fun errorCustomCarriesDisplayAndDescriptionText() {
-        val error = Error.custom("expected unit")
+        val error = ValueError.custom("expected unit")
 
         assertEquals("expected unit", error.fmt())
         assertEquals("expected unit", error.description())
         assertEquals("expected unit", error.toString())
-        assertEquals(Error.custom("expected unit"), error)
-        assertEquals(Error.custom("expected unit").hashCode(), error.hashCode())
+        assertEquals(ValueError.custom("expected unit"), error)
+        assertEquals(ValueError.custom("expected unit").hashCode(), error.hashCode())
     }
 
     @Test
