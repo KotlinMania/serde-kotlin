@@ -1,7 +1,9 @@
 // port-lint: tests test_suite/tests/test_de.rs
 package io.github.kotlinmania.serdecore.de
 
+import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -64,6 +66,20 @@ public class ImplsTest {
                 .getOrThrow(),
         )
     }
+
+    @Test
+    public fun resultDeserializesOkAndErrNewtypeVariants() {
+        val deserialize = resultDeserialize(I32Deserialize, I32Deserialize)
+
+        assertEquals(
+            ResultValue.Ok(0),
+            deserialize.deserialize(ResultEnumDeserializer("Ok", 0)).getOrThrow(),
+        )
+        assertEquals(
+            ResultValue.Err(1),
+            deserialize.deserialize(ResultEnumDeserializer("Err", 1)).getOrThrow(),
+        )
+    }
 }
 
 private sealed class OptionMode {
@@ -91,6 +107,46 @@ private class OptionDeserializer(
             is OptionMode.SomeValue -> visitor.visitSome(IntDeserializer(current.value))
             is OptionMode.UntaggedValue -> visitor.privateVisitUntaggedOption(current.deserializer)
         }
+}
+
+private class ResultEnumDeserializer(
+    private val variant: String,
+    private val value: Int,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeEnum("Result", listOf("Ok", "Err"), visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(ResultEnumAccess(variant, value))
+}
+
+private class ResultEnumAccess(
+    private val variant: String,
+    private val value: Int,
+) : EnumAccess {
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(variant.intoDeserializer()).map { it to ResultVariantAccess(value) }
+}
+
+private class ResultVariantAccess(
+    private val value: Int,
+) : VariantAccess {
+    override fun unitVariant(): SerdeResult<Unit> = SerdeResult.failure(SerdeError.custom("unit variant was not expected"))
+
+    override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
+        seed.deserialize(IntDeserializer(value))
+
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("tuple variant was not expected"))
+
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("struct variant was not expected"))
 }
 
 private class IntDeserializer(
