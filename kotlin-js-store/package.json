@@ -3,5 +3,9 @@
   "private": true,
   "dependencies": {
     "webpack": "5.108.4"
+  },
+  "resolutions": {
+    "ws": "8.21.0",
+    "tmp": "0.2.7"
   }
 }

@@ -53,3 +53,7 @@ NEXT_ACTIONS.md
 port_status_report.md
 high_priority_ports.md
 port_lint_proposed_changes.md
+
+# Node modules (yarn install artifact)
+kotlin-js-store/node_modules
+kotlin-js-store/wasm/node_modules
