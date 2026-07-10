@@ -1,4 +1,4 @@
-// port-lint: source ser/impls.rs
+// port-lint: tests ser/impls.rs
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeError
@@ -58,6 +58,11 @@ public class ImplsTest {
         assertEquals("wrapped", formatSerialize(Wrapping(ImplsLiteralSerialize("wrapped"))))
         assertEquals("saturating", formatSerialize(Saturating(ImplsLiteralSerialize("saturating"))))
         assertEquals("reverse", formatSerialize(Reverse(ImplsLiteralSerialize("reverse"))))
+    }
+
+    @Test
+    public fun testFmtArguments() {
+        assertEquals("1a", formatSerialize(FormatArguments("${1}${'a'}")))
     }
 
     @Test
