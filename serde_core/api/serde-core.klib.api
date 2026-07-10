@@ -1375,6 +1375,34 @@ final class io.github.kotlinmania.serdecore.ser/SerdeSerializationException : ko
     constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.ser/SerdeSerializationException.<init>|<init>(kotlin.String){}[0]
 }
 
+sealed class <#A: out kotlin/Any?, #B: out kotlin/Any?> io.github.kotlinmania.serdecore.de/ResultValue { // io.github.kotlinmania.serdecore.de/ResultValue|null[0]
+    final class <#A1: kotlin/Any?> Err : io.github.kotlinmania.serdecore.de/ResultValue<kotlin/Nothing, #A1> { // io.github.kotlinmania.serdecore.de/ResultValue.Err|null[0]
+        constructor <init>(#A1) // io.github.kotlinmania.serdecore.de/ResultValue.Err.<init>|<init>(1:0){}[0]
+
+        final val error // io.github.kotlinmania.serdecore.de/ResultValue.Err.error|{}error[0]
+            final fun <get-error>(): #A1 // io.github.kotlinmania.serdecore.de/ResultValue.Err.error.<get-error>|<get-error>(){}[0]
+
+        final fun component1(): #A1 // io.github.kotlinmania.serdecore.de/ResultValue.Err.component1|component1(){}[0]
+        final fun copy(#A1 = ...): io.github.kotlinmania.serdecore.de/ResultValue.Err<#A1> // io.github.kotlinmania.serdecore.de/ResultValue.Err.copy|copy(1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/ResultValue.Err.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/ResultValue.Err.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/ResultValue.Err.toString|toString(){}[0]
+    }
+
+    final class <#A1: kotlin/Any?> Ok : io.github.kotlinmania.serdecore.de/ResultValue<#A1, kotlin/Nothing> { // io.github.kotlinmania.serdecore.de/ResultValue.Ok|null[0]
+        constructor <init>(#A1) // io.github.kotlinmania.serdecore.de/ResultValue.Ok.<init>|<init>(1:0){}[0]
+
+        final val value // io.github.kotlinmania.serdecore.de/ResultValue.Ok.value|{}value[0]
+            final fun <get-value>(): #A1 // io.github.kotlinmania.serdecore.de/ResultValue.Ok.value.<get-value>|<get-value>(){}[0]
+
+        final fun component1(): #A1 // io.github.kotlinmania.serdecore.de/ResultValue.Ok.component1|component1(){}[0]
+        final fun copy(#A1 = ...): io.github.kotlinmania.serdecore.de/ResultValue.Ok<#A1> // io.github.kotlinmania.serdecore.de/ResultValue.Ok.copy|copy(1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/ResultValue.Ok.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/ResultValue.Ok.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/ResultValue.Ok.toString|toString(){}[0]
+    }
+}
+
 sealed class <#A: out kotlin/Any?> io.github.kotlinmania.serde/SerdeResult { // io.github.kotlinmania.serde/SerdeResult|null[0]
     final val isFailure // io.github.kotlinmania.serde/SerdeResult.isFailure|{}isFailure[0]
         final fun <get-isFailure>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeResult.isFailure.<get-isFailure>|<get-isFailure>(){}[0]
@@ -1792,6 +1820,7 @@ final fun <#A: kotlin/Any?, #B: io.github.kotlinmania.serdecore.ser/Serialize> (
 final fun <#A: kotlin/Any?, #B: kotlin/Any?, #C: kotlin/Any?> io.github.kotlinmania.serdecore.de/tripleDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>, io.github.kotlinmania.serdecore.de/Deserialize<#B>, io.github.kotlinmania.serdecore.de/Deserialize<#C>): io.github.kotlinmania.serdecore.de/Deserialize<kotlin/Triple<#A, #B, #C>> // io.github.kotlinmania.serdecore.de/tripleDeserialize|tripleDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>;io.github.kotlinmania.serdecore.de.Deserialize<0:1>;io.github.kotlinmania.serdecore.de.Deserialize<0:2>){0§<kotlin.Any?>;1§<kotlin.Any?>;2§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?, #B: kotlin/Any?> io.github.kotlinmania.serdecore.de/mutableMapDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>, io.github.kotlinmania.serdecore.de/Deserialize<#B>): io.github.kotlinmania.serdecore.de/Deserialize<kotlin.collections/MutableMap<#A, #B>> // io.github.kotlinmania.serdecore.de/mutableMapDeserialize|mutableMapDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>;io.github.kotlinmania.serdecore.de.Deserialize<0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?, #B: kotlin/Any?> io.github.kotlinmania.serdecore.de/pairDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>, io.github.kotlinmania.serdecore.de/Deserialize<#B>): io.github.kotlinmania.serdecore.de/Deserialize<kotlin/Pair<#A, #B>> // io.github.kotlinmania.serdecore.de/pairDeserialize|pairDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>;io.github.kotlinmania.serdecore.de.Deserialize<0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> io.github.kotlinmania.serdecore.de/resultDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>, io.github.kotlinmania.serdecore.de/Deserialize<#B>): io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/ResultValue<#A, #B>> // io.github.kotlinmania.serdecore.de/resultDeserialize|resultDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>;io.github.kotlinmania.serdecore.de.Deserialize<0:1>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin.time/Duration).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@kotlin.time.Duration(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin.time/Instant).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@kotlin.time.Instant(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlin/Boolean).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@kotlin.Boolean(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]

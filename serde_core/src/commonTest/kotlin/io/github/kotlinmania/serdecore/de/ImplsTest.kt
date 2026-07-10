@@ -1,12 +1,48 @@
 // port-lint: tests test_suite/tests/test_de.rs
 package io.github.kotlinmania.serdecore.de
 
+import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 public class ImplsTest {
+    @Test
+    public fun stringDeserializesFromStringStrAndChar() {
+        assertEquals("abc", StringDeserialize.deserialize(StringDeserializer("abc")).getOrThrow())
+        assertEquals("abc", StringDeserialize.deserialize(StrDeserializer("abc")).getOrThrow())
+        assertEquals("a", StringDeserialize.deserialize(CharDeserializer('a')).getOrThrow())
+    }
+
+    @Test
+    public fun stringDeserializeInPlaceUsesStringVisitor() {
+        var place = "overwritten"
+
+        StringDeserialize.deserializeInPlace(StrDeserializer("abc")) { place = it }.getOrThrow()
+        assertEquals("abc", place)
+
+        StringDeserialize.deserializeInPlace(StringDeserializer("owned")) { place = it }.getOrThrow()
+        assertEquals("owned", place)
+
+        StringDeserialize.deserializeInPlace(BytesDeserializer("bytes".encodeToByteArray())) { place = it }.getOrThrow()
+        assertEquals("bytes", place)
+    }
+
+    @Test
+    public fun stringFromUnitFailsWithStringExpectation() {
+        val failure = StringDeserialize.deserialize(UnitDeserializer).exceptionOrNull()
+
+        assertTrue(failure?.message?.contains("expected a string") == true)
+    }
+
+    @Test
+    public fun stringFromBorrowedStrDeserializesOwnedValue() {
+        assertEquals("owned", StringDeserialize.deserialize(BorrowedStrDeserializer("owned")).getOrThrow())
+    }
+
     @Test
     public fun optionDeserializesUnitNoneAndSome() {
         val deserialize = nullableDeserialize(I32Deserialize)
@@ -28,6 +64,20 @@ public class ImplsTest {
             deserialize
                 .deserialize(OptionDeserializer(OptionMode.UntaggedValue(StringDeserializer("not an int"))))
                 .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun resultDeserializesOkAndErrNewtypeVariants() {
+        val deserialize = resultDeserialize(I32Deserialize, I32Deserialize)
+
+        assertEquals(
+            ResultValue.Ok(0),
+            deserialize.deserialize(ResultEnumDeserializer("Ok", 0)).getOrThrow(),
+        )
+        assertEquals(
+            ResultValue.Err(1),
+            deserialize.deserialize(ResultEnumDeserializer("Err", 1)).getOrThrow(),
         )
     }
 }
@@ -59,6 +109,46 @@ private class OptionDeserializer(
         }
 }
 
+private class ResultEnumDeserializer(
+    private val variant: String,
+    private val value: Int,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeEnum("Result", listOf("Ok", "Err"), visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(ResultEnumAccess(variant, value))
+}
+
+private class ResultEnumAccess(
+    private val variant: String,
+    private val value: Int,
+) : EnumAccess {
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(variant.intoDeserializer()).map { it to ResultVariantAccess(value) }
+}
+
+private class ResultVariantAccess(
+    private val value: Int,
+) : VariantAccess {
+    override fun unitVariant(): SerdeResult<Unit> = SerdeResult.failure(SerdeError.custom("unit variant was not expected"))
+
+    override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
+        seed.deserialize(IntDeserializer(value))
+
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("tuple variant was not expected"))
+
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("struct variant was not expected"))
+}
+
 private class IntDeserializer(
     private val value: Int,
 ) : ForwardingDeserializer() {
@@ -73,6 +163,44 @@ private class StringDeserializer(
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeString(visitor)
 
     override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = visitor.visitString(value)
+}
+
+private class StrDeserializer(
+    private val value: String,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeStr(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = visitor.visitStr(value)
+}
+
+private class BorrowedStrDeserializer(
+    private val value: String,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeStr(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBorrowedStr(value)
+}
+
+private class CharDeserializer(
+    private val value: Char,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeChar(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = visitor.visitChar(value)
+}
+
+private class BytesDeserializer(
+    private val value: ByteArray,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeByteBuf(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = visitor.visitByteBuf(value)
+}
+
+private data object UnitDeserializer : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeUnit(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = visitor.visitUnit()
 }
 
 private abstract class ForwardingDeserializer : Deserializer {

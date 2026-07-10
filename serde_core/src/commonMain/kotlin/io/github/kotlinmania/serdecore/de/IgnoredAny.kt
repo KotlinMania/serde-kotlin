@@ -41,12 +41,12 @@ import io.github.kotlinmania.serde.serdeCatching
  *         where A : SeqAccess =
  *         serdeCatching {
  *             for (index in 0 until n) {
- *                 if (seq.nextElement(IgnoredAny).getOrThrow() == null) {
+ *                 if (access.nextElement(IgnoredAny).getOrThrow() == null) {
  *                     throw SerdeException(SerdeError.invalidLength(index, this))
  *                 }
  *             }
  *
- *             val nth = seq.nextElement(object : DeserializeSeed<T> {
+ *             val nth = access.nextElement(object : DeserializeSeed<T> {
  *                 override fun <D> deserialize(deserializer: D): SerdeResult<T>
  *                     where D : Deserializer =
  *                     deserializeValue.deserialize(deserializer)

@@ -293,6 +293,7 @@ public final class io/github/kotlinmania/serdecore/de/ImplsKt {
 	public static final fun mutableMapDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun nullableDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun pairDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun resultDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun tripleDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 }
 
@@ -308,6 +309,31 @@ public abstract interface class io/github/kotlinmania/serdecore/de/MapAccess {
 	public fun nextValue (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public abstract class io/github/kotlinmania/serdecore/de/ResultValue {
+}
+
+public final class io/github/kotlinmania/serdecore/de/ResultValue$Err : io/github/kotlinmania/serdecore/de/ResultValue {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/ResultValue$Err;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/ResultValue$Err;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/ResultValue$Err;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/ResultValue$Ok : io/github/kotlinmania/serdecore/de/ResultValue {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/ResultValue$Ok;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/ResultValue$Ok;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/ResultValue$Ok;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class io/github/kotlinmania/serdecore/de/SeqAccess {

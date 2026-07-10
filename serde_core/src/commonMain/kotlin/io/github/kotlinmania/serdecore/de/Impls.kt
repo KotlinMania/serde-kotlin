@@ -502,6 +502,31 @@ private data object StringVisitor : Visitor<String> {
     override fun visitByteBuf(v: ByteArray): SerdeResult<String> = visitBytes(v)
 }
 
+private class StringInPlaceVisitor(
+    private val place: (String) -> Unit,
+) : Visitor<Unit> {
+    override fun expecting(): String = "a string"
+
+    override fun visitStr(v: String): SerdeResult<Unit> {
+        place(v)
+        return SerdeResult.success(Unit)
+    }
+
+    override fun visitString(v: String): SerdeResult<Unit> {
+        place(v)
+        return SerdeResult.success(Unit)
+    }
+
+    override fun visitBytes(v: ByteArray): SerdeResult<Unit> =
+        serdeCatching {
+            place(v.decodeToString(throwOnInvalidSequence = true))
+        }.recoverCatching {
+            throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this))
+        }
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<Unit> = visitBytes(v)
+}
+
 data object StringDeserialize : Deserialize<String> {
     override fun <D> deserialize(deserializer: D): SerdeResult<String>
         where D : Deserializer =
@@ -511,7 +536,8 @@ data object StringDeserialize : Deserialize<String> {
         deserializer: D,
         place: (String) -> Unit,
     ): SerdeResult<Unit>
-        where D : Deserializer = deserialize(deserializer).map { place(it) }
+        where D : Deserializer =
+        deserializer.deserializeString(StringInPlaceVisitor(place))
 }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -815,6 +841,57 @@ data object SystemTimeDeserialize : Deserialize<Instant> {
                     }
             },
         )
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+sealed class ResultValue<out T, out E> {
+    data class Ok<T>(
+        val value: T,
+    ) : ResultValue<T, Nothing>()
+
+    data class Err<E>(
+        val error: E,
+    ) : ResultValue<Nothing, E>()
+}
+
+fun <T, E> resultDeserialize(
+    okDeserialize: Deserialize<T>,
+    errDeserialize: Deserialize<E>,
+): Deserialize<ResultValue<T, E>> =
+    object : Deserialize<ResultValue<T, E>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<ResultValue<T, E>>
+            where D : Deserializer =
+            deserializer.deserializeEnum(
+                "Result",
+                listOf("Ok", "Err"),
+                ResultVisitor(okDeserialize, errDeserialize),
+            )
+    }
+
+private class ResultVisitor<T, E>(
+    private val okDeserialize: Deserialize<T>,
+    private val errDeserialize: Deserialize<E>,
+) : Visitor<ResultValue<T, E>> {
+    override fun expecting(): String = "enum Result"
+
+    override fun <A> visitEnum(access: A): SerdeResult<ResultValue<T, E>>
+        where A : EnumAccess =
+        serdeCatching {
+            val fieldSeed =
+                SeedFromDeserialize(
+                    fieldIdentifierDeserialize(
+                        expectingMessage = "`Ok` or `Err`",
+                        fields = listOf("Ok", "Err"),
+                    ),
+                )
+            val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
+            when (field) {
+                "Ok" -> ResultValue.Ok(variant.newtypeVariant(SeedFromDeserialize(okDeserialize)).getOrThrow())
+                "Err" -> ResultValue.Err(variant.newtypeVariant(SeedFromDeserialize(errDeserialize)).getOrThrow())
+                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Ok", "Err")))
+            }
+        }
 }
 
 // //////////////////////////////////////////////////////////////////////////////
