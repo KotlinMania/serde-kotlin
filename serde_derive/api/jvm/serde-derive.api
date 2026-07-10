@@ -34,6 +34,35 @@ public final class io/github/kotlinmania/serderive/FieldWithAliases {
 	public final fun getIdent ()Lio/github/kotlinmania/procmacro2/Ident;
 }
 
+public final class io/github/kotlinmania/serderive/InPlaceImplGenerics : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/Parameters;)V
+	public final fun getParams ()Lio/github/kotlinmania/serderive/Parameters;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
+public final class io/github/kotlinmania/serderive/InPlaceSplitForDeLifetime {
+	public fun <init> (Lio/github/kotlinmania/serderive/InPlaceImplGenerics;Lio/github/kotlinmania/serderive/InPlaceTypeGenerics;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;)V
+	public final fun component1 ()Lio/github/kotlinmania/serderive/InPlaceImplGenerics;
+	public final fun component2 ()Lio/github/kotlinmania/serderive/InPlaceTypeGenerics;
+	public final fun component3 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun component4 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun copy (Lio/github/kotlinmania/serderive/InPlaceImplGenerics;Lio/github/kotlinmania/serderive/InPlaceTypeGenerics;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/serderive/InPlaceSplitForDeLifetime;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serderive/InPlaceSplitForDeLifetime;Lio/github/kotlinmania/serderive/InPlaceImplGenerics;Lio/github/kotlinmania/serderive/InPlaceTypeGenerics;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;ILjava/lang/Object;)Lio/github/kotlinmania/serderive/InPlaceSplitForDeLifetime;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeImplGenerics ()Lio/github/kotlinmania/serderive/InPlaceImplGenerics;
+	public final fun getDeTyGenerics ()Lio/github/kotlinmania/serderive/InPlaceTypeGenerics;
+	public final fun getTyGenerics ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun getWhereClause ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serderive/InPlaceTypeGenerics : io/github/kotlinmania/quote/ToTokens {
+	public fun <init> (Lio/github/kotlinmania/serderive/Parameters;)V
+	public final fun getParams ()Lio/github/kotlinmania/serderive/Parameters;
+	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
+}
+
 public final class io/github/kotlinmania/serderive/LibKt {
 	public static final fun deriveDeserialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
 	public static final fun deriveSerialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
@@ -48,6 +77,7 @@ public final class io/github/kotlinmania/serderive/Parameters {
 	public final fun getLocal ()Lio/github/kotlinmania/procmacro2/Ident;
 	public final fun getThisType ()Lio/github/kotlinmania/syn/Path;
 	public final fun getThisValue ()Lio/github/kotlinmania/syn/Path;
+	public final fun inPlaceGenericsWithDeLifetime ()Lio/github/kotlinmania/serderive/InPlaceSplitForDeLifetime;
 	public final fun isPacked ()Z
 	public final fun typeName ()Ljava/lang/String;
 }
@@ -57,18 +87,18 @@ public final class io/github/kotlinmania/serderive/SerKt {
 }
 
 public final class io/github/kotlinmania/serderive/SplitForDeLifetime {
-	public fun <init> (Lio/github/kotlinmania/serderive/DeImplGenerics;Lio/github/kotlinmania/serderive/DeTypeGenerics;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/WhereClause;)V
-	public final fun component1 ()Lio/github/kotlinmania/serderive/DeImplGenerics;
-	public final fun component2 ()Lio/github/kotlinmania/serderive/DeTypeGenerics;
-	public final fun component3 ()Lio/github/kotlinmania/syn/Generics;
-	public final fun component4 ()Lio/github/kotlinmania/syn/WhereClause;
-	public final fun copy (Lio/github/kotlinmania/serderive/DeImplGenerics;Lio/github/kotlinmania/serderive/DeTypeGenerics;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/WhereClause;)Lio/github/kotlinmania/serderive/SplitForDeLifetime;
-	public static synthetic fun copy$default (Lio/github/kotlinmania/serderive/SplitForDeLifetime;Lio/github/kotlinmania/serderive/DeImplGenerics;Lio/github/kotlinmania/serderive/DeTypeGenerics;Lio/github/kotlinmania/syn/Generics;Lio/github/kotlinmania/syn/WhereClause;ILjava/lang/Object;)Lio/github/kotlinmania/serderive/SplitForDeLifetime;
+	public fun <init> (Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;)V
+	public final fun component1 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun component2 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun component3 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun component4 ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun copy (Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/serderive/SplitForDeLifetime;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serderive/SplitForDeLifetime;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;Lio/github/kotlinmania/procmacro2/TokenStream;ILjava/lang/Object;)Lio/github/kotlinmania/serderive/SplitForDeLifetime;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDeImplGenerics ()Lio/github/kotlinmania/serderive/DeImplGenerics;
-	public final fun getDeTyGenerics ()Lio/github/kotlinmania/serderive/DeTypeGenerics;
-	public final fun getTyGenerics ()Lio/github/kotlinmania/syn/Generics;
-	public final fun getWhereClause ()Lio/github/kotlinmania/syn/WhereClause;
+	public final fun getDeImplGenerics ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun getDeTyGenerics ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun getTyGenerics ()Lio/github/kotlinmania/procmacro2/TokenStream;
+	public final fun getWhereClause ()Lio/github/kotlinmania/procmacro2/TokenStream;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -378,7 +408,7 @@ public final class io/github/kotlinmania/serderive/internals/PretendKt {
 }
 
 public final class io/github/kotlinmania/serderive/internals/ReceiverKt {
-	public static final fun replaceReceiver (Lio/github/kotlinmania/syn/DeriveInput;)V
+	public static final fun replaceReceiver (Lio/github/kotlinmania/syn/DeriveInput;)Lio/github/kotlinmania/syn/DeriveInput;
 }
 
 public final class io/github/kotlinmania/serderive/internals/RenameAllRules {
@@ -437,6 +467,8 @@ public final class io/github/kotlinmania/serderive/internals/Symbol {
 }
 
 public final class io/github/kotlinmania/serderive/internals/SymbolKt {
+	public static final fun eq (Lio/github/kotlinmania/procmacro2/Ident;Lio/github/kotlinmania/serderive/internals/Symbol;)Z
+	public static final fun eq (Lio/github/kotlinmania/syn/Path;Lio/github/kotlinmania/serderive/internals/Symbol;)Z
 	public static final fun getALIAS ()Lio/github/kotlinmania/serderive/internals/Symbol;
 	public static final fun getBORROW ()Lio/github/kotlinmania/serderive/internals/Symbol;
 	public static final fun getBOUND ()Lio/github/kotlinmania/serderive/internals/Symbol;

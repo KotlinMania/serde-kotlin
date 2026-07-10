@@ -2,7 +2,7 @@
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.checkedQuote
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Fragment
@@ -25,9 +25,9 @@ internal fun deserializeEnum(
         // Ignore any error associated with non-untagged deserialization so that we
         // can fall through to the untagged variants. This may be infallible so we
         // need to provide the error type.
-        val firstAttempt = quote("""
-            if let _serde.`#`Private::Result::<_, __D::Error>::Ok(__ok) = (|| `#`taggedFrag)() {
-                return _serde.`#`Private::Ok(__ok);
+        val firstAttempt = checkedQuote("""
+            if let _serde::`#`Private::Result::<_, __D::Error>::Ok(__ok) = (|| `#`taggedFrag)() {
+                return _serde::`#`Private::Ok(__ok);
             }
         """)
         deserializeEnumUntagged(params, untagged, cattrs, firstAttempt)
@@ -57,10 +57,10 @@ internal fun prepareEnumVariantEnum(variants: List<Variant>): Pair<TokenStream, 
     val fallthrough = deserializedVariants.find { (_, variant) -> variant.attrs.other() }
         ?.let { (i, _) ->
             val ignoreVariant = fieldI(i)
-            quote("_serde.`#`Private::Ok(__Field::`#`ignoreVariant)")
+            checkedQuote("_serde::`#`Private::Ok(__Field::`#`ignoreVariant)")
         }
 
-    val variantsStmt = quote("""
+    val variantsStmt = checkedQuote("""
         `#`[doc(hidden)]
         const VARIANTS: &'static [&'static str] = &[ `#`(`#`deserializedVariants.map { it.second.attrs.aliases() }.flatten()),* ];
     """)

@@ -2,8 +2,8 @@
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.checkedQuote
+import io.github.kotlinmania.serderive.checkedQuoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Field
 import io.github.kotlinmania.serderive.internals.Fragment
@@ -30,21 +30,21 @@ internal fun deserializeEnumInternally(
 
         val block = Match(deserializeInternallyTaggedVariant(params, variant, cattrs))
 
-        quote("__Field::`#`variantName => `#`block")
+        checkedQuote("__Field::`#`variantName => `#`block")
     }
 
     val expecting = "internally tagged enum ${params.typeName()}"
     val expectingVal = cattrs.expecting() ?: expecting
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`variantVisitor
 
         `#`variantsStmt
 
         let (__tag, __content) = _serde::Deserializer::deserialize_any(
             __deserializer,
-            _serde.`#`Private::de::TaggedContentVisitor::<__Field>::new(`#`tag, `#`expectingVal))?;
-        let __deserializer = _serde.`#`Private::de::ContentDeserializer::<__D::Error>::new(__content);
+            _serde::`#`Private::de::TaggedContentVisitor::<__Field>::new(`#`tag, `#`expectingVal))?;
+        let __deserializer = _serde::`#`Private::de::ContentDeserializer::<__D::Error>::new(__content);
 
         match __tag {
             `#`(`#`variantArms)*
@@ -62,8 +62,8 @@ private fun deserializeInternallyTaggedVariant(
     val path = variant.attrs.deserializeWith()
     if (path != null) {
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
-        return Fragment.Block(quote("""
-            _serde.`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
+        return Fragment.Block(checkedQuote("""
+            _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
         """))
     }
 
@@ -76,11 +76,11 @@ private fun deserializeInternallyTaggedVariant(
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
                 val defaultExpr = Stmts(exprIsMissing(field, cattrs))
-                quote("(`#`defaultExpr)")
-            } ?: quote("")
-            Fragment.Block(quote("""
-                _serde::Deserializer::deserialize_any(__deserializer, _serde.`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
-                _serde.`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
+                checkedQuote("(`#`defaultExpr)")
+            } ?: checkedQuote("")
+            Fragment.Block(checkedQuote("""
+                _serde::Deserializer::deserialize_any(__deserializer, _serde::`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
+                _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
             """))
         }
         Style.Newtype -> {

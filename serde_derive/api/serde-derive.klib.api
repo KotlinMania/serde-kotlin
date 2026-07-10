@@ -327,6 +327,46 @@ final class io.github.kotlinmania.serderive/FieldWithAliases { // io.github.kotl
         final fun <get-ident>(): io.github.kotlinmania.procmacro2/Ident // io.github.kotlinmania.serderive/FieldWithAliases.ident.<get-ident>|<get-ident>(){}[0]
 }
 
+final class io.github.kotlinmania.serderive/InPlaceImplGenerics : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive/InPlaceImplGenerics|null[0]
+    constructor <init>(io.github.kotlinmania.serderive/Parameters) // io.github.kotlinmania.serderive/InPlaceImplGenerics.<init>|<init>(io.github.kotlinmania.serderive.Parameters){}[0]
+
+    final val params // io.github.kotlinmania.serderive/InPlaceImplGenerics.params|{}params[0]
+        final fun <get-params>(): io.github.kotlinmania.serderive/Parameters // io.github.kotlinmania.serderive/InPlaceImplGenerics.params.<get-params>|<get-params>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive/InPlaceImplGenerics.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
+final class io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime { // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime|null[0]
+    constructor <init>(io.github.kotlinmania.serderive/InPlaceImplGenerics, io.github.kotlinmania.serderive/InPlaceTypeGenerics, io.github.kotlinmania.procmacro2/TokenStream, io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.<init>|<init>(io.github.kotlinmania.serderive.InPlaceImplGenerics;io.github.kotlinmania.serderive.InPlaceTypeGenerics;io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream){}[0]
+
+    final val deImplGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.deImplGenerics|{}deImplGenerics[0]
+        final fun <get-deImplGenerics>(): io.github.kotlinmania.serderive/InPlaceImplGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.deImplGenerics.<get-deImplGenerics>|<get-deImplGenerics>(){}[0]
+    final val deTyGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.deTyGenerics|{}deTyGenerics[0]
+        final fun <get-deTyGenerics>(): io.github.kotlinmania.serderive/InPlaceTypeGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.deTyGenerics.<get-deTyGenerics>|<get-deTyGenerics>(){}[0]
+    final val tyGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.tyGenerics|{}tyGenerics[0]
+        final fun <get-tyGenerics>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.tyGenerics.<get-tyGenerics>|<get-tyGenerics>(){}[0]
+    final val whereClause // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.whereClause|{}whereClause[0]
+        final fun <get-whereClause>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.whereClause.<get-whereClause>|<get-whereClause>(){}[0]
+
+    final fun component1(): io.github.kotlinmania.serderive/InPlaceImplGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.component1|component1(){}[0]
+    final fun component2(): io.github.kotlinmania.serderive/InPlaceTypeGenerics // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.component2|component2(){}[0]
+    final fun component3(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.component3|component3(){}[0]
+    final fun component4(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.component4|component4(){}[0]
+    final fun copy(io.github.kotlinmania.serderive/InPlaceImplGenerics = ..., io.github.kotlinmania.serderive/InPlaceTypeGenerics = ..., io.github.kotlinmania.procmacro2/TokenStream = ..., io.github.kotlinmania.procmacro2/TokenStream = ...): io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.copy|copy(io.github.kotlinmania.serderive.InPlaceImplGenerics;io.github.kotlinmania.serderive.InPlaceTypeGenerics;io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime.toString|toString(){}[0]
+}
+
+final class io.github.kotlinmania.serderive/InPlaceTypeGenerics : io.github.kotlinmania.quote/ToTokens { // io.github.kotlinmania.serderive/InPlaceTypeGenerics|null[0]
+    constructor <init>(io.github.kotlinmania.serderive/Parameters) // io.github.kotlinmania.serderive/InPlaceTypeGenerics.<init>|<init>(io.github.kotlinmania.serderive.Parameters){}[0]
+
+    final val params // io.github.kotlinmania.serderive/InPlaceTypeGenerics.params|{}params[0]
+        final fun <get-params>(): io.github.kotlinmania.serderive/Parameters // io.github.kotlinmania.serderive/InPlaceTypeGenerics.params.<get-params>|<get-params>(){}[0]
+
+    final fun toTokens(io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive/InPlaceTypeGenerics.toTokens|toTokens(io.github.kotlinmania.procmacro2.TokenStream){}[0]
+}
+
 final class io.github.kotlinmania.serderive/Parameters { // io.github.kotlinmania.serderive/Parameters|null[0]
     constructor <init>(io.github.kotlinmania.serderive.internals/Container) // io.github.kotlinmania.serderive/Parameters.<init>|<init>(io.github.kotlinmania.serderive.internals.Container){}[0]
 
@@ -346,26 +386,27 @@ final class io.github.kotlinmania.serderive/Parameters { // io.github.kotlinmani
         final fun <get-thisValue>(): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive/Parameters.thisValue.<get-thisValue>|<get-thisValue>(){}[0]
 
     final fun genericsWithDeLifetime(): io.github.kotlinmania.serderive/SplitForDeLifetime // io.github.kotlinmania.serderive/Parameters.genericsWithDeLifetime|genericsWithDeLifetime(){}[0]
+    final fun inPlaceGenericsWithDeLifetime(): io.github.kotlinmania.serderive/InPlaceSplitForDeLifetime // io.github.kotlinmania.serderive/Parameters.inPlaceGenericsWithDeLifetime|inPlaceGenericsWithDeLifetime(){}[0]
     final fun typeName(): kotlin/String // io.github.kotlinmania.serderive/Parameters.typeName|typeName(){}[0]
 }
 
 final class io.github.kotlinmania.serderive/SplitForDeLifetime { // io.github.kotlinmania.serderive/SplitForDeLifetime|null[0]
-    constructor <init>(io.github.kotlinmania.serderive/DeImplGenerics, io.github.kotlinmania.serderive/DeTypeGenerics, io.github.kotlinmania.syn/Generics, io.github.kotlinmania.syn/WhereClause?) // io.github.kotlinmania.serderive/SplitForDeLifetime.<init>|<init>(io.github.kotlinmania.serderive.DeImplGenerics;io.github.kotlinmania.serderive.DeTypeGenerics;io.github.kotlinmania.syn.Generics;io.github.kotlinmania.syn.WhereClause?){}[0]
+    constructor <init>(io.github.kotlinmania.procmacro2/TokenStream, io.github.kotlinmania.procmacro2/TokenStream, io.github.kotlinmania.procmacro2/TokenStream, io.github.kotlinmania.procmacro2/TokenStream) // io.github.kotlinmania.serderive/SplitForDeLifetime.<init>|<init>(io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream){}[0]
 
     final val deImplGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deImplGenerics|{}deImplGenerics[0]
-        final fun <get-deImplGenerics>(): io.github.kotlinmania.serderive/DeImplGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deImplGenerics.<get-deImplGenerics>|<get-deImplGenerics>(){}[0]
+        final fun <get-deImplGenerics>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.deImplGenerics.<get-deImplGenerics>|<get-deImplGenerics>(){}[0]
     final val deTyGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deTyGenerics|{}deTyGenerics[0]
-        final fun <get-deTyGenerics>(): io.github.kotlinmania.serderive/DeTypeGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.deTyGenerics.<get-deTyGenerics>|<get-deTyGenerics>(){}[0]
+        final fun <get-deTyGenerics>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.deTyGenerics.<get-deTyGenerics>|<get-deTyGenerics>(){}[0]
     final val tyGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.tyGenerics|{}tyGenerics[0]
-        final fun <get-tyGenerics>(): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive/SplitForDeLifetime.tyGenerics.<get-tyGenerics>|<get-tyGenerics>(){}[0]
+        final fun <get-tyGenerics>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.tyGenerics.<get-tyGenerics>|<get-tyGenerics>(){}[0]
     final val whereClause // io.github.kotlinmania.serderive/SplitForDeLifetime.whereClause|{}whereClause[0]
-        final fun <get-whereClause>(): io.github.kotlinmania.syn/WhereClause? // io.github.kotlinmania.serderive/SplitForDeLifetime.whereClause.<get-whereClause>|<get-whereClause>(){}[0]
+        final fun <get-whereClause>(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.whereClause.<get-whereClause>|<get-whereClause>(){}[0]
 
-    final fun component1(): io.github.kotlinmania.serderive/DeImplGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.component1|component1(){}[0]
-    final fun component2(): io.github.kotlinmania.serderive/DeTypeGenerics // io.github.kotlinmania.serderive/SplitForDeLifetime.component2|component2(){}[0]
-    final fun component3(): io.github.kotlinmania.syn/Generics // io.github.kotlinmania.serderive/SplitForDeLifetime.component3|component3(){}[0]
-    final fun component4(): io.github.kotlinmania.syn/WhereClause? // io.github.kotlinmania.serderive/SplitForDeLifetime.component4|component4(){}[0]
-    final fun copy(io.github.kotlinmania.serderive/DeImplGenerics = ..., io.github.kotlinmania.serderive/DeTypeGenerics = ..., io.github.kotlinmania.syn/Generics = ..., io.github.kotlinmania.syn/WhereClause? = ...): io.github.kotlinmania.serderive/SplitForDeLifetime // io.github.kotlinmania.serderive/SplitForDeLifetime.copy|copy(io.github.kotlinmania.serderive.DeImplGenerics;io.github.kotlinmania.serderive.DeTypeGenerics;io.github.kotlinmania.syn.Generics;io.github.kotlinmania.syn.WhereClause?){}[0]
+    final fun component1(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.component1|component1(){}[0]
+    final fun component2(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.component2|component2(){}[0]
+    final fun component3(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.component3|component3(){}[0]
+    final fun component4(): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive/SplitForDeLifetime.component4|component4(){}[0]
+    final fun copy(io.github.kotlinmania.procmacro2/TokenStream = ..., io.github.kotlinmania.procmacro2/TokenStream = ..., io.github.kotlinmania.procmacro2/TokenStream = ..., io.github.kotlinmania.procmacro2/TokenStream = ...): io.github.kotlinmania.serderive/SplitForDeLifetime // io.github.kotlinmania.serderive/SplitForDeLifetime.copy|copy(io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream;io.github.kotlinmania.procmacro2.TokenStream){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serderive/SplitForDeLifetime.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.kotlinmania.serderive/SplitForDeLifetime.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.kotlinmania.serderive/SplitForDeLifetime.toString|toString(){}[0]
@@ -585,10 +626,12 @@ final val io.github.kotlinmania.serderive.internals/VARIANT_IDENTIFIER // io.git
 final val io.github.kotlinmania.serderive.internals/WITH // io.github.kotlinmania.serderive.internals/WITH|{}WITH[0]
     final fun <get-WITH>(): io.github.kotlinmania.serderive.internals/Symbol // io.github.kotlinmania.serderive.internals/WITH.<get-WITH>|<get-WITH>(){}[0]
 
+final fun (io.github.kotlinmania.procmacro2/Ident).io.github.kotlinmania.serderive.internals/eq(io.github.kotlinmania.serderive.internals/Symbol): kotlin/Boolean // io.github.kotlinmania.serderive.internals/eq|eq@io.github.kotlinmania.procmacro2.Ident(io.github.kotlinmania.serderive.internals.Symbol){}[0]
+final fun (io.github.kotlinmania.syn/Path).io.github.kotlinmania.serderive.internals/eq(io.github.kotlinmania.serderive.internals/Symbol): kotlin/Boolean // io.github.kotlinmania.serderive.internals/eq|eq@io.github.kotlinmania.syn.Path(io.github.kotlinmania.serderive.internals.Symbol){}[0]
 final fun io.github.kotlinmania.serderive.internals/allowDeprecated(io.github.kotlinmania.syn/DeriveInput): io.github.kotlinmania.procmacro2/TokenStream? // io.github.kotlinmania.serderive.internals/allowDeprecated|allowDeprecated(io.github.kotlinmania.syn.DeriveInput){}[0]
 final fun io.github.kotlinmania.serderive.internals/check(io.github.kotlinmania.serderive.internals/Ctxt, io.github.kotlinmania.serderive.internals/Container, io.github.kotlinmania.serderive.internals/Derive) // io.github.kotlinmania.serderive.internals/check|check(io.github.kotlinmania.serderive.internals.Ctxt;io.github.kotlinmania.serderive.internals.Container;io.github.kotlinmania.serderive.internals.Derive){}[0]
 final fun io.github.kotlinmania.serderive.internals/pretendUsed(io.github.kotlinmania.serderive.internals/Container, kotlin/Boolean): io.github.kotlinmania.procmacro2/TokenStream // io.github.kotlinmania.serderive.internals/pretendUsed|pretendUsed(io.github.kotlinmania.serderive.internals.Container;kotlin.Boolean){}[0]
-final fun io.github.kotlinmania.serderive.internals/replaceReceiver(io.github.kotlinmania.syn/DeriveInput) // io.github.kotlinmania.serderive.internals/replaceReceiver|replaceReceiver(io.github.kotlinmania.syn.DeriveInput){}[0]
+final fun io.github.kotlinmania.serderive.internals/replaceReceiver(io.github.kotlinmania.syn/DeriveInput): io.github.kotlinmania.syn/DeriveInput // io.github.kotlinmania.serderive.internals/replaceReceiver|replaceReceiver(io.github.kotlinmania.syn.DeriveInput){}[0]
 final fun io.github.kotlinmania.serderive.internals/thisType(io.github.kotlinmania.serderive.internals/Container): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive.internals/thisType|thisType(io.github.kotlinmania.serderive.internals.Container){}[0]
 final fun io.github.kotlinmania.serderive.internals/thisValue(io.github.kotlinmania.serderive.internals/Container): io.github.kotlinmania.syn/Path // io.github.kotlinmania.serderive.internals/thisValue|thisValue(io.github.kotlinmania.serderive.internals.Container){}[0]
 final fun io.github.kotlinmania.serderive.internals/ungroup(io.github.kotlinmania.syn/SynType): io.github.kotlinmania.syn/SynType // io.github.kotlinmania.serderive.internals/ungroup|ungroup(io.github.kotlinmania.syn.SynType){}[0]

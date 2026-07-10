@@ -25,23 +25,29 @@ import io.github.kotlinmania.syn.WherePredicate
 import io.github.kotlinmania.syn.BareFnArg
 import io.github.kotlinmania.syn.WherePredicateList
 import io.github.kotlinmania.syn.token.Colon
+import io.github.kotlinmania.syn.token.Comma
 import io.github.kotlinmania.syn.token.Lt
 import io.github.kotlinmania.syn.token.Gt
 import io.github.kotlinmania.syn.token.PathSep
+import io.github.kotlinmania.syn.token.Plus
+
+private fun WherePredicateList.pushPredicate(predicate: WherePredicate) {
+    push(predicate) { Comma.default() }
+}
 
 public fun withoutDefaults(generics: Generics): Generics {
     val newParams = GenericParamList()
     for (param in generics.params.toList()) {
         when (param) {
-            is GenericParam.TypeParam -> newParams.pushValue(GenericParam.TypeParam(
+            is GenericParam.TypeParam -> newParams.push(GenericParam.TypeParam(
                 param.attrs,
                 param.ident,
                 param.colonToken,
                 param.bounds,
                 eqToken = null,
                 default = null
-            ))
-            else -> newParams.pushValue(param)
+            )) { Comma.default() }
+            else -> newParams.push(param) { Comma.default() }
         }
     }
     return generics.copy(params = newParams)
@@ -55,7 +61,7 @@ public fun withWherePredicates(
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
     for (predicate in predicates) {
-        dstPredicates.pushValue(predicate)
+        dstPredicates.pushPredicate(predicate)
     }
     return mutGenerics
 }
@@ -71,7 +77,7 @@ public fun withWherePredicatesFromFields(
     for (field in cont.data.allFields()) {
         val predicateSlice = fromField(field.attrs) ?: continue
         for (innerPredicate in predicateSlice) {
-            dstPredicates.pushValue(innerPredicate)
+            dstPredicates.pushPredicate(innerPredicate)
         }
     }
     return mutGenerics
@@ -92,7 +98,7 @@ public fun withWherePredicatesFromVariants(
     for (variant in variants) {
         val predicateSlice = fromVariant(variant.attrs) ?: continue
         for (innerPredicate in predicateSlice) {
-            dstPredicates.pushValue(innerPredicate)
+            dstPredicates.pushPredicate(innerPredicate)
         }
     }
     return mutGenerics
@@ -279,10 +285,10 @@ public fun withBound(
             qself = null,
             path = Path.from(id)
         )
-        dstPredicates.pushValue(makeWhereBoundedType(boundedTy, bound))
+        dstPredicates.pushPredicate(makeWhereBoundedType(boundedTy, bound))
     }
     for (boundedTy in associatedTypeUsage) {
-        dstPredicates.pushValue(makeWhereBoundedType(boundedTy.deepCopy(), bound))
+        dstPredicates.pushPredicate(makeWhereBoundedType(boundedTy.deepCopy(), bound))
     }
     return dstGenerics
 }
@@ -302,7 +308,7 @@ public fun withSelfBound(
             path = bound.deepCopy(),
         )
     )
-    mutGenerics.makeWhereClause().predicates.pushValue(
+    mutGenerics.makeWhereClause().predicates.pushPredicate(
         WherePredicate.TypePredicate(
             boundedTy = typeOfItem(cont),
             colonToken = Colon.default(),
@@ -325,10 +331,10 @@ public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
     for (param in generics.params.toList()) {
         when (param) {
             is GenericParam.LifetimeParam -> {
-                param.bounds.pushValue(bound.deepCopy())
+                param.bounds.push(bound.deepCopy()) { Plus.default() }
             }
             is GenericParam.TypeParam -> {
-                param.bounds.pushValue(TypeParamBound.LifetimeBound(bound.deepCopy()))
+                param.bounds.push(TypeParamBound.LifetimeBound(bound.deepCopy())) { Plus.default() }
             }
             is GenericParam.ConstParam -> {}
         }
@@ -337,7 +343,7 @@ public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
 
     val newParamList = GenericParamList()
     for (p in params) {
-        newParamList.pushValue(p)
+        newParamList.push(p) { Comma.default() }
     }
     return generics.copy(params = newParamList)
 }
@@ -353,13 +359,13 @@ private fun typeOfItem(cont: Container): SynType {
                 for (param in cont.generics.params.toList()) {
                     when (param) {
                         is GenericParam.TypeParam -> {
-                            argList.pushValue(GenericArgument.TypeArg(SynType.Path(
+                            argList.push(GenericArgument.TypeArg(SynType.Path(
                                 qself = null,
                                 path = Path.from(param.ident)
-                            )))
+                            ))) { Comma.default() }
                         }
                         is GenericParam.LifetimeParam -> {
-                            argList.pushValue(GenericArgument.LifetimeArg(param.lifetime.deepCopy()))
+                            argList.push(GenericArgument.LifetimeArg(param.lifetime.deepCopy())) { Comma.default() }
                         }
                         is GenericParam.ConstParam -> {
                             throw Exception("Serde does not support const generics yet")

@@ -5,8 +5,8 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.quote.quoteSpanned
+import io.github.kotlinmania.serderive.checkedQuote as quoteTokens
+import io.github.kotlinmania.serderive.checkedQuoteSpanned as quoteSpannedTokens
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.AttrField
 import io.github.kotlinmania.serderive.internals.AttrVariant
@@ -45,14 +45,17 @@ import io.github.kotlinmania.syn.Lifetime
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.SynType
+import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.WhereClause
 import io.github.kotlinmania.syn.span
+import io.github.kotlinmania.syn.token.Comma
+import io.github.kotlinmania.syn.token.Plus
 
 public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
-    replaceReceiver(input)
+    val rewrittenInput = replaceReceiver(input)
 
     val ctxt = Ctxt()
-    val cont = Container.fromAst(ctxt, input, Derive.Deserialize, Private.ident())
+    val cont = Container.fromAst(ctxt, rewrittenInput, Derive.Deserialize, Private.ident())
     if (cont == null) {
         ctxt.check()
         return TokenStream.new()
@@ -65,42 +68,64 @@ public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
     val (deImplGenerics, _, tyGenerics, whereClause) = params.genericsWithDeLifetime()
     val body = Stmts(deserializeBody(cont, params))
     val delife = params.borrowed.deLifetime()
-    val allowDeprecated = allowDeprecated(input)
+    val allowDeprecated = allowDeprecated(rewrittenInput) ?: TokenStream.new()
 
     val implBlock = if (cont.attrs.remote() != null) {
         val remote = cont.attrs.remote()!!
-        val vis = input.vis
+        val vis = rewrittenInput.vis
         val used = pretendUsed(cont, params.isPacked)
-        quote("""
-            `#`[automatically_derived]
+        quoteTokens("""
+            #[automatically_derived]
             `#`allowDeprecated
             impl `#`deImplGenerics `#`ident `#`tyGenerics `#`whereClause {
-                `#`vis fun deserialize<__D>(__deserializer: __D) -> _serde.`#`Private.Result<`#`remote `#`tyGenerics, __D.Error>
+                `#`vis fn deserialize<__D>(__deserializer: __D) -> _serde::`#`Private::Result<`#`remote `#`tyGenerics, __D::Error>
                 where
-                    __D: _serde.Deserializer<`#`delife>,
+                    __D: _serde::Deserializer<`#`delife>,
                 {
                     `#`used
                     `#`body
                 }
             }
-        """)
+        """, mapOf(
+            "allowDeprecated" to allowDeprecated,
+            "deImplGenerics" to deImplGenerics,
+            "ident" to ident,
+            "tyGenerics" to tyGenerics,
+            "whereClause" to whereClause,
+            "vis" to vis,
+            "remote" to remote,
+            "Private" to Private,
+            "delife" to delife,
+            "used" to used,
+            "body" to body,
+        ))
     } else {
-        val fnDeserializeInPlace = deserializeInPlaceBody(cont, params)
+        val fnDeserializeInPlace = deserializeInPlaceBody(cont, params) ?: Stmts(Fragment.Block(TokenStream.new()))
 
-        quote("""
-            `#`[automatically_derived]
+        quoteTokens("""
+            #[automatically_derived]
             `#`allowDeprecated
-            impl `#`deImplGenerics _serde.Deserialize<`#`delife> for `#`ident `#`tyGenerics `#`whereClause {
-                fun deserialize<__D>(__deserializer: __D) -> _serde.`#`Private.Result<this, __D.Error>
+            impl `#`deImplGenerics _serde::Deserialize<`#`delife> for `#`ident `#`tyGenerics `#`whereClause {
+                fn deserialize<__D>(__deserializer: __D) -> _serde::`#`Private::Result<Self, __D::Error>
                 where
-                    __D: _serde.Deserializer<`#`delife>,
+                    __D: _serde::Deserializer<`#`delife>,
                 {
                     `#`body
                 }
 
                 `#`fnDeserializeInPlace
             }
-        """)
+        """, mapOf(
+            "allowDeprecated" to allowDeprecated,
+            "deImplGenerics" to deImplGenerics,
+            "delife" to delife,
+            "ident" to ident,
+            "tyGenerics" to tyGenerics,
+            "whereClause" to whereClause,
+            "Private" to Private,
+            "body" to body,
+            "fnDeserializeInPlace" to fnDeserializeInPlace,
+        ))
     }
 
     return wrapInConst(cont.attrs.serdePath(), implBlock)
@@ -148,18 +173,45 @@ class Parameters(cont: Container) {
     }
 
     fun genericsWithDeLifetime(): SplitForDeLifetime {
-        val deImplGenerics = DeImplGenerics(this)
-        val deTyGenerics = DeTypeGenerics(this)
-        val split = generics.splitForImpl()
-        return SplitForDeLifetime(deImplGenerics, deTyGenerics, split.typeGenerics, split.typeGenerics.whereClause)
+        val deGenerics = genericsWithInsertedDeLifetime()
+        val deImplGenerics = generatedImplGenerics(deGenerics)
+        val deTyGenerics = generatedTypeGenerics(deGenerics)
+        val tyGenerics = generatedTypeGenerics(generics)
+        val whereClause = generatedWhereClause(generics.whereClause)
+        return SplitForDeLifetime(deImplGenerics, deTyGenerics, tyGenerics, whereClause)
+    }
+
+    fun inPlaceGenericsWithDeLifetime(): InPlaceSplitForDeLifetime {
+        val deImplGenerics = InPlaceImplGenerics(this)
+        val deTyGenerics = InPlaceTypeGenerics(this)
+        val tyGenerics = generatedTypeGenerics(generics)
+        val whereClause = generatedWhereClause(generics.whereClause)
+        return InPlaceSplitForDeLifetime(deImplGenerics, deTyGenerics, tyGenerics, whereClause)
+    }
+
+    private fun genericsWithInsertedDeLifetime(): Generics {
+        val deLifetime = borrowed.deLifetimeParam() ?: return generics.copy()
+        val newParams = io.github.kotlinmania.syn.GenericParamList()
+        newParams.push(deLifetime) { Comma.default() }
+        for (p in generics.params.toList()) {
+            newParams.push(p) { Comma.default() }
+        }
+        return generics.copy(params = newParams)
     }
 }
 
 data class SplitForDeLifetime(
-    val deImplGenerics: DeImplGenerics,
-    val deTyGenerics: DeTypeGenerics,
-    val tyGenerics: io.github.kotlinmania.syn.Generics,
-    val whereClause: WhereClause?
+    val deImplGenerics: TokenStream,
+    val deTyGenerics: TokenStream,
+    val tyGenerics: TokenStream,
+    val whereClause: TokenStream
+)
+
+data class InPlaceSplitForDeLifetime(
+    val deImplGenerics: InPlaceImplGenerics,
+    val deTyGenerics: InPlaceTypeGenerics,
+    val tyGenerics: TokenStream,
+    val whereClause: TokenStream
 )
 private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generics {
     val g0 = withoutDefaults(cont.generics)
@@ -172,7 +224,7 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
         null -> {
             val g3 = when (cont.attrs.default()) {
                 is Default.Plain ->
-                    withSelfBound(cont, g2, parseQuotePath("_serde.`#`Private.Default"))
+                    withSelfBound(cont, g2, parseQuotePath("_serde::`#`Private::Default", "Private" to Private))
                 is Default.None,
                 is Default.Path -> g2
             }
@@ -181,13 +233,13 @@ private fun buildGenerics(cont: Container, borrowed: BorrowedLifetimes): Generic
             val g4 = withBound(
                 cont, g3,
                 ::needsDeserializeBound,
-                parseQuotePath("_serde.Deserialize<`#`delife>")
+                parseQuotePath("_serde::Deserialize<`#`delife>", "delife" to delife)
             )
 
             withBound(
                 cont, g4,
                 ::requiresDefault,
-                parseQuotePath("_serde.`#`Private.Default")
+                parseQuotePath("_serde::`#`Private::Default", "Private" to Private)
             )
         }
         else -> withWherePredicates(g2, deBound)
@@ -223,7 +275,7 @@ sealed class BorrowedLifetimes {
                 lifetime = Lifetime.new("'de", Span.callSite()),
                 colonToken = null,
                 bounds = io.github.kotlinmania.syn.LifetimeList().also { ll ->
-                    for (lt in lifetimes) ll.pushValue(lt)
+                    for (lt in lifetimes) ll.push(lt) { Plus.default() }
                 }
             )
             is Static -> null
@@ -292,14 +344,14 @@ private fun deserializeInPlaceBody(cont: Container, params: Parameters): Stmts? 
     val delife = params.borrowed.deLifetime()
     val stmts = Stmts(code)
 
-    return Stmts(Fragment.Block(quote("""
-        fun deserialize_in_place<__D>(__deserializer: __D, __place: var this) -> _serde.`#`Private.Result<(), __D.Error>
+    return Stmts(Fragment.Block(quoteTokens("""
+        fn deserialize_in_place<__D>(__deserializer: __D, __place: &mut Self) -> _serde::`#`Private::Result<(), __D::Error>
         where
-            __D: _serde.Deserializer<`#`delife>,
+            __D: _serde::Deserializer<`#`delife>,
         {
             `#`stmts
         }
-    """)))
+    """, mapOf("Private" to Private, "delife" to delife, "stmts" to stmts))))
 }
 
 private fun deserializeTransparent(cont: Container, params: Parameters): Fragment {
@@ -310,50 +362,50 @@ private fun deserializeTransparent(cont: Container, params: Parameters): Fragmen
     val path = when (val dw = transparentField.attrs.deserializeWith()) {
         null -> {
             val span = transparentField.original.span()
-            quoteSpanned(span, "_serde.Deserialize::deserialize")
+            quoteSpannedTokens(span, "_serde.Deserialize::deserialize")
         }
-        else -> quote("`#`dw")
+        else -> quoteTokens("`#`dw")
     }
 
     val assign = fields.map { field ->
         val member = field.member
         if (field === transparentField) {
-            quote("`#`member: __transparent")
+            quoteTokens("`#`member: __transparent")
         } else {
             val value = when (field.attrs.default()) {
                 is Default.Plain ->
-                    quote("_serde.`#`Private.Default::default()")
+                    quoteTokens("_serde::`#`Private::Default::default()")
                 is Default.Path -> {
                     val p = (field.attrs.default() as Default.Path).path
-                    quoteSpanned(p.span(), "`#`p()")
+                    quoteSpannedTokens(p.span(), "`#`p()")
                 }
                 is Default.None ->
-                    quote("_serde.`#`Private.PhantomData")
+                    quoteTokens("_serde::`#`Private::PhantomData")
             }
-            quote("`#`member: `#`value")
+            quoteTokens("`#`member: `#`value")
         }
     }
 
-    return Fragment.Expr(quote("""
-        _serde.`#`Private.Result::map(
+    return Fragment.Expr(quoteTokens("""
+        _serde::`#`Private::Result::map(
             `#`path(__deserializer),
             |__transparent| `#`thisValue { `#`(`#`assign),* })
     """))
 }
 
 private fun deserializeFrom(typeFrom: SynType): Fragment {
-    return Fragment.Expr(quote("""
-        _serde.`#`Private.Result::map(
+    return Fragment.Expr(quoteTokens("""
+        _serde::`#`Private::Result::map(
             <`#`typeFrom as _serde.Deserialize>::deserialize(__deserializer),
-            _serde.`#`Private.From::from)
+            _serde::`#`Private::From::from)
     """))
 }
 
 private fun deserializeTryFrom(typeTryFrom: SynType): Fragment {
-    return Fragment.Expr(quote("""
-        _serde.`#`Private.Result::and_then(
+    return Fragment.Expr(quoteTokens("""
+        _serde::`#`Private::Result::and_then(
             <`#`typeTryFrom as _serde.Deserialize>::deserialize(__deserializer),
-            |v| _serde.`#`Private.TryFrom::try_from(v).map_err(_serde::de::Error::custom))
+            |v| _serde::`#`Private::TryFrom::try_from(v).map_err(_serde::de::Error::custom))
     """))
 }
 
@@ -379,6 +431,12 @@ internal fun fieldI(i: Int): Ident {
     return Ident.new("__field$i", Span.callSite())
 }
 
+internal fun memberAccess(member: Member): TokenStream =
+    when (member) {
+        is Member.Named -> member.toTokenStream()
+        is Member.Unnamed -> rustUnsuffixedLiteral(member.index.index)
+    }
+
 // The submodule functions are implemented in the sibling files:
 //   Enum.kt — deserializeEnum, deserializeCustomIdentifier, prepareEnumVariantEnum
 //   Struct.kt — deserializeStruct, deserializeStructInPlace
@@ -395,11 +453,11 @@ internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
     when (field.attrs.default()) {
         is Default.Plain -> {
             val span = field.original.span()
-            return Fragment.Expr(quoteSpanned(span, "_serde.`#`Private.Default::default()"))
+            return Fragment.Expr(quoteSpannedTokens(span, "_serde::`#`Private::Default::default()", "Private" to Private))
         }
         is Default.Path -> {
             val p = (field.attrs.default() as Default.Path).path
-            return Fragment.Expr(quoteSpanned(p.span(), "`#`p()"))
+            return Fragment.Expr(quoteSpannedTokens(p.span(), "`#`p()", "p" to p))
         }
         is Default.None -> {}
     }
@@ -408,29 +466,34 @@ internal fun exprIsMissing(field: Field, cattrs: AttrContainer): Fragment {
         is Default.Plain,
         is Default.Path -> {
             val member = field.member
-            return Fragment.Expr(quote("__default.`#`member"))
+            return Fragment.Expr(quoteTokens("__default.`#`member", "member" to member))
         }
         is Default.None -> {}
     }
 
     val name = field.attrs.name().deserializeName()
     return when (field.attrs.deserializeWith()) {
-        null -> Fragment.Expr(quote("_serde.`#`Private.de::missing_field(`#`name)?"))
-        else -> Fragment.Expr(quote("return _serde.`#`Private.Err(<__A.Error as _serde::de::Error>::missing_field(`#`name))"))
+        null -> Fragment.Expr(quoteTokens("_serde::`#`Private::de::missing_field(`#`name)?", mapOf("Private" to Private, "name" to name)))
+        else -> Fragment.Expr(quoteTokens("return _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::missing_field(`#`name))", mapOf("Private" to Private, "name" to name)))
     }
 }
 
 internal fun exprIsMissingSeq(
     assignTo: TokenStream?, index: Int, field: Field, cattrs: AttrContainer, expecting: String
 ): TokenStream {
+    val indexToken = rustUsizeLiteral(index)
     when (field.attrs.default()) {
         is Default.Plain -> {
             val span = field.original.span()
-            return quoteSpanned(span, "`#`assignTo _serde.`#`Private.Default::default()")
+            return quoteSpannedTokens(
+                span,
+                "`#`assignTo _serde::`#`Private::Default::default()",
+                mapOf("assignTo" to assignTo, "Private" to Private),
+            )
         }
         is Default.Path -> {
             val p = (field.attrs.default() as Default.Path).path
-            return quoteSpanned(p.span(), "`#`assignTo `#`p()")
+            return quoteSpannedTokens(p.span(), "`#`assignTo `#`p()", mapOf("assignTo" to assignTo, "p" to p))
         }
         is Default.None -> {}
     }
@@ -439,10 +502,13 @@ internal fun exprIsMissingSeq(
         is Default.Plain,
         is Default.Path -> {
             val member = field.member
-            quote("`#`assignTo __default.`#`member")
+            quoteTokens("`#`assignTo __default.`#`member", mapOf("assignTo" to assignTo, "member" to member))
         }
         is Default.None -> {
-            quote("return _serde.`#`Private.Err(_serde::de::Error::invalid_length(`#`index, &`#`expecting))")
+            quoteTokens(
+                "return _serde::`#`Private::Err(_serde::de::Error::invalid_length(`#`index, &`#`expecting))",
+                mapOf("Private" to Private, "index" to indexToken, "expecting" to expecting),
+            )
         }
     }
 }
@@ -470,17 +536,72 @@ class DeImplGenerics(val params: Parameters) : ToTokens {
                 newParams.add(p)
             }
             generics = generics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
-                for (p in newParams) gpl.pushValue(p)
+                for (p in newParams) gpl.push(p) { Comma.default() }
             })
         }
-        val split = generics.splitForImpl()
-        split.implGenerics.toTokens(tokens)
+        tokens.extendTokenStreams(listOf(generatedImplGenerics(generics)))
     }
 }
 
 class DeTypeGenerics(val params: Parameters) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         deTypeGenericsToTokens(params.generics.copy(), params.borrowed, tokens)
+    }
+}
+
+class InPlaceImplGenerics(val params: Parameters) : ToTokens {
+    override fun toTokens(tokens: TokenStream) {
+        val placeLife = placeLifetime()
+        var generics = params.generics.copy()
+
+        // Add the in-place bound to all existing generic parameters.
+        for (p in generics.params.toList()) {
+            when (p) {
+                is GenericParam.LifetimeParam -> {
+                    if (p.colonToken == null) {
+                        p.colonToken = io.github.kotlinmania.syn.token.Colon.default()
+                    }
+                    p.bounds.push(placeLife.lifetime.deepCopy()) { Plus.default() }
+                }
+                is GenericParam.TypeParam -> {
+                    if (p.colonToken == null) {
+                        p.colonToken = io.github.kotlinmania.syn.token.Colon.default()
+                    }
+                    p.bounds.push(TypeParamBound.LifetimeBound(placeLife.lifetime.deepCopy())) { Plus.default() }
+                }
+                is GenericParam.ConstParam -> {}
+            }
+        }
+
+        val newParams = mutableListOf<GenericParam>()
+        newParams.add(placeLife)
+        for (p in generics.params.toList()) {
+            newParams.add(p)
+        }
+        val deLifetime = params.borrowed.deLifetimeParam()
+        if (deLifetime != null) {
+            newParams.add(0, deLifetime)
+        }
+        generics = generics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
+            for (p in newParams) gpl.push(p) { Comma.default() }
+        })
+        tokens.extendTokenStreams(listOf(generatedImplGenerics(generics)))
+    }
+}
+
+class InPlaceTypeGenerics(val params: Parameters) : ToTokens {
+    override fun toTokens(tokens: TokenStream) {
+        var generics = params.generics.copy()
+        val placeLife = placeLifetime()
+        val newParams = mutableListOf<GenericParam>()
+        newParams.add(placeLife)
+        for (p in generics.params.toList()) {
+            newParams.add(p)
+        }
+        generics = generics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
+            for (p in newParams) gpl.push(p) { Comma.default() }
+        })
+        deTypeGenericsToTokens(generics, params.borrowed, tokens)
     }
 }
 
@@ -501,16 +622,18 @@ private fun deTypeGenericsToTokens(
             newParams.add(p)
         }
         mutGenerics = mutGenerics.copy(params = io.github.kotlinmania.syn.GenericParamList().also { gpl ->
-            for (p in newParams) gpl.pushValue(p)
+            for (p in newParams) gpl.push(p) { Comma.default() }
         })
     }
-    val split = mutGenerics.splitForImpl()
-    split.typeGenerics.toTokens(out)
+    out.extendTokenStreams(listOf(generatedTypeGenerics(mutGenerics)))
 }
 
-// Parse a quote string into a Path, equivalent to Rust's parse_quote!().
-private fun parseQuotePath(template: String): Path {
-    val tokens = quote(template)
+// Parse a generated token template into a path.
+private fun parseQuotePath(
+    template: String,
+    vararg substitutions: Pair<String, Any?>,
+): Path {
+    val tokens = quoteTokens(template, *substitutions)
     val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse, tokens)
     return result.getOrThrow()
 }
@@ -539,33 +662,42 @@ internal fun deserializeSeq(
     val letValues = vars.zip(fields).map { (varIdent, field) ->
         if (field.attrs.skipDeserializing()) {
             val default = Expr(exprIsMissing(field, cattrs))
-            quote("val `#`varIdent = `#`default")
+            quoteTokens("let `#`varIdent = `#`default;", mapOf("varIdent" to varIdent, "default" to default))
         } else {
             val visit = when (val path = field.attrs.deserializeWith()) {
                 null -> {
                     val fieldTy = field.ty
                     val span = field.original.span()
-                    val func = quoteSpanned(span, "_serde::de::SeqAccess::next_element::<`#`fieldTy>")
-                    quote("`#`func(&mut __seq)?")
+                    val func = quoteSpannedTokens(
+                        span,
+                        "_serde::de::SeqAccess::next_element::<`#`fieldTy>",
+                        "fieldTy" to fieldTy,
+                    )
+                    quoteTokens("`#`func(&mut __seq)?", "func" to func)
                 }
                 else -> {
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
-                    quote("""{
+                    quoteTokens("""{
                         `#`wrapper
-                        _serde.`#`Private::Option::map(
+                        _serde::`#`Private::Option::map(
                             _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq)?,
                             |__wrap| __wrap.value)
-                    }""")
+                    }""", mapOf("wrapper" to wrapper, "Private" to Private, "wrapperTy" to wrapperTy))
                 }
             }
             val valueIfNone = exprIsMissingSeq(null, indexInSeq, field, cattrs, expectingVal)
             indexInSeq += 1
-            quote("""
-                val `#`varIdent = when `#`visit {
-                    _serde.`#`Private::Some(__value) -> __value
-                    _serde.`#`Private::None -> `#`valueIfNone
-                }
-            """)
+            quoteTokens("""
+                let `#`varIdent = match `#`visit {
+                    _serde::`#`Private::Some(__value) => __value,
+                    _serde::`#`Private::None => `#`valueIfNone,
+                };
+            """, mapOf(
+                "varIdent" to varIdent,
+                "visit" to visit,
+                "Private" to Private,
+                "valueIfNone" to valueIfNone,
+            ))
         }
     }
 
@@ -573,34 +705,42 @@ internal fun deserializeSeq(
         val nameAssigns = fields.mapIndexed { i, field ->
             val member = field.member
             val v = vars[i]
-            quote("`#`member: `#`v")
+            quoteTokens("`#`member: `#`v", mapOf("member" to member, "v" to v))
         }
-        quote("`#`typePath { `#`(`#`nameAssigns),* }")
+        quoteTokens("`#`typePath { `#`(`#`nameAssigns),* }", mapOf("typePath" to typePath, "nameAssigns" to nameAssigns))
     } else {
-        quote("`#`typePath(`#`(`#`vars),*)")
+        quoteTokens("`#`typePath(`#`(`#`vars),*)", mapOf("typePath" to typePath, "vars" to vars))
     }
 
     if (params.hasGetter) {
         val thisType = params.thisType
         val split = params.generics.splitForImpl()
         val tyGenerics = split.typeGenerics
-        result = quote("_serde.`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)")
+        result = quoteTokens(
+            "_serde::`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)",
+            mapOf("Private" to Private, "thisType" to thisType, "tyGenerics" to tyGenerics, "result" to result),
+        )
     }
 
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("val __default: Self.Value = _serde.`#`Private::Default::default()")
+        is Default.Plain -> quoteTokens("let __default: Self::Value = _serde::`#`Private::Default::default();", "Private" to Private)
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
-            quoteSpanned(p.span(), "val __default: Self.Value = `#`p()")
+            quoteSpannedTokens(p.span(), "let __default: Self::Value = `#`p();", "p" to p)
         }
-        is Default.None -> quote("")
+        is Default.None -> quoteTokens("")
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(quoteTokens("""
         `#`letDefault
         `#`(`#`letValues)*
-        _serde.`#`Private::Ok(`#`result)
-    """))
+        _serde::`#`Private::Ok(`#`result)
+    """, mapOf(
+        "letDefault" to letDefault,
+        "letValues" to letValues,
+        "Private" to Private,
+        "result" to result,
+    )))
 }
 
 // Generates the sequence of write-statements for in-place deserialization
@@ -621,37 +761,49 @@ internal fun deserializeSeqInPlace(
 
     var indexInSeq = 0
     val writeValues = fields.map { field ->
-        val member = field.member
+        val member = memberAccess(field.member)
 
         if (field.attrs.skipDeserializing()) {
             val default = Expr(exprIsMissing(field, cattrs))
-            quote("self.place.`#`member = `#`default")
+            quoteTokens("self.place.`#`member = `#`default;", mapOf("member" to member, "default" to default))
         } else {
-            val valueIfNone = exprIsMissingSeq(quote("self.place.`#`member = "), indexInSeq, field, cattrs, expectingVal)
+            val valueIfNone = exprIsMissingSeq(
+                quoteTokens("self.place.`#`member = ", "member" to member),
+                indexInSeq,
+                field,
+                cattrs,
+                expectingVal,
+            )
             val write = when (val path = field.attrs.deserializeWith()) {
-                null -> quote("""
-                    if _serde.`#`Private::None == _serde::de::SeqAccess::next_element_seed(&mut __seq,
-                        _serde.`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
+                null -> quoteTokens("""
+                    if let _serde::`#`Private::None = _serde::de::SeqAccess::next_element_seed(&mut __seq,
+                        _serde::`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
                     {
-                        `#`valueIfNone
+                        `#`valueIfNone;
                     }
-                """)
+                """, mapOf("Private" to Private, "member" to member, "valueIfNone" to valueIfNone))
                 else -> {
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
-                    quote("""{
+                    quoteTokens("""{
                         `#`wrapper
-                        when _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq) {
-                            _serde.`#`Private::Ok(_serde.`#`Private::Some(__wrap)) -> {
-                                self.place.`#`member = __wrap.value
+                        match _serde::de::SeqAccess::next_element::<`#`wrapperTy>(&mut __seq) {
+                            _serde::`#`Private::Ok(_serde::`#`Private::Some(__wrap)) => {
+                                self.place.`#`member = __wrap.value;
                             }
-                            _serde.`#`Private::Ok(_serde.`#`Private::None) -> {
-                                `#`valueIfNone
+                            _serde::`#`Private::Ok(_serde::`#`Private::None) => {
+                                `#`valueIfNone;
                             }
-                            _serde.`#`Private::Err(__err) -> {
-                                return _serde.`#`Private::Err(__err)
+                            _serde::`#`Private::Err(__err) => {
+                                return _serde::`#`Private::Err(__err);
                             }
                         }
-                    }""")
+                    }""", mapOf(
+                        "wrapper" to wrapper,
+                        "wrapperTy" to wrapperTy,
+                        "Private" to Private,
+                        "member" to member,
+                        "valueIfNone" to valueIfNone,
+                    ))
                 }
             }
             indexInSeq += 1
@@ -663,19 +815,26 @@ internal fun deserializeSeqInPlace(
     val split = params.generics.splitForImpl()
     val tyGenerics = split.typeGenerics
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("val __default: `#`thisType `#`tyGenerics = _serde.`#`Private::Default::default()")
+        is Default.Plain -> quoteTokens(
+            "let __default: `#`thisType `#`tyGenerics = _serde::`#`Private::Default::default();",
+            mapOf("thisType" to thisType, "tyGenerics" to tyGenerics, "Private" to Private),
+        )
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
-            quoteSpanned(p.span(), "val __default: `#`thisType `#`tyGenerics = `#`p()")
+            quoteSpannedTokens(
+                p.span(),
+                "let __default: `#`thisType `#`tyGenerics = `#`p();",
+                mapOf("thisType" to thisType, "tyGenerics" to tyGenerics, "p" to p),
+            )
         }
-        is Default.None -> quote("")
+        is Default.None -> quoteTokens("")
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(quoteTokens("""
         `#`letDefault
         `#`(`#`writeValues)*
-        _serde.`#`Private::Ok(())
-    """))
+        _serde::`#`Private::Ok(())
+    """, mapOf("letDefault" to letDefault, "writeValues" to writeValues, "Private" to Private)))
 }
 
 // Wraps the expression in a serde deserializeWith attribute in a trait
@@ -688,34 +847,49 @@ internal fun wrapDeserializeWith(
     val thisType = params.thisType
     val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.genericsWithDeLifetime()
     val delife = params.borrowed.deLifetime()
-    val deserializerVar = quote("__deserializer")
+    val deserializerVar = quoteTokens("__deserializer")
 
     // If the path returns the wrong type, the error will be reported on the
     // span of the path itself — the same span the user wrote in the attribute.
-    val value = quoteSpanned(deserializeWith.span(), "`#`deserializeWith(`#`deserializerVar)?")
-    val wrapper = quote("""
+    val value = quoteSpannedTokens(
+        deserializeWith.span(),
+        "`#`deserializeWith(`#`deserializerVar)?",
+        mapOf("deserializeWith" to deserializeWith, "deserializerVar" to deserializerVar),
+    )
+    val wrapper = quoteTokens("""
         `#`[doc(hidden)]
         struct __DeserializeWith `#`deImplGenerics `#`whereClause {
             value: `#`valueTy,
-            phantom: _serde.`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
-            lifetime: _serde.`#`Private::PhantomData<&`#`delife ()>,
+            phantom: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
+            lifetime: _serde::`#`Private::PhantomData<&`#`delife ()>,
         }
 
         `#`[automatically_derived]
         impl `#`deImplGenerics _serde::Deserialize<`#`delife> for __DeserializeWith `#`deTyGenerics `#`whereClause {
-            fun deserialize<__D>(`#`deserializerVar: __D) -> _serde.`#`Private::Result<this, __D.Error>
+            fn deserialize<__D>(`#`deserializerVar: __D) -> _serde::`#`Private::Result<Self, __D::Error>
             where
                 __D: _serde::Deserializer<`#`delife>,
             {
-                _serde.`#`Private::Ok(__DeserializeWith {
+                _serde::`#`Private::Ok(__DeserializeWith {
                     value: `#`value,
-                    phantom: _serde.`#`Private::PhantomData,
-                    lifetime: _serde.`#`Private::PhantomData,
+                    phantom: _serde::`#`Private::PhantomData,
+                    lifetime: _serde::`#`Private::PhantomData,
                 })
             }
         }
-    """)
-    val wrapperTy = quote("__DeserializeWith `#`deTyGenerics")
+    """, mapOf(
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "valueTy" to valueTy,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "delife" to delife,
+        "deTyGenerics" to deTyGenerics,
+        "deserializerVar" to deserializerVar,
+        "value" to value,
+    ))
+    val wrapperTy = quoteTokens("__DeserializeWith `#`deTyGenerics", "deTyGenerics" to deTyGenerics)
     return Pair(wrapper, wrapperTy)
 }
 
@@ -724,7 +898,7 @@ internal fun wrapDeserializeFieldWith(
     fieldTy: SynType,
     deserializeWith: io.github.kotlinmania.syn.Expr.Path
 ): Pair<TokenStream, TokenStream> {
-    return wrapDeserializeWith(params, quote("`#`fieldTy"), deserializeWith)
+    return wrapDeserializeWith(params, quoteTokens("`#`fieldTy", "fieldTy" to fieldTy), deserializeWith)
 }
 
 // Generates a closure that converts a single input parameter to the final value.
@@ -737,10 +911,10 @@ internal fun unwrapToVariantClosure(
     val variantIdent = variant.ident
 
     val (arg, wrapper) = if (withWrapper) {
-        Pair(quote("__wrap"), quote("__wrap.value"))
+        Pair(quoteTokens("__wrap"), quoteTokens("__wrap.value"))
     } else {
         val fieldTys = variant.fields.map { it.ty }
-        Pair(quote("__wrap: (`#`(`#`fieldTys),*)"), quote("__wrap"))
+        Pair(quoteTokens("__wrap: (`#`(`#`fieldTys),*)"), quoteTokens("__wrap"))
     }
 
     val fieldAccess = (0 until variant.fields.size).map { n ->
@@ -750,25 +924,56 @@ internal fun unwrapToVariantClosure(
     return when (variant.style) {
         Style.Struct -> if (variant.fields.size == 1) {
             val member = variant.fields[0].member
-            quote("|`#`arg| `#`thisValue::`#`variantIdent { `#`member: `#`wrapper }")
+            quoteTokens(
+                "|`#`arg| `#`thisValue::`#`variantIdent { `#`member: `#`wrapper }",
+                mapOf(
+                    "arg" to arg,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "member" to member,
+                    "wrapper" to wrapper,
+                ),
+            )
         } else {
             val memberAssigns = variant.fields.mapIndexed { i, field ->
                 val m = field.member
                 val fa = fieldAccess[i]
-                quote("`#`m: `#`wrapper.`#`fa")
+                quoteTokens("`#`m: `#`wrapper.`#`fa", mapOf("m" to m, "wrapper" to wrapper, "fa" to fa))
             }
-            quote("|`#`arg| `#`thisValue::`#`variantIdent { `#`(`#`memberAssigns),* }")
+            quoteTokens(
+                "|`#`arg| `#`thisValue::`#`variantIdent { `#`(`#`memberAssigns),* }",
+                mapOf(
+                    "arg" to arg,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "memberAssigns" to memberAssigns,
+                ),
+            )
         }
         Style.Tuple -> {
-            val fieldAccesses = fieldAccess.map { fa -> quote("`#`wrapper.`#`fa") }
-            quote("|`#`arg| `#`thisValue::`#`variantIdent(`#`(`#`fieldAccesses),*)")
+            val fieldAccesses = fieldAccess.map { fa -> quoteTokens("`#`wrapper.`#`fa", mapOf("wrapper" to wrapper, "fa" to fa)) }
+            quoteTokens(
+                "|`#`arg| `#`thisValue::`#`variantIdent(`#`(`#`fieldAccesses),*)",
+                mapOf(
+                    "arg" to arg,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "fieldAccesses" to fieldAccesses,
+                ),
+            )
         }
-        Style.Newtype -> quote("|`#`arg| `#`thisValue::`#`variantIdent(`#`wrapper)")
-        Style.Unit -> quote("|`#`arg| `#`thisValue::`#`variantIdent")
+        Style.Newtype -> quoteTokens(
+            "|`#`arg| `#`thisValue::`#`variantIdent(`#`wrapper)",
+            mapOf("arg" to arg, "thisValue" to thisValue, "variantIdent" to variantIdent, "wrapper" to wrapper),
+        )
+        Style.Unit -> quoteTokens(
+            "|`#`arg| `#`thisValue::`#`variantIdent",
+            mapOf("arg" to arg, "thisValue" to thisValue, "variantIdent" to variantIdent),
+        )
     }
 }
 
-// The lifetime parameter used for in-place deserialization.
+// The generated parameter used for in-place deserialization.
 internal fun placeLifetime(): GenericParam.LifetimeParam {
     return GenericParam.LifetimeParam(
         attrs = mutableListOf(),

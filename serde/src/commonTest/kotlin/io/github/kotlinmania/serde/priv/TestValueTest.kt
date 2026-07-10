@@ -1,4 +1,4 @@
-// port-lint: source test_suite/tests/test_value.rs
+// port-lint: tests test_suite/tests/test_value.rs
 package io.github.kotlinmania.serde.`private`
 
 import io.github.kotlinmania.serde.SerdeError

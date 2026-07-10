@@ -969,6 +969,7 @@ public final class io/github/kotlinmania/serdecore/de/value/MapDeserializer : io
 	public final fun end ()Lio/github/kotlinmania/serde/SerdeResult;
 	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
 	public fun nextElementSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun nextEntrySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextKeySeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
@@ -1349,6 +1350,19 @@ public final class io/github/kotlinmania/serdecore/de/value/UsizeDeserializer : 
 
 public final class io/github/kotlinmania/serdecore/de/value/UsizeDeserializer$Companion {
 	public final fun new-VKZWuLQ (J)Lio/github/kotlinmania/serdecore/de/value/UsizeDeserializer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/ValueError {
+	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/ValueError$Companion;
+	public final fun description ()Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun fmt ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/value/ValueError$Companion {
+	public final fun custom (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/ValueError;
 }
 
 public final class io/github/kotlinmania/serdecore/de/value/ValueKt {

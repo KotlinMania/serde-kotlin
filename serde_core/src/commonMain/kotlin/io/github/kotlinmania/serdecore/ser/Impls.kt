@@ -53,6 +53,13 @@ fun <Ok> Char.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
 fun <Ok> String.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
     = serializer.serializeStr(this)
 
+internal class FormatArguments(
+    private val value: Any,
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+        = serializer.collectStr(value)
+}
+
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok> ByteArray.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>

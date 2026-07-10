@@ -1,7 +1,7 @@
 package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.serderive.checkedQuote
 import io.github.kotlinmania.syn.Attribute
 import io.github.kotlinmania.syn.Data
 import io.github.kotlinmania.syn.DeriveInput
@@ -10,7 +10,7 @@ import io.github.kotlinmania.syn.parseNestedMeta
 
 public fun allowDeprecated(input: DeriveInput): TokenStream? {
     return if (shouldAllowDeprecated(input)) {
-        quote(""" `#`[allow(deprecated)] """)
+        checkedQuote(""" `#`[allow(deprecated)] """)
     } else {
         null
     }

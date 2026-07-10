@@ -31,6 +31,23 @@ import io.github.kotlinmania.serde.serdeCatching
  * Not a `Throwable` subclass — avoids Swift export's Class Stdlib hazard
  * (unchecked-cast bridge on `Throwable.getStackTrace()`).
  */
+class ValueError private constructor(
+    private val err: String,
+) {
+    fun fmt(): String = err
+
+    fun description(): String = err
+
+    override fun toString(): String = fmt()
+
+    override fun equals(other: Any?): Boolean = other is ValueError && other.err == err
+
+    override fun hashCode(): Int = err.hashCode()
+
+    companion object {
+        fun custom(msg: String): ValueError = ValueError(msg)
+    }
+}
 
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -1324,6 +1341,7 @@ class BorrowedBytesDeserializer private constructor(
  */
 class SeqDeserializer<T : IntoDeserializer> internal constructor(
     private val iter: Iterator<T>,
+    private val len: Int? = null,
 ) : Deserializer,
     SeqAccess,
     IntoDeserializer {
@@ -1436,12 +1454,13 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
             }
         }
 
-    override fun sizeHint(): Int? = null
+    override fun sizeHint(): Int? = len?.let { (it - count).coerceAtLeast(0) }
 
     override fun intoDeserializer(): Deserializer = this
 }
 
-fun <T : IntoDeserializer> Iterable<T>.intoDeserializer(): SeqDeserializer<T> = SeqDeserializer(iterator())
+fun <T : IntoDeserializer> Iterable<T>.intoDeserializer(): SeqDeserializer<T> =
+    SeqDeserializer(iterator(), (this as? Collection<*>)?.size)
 
 /**
  * Creates a [SeqDeserializer] from an iterator of values that can be converted
@@ -1558,11 +1577,14 @@ data class MapEntry<K, V>(
     val value: V,
 )
 
+private fun <K, V> split(entry: MapEntry<K, V>): Pair<K, V> = entry.key to entry.value
+
 /**
  * A deserializer that iterates over a map.
  */
 class MapDeserializer<K, V> internal constructor(
     private val iter: Iterator<MapEntry<K, V>>,
+    private val len: Int? = null,
 ) : Deserializer,
     MapAccess,
     SeqAccess,
@@ -1571,15 +1593,23 @@ class MapDeserializer<K, V> internal constructor(
     private var pendingValue: V? = null
     private var count: Int = 0
 
+    private fun nextPair(): Pair<K, V>? {
+        val next = if (iter.hasNext()) iter.next() else null
+        if (next != null) {
+            count += 1
+        }
+        return next?.let(::split)
+    }
+
     override fun <T> nextKeySeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
         serdeCatching {
-            val next = if (iter.hasNext()) iter.next() else null
+            val next = nextPair()
             if (next == null) {
                 null
             } else {
-                count += 1
-                pendingValue = next.value
-                seed.deserialize(next.key.intoDeserializer()).getOrThrow()
+                val (key, value) = next
+                pendingValue = value
+                seed.deserialize(key.intoDeserializer()).getOrThrow()
             }
         }
 
@@ -1593,16 +1623,33 @@ class MapDeserializer<K, V> internal constructor(
 
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
         serdeCatching {
-            val next = if (iter.hasNext()) iter.next() else null
+            val next = nextPair()
             if (next == null) {
                 null
             } else {
-                val pairDeserializer = PairDeserializer(next.key, next.value)
+                val (key, value) = next
+                val pairDeserializer = PairDeserializer(key, value)
                 seed.deserialize(pairDeserializer).getOrThrow()
             }
         }
 
-    override fun sizeHint(): Int? = null
+    override fun <K1, V1> nextEntrySeed(
+        keySeed: DeserializeSeed<K1>,
+        valueSeed: DeserializeSeed<V1>,
+    ): SerdeResult<Pair<K1, V1>?> =
+        serdeCatching {
+            val next = nextPair()
+            if (next == null) {
+                null
+            } else {
+                val (rawKey, rawValue) = next
+                val key = keySeed.deserialize(rawKey.intoDeserializer()).getOrThrow()
+                val value = valueSeed.deserialize(rawValue.intoDeserializer()).getOrThrow()
+                key to value
+            }
+        }
+
+    override fun sizeHint(): Int? = len?.let { (it - count).coerceAtLeast(0) }
 
     override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> =
         serdeCatching {
@@ -1847,7 +1894,7 @@ class MapDeserializer<K, V> internal constructor(
 }
 
 fun <K : IntoDeserializer, V : IntoDeserializer> Map<K, V>.intoDeserializer(): MapDeserializer<K, V> =
-    MapDeserializer(entries.map { MapEntry(it.key, it.value) }.iterator())
+    MapDeserializer(entries.map { MapEntry(it.key, it.value) }.iterator(), size)
 
 /**
  * Creates a [MapDeserializer] from an iterator of entries. Use this instead of
