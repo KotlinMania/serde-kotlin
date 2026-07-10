@@ -23,6 +23,10 @@ public class Symbol(public val word: String) {
     }
 }
 
+public fun Ident.eq(word: Symbol): Boolean = this.toString() == word.word
+
+public fun Path.eq(word: Symbol): Boolean = this.isIdent(word.word)
+
 public val ALIAS: Symbol = Symbol("alias")
 public val BORROW: Symbol = Symbol("borrow")
 public val BOUND: Symbol = Symbol("bound")

@@ -1419,12 +1419,12 @@ private fun <T> getSerAndDe(
     } else {
         // Try parsing as `(serialize = "...", deserialize = "...")`
         val parseResult = parseNestedMetaCompat(meta) { subMeta ->
-            if (subMeta.path == SERIALIZE) {
+            if (subMeta.path.eq(SERIALIZE)) {
                 val v = f(cx, attrName, SERIALIZE, subMeta)
                 if (v != null) {
                     serMeta.insert(subMeta.path, v)
                 }
-            } else if (subMeta.path == DESERIALIZE) {
+            } else if (subMeta.path.eq(DESERIALIZE)) {
                 val v = f(cx, attrName, DESERIALIZE, subMeta)
                 if (v != null) {
                     deMeta.insert(subMeta.path, v)

@@ -26,7 +26,7 @@ internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragmen
         }
 
         `#`[automatically_derived]
-        impl `#`deImplGenerics _serde.de.Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
+        impl `#`deImplGenerics _serde::de::Visitor<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
             type Value = `#`thisType `#`tyGenerics;
 
             fn expecting(self, __formatter: var _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt.Result {
@@ -36,13 +36,13 @@ internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragmen
             `#`[inline]
             fn visit_unit<__E>(self) -> _serde::`#`Private::Result<Self.Value, __E>
             where
-                __E: _serde.de.Error,
+                __E: _serde::de::Error,
             {
                 _serde::`#`Private::Ok(`#`thisValue)
             }
         }
 
-        _serde.Deserializer.deserialize_unit_struct(
+        _serde::Deserializer::deserialize_unit_struct(
             __deserializer,
             `#`typeName,
             __Visitor {

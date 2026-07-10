@@ -5,8 +5,8 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.quote.quote as quoteTokens
-import io.github.kotlinmania.quote.quoteSpanned as quoteSpannedTokens
+import io.github.kotlinmania.serderive.quote as quoteTokens
+import io.github.kotlinmania.serderive.quoteSpanned as quoteSpannedTokens
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.AttrField
 import io.github.kotlinmania.serderive.internals.AttrVariant
@@ -68,7 +68,7 @@ public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
     val (deImplGenerics, _, tyGenerics, whereClause) = params.genericsWithDeLifetime()
     val body = Stmts(deserializeBody(cont, params))
     val delife = params.borrowed.deLifetime()
-    val allowDeprecated = allowDeprecated(rewrittenInput)
+    val allowDeprecated = allowDeprecated(rewrittenInput) ?: TokenStream.new()
 
     val implBlock = if (cont.attrs.remote() != null) {
         val remote = cont.attrs.remote()!!
@@ -100,7 +100,7 @@ public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
             "body" to body,
         ))
     } else {
-        val fnDeserializeInPlace = deserializeInPlaceBody(cont, params)
+        val fnDeserializeInPlace = deserializeInPlaceBody(cont, params) ?: Stmts(Fragment.Block(TokenStream.new()))
 
         quoteTokens("""
             #[automatically_derived]
@@ -924,21 +924,52 @@ internal fun unwrapToVariantClosure(
     return when (variant.style) {
         Style.Struct -> if (variant.fields.size == 1) {
             val member = variant.fields[0].member
-            quoteTokens("|`#`arg| `#`thisValue::`#`variantIdent { `#`member: `#`wrapper }")
+            quoteTokens(
+                "|`#`arg| `#`thisValue::`#`variantIdent { `#`member: `#`wrapper }",
+                mapOf(
+                    "arg" to arg,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "member" to member,
+                    "wrapper" to wrapper,
+                ),
+            )
         } else {
             val memberAssigns = variant.fields.mapIndexed { i, field ->
                 val m = field.member
                 val fa = fieldAccess[i]
-                quoteTokens("`#`m: `#`wrapper.`#`fa")
+                quoteTokens("`#`m: `#`wrapper.`#`fa", mapOf("m" to m, "wrapper" to wrapper, "fa" to fa))
             }
-            quoteTokens("|`#`arg| `#`thisValue::`#`variantIdent { `#`(`#`memberAssigns),* }")
+            quoteTokens(
+                "|`#`arg| `#`thisValue::`#`variantIdent { `#`(`#`memberAssigns),* }",
+                mapOf(
+                    "arg" to arg,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "memberAssigns" to memberAssigns,
+                ),
+            )
         }
         Style.Tuple -> {
-            val fieldAccesses = fieldAccess.map { fa -> quoteTokens("`#`wrapper.`#`fa") }
-            quoteTokens("|`#`arg| `#`thisValue::`#`variantIdent(`#`(`#`fieldAccesses),*)")
+            val fieldAccesses = fieldAccess.map { fa -> quoteTokens("`#`wrapper.`#`fa", mapOf("wrapper" to wrapper, "fa" to fa)) }
+            quoteTokens(
+                "|`#`arg| `#`thisValue::`#`variantIdent(`#`(`#`fieldAccesses),*)",
+                mapOf(
+                    "arg" to arg,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "fieldAccesses" to fieldAccesses,
+                ),
+            )
         }
-        Style.Newtype -> quoteTokens("|`#`arg| `#`thisValue::`#`variantIdent(`#`wrapper)")
-        Style.Unit -> quoteTokens("|`#`arg| `#`thisValue::`#`variantIdent")
+        Style.Newtype -> quoteTokens(
+            "|`#`arg| `#`thisValue::`#`variantIdent(`#`wrapper)",
+            mapOf("arg" to arg, "thisValue" to thisValue, "variantIdent" to variantIdent, "wrapper" to wrapper),
+        )
+        Style.Unit -> quoteTokens(
+            "|`#`arg| `#`thisValue::`#`variantIdent",
+            mapOf("arg" to arg, "thisValue" to thisValue, "variantIdent" to variantIdent),
+        )
     }
 }
 
