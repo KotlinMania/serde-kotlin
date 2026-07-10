@@ -1,4 +1,4 @@
-// port-lint: source serde_derive/src/bound.rs
+// port-lint: source bound.rs
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream

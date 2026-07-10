@@ -183,7 +183,7 @@ private fun buildGenerics(cont: Container): Generics {
     }
 }
 
-// Parse a quote string into a Path, equivalent to Rust's parse_quote!().
+// Parse a quote string into a Path, equivalent to the upstream parse-quote macro.
 private fun parseQuotePath(template: String): Path {
     val tokens = checkedQuote(template.replace(".", "::"))
     val result = parse2(PathParse, tokens)

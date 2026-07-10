@@ -52,7 +52,7 @@ internal fun deserializeEnumInternally(
     """))
 }
 
-// Generates significant part of the visit_seq and visit_map bodies of visitors
+// Generates significant parts of the sequence and map visitor bodies
 // for the variants of internally tagged enum.
 private fun deserializeInternallyTaggedVariant(
     params: Parameters,

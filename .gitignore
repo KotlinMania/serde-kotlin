@@ -47,3 +47,9 @@ DerivedData/
 
 # Local ast_distance binary copied from the workspace tool cache.
 tools/ast_distance
+
+# ast_distance generated reports
+NEXT_ACTIONS.md
+port_status_report.md
+high_priority_ports.md
+port_lint_proposed_changes.md
