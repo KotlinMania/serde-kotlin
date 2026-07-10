@@ -550,29 +550,29 @@ data object BorrowedBytesDeserialize : Deserialize<ByteArray> {
 
 // //////////////////////////////////////////////////////////////////////////////
 
+private class OptionVisitor<T>(
+    private val valueDeserialize: Deserialize<T>,
+) : Visitor<T?> {
+    override fun expecting(): String = "option"
+
+    override fun visitUnit(): SerdeResult<T?> = SerdeResult.success(null)
+
+    override fun visitNone(): SerdeResult<T?> = SerdeResult.success(null)
+
+    override fun <D> visitSome(deserializer: D): SerdeResult<T?>
+        where D : Deserializer =
+        valueDeserialize.deserialize(deserializer).map { it }
+
+    override fun <D> privateVisitUntaggedOption(deserializer: D): SerdeResult<T?>
+        where D : Deserializer =
+        SerdeResult.success(valueDeserialize.deserialize(deserializer).getOrNull())
+}
+
 fun <T> nullableDeserialize(valueDeserialize: Deserialize<T>): Deserialize<T?> =
     object : Deserialize<T?> {
         override fun <D> deserialize(deserializer: D): SerdeResult<T?>
             where D : Deserializer =
-            deserializer.deserializeOption(
-                object : Visitor<T?> {
-                    override fun expecting(): String = "option"
-
-                    override fun visitUnit(): SerdeResult<T?> = SerdeResult.success(null)
-
-                    override fun visitNone(): SerdeResult<T?> = SerdeResult.success(null)
-
-                    override fun <D2> visitSome(deserializer: D2): SerdeResult<T?>
-                        where D2 : Deserializer =
-                        valueDeserialize.deserialize(deserializer).map { it }
-
-                    override fun <D2> privateVisitUntaggedOption(
-                        deserializer: D2,
-                    ): SerdeResult<T?>
-                        where D2 : Deserializer =
-                        SerdeResult.success(valueDeserialize.deserialize(deserializer).getOrNull())
-                },
-            )
+            deserializer.deserializeOption(OptionVisitor(valueDeserialize))
     }
 
 // //////////////////////////////////////////////////////////////////////////////
