@@ -1575,6 +1575,8 @@ data class MapEntry<K, V>(
     val value: V,
 )
 
+private fun <K, V> split(entry: MapEntry<K, V>): Pair<K, V> = entry.key to entry.value
+
 /**
  * A deserializer that iterates over a map.
  */
@@ -1588,12 +1590,12 @@ class MapDeserializer<K, V> internal constructor(
     private var pendingValue: V? = null
     private var count: Int = 0
 
-    private fun nextPair(): MapEntry<K, V>? {
+    private fun nextPair(): Pair<K, V>? {
         val next = if (iter.hasNext()) iter.next() else null
         if (next != null) {
             count += 1
         }
-        return next
+        return next?.let(::split)
     }
 
     override fun <T> nextKeySeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
@@ -1602,8 +1604,9 @@ class MapDeserializer<K, V> internal constructor(
             if (next == null) {
                 null
             } else {
-                pendingValue = next.value
-                seed.deserialize(next.key.intoDeserializer()).getOrThrow()
+                val (key, value) = next
+                pendingValue = value
+                seed.deserialize(key.intoDeserializer()).getOrThrow()
             }
         }
 
@@ -1621,7 +1624,8 @@ class MapDeserializer<K, V> internal constructor(
             if (next == null) {
                 null
             } else {
-                val pairDeserializer = PairDeserializer(next.key, next.value)
+                val (key, value) = next
+                val pairDeserializer = PairDeserializer(key, value)
                 seed.deserialize(pairDeserializer).getOrThrow()
             }
         }
@@ -1635,8 +1639,9 @@ class MapDeserializer<K, V> internal constructor(
             if (next == null) {
                 null
             } else {
-                val key = keySeed.deserialize(next.key.intoDeserializer()).getOrThrow()
-                val value = valueSeed.deserialize(next.value.intoDeserializer()).getOrThrow()
+                val (rawKey, rawValue) = next
+                val key = keySeed.deserialize(rawKey.intoDeserializer()).getOrThrow()
+                val value = valueSeed.deserialize(rawValue.intoDeserializer()).getOrThrow()
                 key to value
             }
         }

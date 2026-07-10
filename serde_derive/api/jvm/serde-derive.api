@@ -467,6 +467,8 @@ public final class io/github/kotlinmania/serderive/internals/Symbol {
 }
 
 public final class io/github/kotlinmania/serderive/internals/SymbolKt {
+	public static final fun eq (Lio/github/kotlinmania/procmacro2/Ident;Lio/github/kotlinmania/serderive/internals/Symbol;)Z
+	public static final fun eq (Lio/github/kotlinmania/syn/Path;Lio/github/kotlinmania/serderive/internals/Symbol;)Z
 	public static final fun getALIAS ()Lio/github/kotlinmania/serderive/internals/Symbol;
 	public static final fun getBORROW ()Lio/github/kotlinmania/serderive/internals/Symbol;
 	public static final fun getBOUND ()Lio/github/kotlinmania/serderive/internals/Symbol;
