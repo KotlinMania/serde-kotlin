@@ -2,8 +2,8 @@
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.serderive.quote
-import io.github.kotlinmania.serderive.quoteSpanned
+import io.github.kotlinmania.serderive.checkedQuote
+import io.github.kotlinmania.serderive.checkedQuoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Match
@@ -30,7 +30,7 @@ internal fun deserializeEnumAdjacently(
         if (variant.attrs.skipDeserializing()) return@mapIndexedNotNull null
         val variantIndex = fieldI(i)
         val block = Match(deserializeVariant(params, variant, cattrs))
-        quote("__Field::`#`variantIndex => `#`block")
+        checkedQuote("__Field::`#`variantIndex => `#`block")
     }
 
     val rustName = params.typeName()
@@ -40,15 +40,15 @@ internal fun deserializeEnumAdjacently(
     val denyUnknownFields = cattrs.denyUnknownFields()
 
     val fieldVisitorTy = if (denyUnknownFields) {
-        quote("_serde::`#`Private::de::TagOrContentFieldVisitor")
+        checkedQuote("_serde::`#`Private::de::TagOrContentFieldVisitor")
     } else {
-        quote("_serde::`#`Private::de::TagContentOtherFieldVisitor")
+        checkedQuote("_serde::`#`Private::de::TagContentOtherFieldVisitor")
     }
 
-    var missingContent = quote("""
+    var missingContent = checkedQuote("""
         _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::missing_field(`#`content))
     """)
-    var missingContentFallthrough = quote("")
+    var missingContentFallthrough = checkedQuote("")
     val missingContentArms = mutableListOf<TokenStream>()
     for ((i, variant) in variants.withIndex()) {
         if (variant.attrs.skipDeserializing()) continue
@@ -56,27 +56,27 @@ internal fun deserializeEnumAdjacently(
         val variantIdent = variant.ident
 
         val arm = when (variant.style) {
-            Style.Unit -> quote("_serde::`#`Private::Ok(`#`thisValue::`#`variantIdent)")
+            Style.Unit -> checkedQuote("_serde::`#`Private::Ok(`#`thisValue::`#`variantIdent)")
             Style.Newtype -> {
                 if (variant.attrs.deserializeWith() == null) {
                     val span = variant.original.span()
-                    val func = quoteSpanned(span, "_serde::`#`Private::de::missing_field")
-                    quote("`#`func(`#`content).map(`#`thisValue::`#`variantIdent)")
+                    val func = checkedQuoteSpanned(span, "_serde::`#`Private::de::missing_field")
+                    checkedQuote("`#`func(`#`content).map(`#`thisValue::`#`variantIdent)")
                 } else {
-                    missingContentFallthrough = quote("_ => `#`missingContent")
+                    missingContentFallthrough = checkedQuote("_ => `#`missingContent")
                     continue
                 }
             }
             else -> {
-                missingContentFallthrough = quote("_ => `#`missingContent")
+                missingContentFallthrough = checkedQuote("_ => `#`missingContent")
                 continue
             }
         }
-        missingContentArms.add(quote("__Field::`#`variantIndex => `#`arm,"))
+        missingContentArms.add(checkedQuote("__Field::`#`variantIndex => `#`arm,"))
     }
 
     if (missingContentArms.isNotEmpty()) {
-        missingContent = quote("""
+        missingContent = checkedQuote("""
             match __field {
                 `#`(`#`missingContentArms)*
                 `#`missingContentFallthrough
@@ -84,14 +84,14 @@ internal fun deserializeEnumAdjacently(
         """)
     }
 
-    val nextKey = quote("""
+    val nextKey = checkedQuote("""
         _serde::de::MapAccess::next_key_seed(&mut __map, `#`fieldVisitorTy {
             tag: `#`tag,
             content: `#`content,
         })?
     """)
 
-    val variantFromMap = quote("""
+    val variantFromMap = checkedQuote("""
         _serde::de::MapAccess::next_value_seed(&mut __map, _serde::`#`Private::de::AdjacentlyTaggedEnumVariantSeed::<__Field> {
             enum_name: `#`rustName,
             variants: VARIANTS,
@@ -102,7 +102,7 @@ internal fun deserializeEnumAdjacently(
     val nextRelevantKey = if (denyUnknownFields) {
         nextKey
     } else {
-        quote("""
+        checkedQuote("""
             {
                 let mut __rk : _serde::`#`Private::Option<_serde::`#`Private::de::TagOrContentField> = _serde::`#`Private::None;
                 while let _serde::`#`Private::Some(__k) = `#`nextKey {
@@ -126,7 +126,7 @@ internal fun deserializeEnumAdjacently(
         """)
     }
 
-    val visitRemainingKeys = quote("""
+    val visitRemainingKeys = checkedQuote("""
         match `#`nextRelevantKey {
             _serde::`#`Private::Some(_serde::`#`Private::de::TagOrContentField::Tag) => {
                 _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`tag))
@@ -139,9 +139,9 @@ internal fun deserializeEnumAdjacently(
     """)
 
     val finishContentThenTag = if (variantArms.isEmpty()) {
-        quote("match `#`variantFromMap {}")
+        checkedQuote("match `#`variantFromMap {}")
     } else {
-        quote("""
+        checkedQuote("""
             let __seed = __Seed {
                 variant: `#`variantFromMap,
                 marker: _serde::`#`Private::PhantomData,
@@ -153,7 +153,7 @@ internal fun deserializeEnumAdjacently(
         """)
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`variantVisitor
 
         `#`variantsStmt

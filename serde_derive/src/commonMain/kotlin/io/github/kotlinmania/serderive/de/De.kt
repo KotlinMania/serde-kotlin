@@ -5,8 +5,8 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.serderive.quote as quoteTokens
-import io.github.kotlinmania.serderive.quoteSpanned as quoteSpannedTokens
+import io.github.kotlinmania.serderive.checkedQuote as quoteTokens
+import io.github.kotlinmania.serderive.checkedQuoteSpanned as quoteSpannedTokens
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.AttrField
 import io.github.kotlinmania.serderive.internals.AttrVariant

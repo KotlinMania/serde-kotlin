@@ -12,28 +12,28 @@ private object EmptyTokens : ToTokens {
     override fun toTokens(tokens: TokenStream) = Unit
 }
 
-internal fun quote(
+internal fun checkedQuote(
     template: String,
     interpolations: Map<String, *> = emptyMap<String, Any?>(),
 ): TokenStream =
     quoteKotlin(template, checkedInterpolations(template, interpolations))
 
-internal fun quote(template: String, vararg pairs: Pair<String, *>): TokenStream =
-    quote(template, mapOf(*pairs))
+internal fun checkedQuote(template: String, vararg pairs: Pair<String, *>): TokenStream =
+    checkedQuote(template, mapOf(*pairs))
 
-internal fun quoteSpanned(
+internal fun checkedQuoteSpanned(
     span: Span,
     template: String,
     interpolations: Map<String, *> = emptyMap<String, Any?>(),
 ): TokenStream =
     quoteSpannedKotlin(span, template, checkedInterpolations(template, interpolations))
 
-internal fun quoteSpanned(
+internal fun checkedQuoteSpanned(
     span: Span,
     template: String,
     vararg pairs: Pair<String, *>,
 ): TokenStream =
-    quoteSpanned(span, template, mapOf(*pairs))
+    checkedQuoteSpanned(span, template, mapOf(*pairs))
 
 private fun checkedInterpolations(template: String, values: Map<String, *>): Map<String, *> {
     val required = interpolation.findAll(template).map { it.groupValues[1] }.toSet()

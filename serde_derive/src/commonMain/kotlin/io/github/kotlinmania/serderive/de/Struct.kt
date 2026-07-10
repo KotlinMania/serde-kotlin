@@ -3,8 +3,8 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.serderive.quote
-import io.github.kotlinmania.serderive.quoteSpanned
+import io.github.kotlinmania.serderive.checkedQuote
+import io.github.kotlinmania.serderive.checkedQuoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Default
 import io.github.kotlinmania.serderive.internals.Expr
@@ -33,28 +33,28 @@ internal fun deserializeStruct(
     // getters then construct the target type directly.
     val construct = if (params.hasGetter) {
         val local = params.local
-        quote("`#`local", "local" to local)
+        checkedQuote("`#`local", "local" to local)
     } else {
-        quote("`#`thisValue", "thisValue" to thisValue)
+        checkedQuote("`#`thisValue", "thisValue" to thisValue)
     }
 
     val typePath = when (form) {
         StructForm.Struct -> construct
         is StructForm.ExternallyTagged -> {
             val variantIdent = form.variantIdent
-            quote("`#`construct::`#`variantIdent",
+            checkedQuote("`#`construct::`#`variantIdent",
                 "construct" to construct,
                 "variantIdent" to variantIdent)
         }
         is StructForm.InternallyTagged -> {
             val variantIdent = form.variantIdent
-            quote("`#`construct::`#`variantIdent",
+            checkedQuote("`#`construct::`#`variantIdent",
                 "construct" to construct,
                 "variantIdent" to variantIdent)
         }
         is StructForm.Untagged -> {
             val variantIdent = form.variantIdent
-            quote("`#`construct::`#`variantIdent",
+            checkedQuote("`#`construct::`#`variantIdent",
                 "construct" to construct,
                 "variantIdent" to variantIdent)
         }
@@ -86,16 +86,16 @@ internal fun deserializeStruct(
         is StructForm.Untagged -> null
         else -> if (hasFlatten) null else {
             val mutSeq = if (deserializedFields.isEmpty()) {
-                quote("_")
+                checkedQuote("_")
             } else {
-                quote("mut __seq")
+                checkedQuote("mut __seq")
             }
 
             val visitSeqBody = Stmts(deserializeSeq(
                 typePath, params, fields, true, cattrs, expectingVal
             ))
 
-            quote("""
+            checkedQuote("""
                 `#`[inline]
                 fn visit_seq<__A>(self, `#`mutSeq: __A) -> _serde::`#`Private::Result<Self::Value, __A::Error>
                 where
@@ -121,7 +121,7 @@ internal fun deserializeStruct(
 
     val visitorSeed = when (form) {
         is StructForm.ExternallyTagged -> if (hasFlatten) {
-            quote("""
+            checkedQuote("""
                 `#`[automatically_derived]
                 impl `#`deImplGenerics _serde::de::DeserializeSeed<`#`delife> for __Visitor `#`deTyGenerics `#`whereClause {
                     type Value = `#`thisType `#`tyGenerics;
@@ -150,14 +150,14 @@ internal fun deserializeStruct(
     } else {
         val fieldNames = deserializedFields.flatMap { field -> field.aliases.toList() }
 
-        quote("""
+        checkedQuote("""
             `#`[doc(hidden)]
             const FIELDS: &'static [&'static str] = &[ `#`(`#`fieldNames),* ];
         """,
             "fieldNames" to fieldNames)
     }
 
-    val visitorExpr = quote("""
+    val visitorExpr = checkedQuote("""
         __Visitor {
             marker: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             lifetime: _serde::`#`Private::PhantomData,
@@ -169,35 +169,35 @@ internal fun deserializeStruct(
 
     val dispatch = when (form) {
         StructForm.Struct -> if (hasFlatten) {
-            quote("""
+            checkedQuote("""
                 _serde::Deserializer::deserialize_map(__deserializer, `#`visitorExpr)
             """, "visitorExpr" to visitorExpr)
         } else {
             val typeName = cattrs.name().deserializeName()
-            quote("""
+            checkedQuote("""
                 _serde::Deserializer::deserialize_struct(__deserializer, `#`typeName, FIELDS, `#`visitorExpr)
             """,
                 "typeName" to typeName,
                 "visitorExpr" to visitorExpr)
         }
         is StructForm.ExternallyTagged -> if (hasFlatten) {
-            quote("""
+            checkedQuote("""
                 _serde::de::VariantAccess::newtype_variant_seed(__variant, `#`visitorExpr)
             """, "visitorExpr" to visitorExpr)
         } else {
-            quote("""
+            checkedQuote("""
                 _serde::de::VariantAccess::struct_variant(__variant, FIELDS, `#`visitorExpr)
             """, "visitorExpr" to visitorExpr)
         }
-        is StructForm.InternallyTagged -> quote("""
+        is StructForm.InternallyTagged -> checkedQuote("""
             _serde::Deserializer::deserialize_any(__deserializer, `#`visitorExpr)
         """, "visitorExpr" to visitorExpr)
-        is StructForm.Untagged -> quote("""
+        is StructForm.Untagged -> checkedQuote("""
             _serde::Deserializer::deserialize_any(__deserializer, `#`visitorExpr)
         """, "visitorExpr" to visitorExpr)
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`fieldVisitor
 
         `#`[doc(hidden)]
@@ -264,7 +264,7 @@ private fun deserializeMap(
         .filter { (field, _) -> !field.attrs.skipDeserializing() && !field.attrs.flatten() }
         .map { (field, name) ->
             val fieldTy = field.ty
-            quote("""
+            checkedQuote("""
                 let mut `#`name: _serde::`#`Private::Option<`#`fieldTy> = _serde::`#`Private::None;
             """,
                 "name" to name,
@@ -274,14 +274,14 @@ private fun deserializeMap(
 
     // Collect contents for flatten fields into a buffer
     val letCollect = if (hasFlatten) {
-        quote("""
+        checkedQuote("""
             let mut __collect = _serde::`#`Private::Vec::<_serde::`#`Private::Option<(
                 _serde::`#`Private::de::Content,
                 _serde::`#`Private::de::Content
             )>>::new();
         """, "Private" to Private)
     } else {
-        quote("")
+        checkedQuote("")
     }
 
     // Match arms to extract a value for a field.
@@ -294,13 +294,13 @@ private fun deserializeMap(
                 null -> {
                     val fieldTy = field.ty
                     val span = field.original.span()
-                    val func = quoteSpanned(span, "_serde::de::MapAccess::next_value::<`#`fieldTy>",
+                    val func = checkedQuoteSpanned(span, "_serde::de::MapAccess::next_value::<`#`fieldTy>",
                         "fieldTy" to fieldTy)
-                    quote("`#`func(&mut __map)?", "func" to func)
+                    checkedQuote("`#`func(&mut __map)?", "func" to func)
                 }
                 else -> {
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
-                    quote("""{
+                    checkedQuote("""{
                         `#`wrapper
                         match _serde::de::MapAccess::next_value::<`#`wrapperTy>(&mut __map) {
                             _serde::`#`Private::Ok(__wrapper) => __wrapper.value,
@@ -315,7 +315,7 @@ private fun deserializeMap(
                 }
             }
 
-            quote("""
+            checkedQuote("""
                 __Field::`#`name => {
                     if _serde::`#`Private::Option::is_some(&`#`name) {
                         return _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`deserName));
@@ -331,7 +331,7 @@ private fun deserializeMap(
 
     // Visit ignored values to consume them
     val ignoredArm = if (hasFlatten) {
-        quote("""
+        checkedQuote("""
             __Field::__other(__name) => {
                 __collect.push(_serde::`#`Private::Some((
                     __name,
@@ -339,16 +339,16 @@ private fun deserializeMap(
             }
         """, "Private" to Private)
     } else if (cattrs.denyUnknownFields()) {
-        quote("")
+        checkedQuote("")
     } else {
-        quote("""
+        checkedQuote("""
             _ => { let _ = _serde::de::MapAccess::next_value::<_serde::de::IgnoredAny>(&mut __map)?; }
         """)
     }
 
     val allSkipped = fields.all { it.attrs.skipDeserializing() }
     val matchKeys = if (cattrs.denyUnknownFields() && allSkipped) {
-        quote("""
+        checkedQuote("""
             // FIXME: Once feature(exhaustive_patterns) is stable:
             // let _serde::`#`Private::None::<__Field> = _serde::de::MapAccess::next_key(&mut __map)?;
             _serde::`#`Private::Option::map(
@@ -356,7 +356,7 @@ private fun deserializeMap(
                 |__impossible| match __impossible {});
         """, "Private" to Private)
     } else {
-        quote("""
+        checkedQuote("""
             while let _serde::`#`Private::Some(__key) = _serde::de::MapAccess::next_key::<__Field>(&mut __map)? {
                 match __key {
                     `#`(`#`valueArms)*
@@ -374,7 +374,7 @@ private fun deserializeMap(
         .map { (field, name) ->
             val missingExpr = Match(exprIsMissing(field, cattrs))
 
-            quote("""
+            checkedQuote("""
                 let `#`name = match `#`name {
                     _serde::`#`Private::Some(`#`name) => `#`name,
                     _serde::`#`Private::None => `#`missingExpr
@@ -392,12 +392,12 @@ private fun deserializeMap(
             val func = when (val path = field.attrs.deserializeWith()) {
                 null -> {
                     val span = field.original.span()
-                    quoteSpanned(span, "_serde::de::Deserialize::deserialize")
+                    checkedQuoteSpanned(span, "_serde::de::Deserialize::deserialize")
                 }
-                else -> quote("`#`path", "path" to path)
+                else -> checkedQuote("`#`path", "path" to path)
             }
 
-            quote("""
+            checkedQuote("""
                 let `#`name: `#`fieldTy = `#`func(
                     _serde::`#`Private::de::FlatMapDeserializer(
                         &mut __collect,
@@ -410,7 +410,7 @@ private fun deserializeMap(
         }
 
     val collectedDenyUnknownFields = if (hasFlatten && cattrs.denyUnknownFields()) {
-        quote("""
+        checkedQuote("""
             if let _serde::`#`Private::Some(_serde::`#`Private::Some((__key, _))) =
                 __collect.into_iter().filter(_serde::`#`Private::Option::is_some).next()
             {
@@ -424,49 +424,49 @@ private fun deserializeMap(
             }
         """, "Private" to Private)
     } else {
-        quote("")
+        checkedQuote("")
     }
 
     val result = fieldsNames.map { (field, name) ->
         val member = field.member
         if (field.attrs.skipDeserializing()) {
             val value = Expr(exprIsMissing(field, cattrs))
-            quote("`#`member: `#`value",
+            checkedQuote("`#`member: `#`value",
                 "member" to member,
                 "value" to value)
         } else {
-            quote("`#`member: `#`name",
+            checkedQuote("`#`member: `#`name",
                 "member" to member,
                 "name" to name)
         }
     }
 
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("let __default: Self::Value = _serde::`#`Private::Default::default();",
+        is Default.Plain -> checkedQuote("let __default: Self::Value = _serde::`#`Private::Default::default();",
             "Private" to Private)
         // If the path returns the wrong type, the error will be reported here.
         // We attach the span of the path to the function so it will be reported
         // on the serde default attribute.
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
-            quoteSpanned(p.span(), "let __default: Self::Value = `#`p();",
+            checkedQuoteSpanned(p.span(), "let __default: Self::Value = `#`p();",
                 "p" to p)
         }
         is Default.None -> {
             // We don't need the default value, to prevent an unused variable warning
             // we'll leave the line empty.
-            quote("")
+            checkedQuote("")
         }
     }
 
-    var resultExpr = quote("`#`structPath { `#`(`#`result),* }",
+    var resultExpr = checkedQuote("`#`structPath { `#`(`#`result),* }",
         "structPath" to structPath,
         "result" to result)
     if (params.hasGetter) {
         val thisType = params.thisType
         val split = params.generics.splitForImpl()
         val tyGenerics = split.typeGenerics
-        resultExpr = quote("""
+        resultExpr = checkedQuote("""
             _serde::`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`resultExpr)
         """,
             "Private" to Private,
@@ -475,7 +475,7 @@ private fun deserializeMap(
             "resultExpr" to resultExpr)
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`(`#`letValues)*
 
         `#`letCollect
@@ -534,9 +534,9 @@ internal fun deserializeStructInPlace(
     val fieldVisitor = Stmts(deserializeFieldIdentifier(deserializedFields, cattrs, false))
 
     val mutSeq = if (deserializedFields.isEmpty()) {
-        quote("_")
+        checkedQuote("_")
     } else {
-        quote("mut __seq")
+        checkedQuote("mut __seq")
     }
     val visitSeq = Stmts(deserializeSeqInPlace(params, fields, cattrs, expectingVal))
     val visitMap = Stmts(deserializeMapInPlace(params, fields, cattrs))
@@ -547,7 +547,7 @@ internal fun deserializeStructInPlace(
     val inPlaceTyGenerics = InPlaceTypeGenerics(params)
     val placeLife = placeLifetime()
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`fieldVisitor
 
         `#`[doc(hidden)]
@@ -623,7 +623,7 @@ private fun deserializeMapInPlace(
     val letFlags = fieldsNames
         .filter { (field, _) -> !field.attrs.skipDeserializing() }
         .map { (_, name) ->
-            quote("""
+            checkedQuote("""
                 let mut `#`name: bool = false;
             """, "name" to name)
         }
@@ -637,7 +637,7 @@ private fun deserializeMapInPlace(
 
             val visit = when (val path = field.attrs.deserializeWith()) {
                 null -> {
-                    quote("""
+                    checkedQuote("""
                         _serde::de::MapAccess::next_value_seed(&mut __map, _serde::`#`Private::de::InPlaceSeed(&mut self.place.`#`member))?
                     """,
                         "Private" to Private,
@@ -645,7 +645,7 @@ private fun deserializeMapInPlace(
                 }
                 else -> {
                     val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, path)
-                    quote("""{
+                    checkedQuote("""{
                         `#`wrapper
                         self.place.`#`member = match _serde::de::MapAccess::next_value::<`#`wrapperTy>(&mut __map) {
                             _serde::`#`Private::Ok(__wrapper) => __wrapper.value,
@@ -661,7 +661,7 @@ private fun deserializeMapInPlace(
                 }
             }
 
-            quote("""
+            checkedQuote("""
                 __Field::`#`name => {
                     if `#`name {
                         return _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`deserName));
@@ -678,9 +678,9 @@ private fun deserializeMapInPlace(
 
     // Visit ignored values to consume them
     val ignoredArm = if (cattrs.denyUnknownFields()) {
-        quote("")
+        checkedQuote("")
     } else {
-        quote("""
+        checkedQuote("""
             _ => { let _ = _serde::de::MapAccess::next_value::<_serde::de::IgnoredAny>(&mut __map)?; }
         """)
     }
@@ -688,7 +688,7 @@ private fun deserializeMapInPlace(
     val allSkipped = fields.all { it.attrs.skipDeserializing() }
 
     val matchKeys = if (cattrs.denyUnknownFields() && allSkipped) {
-        quote("""
+        checkedQuote("""
             // FIXME: Once feature(exhaustive_patterns) is stable:
             // let _serde::`#`Private::None::<__Field> = _serde::de::MapAccess::next_key(&mut __map)?;
             _serde::`#`Private::Option::map(
@@ -696,7 +696,7 @@ private fun deserializeMapInPlace(
                 |__impossible| match __impossible {});
         """, "Private" to Private)
     } else {
-        quote("""
+        checkedQuote("""
             while let _serde::`#`Private::Some(__key) = _serde::de::MapAccess::next_key::<__Field>(&mut __map)? {
                 match __key {
                     `#`(`#`valueArmsFrom)*
@@ -720,7 +720,7 @@ private fun deserializeMapInPlace(
                 && field.attrs.deserializeWith() != null
             ) {
                 val missingExprStmts = Stmts(missingExpr)
-                quote("""
+                checkedQuote("""
                     if !`#`name {
                         `#`missingExprStmts;
                     }
@@ -730,7 +730,7 @@ private fun deserializeMapInPlace(
             } else {
                 val member = field.member
                 val missingExprExpr = Expr(missingExpr)
-                quote("""
+                checkedQuote("""
                     if !`#`name {
                         self.place.`#`member = `#`missingExprExpr;
                     };
@@ -746,7 +746,7 @@ private fun deserializeMapInPlace(
     val tyGenerics = split.typeGenerics
 
     val letDefault = when (cattrs.default()) {
-        is Default.Plain -> quote("let __default: `#`thisType `#`tyGenerics = _serde::`#`Private::Default::default();",
+        is Default.Plain -> checkedQuote("let __default: `#`thisType `#`tyGenerics = _serde::`#`Private::Default::default();",
             "thisType" to thisType,
             "tyGenerics" to tyGenerics,
             "Private" to Private)
@@ -755,7 +755,7 @@ private fun deserializeMapInPlace(
         // on the serde default attribute.
         is Default.Path -> {
             val p = (cattrs.default() as Default.Path).path
-            quoteSpanned(p.span(), "let __default: `#`thisType `#`tyGenerics = `#`p();",
+            checkedQuoteSpanned(p.span(), "let __default: `#`thisType `#`tyGenerics = `#`p();",
                 "thisType" to thisType,
                 "tyGenerics" to tyGenerics,
                 "p" to p)
@@ -763,11 +763,11 @@ private fun deserializeMapInPlace(
         is Default.None -> {
             // We don't need the default value, to prevent an unused variable warning
             // we'll leave the line empty.
-            quote("")
+            checkedQuote("")
         }
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`(`#`letFlags)*
 
         `#`matchKeys
@@ -793,14 +793,14 @@ private fun deserializeFieldIdentifier(
     hasFlatten: Boolean
 ): Fragment {
     val (ignoreVariant, fallthrough) = if (hasFlatten) {
-        val ignoreVariant = quote("__other(_serde::`#`Private::de::Content<'de>),", "Private" to Private)
-        val fallthrough = quote("_serde::`#`Private::Ok(__Field::__other(__value))", "Private" to Private)
+        val ignoreVariant = checkedQuote("__other(_serde::`#`Private::de::Content<'de>),", "Private" to Private)
+        val fallthrough = checkedQuote("_serde::`#`Private::Ok(__Field::__other(__value))", "Private" to Private)
         Pair(ignoreVariant, fallthrough)
     } else if (cattrs.denyUnknownFields()) {
         Pair(null, null)
     } else {
-        val ignoreVariant = quote("__ignore,")
-        val fallthrough = quote("_serde::`#`Private::Ok(__Field::__ignore)", "Private" to Private)
+        val ignoreVariant = checkedQuote("__ignore,")
+        val fallthrough = checkedQuote("_serde::`#`Private::Ok(__Field::__ignore)", "Private" to Private)
         Pair(ignoreVariant, fallthrough)
     }
 

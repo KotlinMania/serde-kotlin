@@ -1,22 +1,22 @@
 package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.serderive.quote
+import io.github.kotlinmania.serderive.checkedQuote
 import io.github.kotlinmania.syn.Path
 
 public fun wrapInConst(serdePath: Path?, code: TokenStream): TokenStream {
     val useSerde = if (serdePath != null) {
-        quote("""
+        checkedQuote("""
             use `#`serdePath as _serde;
         """, mapOf("serdePath" to serdePath))
     } else {
-        quote("""
+        checkedQuote("""
             #[allow(unused_extern_crates, clippy::useless_attribute)]
             extern crate serde as _serde;
         """)
     }
 
-    return quote("""
+    return checkedQuote("""
         #[doc(hidden)]
         #[allow(
             non_upper_case_globals,

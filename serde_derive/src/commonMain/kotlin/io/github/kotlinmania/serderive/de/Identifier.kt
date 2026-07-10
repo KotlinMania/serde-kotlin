@@ -4,7 +4,7 @@ package io.github.kotlinmania.serderive
 import io.github.kotlinmania.procmacro2.Literal
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
-import io.github.kotlinmania.serderive.quote
+import io.github.kotlinmania.serderive.checkedQuote
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Fragment
@@ -41,7 +41,7 @@ internal fun deserializeCustom(
             // last variant (checked in checkIdentifier), so all preceding
             // are ordinary variants.
             val ordinary = variants.subList(0, variants.size - 1)
-            val fallthrough = quote(
+            val fallthrough = checkedQuote(
                 "_serde::`#`Private::Ok(`#`thisValue::`#`lastIdent)",
                 mapOf("Private" to Private, "thisValue" to thisValue, "lastIdent" to lastIdent),
             )
@@ -49,7 +49,7 @@ internal fun deserializeCustom(
         } else if (last.style == Style.Newtype) {
             val ordinary = variants.subList(0, variants.size - 1)
             val fallthrough = { value: TokenStream ->
-                quote("""
+                checkedQuote("""
                     _serde::`#`Private::Result::map(
                         _serde::Deserialize::deserialize(
                             _serde::`#`Private::de::IdentifierDeserializer::from(`#`value)
@@ -64,8 +64,8 @@ internal fun deserializeCustom(
             }
             Triple(
                 ordinary,
-                fallthrough(quote("__value")),
-                fallthrough(quote("_serde::`#`Private::de::Borrowed(__value)", "Private" to Private))
+                fallthrough(checkedQuote("__value")),
+                fallthrough(checkedQuote("_serde::`#`Private::de::Borrowed(__value)", "Private" to Private))
             )
         } else {
             Triple(variants, null, null)
@@ -86,12 +86,12 @@ internal fun deserializeCustom(
     val namesConst = if (fallthrough != null) {
         null
     } else if (isVariant) {
-        quote("""
+        checkedQuote("""
             `#`[doc(hidden)]
             const VARIANTS: &'static [&'static str] = &[ `#`(`#`names),* ];
         """, "names" to names)
     } else {
-        quote("""
+        checkedQuote("""
             `#`[doc(hidden)]
             const FIELDS: &'static [&'static str] = &[ `#`(`#`names),* ];
         """, "names" to names)
@@ -110,7 +110,7 @@ internal fun deserializeCustom(
         cattrs.expecting()
     ))
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`namesConst
 
         `#`[doc(hidden)]
@@ -151,7 +151,7 @@ internal fun deserializeGenerated(
     ignoreVariant: TokenStream?,
     fallthrough: TokenStream?
 ): Fragment {
-    val thisValue = quote("__Field")
+    val thisValue = checkedQuote("__Field")
     val fieldIdents = deserializedFields.map { it.ident }
 
     val visitorImpl = Stmts(deserializeIdentifier(
@@ -165,12 +165,12 @@ internal fun deserializeGenerated(
     ))
 
     val lifetime = if (!isVariant && hasFlatten) {
-        quote("<'de>")
+        checkedQuote("<'de>")
     } else {
         null
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         `#`[allow(non_camel_case_types)]
         `#`[doc(hidden)]
         enum __Field `#`lifetime {
@@ -220,7 +220,7 @@ private fun deserializeIdentifier(
         val ident = field.ident
         val aliases = field.aliases
         // aliases also contains a main name
-        quote(
+        checkedQuote(
             "`#`(`#`aliases),* => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
             mapOf("aliases" to aliases, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
         )
@@ -232,7 +232,7 @@ private fun deserializeIdentifier(
         val byteAliases = field.aliases.map { alias ->
             Literal.byteString(alias.value.encodeToByteArray())
         }
-        quote(
+        checkedQuote(
             "`#`(`#`byteAliases),* => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
             mapOf("byteAliases" to byteAliases, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
         )
@@ -243,16 +243,16 @@ private fun deserializeIdentifier(
     val bytesToStr = if (fallthrough != null || collectOtherFields) {
         null
     } else {
-        quote("let __value = &_serde::`#`Private::from_utf8_lossy(__value);", "Private" to Private)
+        checkedQuote("let __value = &_serde::`#`Private::from_utf8_lossy(__value);", "Private" to Private)
     }
 
     val (valueAsStrContent, valueAsBorrowedStrContent, valueAsBytesContent, valueAsBorrowedBytesContent) =
         if (collectOtherFields) {
             Quad(
-                quote("let __value = _serde::`#`Private::de::Content::String(_serde::`#`Private::ToString::to_string(__value));", "Private" to Private),
-                quote("let __value = _serde::`#`Private::de::Content::Str(__value);", "Private" to Private),
-                quote("let __value = _serde::`#`Private::de::Content::ByteBuf(__value.to_vec());", "Private" to Private),
-                quote("let __value = _serde::`#`Private::de::Content::Bytes(__value);", "Private" to Private)
+                checkedQuote("let __value = _serde::`#`Private::de::Content::String(_serde::`#`Private::ToString::to_string(__value));", "Private" to Private),
+                checkedQuote("let __value = _serde::`#`Private::de::Content::Str(__value);", "Private" to Private),
+                checkedQuote("let __value = _serde::`#`Private::de::Content::ByteBuf(__value.to_vec());", "Private" to Private),
+                checkedQuote("let __value = _serde::`#`Private::de::Content::Bytes(__value);", "Private" to Private)
             )
         } else {
             Quad(null, null, null, null)
@@ -261,13 +261,13 @@ private fun deserializeIdentifier(
     val fallthroughArm = if (fallthrough != null) {
         fallthrough
     } else if (isVariant) {
-        quote("_serde::`#`Private::Err(_serde::de::Error::unknown_variant(__value, VARIANTS))", "Private" to Private)
+        checkedQuote("_serde::`#`Private::Err(_serde::de::Error::unknown_variant(__value, VARIANTS))", "Private" to Private)
     } else {
-        quote("_serde::`#`Private::Err(_serde::de::Error::unknown_field(__value, FIELDS))", "Private" to Private)
+        checkedQuote("_serde::`#`Private::Err(_serde::de::Error::unknown_field(__value, FIELDS))", "Private" to Private)
     }
 
     val visitOther = if (collectOtherFields) {
-        quote("""
+        checkedQuote("""
             fn visit_bool<__E>(self, __value: bool) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
@@ -363,7 +363,7 @@ private fun deserializeIdentifier(
         val u64Mapping = deserializedFields.mapIndexed { i, field ->
             val index = rustU64Literal(i)
             val ident = field.ident
-            quote(
+            checkedQuote(
                 "`#`i => _serde::`#`Private::Ok(`#`thisValue::`#`ident)",
                 mapOf("i" to index, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
             )
@@ -374,7 +374,7 @@ private fun deserializeIdentifier(
         } else {
             val indexExpecting = if (isVariant) "variant" else "field"
             val fallthroughMsg = "$indexExpecting index 0 <= i < ${deserializedFields.size}"
-            quote("""
+            checkedQuote("""
                 _serde::`#`Private::Err(_serde::de::Error::invalid_value(
                     _serde::de::Unexpected::Unsigned(__value),
                     &`#`fallthroughMsg,
@@ -382,7 +382,7 @@ private fun deserializeIdentifier(
             """, mapOf("Private" to Private, "fallthroughMsg" to fallthroughMsg))
         }
 
-        quote("""
+        checkedQuote("""
             fn visit_u64<__E>(self, __value: u64) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
@@ -401,7 +401,7 @@ private fun deserializeIdentifier(
 
     val visitBorrowed = if (fallthroughBorrowed != null || collectOtherFields) {
         val fallthroughBorrowedArm = fallthroughBorrowed ?: fallthroughArm
-        quote("""
+        checkedQuote("""
             fn visit_borrowed_str<__E>(self, __value: &'de str) -> _serde::`#`Private::Result<Self::Value, __E>
             where
                 __E: _serde::de::Error,
@@ -441,7 +441,7 @@ private fun deserializeIdentifier(
         null
     }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         fn expecting(&self, __formatter: &mut _serde::`#`Private::Formatter) -> _serde::`#`Private::fmt::Result {
             _serde::`#`Private::Formatter::write_str(__formatter, `#`expectingVal)
         }

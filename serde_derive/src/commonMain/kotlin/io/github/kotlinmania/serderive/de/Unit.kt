@@ -1,7 +1,7 @@
 // port-lint: source de/unit.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.serderive.quote
+import io.github.kotlinmania.serderive.checkedQuote
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.AttrContainer
 
@@ -17,7 +17,7 @@ internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragmen
     var expecting = "unit struct ${params.typeName()}"
     expecting = cattrs.expecting() ?: expecting
 
-    val code = quote(
+    val code = checkedQuote(
         """
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {

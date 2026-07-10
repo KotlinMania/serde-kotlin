@@ -3,8 +3,8 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.procmacro2.Ident
-import io.github.kotlinmania.serderive.quote
-import io.github.kotlinmania.serderive.quoteSpanned
+import io.github.kotlinmania.serderive.checkedQuote
+import io.github.kotlinmania.serderive.checkedQuoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Field
@@ -28,7 +28,7 @@ internal fun deserializeEnumUntagged(
     val fallthroughMsg = "data did not match any variant of untagged enum ${params.typeName()}"
     val fallthroughMsgVal = cattrs.expecting() ?: fallthroughMsg
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(checkedQuote("""
         let __content = _serde::de::DeserializeSeed::deserialize(_serde::`#`Private::de::ContentVisitor::new(), __deserializer)?;
         let __deserializer = _serde::`#`Private::de::ContentRefDeserializer::<__D::Error>::new(&__content);
 
@@ -53,7 +53,7 @@ internal fun deserializeVariant(
     val path = variant.attrs.deserializeWith()
     if (path != null) {
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
-        return Fragment.Block(quote("""
+        return Fragment.Block(checkedQuote("""
             _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
         """))
     }
@@ -67,9 +67,9 @@ internal fun deserializeVariant(
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
                 val defaultExpr = Stmts(exprIsMissing(field, cattrs))
-                quote("(`#`defaultExpr)")
-            } ?: quote("")
-            Fragment.Expr(quote("""
+                checkedQuote("(`#`defaultExpr)")
+            } ?: checkedQuote("")
+            Fragment.Expr(checkedQuote("""
                 match _serde::Deserializer::deserialize_any(
                     __deserializer,
                     _serde::`#`Private::de::UntaggedUnitVisitor::new(`#`typeName, `#`variantName)
@@ -107,12 +107,12 @@ internal fun deserializeNewtypeVariant(
     val fieldPath = field.attrs.deserializeWith()
     return if (fieldPath == null) {
         val span = field.original.span()
-        val func = quoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize")
-        Fragment.Expr(quote("""
+        val func = checkedQuoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize")
+        Fragment.Expr(checkedQuote("""
             _serde::`#`Private::Result::map(`#`func(__deserializer), `#`thisValue::`#`variantIdent)
         """))
     } else {
-        Fragment.Block(quote("""
+        Fragment.Block(checkedQuote("""
             let __value: _serde::`#`Private::Result<`#`fieldTy, _> = `#`fieldPath(__deserializer);
             _serde::`#`Private::Result::map(__value, `#`thisValue::`#`variantIdent)
         """))
