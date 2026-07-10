@@ -509,8 +509,8 @@ internal fun deserializeStructInPlace(
     fields: List<Field>,
     cattrs: AttrContainer
 ): Fragment? {
-    // for now we do not support in_place deserialization for structs that
-    // are represented as map.
+    // We do not support in-place deserialization for structs that
+    // are represented as a map.
     if (hasFlatten(fields)) {
         return null
     }
@@ -713,7 +713,7 @@ private fun deserializeMapInPlace(
         .filter { (field, _) -> !field.attrs.skipDeserializing() }
         .map { (field, name) ->
             val missingExpr = exprIsMissing(field, cattrs)
-            // If missing_expr unconditionally returns an error, don't try
+            // If the missing expression unconditionally returns an error, don't try
             // to assign its value to self.place.
             if (field.attrs.default() is Default.None
                 && cattrs.default() is Default.None

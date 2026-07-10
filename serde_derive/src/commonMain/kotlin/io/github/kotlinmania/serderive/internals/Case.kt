@@ -18,15 +18,15 @@ public enum class RenameRule {
     PascalCase,
     // Rename direct children to "camelCase" style.
     CamelCase,
-    // Rename direct children to "snake_case" style, as commonly used for
-    // fields.
+    // Rename direct children to underscore-separated lowercase style, as
+    // commonly used for fields.
     SnakeCase,
-    // Rename direct children to "SCREAMING_SNAKE_CASE" style, as commonly
-    // used for constants.
+    // Rename direct children to underscore-separated uppercase style, as
+    // commonly used for constants.
     ScreamingSnakeCase,
-    // Rename direct children to "kebab-case" style.
+    // Rename direct children to dash-separated lowercase style.
     KebabCase,
-    // Rename direct children to "SCREAMING-KEBAB-CASE" style.
+    // Rename direct children to dash-separated uppercase style.
     ScreamingKebabCase;
 
     public fun applyToVariant(variant: String): String {

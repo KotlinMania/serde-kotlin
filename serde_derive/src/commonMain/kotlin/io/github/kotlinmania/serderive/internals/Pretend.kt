@@ -7,7 +7,7 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.formatIdent
 import io.github.kotlinmania.serderive.checkedQuote
 
-// Suppress dead_code warnings that would otherwise appear when using a remote
+// Suppress unused-code warnings that would otherwise appear when using a remote
 // derive. Other than this pretend code, a struct annotated with remote derive
 // never has its fields referenced and an enum annotated with remote derive
 // never has its variants constructed.
