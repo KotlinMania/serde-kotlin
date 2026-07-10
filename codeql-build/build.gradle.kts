@@ -19,7 +19,7 @@ fun propertyValue(
     default: String,
 ): String = providers.gradleProperty(name).orNull ?: parentProperties.getProperty(name) ?: default
 
-val codeqlKotlinVersion = propertyValue("codeql.kotlin.version", "2.4.0")
+val codeqlKotlinVersion = propertyValue("codeql.kotlin.version", "2.3.21")
 val codeqlLanguageVersion =
     propertyValue(
         "kotlin.languageVersion",
