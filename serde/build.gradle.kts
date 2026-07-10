@@ -1,8 +1,5 @@
-
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
-import org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl
-@file:OptIn(ExperimentalSwiftExportDsl::class)
 
 plugins {
     id("kotlinx-io-multiplatform")
@@ -92,6 +89,7 @@ tasks.named("build") {
 
 kotlin {
     swiftExport {
+        @OptIn(org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl::class)
         moduleName = "Serde"
     }
 }
