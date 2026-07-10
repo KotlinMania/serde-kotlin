@@ -94,6 +94,28 @@ public class ValueTest {
         assertEquals(null, deserializer.nextKeySeed(StringSeed).getOrThrow())
     }
 
+    @Test
+    public fun seqDeserializerSizeHintTracksRemainingCollectionElements() {
+        val deserializer = listOf("first".intoDeserializer(), "second".intoDeserializer()).intoDeserializer()
+
+        assertEquals(2, deserializer.sizeHint())
+        assertEquals("first", deserializer.nextElementSeed(StringSeed).getOrThrow())
+        assertEquals(1, deserializer.sizeHint())
+        assertEquals("second", deserializer.nextElementSeed(StringSeed).getOrThrow())
+        assertEquals(0, deserializer.sizeHint())
+    }
+
+    @Test
+    public fun mapDeserializerSizeHintTracksRemainingMapEntries() {
+        val deserializer = mapOf("key".intoDeserializer() to "value".intoDeserializer()).intoDeserializer()
+
+        assertEquals(1, deserializer.sizeHint())
+        assertEquals("key", deserializer.nextKeySeed(StringSeed).getOrThrow())
+        assertEquals(0, deserializer.sizeHint())
+        assertEquals("value", deserializer.nextValueSeed(StringSeed).getOrThrow())
+        assertEquals(0, deserializer.sizeHint())
+    }
+
 }
 
 private data object StringKindVisitor : Visitor<String> {

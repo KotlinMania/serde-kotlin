@@ -1341,6 +1341,7 @@ class BorrowedBytesDeserializer private constructor(
  */
 class SeqDeserializer<T : IntoDeserializer> internal constructor(
     private val iter: Iterator<T>,
+    private val len: Int? = null,
 ) : Deserializer,
     SeqAccess,
     IntoDeserializer {
@@ -1453,12 +1454,13 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
             }
         }
 
-    override fun sizeHint(): Int? = null
+    override fun sizeHint(): Int? = len?.let { (it - count).coerceAtLeast(0) }
 
     override fun intoDeserializer(): Deserializer = this
 }
 
-fun <T : IntoDeserializer> Iterable<T>.intoDeserializer(): SeqDeserializer<T> = SeqDeserializer(iterator())
+fun <T : IntoDeserializer> Iterable<T>.intoDeserializer(): SeqDeserializer<T> =
+    SeqDeserializer(iterator(), (this as? Collection<*>)?.size)
 
 /**
  * Creates a [SeqDeserializer] from an iterator of values that can be converted
@@ -1582,6 +1584,7 @@ private fun <K, V> split(entry: MapEntry<K, V>): Pair<K, V> = entry.key to entry
  */
 class MapDeserializer<K, V> internal constructor(
     private val iter: Iterator<MapEntry<K, V>>,
+    private val len: Int? = null,
 ) : Deserializer,
     MapAccess,
     SeqAccess,
@@ -1646,7 +1649,7 @@ class MapDeserializer<K, V> internal constructor(
             }
         }
 
-    override fun sizeHint(): Int? = null
+    override fun sizeHint(): Int? = len?.let { (it - count).coerceAtLeast(0) }
 
     override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> =
         serdeCatching {
@@ -1891,7 +1894,7 @@ class MapDeserializer<K, V> internal constructor(
 }
 
 fun <K : IntoDeserializer, V : IntoDeserializer> Map<K, V>.intoDeserializer(): MapDeserializer<K, V> =
-    MapDeserializer(entries.map { MapEntry(it.key, it.value) }.iterator())
+    MapDeserializer(entries.map { MapEntry(it.key, it.value) }.iterator(), size)
 
 /**
  * Creates a [MapDeserializer] from an iterator of entries. Use this instead of
