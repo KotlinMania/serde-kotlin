@@ -78,52 +78,72 @@ sealed class Unexpected {
     /**
      * The input contained a unit `Unit` that was not expected.
      */
-    data object UnitValue : Unexpected()
+    data object UnitValue : Unexpected() {
+        override fun toString(): String = "unit value"
+    }
 
     /**
      * The input contained an optional value that was not expected.
      */
-    data object Option : Unexpected()
+    data object Option : Unexpected() {
+        override fun toString(): String = "Option value"
+    }
 
     /**
      * The input contained a newtype class that was not expected.
      */
-    data object NewtypeStruct : Unexpected()
+    data object NewtypeStruct : Unexpected() {
+        override fun toString(): String = "newtype struct"
+    }
 
     /**
      * The input contained a sequence that was not expected.
      */
-    data object Seq : Unexpected()
+    data object Seq : Unexpected() {
+        override fun toString(): String = "sequence"
+    }
 
     /**
      * The input contained a map that was not expected.
      */
-    data object Map : Unexpected()
+    data object Map : Unexpected() {
+        override fun toString(): String = "map"
+    }
 
     /**
      * The input contained an enum that was not expected.
      */
-    data object Enum : Unexpected()
+    data object Enum : Unexpected() {
+        override fun toString(): String = "enum"
+    }
 
     /**
      * The input contained a unit variant that was not expected.
      */
-    data object UnitVariant : Unexpected()
+    data object UnitVariant : Unexpected() {
+        override fun toString(): String = "unit variant"
+    }
 
     /**
      * The input contained a newtype variant that was not expected.
      */
-    data object NewtypeVariant : Unexpected()
+    data object NewtypeVariant : Unexpected() {
+        override fun toString(): String = "newtype variant"
+    }
 
     /**
      * The input contained a tuple variant that was not expected.
      */
-    data object TupleVariant : Unexpected()
+    data object TupleVariant : Unexpected() {
+        override fun toString(): String = "tuple variant"
+    }
 
     /**
      * The input contained a class variant that was not expected.
      */
-    data object StructVariant : Unexpected()
+    data object StructVariant : Unexpected() {
+        override fun toString(): String = "struct variant"
+    }
 
     /**
      * A message stating what uncategorized thing the input contained that was not expected.
