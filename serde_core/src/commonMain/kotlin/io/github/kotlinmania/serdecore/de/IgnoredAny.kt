@@ -103,7 +103,6 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
         where A : SeqAccess =
         serdeCatching {
             while (access.nextElementSeed(IgnoredAny).getOrThrow() != null) {
-                // Gobble
             }
             IgnoredAny
         }
@@ -112,7 +111,6 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
         where A : MapAccess =
         serdeCatching {
             while (access.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
-                // Gobble
             }
             IgnoredAny
         }

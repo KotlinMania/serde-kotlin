@@ -229,6 +229,21 @@ public class ImplsTest {
     }
 
     @Test
+    public fun ignoredAnyDeserializesStringSequenceAndEnum() {
+        assertEquals(IgnoredAny, IgnoredAny.deserialize(StrDeserializer("s")).getOrThrow())
+        assertEquals(
+            IgnoredAny,
+            IgnoredAny
+                .deserialize(listOf(true.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            IgnoredAny,
+            IgnoredAny.deserialize(IgnoredAnyEnumDeserializer("Rust")).getOrThrow(),
+        )
+    }
+
+    @Test
     public fun vecDeserializesNestedSequences() {
         val deserialize = mutableListDeserialize(mutableListDeserialize(I32Deserialize))
         val deserializer =
@@ -470,6 +485,43 @@ private data object UnitDeserializer : ForwardingDeserializer() {
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeUnit(visitor)
 
     override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = visitor.visitUnit()
+}
+
+private class IgnoredAnyEnumDeserializer(
+    private val variant: String,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
+        visitor.visitEnum(IgnoredAnyEnumAccess(variant))
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+}
+
+private class IgnoredAnyEnumAccess(
+    private val variant: String,
+) : EnumAccess {
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(variant.intoDeserializer()).map { it to IgnoredAnyVariantAccess }
+}
+
+private data object IgnoredAnyVariantAccess : VariantAccess {
+    override fun unitVariant(): SerdeResult<Unit> = SerdeResult.success(Unit)
+
+    override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
+        seed.deserialize(UnitDeserializer)
+
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("tuple variant was not expected"))
+
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("struct variant was not expected"))
 }
 
 private abstract class ForwardingDeserializer : Deserializer {
