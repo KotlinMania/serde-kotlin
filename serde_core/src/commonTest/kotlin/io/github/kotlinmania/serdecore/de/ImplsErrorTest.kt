@@ -7,6 +7,26 @@ import kotlin.test.assertEquals
 
 public class ImplsErrorTest {
     @Test
+    public fun cStringInternalNullReportsUpstreamError() {
+        val error =
+            CStringDeserialize
+                .deserialize(byteArrayOf('a'.code.toByte(), 0, 'b'.code.toByte()).intoDeserializer())
+                .exceptionOrNull()
+
+        assertEquals("nul byte found in provided data at position: 1", error?.message)
+    }
+
+    @Test
+    public fun cStringInternalNullEndReportsUpstreamError() {
+        val error =
+            CStringDeserialize
+                .deserialize(byteArrayOf('a'.code.toByte(), 'b'.code.toByte(), 0).intoDeserializer())
+                .exceptionOrNull()
+
+        assertEquals("nul byte found in provided data at position: 2", error?.message)
+    }
+
+    @Test
     public fun durationOverflowSeqReportsUpstreamError() {
         val error =
             DurationDeserialize

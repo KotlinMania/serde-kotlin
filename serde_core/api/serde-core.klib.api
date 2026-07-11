@@ -1373,6 +1373,30 @@ final class io.github.kotlinmania.serdecore.de.value/ValueError { // io.github.k
     }
 }
 
+final class io.github.kotlinmania.serdecore.de/CStringValue { // io.github.kotlinmania.serdecore.de/CStringValue|null[0]
+    constructor <init>(kotlin/ByteArray) // io.github.kotlinmania.serdecore.de/CStringValue.<init>|<init>(kotlin.ByteArray){}[0]
+
+    final val bytes // io.github.kotlinmania.serdecore.de/CStringValue.bytes|{}bytes[0]
+        final fun <get-bytes>(): kotlin/ByteArray // io.github.kotlinmania.serdecore.de/CStringValue.bytes.<get-bytes>|<get-bytes>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/CStringValue.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/CStringValue.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/CStringValue.toString|toString(){}[0]
+}
+
+final class io.github.kotlinmania.serdecore.de/PathValue { // io.github.kotlinmania.serdecore.de/PathValue|null[0]
+    constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.de/PathValue.<init>|<init>(kotlin.String){}[0]
+
+    final val value // io.github.kotlinmania.serdecore.de/PathValue.value|{}value[0]
+        final fun <get-value>(): kotlin/String // io.github.kotlinmania.serdecore.de/PathValue.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): kotlin/String // io.github.kotlinmania.serdecore.de/PathValue.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): io.github.kotlinmania.serdecore.de/PathValue // io.github.kotlinmania.serdecore.de/PathValue.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/PathValue.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/PathValue.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/PathValue.toString|toString(){}[0]
+}
+
 final class io.github.kotlinmania.serdecore.de/SerdeDeserializationException : kotlin/IllegalStateException { // io.github.kotlinmania.serdecore.de/SerdeDeserializationException|null[0]
     constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.de/SerdeDeserializationException.<init>|<init>(kotlin.String){}[0]
 }
@@ -1730,6 +1754,13 @@ final object io.github.kotlinmania.serdecore.de/BorrowedStrDeserialize : io.gith
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/BorrowedStrDeserialize.toString|toString(){}[0]
 }
 
+final object io.github.kotlinmania.serdecore.de/CStringDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/CStringValue> { // io.github.kotlinmania.serdecore.de/CStringDeserialize|null[0]
+    final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/CStringValue> // io.github.kotlinmania.serdecore.de/CStringDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/CStringDeserialize.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/CStringDeserialize.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/CStringDeserialize.toString|toString(){}[0]
+}
+
 final object io.github.kotlinmania.serdecore.de/CharDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<kotlin/Char> { // io.github.kotlinmania.serdecore.de/CharDeserialize|null[0]
     final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<kotlin/Char> // io.github.kotlinmania.serdecore.de/CharDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/CharDeserialize.equals|equals(kotlin.Any?){}[0]
@@ -1814,6 +1845,20 @@ final object io.github.kotlinmania.serdecore.de/IgnoredAny : io.github.kotlinman
     final fun visitU128(kotlin/String): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/IgnoredAny> // io.github.kotlinmania.serdecore.de/IgnoredAny.visitU128|visitU128(kotlin.String){}[0]
     final fun visitU64(kotlin/ULong): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/IgnoredAny> // io.github.kotlinmania.serdecore.de/IgnoredAny.visitU64|visitU64(kotlin.ULong){}[0]
     final fun visitUnit(): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/IgnoredAny> // io.github.kotlinmania.serdecore.de/IgnoredAny.visitUnit|visitUnit(){}[0]
+}
+
+final object io.github.kotlinmania.serdecore.de/PathBufDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/PathValue> { // io.github.kotlinmania.serdecore.de/PathBufDeserialize|null[0]
+    final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/PathValue> // io.github.kotlinmania.serdecore.de/PathBufDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/PathBufDeserialize.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/PathBufDeserialize.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/PathBufDeserialize.toString|toString(){}[0]
+}
+
+final object io.github.kotlinmania.serdecore.de/PathDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/PathValue> { // io.github.kotlinmania.serdecore.de/PathDeserialize|null[0]
+    final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/PathValue> // io.github.kotlinmania.serdecore.de/PathDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/PathDeserialize.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/PathDeserialize.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/PathDeserialize.toString|toString(){}[0]
 }
 
 final object io.github.kotlinmania.serdecore.de/StringDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<kotlin/String> { // io.github.kotlinmania.serdecore.de/StringDeserialize|null[0]

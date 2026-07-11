@@ -576,6 +576,55 @@ data object BorrowedBytesDeserialize : Deserialize<ByteArray> {
 
 // //////////////////////////////////////////////////////////////////////////////
 
+class CStringValue(
+    val bytes: ByteArray,
+) {
+    override fun equals(other: Any?): Boolean = other is CStringValue && bytes.contentEquals(other.bytes)
+
+    override fun hashCode(): Int = bytes.contentHashCode()
+
+    override fun toString(): String = bytes.decodeToString()
+}
+
+private data object CStringVisitor : Visitor<CStringValue> {
+    override fun expecting(): String = "byte array"
+
+    override fun <A> visitSeq(access: A): SerdeResult<CStringValue>
+        where A : SeqAccess =
+        serdeCatching {
+            val values = mutableListOf<Byte>()
+            while (true) {
+                val value = access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow() ?: break
+                values += value.toByte()
+            }
+            cStringFromBytes(values.toByteArray())
+        }
+
+    override fun visitBytes(v: ByteArray): SerdeResult<CStringValue> = serdeCatching { cStringFromBytes(v) }
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<CStringValue> = visitBytes(v)
+
+    override fun visitStr(v: String): SerdeResult<CStringValue> = serdeCatching { cStringFromBytes(v.encodeToByteArray()) }
+
+    override fun visitString(v: String): SerdeResult<CStringValue> = visitStr(v)
+}
+
+data object CStringDeserialize : Deserialize<CStringValue> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<CStringValue>
+        where D : Deserializer =
+        deserializer.deserializeByteBuf(CStringVisitor)
+}
+
+private fun cStringFromBytes(bytes: ByteArray): CStringValue {
+    val nulIndex = bytes.indexOf(0)
+    if (nulIndex >= 0) {
+        throw SerdeException(SerdeError.custom("nul byte found in provided data at position: $nulIndex"))
+    }
+    return CStringValue(bytes.copyOf())
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
 private class OptionVisitor<T>(
     private val valueDeserialize: Deserialize<T>,
 ) : Visitor<T?> {
@@ -1185,6 +1234,48 @@ private class ResultVisitor<T, E>(
                 else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Ok", "Err")))
             }
         }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+data class PathValue(
+    val value: String,
+)
+
+private data object PathVisitor : Visitor<PathValue> {
+    override fun expecting(): String = "a borrowed path"
+
+    override fun visitBorrowedStr(v: String): SerdeResult<PathValue> = SerdeResult.success(PathValue(v))
+
+    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<PathValue> =
+        serdeCatching { PathValue(v.decodeToString(throwOnInvalidSequence = true)) }
+            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+}
+
+data object PathDeserialize : Deserialize<PathValue> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<PathValue>
+        where D : Deserializer =
+        deserializer.deserializeStr(PathVisitor)
+}
+
+private data object PathBufVisitor : Visitor<PathValue> {
+    override fun expecting(): String = "path string"
+
+    override fun visitStr(v: String): SerdeResult<PathValue> = SerdeResult.success(PathValue(v))
+
+    override fun visitString(v: String): SerdeResult<PathValue> = SerdeResult.success(PathValue(v))
+
+    override fun visitBytes(v: ByteArray): SerdeResult<PathValue> =
+        serdeCatching { PathValue(v.decodeToString(throwOnInvalidSequence = true)) }
+            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<PathValue> = visitBytes(v)
+}
+
+data object PathBufDeserialize : Deserialize<PathValue> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<PathValue>
+        where D : Deserializer =
+        deserializer.deserializeString(PathBufVisitor)
 }
 
 // //////////////////////////////////////////////////////////////////////////////
