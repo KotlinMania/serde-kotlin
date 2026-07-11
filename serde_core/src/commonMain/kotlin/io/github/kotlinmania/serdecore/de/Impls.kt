@@ -636,6 +636,39 @@ fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<
 
 // //////////////////////////////////////////////////////////////////////////////
 
+fun <T> mutableSetDeserialize(elementDeserialize: Deserialize<T>): Deserialize<MutableSet<T>> =
+    object : Deserialize<MutableSet<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<MutableSet<T>>
+            where D : Deserializer =
+            deserializer.deserializeSeq(
+                object : Visitor<MutableSet<T>> {
+                    override fun expecting(): String = "a sequence"
+
+                    override fun <A> visitSeq(access: A): SerdeResult<MutableSet<T>>
+                        where A : SeqAccess =
+                        serdeCatching {
+                            val hint = access.sizeHint() ?: 0
+                            val values = LinkedHashSet<T>(hint)
+                            val seed = SeedFromDeserialize(elementDeserialize)
+                            while (true) {
+                                val next = access.nextElementSeed(seed).getOrThrow() ?: break
+                                values.add(next)
+                            }
+                            values
+                        }
+                },
+            )
+    }
+
+fun <T> setDeserialize(elementDeserialize: Deserialize<T>): Deserialize<Set<T>> =
+    object : Deserialize<Set<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<Set<T>>
+            where D : Deserializer =
+            mutableSetDeserialize(elementDeserialize).deserialize(deserializer)
+    }
+
+// //////////////////////////////////////////////////////////////////////////////
+
 fun <K, V> mutableMapDeserialize(
     keyDeserialize: Deserialize<K>,
     valueDeserialize: Deserialize<V>,
@@ -662,6 +695,16 @@ fun <K, V> mutableMapDeserialize(
                         }
                 },
             )
+    }
+
+fun <K, V> mapDeserialize(
+    keyDeserialize: Deserialize<K>,
+    valueDeserialize: Deserialize<V>,
+): Deserialize<Map<K, V>> =
+    object : Deserialize<Map<K, V>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<Map<K, V>>
+            where D : Deserializer =
+            mutableMapDeserialize(keyDeserialize, valueDeserialize).deserialize(deserializer)
     }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -890,6 +933,59 @@ private class ResultVisitor<T, E>(
                 "Ok" -> ResultValue.Ok(variant.newtypeVariant(SeedFromDeserialize(okDeserialize)).getOrThrow())
                 "Err" -> ResultValue.Err(variant.newtypeVariant(SeedFromDeserialize(errDeserialize)).getOrThrow())
                 else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Ok", "Err")))
+            }
+        }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+sealed class BoundValue<out T> {
+    data object Unbounded : BoundValue<Nothing>()
+
+    data class Included<T>(
+        val value: T,
+    ) : BoundValue<T>()
+
+    data class Excluded<T>(
+        val value: T,
+    ) : BoundValue<T>()
+}
+
+fun <T> boundDeserialize(valueDeserialize: Deserialize<T>): Deserialize<BoundValue<T>> =
+    object : Deserialize<BoundValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<BoundValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeEnum(
+                "Bound",
+                listOf("Unbounded", "Included", "Excluded"),
+                BoundVisitor(valueDeserialize),
+            )
+    }
+
+private class BoundVisitor<T>(
+    private val valueDeserialize: Deserialize<T>,
+) : Visitor<BoundValue<T>> {
+    override fun expecting(): String = "enum Bound"
+
+    override fun <A> visitEnum(access: A): SerdeResult<BoundValue<T>>
+        where A : EnumAccess =
+        serdeCatching {
+            val fieldSeed =
+                SeedFromDeserialize(
+                    fieldIdentifierDeserialize(
+                        expectingMessage = "`Unbounded`, `Included` or `Excluded`",
+                        fields = listOf("Unbounded", "Included", "Excluded"),
+                    ),
+                )
+            val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
+            when (field) {
+                "Unbounded" -> {
+                    variant.unitVariant().getOrThrow()
+                    BoundValue.Unbounded
+                }
+                "Included" -> BoundValue.Included(variant.newtypeVariant(SeedFromDeserialize(valueDeserialize)).getOrThrow())
+                "Excluded" -> BoundValue.Excluded(variant.newtypeVariant(SeedFromDeserialize(valueDeserialize)).getOrThrow())
+                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Unbounded", "Included", "Excluded")))
             }
         }
 }

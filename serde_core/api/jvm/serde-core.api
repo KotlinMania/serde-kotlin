@@ -137,6 +137,38 @@ public final class io/github/kotlinmania/serdecore/de/BorrowedStrDeserialize : i
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract class io/github/kotlinmania/serdecore/de/BoundValue {
+}
+
+public final class io/github/kotlinmania/serdecore/de/BoundValue$Excluded : io/github/kotlinmania/serdecore/de/BoundValue {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/BoundValue$Excluded;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/BoundValue$Excluded;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/BoundValue$Excluded;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/BoundValue$Included : io/github/kotlinmania/serdecore/de/BoundValue {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/BoundValue$Included;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/BoundValue$Included;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/BoundValue$Included;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/BoundValue$Unbounded : io/github/kotlinmania/serdecore/de/BoundValue {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/BoundValue$Unbounded;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/kotlinmania/serdecore/de/CharDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
 	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/CharDeserialize;
 	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -289,11 +321,15 @@ public final class io/github/kotlinmania/serdecore/de/IgnoredAny : io/github/kot
 }
 
 public final class io/github/kotlinmania/serdecore/de/ImplsKt {
+	public static final fun boundDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun mapDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun mutableListDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun mutableMapDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun mutableSetDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun nullableDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun pairDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun resultDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun setDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun tripleDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 }
 
