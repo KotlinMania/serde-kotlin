@@ -1677,6 +1677,34 @@ sealed class io.github.kotlinmania.serdecore.de/IpAddress { // io.github.kotlinm
     }
 }
 
+sealed class io.github.kotlinmania.serdecore.de/OsStringValue { // io.github.kotlinmania.serdecore.de/OsStringValue|null[0]
+    final class Unix : io.github.kotlinmania.serdecore.de/OsStringValue { // io.github.kotlinmania.serdecore.de/OsStringValue.Unix|null[0]
+        constructor <init>(kotlin.collections/List<kotlin/UByte>) // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.<init>|<init>(kotlin.collections.List<kotlin.UByte>){}[0]
+
+        final val bytes // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.bytes|{}bytes[0]
+            final fun <get-bytes>(): kotlin.collections/List<kotlin/UByte> // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.bytes.<get-bytes>|<get-bytes>(){}[0]
+
+        final fun component1(): kotlin.collections/List<kotlin/UByte> // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.component1|component1(){}[0]
+        final fun copy(kotlin.collections/List<kotlin/UByte> = ...): io.github.kotlinmania.serdecore.de/OsStringValue.Unix // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.copy|copy(kotlin.collections.List<kotlin.UByte>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/OsStringValue.Unix.toString|toString(){}[0]
+    }
+
+    final class Windows : io.github.kotlinmania.serdecore.de/OsStringValue { // io.github.kotlinmania.serdecore.de/OsStringValue.Windows|null[0]
+        constructor <init>(kotlin.collections/List<kotlin/UShort>) // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.<init>|<init>(kotlin.collections.List<kotlin.UShort>){}[0]
+
+        final val wide // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.wide|{}wide[0]
+            final fun <get-wide>(): kotlin.collections/List<kotlin/UShort> // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.wide.<get-wide>|<get-wide>(){}[0]
+
+        final fun component1(): kotlin.collections/List<kotlin/UShort> // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.component1|component1(){}[0]
+        final fun copy(kotlin.collections/List<kotlin/UShort> = ...): io.github.kotlinmania.serdecore.de/OsStringValue.Windows // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.copy|copy(kotlin.collections.List<kotlin.UShort>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/OsStringValue.Windows.toString|toString(){}[0]
+    }
+}
+
 sealed class io.github.kotlinmania.serdecore.de/SocketAddress { // io.github.kotlinmania.serdecore.de/SocketAddress|null[0]
     final class V4 : io.github.kotlinmania.serdecore.de/SocketAddress { // io.github.kotlinmania.serdecore.de/SocketAddress.V4|null[0]
         constructor <init>(io.github.kotlinmania.serdecore.de/SocketAddressV4) // io.github.kotlinmania.serdecore.de/SocketAddress.V4.<init>|<init>(io.github.kotlinmania.serdecore.de.SocketAddressV4){}[0]
@@ -2013,6 +2041,13 @@ final object io.github.kotlinmania.serdecore.de/Ipv6AddressDeserialize : io.gith
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Ipv6AddressDeserialize.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Ipv6AddressDeserialize.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Ipv6AddressDeserialize.toString|toString(){}[0]
+}
+
+final object io.github.kotlinmania.serdecore.de/OsStringDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/OsStringValue> { // io.github.kotlinmania.serdecore.de/OsStringDeserialize|null[0]
+    final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/OsStringValue> // io.github.kotlinmania.serdecore.de/OsStringDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/OsStringDeserialize.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/OsStringDeserialize.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/OsStringDeserialize.toString|toString(){}[0]
 }
 
 final object io.github.kotlinmania.serdecore.de/PathBufDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/PathValue> { // io.github.kotlinmania.serdecore.de/PathBufDeserialize|null[0]
