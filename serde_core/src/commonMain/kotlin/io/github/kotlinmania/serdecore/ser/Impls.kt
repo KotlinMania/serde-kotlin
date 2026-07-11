@@ -86,6 +86,11 @@ data object PhantomData : Serialize {
 
 // //////////////////////////////////////////////////////////////////////////////
 
+internal fun <Ok> serializeEmptyArray(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serdeCatching {
+        serializer.serializeTuple(0).getOrThrow().end().getOrThrow()
+    }
+
 fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
     where T : Serialize =
     serdeCatching {
