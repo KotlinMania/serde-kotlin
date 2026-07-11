@@ -3,6 +3,7 @@ package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serdecore.de.value.I32Deserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -87,6 +88,101 @@ public class ImplsTest {
             deserialize.deserialize(ResultEnumDeserializer("Err", 1)).getOrThrow(),
         )
     }
+
+    @Test
+    public fun boundDeserializesUnitAndNewtypeVariants() {
+        assertEquals(
+            BoundValue.Unbounded,
+            boundDeserialize(UnitDeserialize).deserialize(BoundEnumDeserializer("Unbounded", null)).getOrThrow(),
+        )
+        assertEquals(
+            BoundValue.Included(0.toUByte()),
+            boundDeserialize(U8Deserialize)
+                .deserialize(BoundEnumDeserializer("Included", 0.toUByte().intoDeserializer()))
+                .getOrThrow(),
+        )
+        assertEquals(
+            BoundValue.Excluded(0.toUByte()),
+            boundDeserialize(U8Deserialize)
+                .deserialize(BoundEnumDeserializer("Excluded", 0.toUByte().intoDeserializer()))
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun vecDeserializesNestedSequences() {
+        val deserialize = mutableListDeserialize(mutableListDeserialize(I32Deserialize))
+        val deserializer =
+            listOf(
+                emptyList<I32Deserializer>().intoDeserializer(),
+                listOf(1.intoDeserializer()).intoDeserializer(),
+                listOf(2.intoDeserializer(), 3.intoDeserializer()).intoDeserializer(),
+            ).intoDeserializer()
+
+        assertEquals(
+            mutableListOf(
+                mutableListOf(),
+                mutableListOf(1),
+                mutableListOf(2, 3),
+            ),
+            deserialize.deserialize(deserializer).getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun setDeserializesSequenceAndDeduplicatesInEncounterOrder() {
+        val deserialize = mutableSetDeserialize(I32Deserialize)
+        val deserializer =
+            listOf(
+                2.intoDeserializer(),
+                1.intoDeserializer(),
+                2.intoDeserializer(),
+            ).intoDeserializer()
+
+        assertEquals(linkedSetOf(2, 1), deserialize.deserialize(deserializer).getOrThrow())
+    }
+
+    @Test
+    public fun setDeserializesNestedSequences() {
+        val deserialize = mutableSetDeserialize(mutableSetDeserialize(I32Deserialize))
+        val deserializer =
+            listOf(
+                emptyList<I32Deserializer>().intoDeserializer(),
+                listOf(1.intoDeserializer()).intoDeserializer(),
+                listOf(2.intoDeserializer(), 3.intoDeserializer()).intoDeserializer(),
+            ).intoDeserializer()
+
+        assertEquals(
+            linkedSetOf(
+                linkedSetOf(),
+                linkedSetOf(1),
+                linkedSetOf(2, 3),
+            ),
+            deserialize.deserialize(deserializer).getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun mapDeserializesNestedMaps() {
+        val deserialize = mutableMapDeserialize(I32Deserialize, mutableMapDeserialize(I32Deserialize, I32Deserialize))
+        val deserializer =
+            mapOf(
+                1.intoDeserializer() to emptyMap<I32Deserializer, I32Deserializer>().intoDeserializer(),
+                2.intoDeserializer() to
+                    mapOf(
+                        3.intoDeserializer() to 4.intoDeserializer(),
+                        5.intoDeserializer() to 6.intoDeserializer(),
+                    ).intoDeserializer(),
+            ).intoDeserializer()
+
+        assertEquals(
+            linkedMapOf(
+                1 to linkedMapOf(),
+                2 to linkedMapOf(3 to 4, 5 to 6),
+            ),
+            deserialize.deserialize(deserializer).getOrThrow(),
+        )
+    }
 }
 
 private sealed class OptionMode {
@@ -144,6 +240,53 @@ private class ResultVariantAccess(
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
         seed.deserialize(IntDeserializer(value))
+
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("tuple variant was not expected"))
+
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("struct variant was not expected"))
+}
+
+private class BoundEnumDeserializer(
+    private val variant: String,
+    private val value: Deserializer?,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeEnum("Bound", listOf("Unbounded", "Included", "Excluded"), visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(BoundEnumAccess(variant, value))
+}
+
+private class BoundEnumAccess(
+    private val variant: String,
+    private val value: Deserializer?,
+) : EnumAccess {
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(variant.intoDeserializer()).map { it to BoundVariantAccess(value) }
+}
+
+private class BoundVariantAccess(
+    private val value: Deserializer?,
+) : VariantAccess {
+    override fun unitVariant(): SerdeResult<Unit> =
+        if (value == null) {
+            SerdeResult.success(Unit)
+        } else {
+            SerdeResult.failure(SerdeError.custom("unit variant was not expected"))
+        }
+
+    override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> {
+        val deserializer = value ?: return SerdeResult.failure(SerdeError.custom("newtype variant was not expected"))
+        return seed.deserialize(deserializer)
+    }
 
     override fun <V> tupleVariant(
         len: Int,
