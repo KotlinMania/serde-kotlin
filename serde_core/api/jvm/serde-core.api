@@ -2064,6 +2064,11 @@ public final class io/github/kotlinmania/serdecore/ser/ImplsKt {
 	public static final fun serialize (FLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (ILio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (JLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/BoundValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeFromValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeInclusiveValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeToValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Lio/github/kotlinmania/serdecore/ser/Serialize;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Ljava/lang/Iterable;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
