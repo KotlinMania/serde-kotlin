@@ -110,6 +110,78 @@ public class ImplsTest {
     }
 
     @Test
+    public fun rangeDeserializesFromStructAndSequence() {
+        assertEquals(
+            RangeValue(1u, 2u),
+            rangeDeserialize(U32Deserialize)
+                .deserialize(
+                    mapOf(
+                        "start".intoDeserializer() to 1u.intoDeserializer(),
+                        "end".intoDeserializer() to 2u.intoDeserializer(),
+                    ).intoDeserializer(),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            RangeValue(1u, 2u),
+            rangeDeserialize(U32Deserialize)
+                .deserialize(listOf(1UL.intoDeserializer(), 2UL.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun rangeInclusiveDeserializesFromStructAndSequence() {
+        assertEquals(
+            RangeInclusiveValue(1u, 2u),
+            rangeInclusiveDeserialize(U32Deserialize)
+                .deserialize(
+                    mapOf(
+                        "start".intoDeserializer() to 1u.intoDeserializer(),
+                        "end".intoDeserializer() to 2u.intoDeserializer(),
+                    ).intoDeserializer(),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            RangeInclusiveValue(1u, 2u),
+            rangeInclusiveDeserialize(U32Deserialize)
+                .deserialize(listOf(1UL.intoDeserializer(), 2UL.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun rangeFromDeserializesFromStructAndSequence() {
+        assertEquals(
+            RangeFromValue(1u),
+            rangeFromDeserialize(U32Deserialize)
+                .deserialize(mapOf("start".intoDeserializer() to 1u.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            RangeFromValue(1u),
+            rangeFromDeserialize(U32Deserialize)
+                .deserialize(listOf(1u.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun rangeToDeserializesFromStructAndSequence() {
+        assertEquals(
+            RangeToValue(2u),
+            rangeToDeserialize(U32Deserialize)
+                .deserialize(mapOf("end".intoDeserializer() to 2u.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            RangeToValue(2u),
+            rangeToDeserialize(U32Deserialize)
+                .deserialize(listOf(2u.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
     public fun vecDeserializesNestedSequences() {
         val deserialize = mutableListDeserialize(mutableListDeserialize(I32Deserialize))
         val deserializer =

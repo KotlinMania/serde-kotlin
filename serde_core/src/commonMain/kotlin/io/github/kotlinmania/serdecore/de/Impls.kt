@@ -769,6 +769,219 @@ fun <T0, T1, T2> tripleDeserialize(
 
 // //////////////////////////////////////////////////////////////////////////////
 
+data class RangeValue<T>(
+    val start: T,
+    val end: T,
+)
+
+data class RangeInclusiveValue<T>(
+    val start: T,
+    val end: T,
+)
+
+data class RangeFromValue<T>(
+    val start: T,
+)
+
+data class RangeToValue<T>(
+    val end: T,
+)
+
+fun <T> rangeDeserialize(valueDeserialize: Deserialize<T>): Deserialize<RangeValue<T>> =
+    object : Deserialize<RangeValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<RangeValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeStruct(
+                "Range",
+                listOf("start", "end"),
+                RangeVisitor("struct Range", valueDeserialize) { start, end -> RangeValue(start, end) },
+            )
+    }
+
+fun <T> rangeInclusiveDeserialize(valueDeserialize: Deserialize<T>): Deserialize<RangeInclusiveValue<T>> =
+    object : Deserialize<RangeInclusiveValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<RangeInclusiveValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeStruct(
+                "RangeInclusive",
+                listOf("start", "end"),
+                RangeVisitor("struct RangeInclusive", valueDeserialize) { start, end -> RangeInclusiveValue(start, end) },
+            )
+    }
+
+fun <T> rangeFromDeserialize(valueDeserialize: Deserialize<T>): Deserialize<RangeFromValue<T>> =
+    object : Deserialize<RangeFromValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<RangeFromValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeStruct(
+                "RangeFrom",
+                listOf("start"),
+                RangeFromVisitor("struct RangeFrom", valueDeserialize),
+            )
+    }
+
+fun <T> rangeToDeserialize(valueDeserialize: Deserialize<T>): Deserialize<RangeToValue<T>> =
+    object : Deserialize<RangeToValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<RangeToValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeStruct(
+                "RangeTo",
+                listOf("end"),
+                RangeToVisitor("struct RangeTo", valueDeserialize),
+            )
+    }
+
+private class RangeVisitor<T, R>(
+    private val expecting: String,
+    private val valueDeserialize: Deserialize<T>,
+    private val build: (T, T) -> R,
+) : Visitor<R> {
+    private data class Slot<T>(
+        val value: T,
+    )
+
+    override fun expecting(): String = expecting
+
+    override fun <A> visitSeq(access: A): SerdeResult<R>
+        where A : SeqAccess =
+        serdeCatching {
+            val seed = SeedFromDeserialize(valueDeserialize)
+            val start =
+                access.nextElementSeed(seed).getOrThrow()
+                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+            val end =
+                access.nextElementSeed(seed).getOrThrow()
+                    ?: throw SerdeException(SerdeError.invalidLength(1, this))
+            build(start, end)
+        }
+
+    override fun <A> visitMap(access: A): SerdeResult<R>
+        where A : MapAccess =
+        serdeCatching {
+            var start: Slot<T>? = null
+            var end: Slot<T>? = null
+            val fieldSeed =
+                SeedFromDeserialize(
+                    fieldIdentifierDeserialize(
+                        expectingMessage = "`start` or `end`",
+                        fields = listOf("start", "end"),
+                    ),
+                )
+            val valueSeed = SeedFromDeserialize(valueDeserialize)
+            while (true) {
+                val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                when (key) {
+                    "start" -> {
+                        if (start != null) throw SerdeException(SerdeError.duplicateField("start"))
+                        start = Slot(access.nextValueSeed(valueSeed).getOrThrow())
+                    }
+                    "end" -> {
+                        if (end != null) throw SerdeException(SerdeError.duplicateField("end"))
+                        end = Slot(access.nextValueSeed(valueSeed).getOrThrow())
+                    }
+                    else -> throw SerdeException(SerdeError.unknownField(key, listOf("start", "end")))
+                }
+            }
+            val startValue = start ?: throw SerdeException(SerdeError.missingField("start"))
+            val endValue = end ?: throw SerdeException(SerdeError.missingField("end"))
+            build(startValue.value, endValue.value)
+        }
+}
+
+private class RangeFromVisitor<T>(
+    private val expecting: String,
+    private val valueDeserialize: Deserialize<T>,
+) : Visitor<RangeFromValue<T>> {
+    private data class Slot<T>(
+        val value: T,
+    )
+
+    override fun expecting(): String = expecting
+
+    override fun <A> visitSeq(access: A): SerdeResult<RangeFromValue<T>>
+        where A : SeqAccess =
+        serdeCatching {
+            val start =
+                access.nextElementSeed(SeedFromDeserialize(valueDeserialize)).getOrThrow()
+                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+            RangeFromValue(start)
+        }
+
+    override fun <A> visitMap(access: A): SerdeResult<RangeFromValue<T>>
+        where A : MapAccess =
+        serdeCatching {
+            var start: Slot<T>? = null
+            val fieldSeed =
+                SeedFromDeserialize(
+                    fieldIdentifierDeserialize(
+                        expectingMessage = "`start`",
+                        fields = listOf("start"),
+                    ),
+                )
+            val valueSeed = SeedFromDeserialize(valueDeserialize)
+            while (true) {
+                val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                when (key) {
+                    "start" -> {
+                        if (start != null) throw SerdeException(SerdeError.duplicateField("start"))
+                        start = Slot(access.nextValueSeed(valueSeed).getOrThrow())
+                    }
+                    else -> throw SerdeException(SerdeError.unknownField(key, listOf("start")))
+                }
+            }
+            val startValue = start ?: throw SerdeException(SerdeError.missingField("start"))
+            RangeFromValue(startValue.value)
+        }
+}
+
+private class RangeToVisitor<T>(
+    private val expecting: String,
+    private val valueDeserialize: Deserialize<T>,
+) : Visitor<RangeToValue<T>> {
+    private data class Slot<T>(
+        val value: T,
+    )
+
+    override fun expecting(): String = expecting
+
+    override fun <A> visitSeq(access: A): SerdeResult<RangeToValue<T>>
+        where A : SeqAccess =
+        serdeCatching {
+            val end =
+                access.nextElementSeed(SeedFromDeserialize(valueDeserialize)).getOrThrow()
+                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+            RangeToValue(end)
+        }
+
+    override fun <A> visitMap(access: A): SerdeResult<RangeToValue<T>>
+        where A : MapAccess =
+        serdeCatching {
+            var end: Slot<T>? = null
+            val fieldSeed =
+                SeedFromDeserialize(
+                    fieldIdentifierDeserialize(
+                        expectingMessage = "`end`",
+                        fields = listOf("end"),
+                    ),
+                )
+            val valueSeed = SeedFromDeserialize(valueDeserialize)
+            while (true) {
+                val key = access.nextKeySeed(fieldSeed).getOrThrow() ?: break
+                when (key) {
+                    "end" -> {
+                        if (end != null) throw SerdeException(SerdeError.duplicateField("end"))
+                        end = Slot(access.nextValueSeed(valueSeed).getOrThrow())
+                    }
+                    else -> throw SerdeException(SerdeError.unknownField(key, listOf("end")))
+                }
+            }
+            val endValue = end ?: throw SerdeException(SerdeError.missingField("end"))
+            RangeToValue(endValue.value)
+        }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
 data object DurationDeserialize : Deserialize<Duration> {
     override fun <D> deserialize(deserializer: D): SerdeResult<Duration>
         where D : Deserializer =
