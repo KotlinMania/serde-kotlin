@@ -1,9 +1,14 @@
-// port-lint: tests ser/impls.rs
+// port-lint: tests test_suite/tests/test_ser.rs
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.de.BoundValue
+import io.github.kotlinmania.serdecore.de.RangeFromValue
+import io.github.kotlinmania.serdecore.de.RangeInclusiveValue
+import io.github.kotlinmania.serdecore.de.RangeToValue
+import io.github.kotlinmania.serdecore.de.RangeValue
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -79,6 +84,53 @@ public class ImplsTest {
             ).serialize(TupleRecordingSerializer()).getOrThrow()
 
         assertEquals("Tuple2(a,b)", serialized)
+    }
+
+    @Test
+    public fun rangesSerializeAsStructs() {
+        assertEquals(
+            "Range(start=a,end=b)",
+            RangeValue(ImplsLiteralSerialize("a"), ImplsLiteralSerialize("b"))
+                .serialize(StructRecordingSerializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            "RangeFrom(start=a)",
+            RangeFromValue(ImplsLiteralSerialize("a"))
+                .serialize(StructRecordingSerializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            "RangeInclusive(start=a,end=b)",
+            RangeInclusiveValue(ImplsLiteralSerialize("a"), ImplsLiteralSerialize("b"))
+                .serialize(StructRecordingSerializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            "RangeTo(end=b)",
+            RangeToValue(ImplsLiteralSerialize("b"))
+                .serialize(StructRecordingSerializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun boundSerializesAsEnumVariants() {
+        val unbounded: BoundValue<ImplsUByteSerialize> = BoundValue.Unbounded
+
+        assertEquals("Bound#0:Unbounded", unbounded.serialize(VariantRecordingSerializer()).getOrThrow())
+        assertEquals(
+            "Bound#1:Included(0)",
+            BoundValue.Included(ImplsUByteSerialize(0u))
+                .serialize(VariantRecordingSerializer())
+                .getOrThrow(),
+        )
+        assertEquals(
+            "Bound#2:Excluded(0)",
+            BoundValue.Excluded(ImplsUByteSerialize(0u))
+                .serialize(VariantRecordingSerializer())
+                .getOrThrow(),
+        )
     }
 }
 
@@ -184,8 +236,29 @@ private class StructRecordingSerializer : FailingSerializer() {
     ): SerdeResult<SerializeStruct<String>> = SerdeResult.success(RecordingStruct(name, len))
 }
 
+private class VariantRecordingSerializer : FailingSerializer() {
+    override fun serializeUnitVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+    ): SerdeResult<String> = SerdeResult.success("$name#$variantIndex:$variant")
+
+    override fun <T> serializeNewtypeVariant(
+        name: String,
+        variantIndex: UInt,
+        variant: String,
+        value: T,
+    ): SerdeResult<String>
+        where T : Serialize =
+        serdeCatching {
+            "$name#$variantIndex:$variant(${value.serialize(FieldRecordingSerializer()).getOrThrow()})"
+        }
+}
+
 internal class FieldRecordingSerializer : FailingSerializer() {
     override fun serializeStr(v: String): SerdeResult<String> = SerdeResult.success(v)
+
+    override fun serializeU8(v: UByte): SerdeResult<String> = SerdeResult.success(v.toString())
 
     override fun serializeU32(v: UInt): SerdeResult<String> = SerdeResult.success(v.toString())
 
@@ -247,4 +320,11 @@ private data class ImplsLiteralSerialize(
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
         = serializer.serializeStr(text)
+}
+
+private data class ImplsUByteSerialize(
+    private val value: UByte,
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+        = serializer.serializeU8(value)
 }

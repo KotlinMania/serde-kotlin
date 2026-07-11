@@ -6,6 +6,11 @@ import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.de.BoundValue
+import io.github.kotlinmania.serdecore.de.RangeFromValue
+import io.github.kotlinmania.serdecore.de.RangeInclusiveValue
+import io.github.kotlinmania.serdecore.de.RangeToValue
+import io.github.kotlinmania.serdecore.de.RangeValue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -113,6 +118,50 @@ fun <Ok, K, V> Map<K, V>.serialize(
     where K : Serialize,
           V : Serialize =
     serializer.collectMap(this.entries.asIterable().map { it.key to it.value })
+
+// //////////////////////////////////////////////////////////////////////////////
+
+fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+    where T : Serialize =
+    serdeCatching {
+        val state = serializer.serializeStruct("Range", 2).getOrThrow()
+        state.serializeField("start", start).getOrThrow()
+        state.serializeField("end", end).getOrThrow()
+        state.end().getOrThrow()
+    }
+
+fun <Ok, T> RangeFromValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+    where T : Serialize =
+    serdeCatching {
+        val state = serializer.serializeStruct("RangeFrom", 1).getOrThrow()
+        state.serializeField("start", start).getOrThrow()
+        state.end().getOrThrow()
+    }
+
+fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+    where T : Serialize =
+    serdeCatching {
+        val state = serializer.serializeStruct("RangeInclusive", 2).getOrThrow()
+        state.serializeField("start", start).getOrThrow()
+        state.serializeField("end", end).getOrThrow()
+        state.end().getOrThrow()
+    }
+
+fun <Ok, T> RangeToValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+    where T : Serialize =
+    serdeCatching {
+        val state = serializer.serializeStruct("RangeTo", 1).getOrThrow()
+        state.serializeField("end", end).getOrThrow()
+        state.end().getOrThrow()
+    }
+
+fun <Ok, T> BoundValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+    where T : Serialize =
+    when (this) {
+        BoundValue.Unbounded -> serializer.serializeUnitVariant("Bound", 0u, "Unbounded")
+        is BoundValue.Included -> serializer.serializeNewtypeVariant("Bound", 1u, "Included", value)
+        is BoundValue.Excluded -> serializer.serializeNewtypeVariant("Bound", 2u, "Excluded", value)
+    }
 
 // //////////////////////////////////////////////////////////////////////////////
 
