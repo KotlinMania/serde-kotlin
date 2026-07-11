@@ -146,6 +146,26 @@ public class ImplsTest {
     }
 
     @Test
+    public fun boxedPathDeserializesStringAndBytes() {
+        assertEquals(
+            BoxedPathValue(PathValue("/usr/local/lib")),
+            BoxedPathDeserialize.deserialize(StrDeserializer("/usr/local/lib")).getOrThrow(),
+        )
+        assertEquals(
+            BoxedPathValue(PathValue("/usr/local/lib")),
+            BoxedPathDeserialize.deserialize(StringDeserializer("/usr/local/lib")).getOrThrow(),
+        )
+        assertEquals(
+            BoxedPathValue(PathValue("/usr/local/lib")),
+            BoxedPathDeserialize.deserialize("/usr/local/lib".encodeToByteArray().intoDeserializer()).getOrThrow(),
+        )
+        assertEquals(
+            BoxedPathValue(PathValue("/usr/local/lib")),
+            BoxedPathDeserialize.deserialize(BytesDeserializer("/usr/local/lib".encodeToByteArray())).getOrThrow(),
+        )
+    }
+
+    @Test
     public fun cStringDeserializesBytesStringAndSequence() {
         assertContentEquals(
             "abc".encodeToByteArray(),

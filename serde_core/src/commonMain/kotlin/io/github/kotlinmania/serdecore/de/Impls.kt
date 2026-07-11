@@ -1278,6 +1278,16 @@ data object PathBufDeserialize : Deserialize<PathValue> {
         deserializer.deserializeString(PathBufVisitor)
 }
 
+data class BoxedPathValue(
+    val path: PathValue,
+)
+
+data object BoxedPathDeserialize : Deserialize<BoxedPathValue> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<BoxedPathValue>
+        where D : Deserializer =
+        PathBufDeserialize.deserialize(deserializer).map(::BoxedPathValue)
+}
+
 // //////////////////////////////////////////////////////////////////////////////
 
 sealed class BoundValue<out T> {
