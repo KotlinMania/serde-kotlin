@@ -328,6 +328,10 @@ public final class io/github/kotlinmania/serdecore/de/ImplsKt {
 	public static final fun mutableSetDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun nullableDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun pairDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun rangeDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun rangeFromDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun rangeInclusiveDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
+	public static final fun rangeToDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun resultDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun setDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
 	public static final fun tripleDeserialize (Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serdecore/de/Deserialize;
@@ -345,6 +349,54 @@ public abstract interface class io/github/kotlinmania/serdecore/de/MapAccess {
 	public fun nextValue (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/RangeFromValue {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeFromValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/RangeFromValue;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeFromValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStart ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/RangeInclusiveValue {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeInclusiveValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/RangeInclusiveValue;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeInclusiveValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()Ljava/lang/Object;
+	public final fun getStart ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/RangeToValue {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeToValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/RangeToValue;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeToValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/RangeValue {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/RangeValue;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/RangeValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()Ljava/lang/Object;
+	public final fun getStart ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract class io/github/kotlinmania/serdecore/de/ResultValue {
