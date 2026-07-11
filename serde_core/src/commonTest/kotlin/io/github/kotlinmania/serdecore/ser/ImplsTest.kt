@@ -54,6 +54,11 @@ public class ImplsTest {
     }
 
     @Test
+    public fun emptyArraySerializesAsZeroTupleWithoutElementSerializer() {
+        assertEquals("Tuple0()", serializeEmptyArray(TupleRecordingSerializer()).getOrThrow())
+    }
+
+    @Test
     public fun wrappersSerializeTheirValues() {
         assertEquals("wrapped", formatSerialize(Wrapping(ImplsLiteralSerialize("wrapped"))))
         assertEquals("saturating", formatSerialize(Saturating(ImplsLiteralSerialize("saturating"))))
