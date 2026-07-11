@@ -18,6 +18,13 @@ public class ImplsTest {
     }
 
     @Test
+    public fun charDeserializesFromCharStrAndString() {
+        assertEquals('a', CharDeserialize.deserialize(CharDeserializer('a')).getOrThrow())
+        assertEquals('a', CharDeserialize.deserialize(StrDeserializer("a")).getOrThrow())
+        assertEquals('a', CharDeserialize.deserialize(StringDeserializer("a")).getOrThrow())
+    }
+
+    @Test
     public fun stringDeserializeInPlaceUsesStringVisitor() {
         var place = "overwritten"
 
