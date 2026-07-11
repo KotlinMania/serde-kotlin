@@ -414,6 +414,58 @@ public class ImplsTest {
     }
 
     @Test
+    public fun fixedArrayDeserializesEmptyNestedAndTupleStructForms() {
+        assertEquals(
+            ArrayValue<Int>(emptyList()),
+            emptyArrayDeserialize<Int>().deserialize(emptyList<I32Deserializer>().intoDeserializer()).getOrThrow(),
+        )
+        assertEquals(
+            ArrayValue<Int>(emptyList()),
+            emptyArrayDeserialize<Int>().deserialize(compactEmptyTuple()).getOrThrow(),
+        )
+
+        val deserialize =
+            tripleDeserialize(
+                emptyArrayDeserialize<Int>(),
+                arrayDeserialize(1, I32Deserialize),
+                arrayDeserialize(2, I32Deserialize),
+            )
+        val expected =
+            Triple(
+                ArrayValue<Int>(emptyList()),
+                ArrayValue(listOf(1)),
+                ArrayValue(listOf(2, 3)),
+            )
+
+        assertEquals(
+            expected,
+            deserialize
+                .deserialize(
+                    listOf(
+                        emptyList<I32Deserializer>().intoDeserializer(),
+                        listOf(1.intoDeserializer()).intoDeserializer(),
+                        listOf(2.intoDeserializer(), 3.intoDeserializer()).intoDeserializer(),
+                    ).intoDeserializer(),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            expected,
+            deserialize
+                .deserialize(
+                    compactTuple(
+                        compactEmptyTuple(),
+                        compactTuple(IntDeserializer(1)),
+                        compactTuple(IntDeserializer(2), IntDeserializer(3)),
+                    ),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            ArrayValue<Int>(emptyList()),
+            emptyArrayDeserialize<Int>().deserialize(EmptyTupleStructDeserializer).getOrThrow(),
+        )
+    }
+
+    @Test
     public fun setDeserializesSequenceAndDeduplicatesInEncounterOrder() {
         val deserialize = mutableSetDeserialize(I32Deserialize)
         val deserializer =
@@ -653,6 +705,16 @@ private data object UnitDeserializer : ForwardingDeserializer() {
     override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = visitor.visitUnit()
 }
 
+private data object EmptyTupleStructDeserializer : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeTupleStruct("Anything", 0, visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitSeq(CompactSeqAccess(emptyList()))
+}
+
 private fun octets(vararg values: Int): List<UByte> = values.map { it.toUByte() }
 
 private fun octets(value: String): List<UByte> = value.encodeToByteArray().map { it.toInt().toUByte() }
@@ -662,6 +724,8 @@ private fun compactTuple(vararg values: Int): Deserializer =
 
 private fun compactTuple(value: String): Deserializer =
     compactTuple(*value.encodeToByteArray().map { UByteDeserializer(it.toInt().toUByte()) }.toTypedArray())
+
+private fun compactEmptyTuple(): Deserializer = compactTuple(*emptyArray<Deserializer>())
 
 private fun compactTuple(vararg values: Deserializer): Deserializer = CompactTupleDeserializer(values.toList())
 

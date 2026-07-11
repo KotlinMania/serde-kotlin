@@ -758,6 +758,68 @@ fun <K, V> mapDeserialize(
 
 // //////////////////////////////////////////////////////////////////////////////
 
+data class ArrayValue<T>(
+    val elements: List<T>,
+)
+
+private class ArrayVisitor<T>(
+    private val len: Int,
+    private val elementDeserialize: Deserialize<T>?,
+) : Visitor<ArrayValue<T>> {
+    override fun expecting(): String =
+        if (len == 0) {
+            "an empty array"
+        } else {
+            "an array of length $len"
+        }
+
+    override fun <A> visitSeq(access: A): SerdeResult<ArrayValue<T>>
+        where A : SeqAccess =
+        serdeCatching {
+            if (len == 0) return@serdeCatching ArrayValue(emptyList())
+
+            val deserialize =
+                elementDeserialize
+                    ?: throw SerdeException(SerdeError.custom("array element deserializer is required"))
+            val seed = SeedFromDeserialize(deserialize)
+            val values = ArrayList<T>(len)
+            repeat(len) { index ->
+                values +=
+                    access.nextElementSeed(seed).getOrThrow()
+                        ?: throw SerdeException(SerdeError.invalidLength(index, this))
+            }
+            ArrayValue(values)
+        }
+}
+
+fun <T> emptyArrayDeserialize(): Deserialize<ArrayValue<T>> =
+    object : Deserialize<ArrayValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<ArrayValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeTuple(0, ArrayVisitor(0, null))
+    }
+
+fun <T> arrayDeserialize(
+    len: Int,
+    elementDeserialize: Deserialize<T>,
+): Deserialize<ArrayValue<T>> =
+    object : Deserialize<ArrayValue<T>> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<ArrayValue<T>>
+            where D : Deserializer =
+            deserializer.deserializeTuple(len, ArrayVisitor(len, elementDeserialize))
+
+        override fun <D> deserializeInPlace(
+            deserializer: D,
+            place: (ArrayValue<T>) -> Unit,
+        ): SerdeResult<Unit>
+            where D : Deserializer =
+            deserialize(deserializer).map { value ->
+                place(value)
+            }
+    }
+
+// //////////////////////////////////////////////////////////////////////////////
+
 fun <T0, T1> pairDeserialize(
     firstDeserialize: Deserialize<T0>,
     secondDeserialize: Deserialize<T1>,
