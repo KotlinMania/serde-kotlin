@@ -5,6 +5,9 @@ import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serdecore.de.value.I32Deserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -177,6 +180,50 @@ public class ImplsTest {
             RangeToValue(2u),
             rangeToDeserialize(U32Deserialize)
                 .deserialize(listOf(2u.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun durationDeserializesFromStructAndSequence() {
+        val expected = 1.seconds + 2.nanoseconds
+
+        assertEquals(
+            expected,
+            DurationDeserialize
+                .deserialize(
+                    mapOf(
+                        "secs".intoDeserializer() to 1UL.intoDeserializer(),
+                        "nanos".intoDeserializer() to 2u.intoDeserializer(),
+                    ).intoDeserializer(),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            expected,
+            DurationDeserialize
+                .deserialize(listOf(1L.intoDeserializer(), 2L.intoDeserializer()).intoDeserializer())
+                .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun systemTimeDeserializesFromStructAndSequence() {
+        val expected = Instant.fromEpochSeconds(1, 2)
+
+        assertEquals(
+            expected,
+            SystemTimeDeserialize
+                .deserialize(
+                    mapOf(
+                        "secs_since_epoch".intoDeserializer() to 1UL.intoDeserializer(),
+                        "nanos_since_epoch".intoDeserializer() to 2u.intoDeserializer(),
+                    ).intoDeserializer(),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            expected,
+            SystemTimeDeserialize
+                .deserialize(listOf(1L.intoDeserializer(), 2L.intoDeserializer()).intoDeserializer())
                 .getOrThrow(),
         )
     }

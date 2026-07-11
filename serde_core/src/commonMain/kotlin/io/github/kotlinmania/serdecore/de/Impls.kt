@@ -1000,7 +1000,7 @@ data object DurationDeserialize : Deserialize<Duration> {
                         val nanos =
                             access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 ?: throw SerdeException(SerdeError.invalidLength(1, this))
-                        secs.toLong().seconds + nanos.toLong().nanoseconds
+                        durationFromParts(secs, nanos)
                     }
 
                 override fun <A> visitMap(access: A): SerdeResult<Duration>
@@ -1031,10 +1031,47 @@ data object DurationDeserialize : Deserialize<Duration> {
                         }
                         val s = secs ?: throw SerdeException(SerdeError.missingField("secs"))
                         val n = nanos ?: throw SerdeException(SerdeError.missingField("nanos"))
-                        s.toLong().seconds + n.toLong().nanoseconds
+                        durationFromParts(s, n)
                     }
             },
         )
+}
+
+private fun checkUnsignedSecondOverflow(
+    secs: ULong,
+    nanos: UInt,
+    message: String,
+) {
+    val carry = (nanos.toLong() / 1_000_000_000L).toULong()
+    if (!unsignedLessOrEqual(secs, ULong.MAX_VALUE - carry)) {
+        throw SerdeException(SerdeError.custom(message))
+    }
+}
+
+private fun durationFromParts(
+    secs: ULong,
+    nanos: UInt,
+): Duration {
+    checkUnsignedSecondOverflow(secs, nanos, "overflow deserializing Duration")
+    if (!unsignedLessOrEqual(secs, Long.MAX_VALUE.toULong())) {
+        throw SerdeException(SerdeError.custom("overflow deserializing Duration"))
+    }
+    return secs.toLong().seconds + nanos.toLong().nanoseconds
+}
+
+private fun instantFromEpochParts(
+    secs: ULong,
+    nanos: UInt,
+): Instant {
+    checkUnsignedSecondOverflow(secs, nanos, "overflow deserializing SystemTime epoch offset")
+    if (!unsignedLessOrEqual(secs, Long.MAX_VALUE.toULong())) {
+        throw SerdeException(SerdeError.custom("overflow deserializing SystemTime"))
+    }
+    return try {
+        Instant.fromEpochSeconds(secs.toLong(), nanos.toInt())
+    } catch (_: IllegalArgumentException) {
+        throw SerdeException(SerdeError.custom("overflow deserializing SystemTime"))
+    }
 }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -1057,7 +1094,7 @@ data object SystemTimeDeserialize : Deserialize<Instant> {
                         val nanos =
                             access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
                                 ?: throw SerdeException(SerdeError.invalidLength(1, this))
-                        Instant.fromEpochSeconds(secs.toLong(), nanos.toInt())
+                        instantFromEpochParts(secs, nanos)
                     }
 
                 override fun <A> visitMap(access: A): SerdeResult<Instant>
@@ -1093,7 +1130,7 @@ data object SystemTimeDeserialize : Deserialize<Instant> {
                         }
                         val s = secs ?: throw SerdeException(SerdeError.missingField("secs_since_epoch"))
                         val n = nanos ?: throw SerdeException(SerdeError.missingField("nanos_since_epoch"))
-                        Instant.fromEpochSeconds(s.toLong(), n.toInt())
+                        instantFromEpochParts(s, n)
                     }
             },
         )
