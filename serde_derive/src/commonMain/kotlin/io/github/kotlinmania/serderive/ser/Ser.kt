@@ -130,15 +130,15 @@ private fun precondition(cx: Ctxt, cont: Container) {
 }
 
 private class SerParameters(cont: Container) {
-    // Variable holding the value being serialized. Either self for local
-    // types or __self for remote types.
+    // Variable holding the value being serialized. Either the receiver for local
+    // types or the remote receiver alias for remote types.
     val selfVar: Ident = if (cont.attrs.remote() != null) {
         Ident.new("__self", Span.callSite())
     } else {
         Ident.new("self", Span.callSite())
     }
 
-    // Path to the type the impl is for. Either a single Ident for local
+    // Path to the type the implementation is for. Either a single Ident for local
     // types (does not include generic parameters) or a remote path for
     // remote types.
     val thisType: Path = thisTypeFn(cont)
@@ -434,17 +434,24 @@ private fun serializeEnum(params: SerParameters, variants: List<Variant>, cattrs
         .toMutableList()
 
     if (cattrs.remote() != null && cattrs.nonExhaustive()) {
-        arms.add(checkedQuote("""
+        arms.add(checkedQuote(
+            """
             ref unrecognized => _serde::`#`Private::Err(_serde::ser::Error::custom(_serde::`#`Private::ser::CannotSerializeVariant(unrecognized))),
-        """))
+            """,
+            "Private" to Private,
+        ))
     }
 
     val armsStr = arms.joinToString(separator = "") { it.toString() }
-    return Fragment.Expr(checkedQuote("""
+    return Fragment.Expr(checkedQuote(
+        """
         match *`#`selfVar {
             `#`armsStr
         }
-    """))
+        """,
+        "selfVar" to selfVar,
+        "armsStr" to armsStr,
+    ))
 }
 
 private fun serializeVariant(
@@ -458,24 +465,52 @@ private fun serializeVariant(
 
     return if (variant.attrs.skipSerializing()) {
         val skippedMsg = "the enum variant ${params.typeName()}::$variantIdent cannot be serialized"
-        val skippedErr = checkedQuote("_serde::`#`Private::Err(_serde::ser::Error::custom(`#`skippedMsg))")
+        val skippedErr = checkedQuote(
+            "_serde::`#`Private::Err(_serde::ser::Error::custom(`#`skippedMsg))",
+            "Private" to Private,
+            "skippedMsg" to skippedMsg,
+        )
         val fieldsPat = when (variant.style) {
             Style.Unit -> TokenStream.new()
             Style.Newtype, Style.Tuple -> checkedQuote("(..)")
             Style.Struct -> checkedQuote("{ .. }")
         }
-        checkedQuote("`#`thisValue::`#`variantIdent `#`fieldsPat => `#`skippedErr,")
+        checkedQuote(
+            "`#`thisValue::`#`variantIdent `#`fieldsPat => `#`skippedErr,",
+            "thisValue" to thisValue,
+            "variantIdent" to variantIdent,
+            "fieldsPat" to fieldsPat,
+            "skippedErr" to skippedErr,
+        )
     } else {
         val case = when (variant.style) {
-            Style.Unit -> checkedQuote("`#`thisValue::`#`variantIdent")
-            Style.Newtype -> checkedQuote("`#`thisValue::`#`variantIdent(ref __field0)")
+            Style.Unit -> checkedQuote(
+                "`#`thisValue::`#`variantIdent",
+                "thisValue" to thisValue,
+                "variantIdent" to variantIdent,
+            )
+            Style.Newtype -> checkedQuote(
+                "`#`thisValue::`#`variantIdent(ref __field0)",
+                "thisValue" to thisValue,
+                "variantIdent" to variantIdent,
+            )
             Style.Tuple -> {
                 val fieldNames = (0 until variant.fields.size).map { fieldI(it) }
-                checkedQuote("`#`thisValue::`#`variantIdent(`#`(`#`fieldNames: ref `#`fieldNames,*)")
+                checkedQuote(
+                    "`#`thisValue::`#`variantIdent(`#`(`#`fieldNames: ref `#`fieldNames,*)",
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "fieldNames" to fieldNames,
+                )
             }
             Style.Struct -> {
                 val members = variant.fields.map { it.member }
-                checkedQuote("`#`thisValue::`#`variantIdent { `#`(`#`members: ref `#`members,*) }")
+                checkedQuote(
+                    "`#`thisValue::`#`variantIdent { `#`(`#`members: ref `#`members,*) }",
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                    "members" to members,
+                )
             }
         }
 
@@ -773,7 +808,11 @@ private fun serializeUntaggedVariant(
 
             val span = field.original.span()
             val func = checkedQuoteSpanned(span, "_serde::Serialize::serialize")
-            Fragment.Expr(checkedQuote("`#`func(`#`fieldExpr, __serializer)"))
+            Fragment.Expr(checkedQuote(
+                "`#`func(`#`fieldExpr, __serializer)",
+                "func" to func,
+                "fieldExpr" to fieldExpr,
+            ))
         }
         Style.Tuple -> serializeTupleVariant(TupleVariant.Untagged, params, variant.fields)
         Style.Struct -> {
