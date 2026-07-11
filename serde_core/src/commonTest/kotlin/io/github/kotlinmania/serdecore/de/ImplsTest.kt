@@ -321,6 +321,79 @@ public class ImplsTest {
     }
 
     @Test
+    public fun netIpv4AddressDeserializesReadableAndCompact() {
+        val expected = Ipv4Address(octets(1, 2, 3, 4))
+
+        assertEquals(expected, Ipv4AddressDeserialize.deserialize(StrDeserializer("1.2.3.4")).getOrThrow())
+        assertEquals(expected, Ipv4AddressDeserialize.deserialize(compactTuple(1, 2, 3, 4)).getOrThrow())
+    }
+
+    @Test
+    public fun netIpv6AddressDeserializesReadableAndCompact() {
+        val expected = Ipv6Address(octets(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
+        val compact = compactTuple(49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54)
+
+        assertEquals(expected, Ipv6AddressDeserialize.deserialize(StrDeserializer("::1")).getOrThrow())
+        assertEquals(
+            Ipv6Address(octets("1234567890123456")),
+            Ipv6AddressDeserialize.deserialize(compact).getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun netIpAddressDeserializesReadableAndCompact() {
+        val ipv4 = Ipv4Address(octets("1234"))
+
+        assertEquals(
+            IpAddress.V4(Ipv4Address(octets(1, 2, 3, 4))),
+            IpAddressDeserialize.deserialize(StrDeserializer("1.2.3.4")).getOrThrow(),
+        )
+        assertEquals(
+            IpAddress.V4(ipv4),
+            IpAddressDeserialize.deserialize(compactEnum("IpAddr", "V4", compactTuple(49, 50, 51, 52))).getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun netSocketAddressDeserializesReadableAndCompact() {
+        val ipv4 = Ipv4Address(octets("1234"))
+        val ipv6 = Ipv6Address(octets("1234567890123456"))
+
+        assertEquals(
+            SocketAddress.V4(SocketAddressV4(Ipv4Address(octets(1, 2, 3, 4)), 1234u)),
+            SocketAddressDeserialize.deserialize(StrDeserializer("1.2.3.4:1234")).getOrThrow(),
+        )
+        assertEquals(
+            SocketAddressV4(Ipv4Address(octets(1, 2, 3, 4)), 1234u),
+            SocketAddressV4Deserialize.deserialize(StrDeserializer("1.2.3.4:1234")).getOrThrow(),
+        )
+        assertEquals(
+            SocketAddressV6(Ipv6Address(octets(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)), 1234u),
+            SocketAddressV6Deserialize.deserialize(StrDeserializer("[::1]:1234")).getOrThrow(),
+        )
+        assertEquals(
+            SocketAddress.V6(SocketAddressV6(ipv6, 1234u)),
+            SocketAddressDeserialize
+                .deserialize(compactEnum("SocketAddr", "V6", compactTuple(compactTuple("1234567890123456"), UShortDeserializer(1234u))))
+                .getOrThrow(),
+        )
+        assertEquals(
+            SocketAddress.V4(SocketAddressV4(ipv4, 1234u)),
+            SocketAddressDeserialize
+                .deserialize(compactEnum("SocketAddr", "V4", compactTuple(compactTuple("1234"), UShortDeserializer(1234u))))
+                .getOrThrow(),
+        )
+        assertEquals(
+            SocketAddressV4(ipv4, 1234u),
+            SocketAddressV4Deserialize.deserialize(compactTuple(compactTuple("1234"), UShortDeserializer(1234u))).getOrThrow(),
+        )
+        assertEquals(
+            SocketAddressV6(ipv6, 1234u),
+            SocketAddressV6Deserialize.deserialize(compactTuple(compactTuple("1234567890123456"), UShortDeserializer(1234u))).getOrThrow(),
+        )
+    }
+
+    @Test
     public fun vecDeserializesNestedSequences() {
         val deserialize = mutableListDeserialize(mutableListDeserialize(I32Deserialize))
         val deserializer =
@@ -518,6 +591,14 @@ private class IntDeserializer(
     override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI32(value)
 }
 
+private class UShortDeserializer(
+    private val value: UShort,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeU16(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU16(value)
+}
+
 private class StringDeserializer(
     private val value: String,
 ) : ForwardingDeserializer() {
@@ -570,6 +651,104 @@ private data object UnitDeserializer : ForwardingDeserializer() {
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeUnit(visitor)
 
     override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = visitor.visitUnit()
+}
+
+private fun octets(vararg values: Int): List<UByte> = values.map { it.toUByte() }
+
+private fun octets(value: String): List<UByte> = value.encodeToByteArray().map { it.toInt().toUByte() }
+
+private fun compactTuple(vararg values: Int): Deserializer =
+    compactTuple(*values.map { UByteDeserializer(it.toUByte()) }.toTypedArray())
+
+private fun compactTuple(value: String): Deserializer =
+    compactTuple(*value.encodeToByteArray().map { UByteDeserializer(it.toInt().toUByte()) }.toTypedArray())
+
+private fun compactTuple(vararg values: Deserializer): Deserializer = CompactTupleDeserializer(values.toList())
+
+private fun compactEnum(
+    name: String,
+    variant: String,
+    value: Deserializer,
+): Deserializer = CompactEnumDeserializer(name, variant, value)
+
+private class UByteDeserializer(
+    private val value: UByte,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeU8(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU8(value)
+
+    override fun isHumanReadable(): Boolean = false
+}
+
+private class CompactTupleDeserializer(
+    private val values: List<Deserializer>,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeTuple(values.size, visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitSeq(CompactSeqAccess(values))
+
+    override fun isHumanReadable(): Boolean = false
+}
+
+private class CompactSeqAccess(
+    values: List<Deserializer>,
+) : SeqAccess {
+    private val iterator = values.iterator()
+
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+        if (iterator.hasNext()) {
+            seed.deserialize(iterator.next()).map { it }
+        } else {
+            SerdeResult.success(null)
+        }
+
+    override fun sizeHint(): Int? = null
+}
+
+private class CompactEnumDeserializer(
+    private val name: String,
+    private val variant: String,
+    private val value: Deserializer,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeEnum(name, listOf("V4", "V6"), visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(CompactEnumAccess(variant, value))
+
+    override fun isHumanReadable(): Boolean = false
+}
+
+private class CompactEnumAccess(
+    private val variant: String,
+    private val value: Deserializer,
+) : EnumAccess {
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(variant.intoDeserializer()).map { it to CompactVariantAccess(value) }
+}
+
+private class CompactVariantAccess(
+    private val value: Deserializer,
+) : VariantAccess {
+    override fun unitVariant(): SerdeResult<Unit> = SerdeResult.failure(SerdeError.custom("unit variant was not expected"))
+
+    override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> = seed.deserialize(value)
+
+    override fun <V> tupleVariant(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("tuple variant was not expected"))
+
+    override fun <V> structVariant(
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = SerdeResult.failure(SerdeError.custom("struct variant was not expected"))
 }
 
 private class IgnoredAnyEnumDeserializer(

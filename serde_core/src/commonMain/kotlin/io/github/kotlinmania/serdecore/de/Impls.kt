@@ -1238,6 +1238,268 @@ private class ResultVisitor<T, E>(
 
 // //////////////////////////////////////////////////////////////////////////////
 
+data class Ipv4Address(
+    val octets: List<UByte>,
+) {
+    init {
+        require(octets.size == 4)
+    }
+
+    override fun toString(): String = octets.joinToString(".") { it.toString() }
+}
+
+data class Ipv6Address(
+    val octets: List<UByte>,
+) {
+    init {
+        require(octets.size == 16)
+    }
+}
+
+sealed class IpAddress {
+    data class V4(
+        val address: Ipv4Address,
+    ) : IpAddress()
+
+    data class V6(
+        val address: Ipv6Address,
+    ) : IpAddress()
+}
+
+data class SocketAddressV4(
+    val ip: Ipv4Address,
+    val port: UShort,
+)
+
+data class SocketAddressV6(
+    val ip: Ipv6Address,
+    val port: UShort,
+)
+
+sealed class SocketAddress {
+    data class V4(
+        val address: SocketAddressV4,
+    ) : SocketAddress()
+
+    data class V6(
+        val address: SocketAddressV6,
+    ) : SocketAddress()
+}
+
+private fun parseIpv4(value: String): Ipv4Address {
+    val parts = value.split(".")
+    if (parts.size != 4) throw SerdeException(SerdeError.custom("invalid IPv4 address"))
+    return Ipv4Address(
+        parts.map { part ->
+            if (part.isEmpty()) throw SerdeException(SerdeError.custom("invalid IPv4 address"))
+            val n = part.toIntOrNull() ?: throw SerdeException(SerdeError.custom("invalid IPv4 address"))
+            if (n !in 0..255) throw SerdeException(SerdeError.custom("invalid IPv4 address"))
+            n.toUByte()
+        },
+    )
+}
+
+private fun parseIpv6(value: String): Ipv6Address {
+    if (value.isEmpty()) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+    val doubleColon = value.indexOf("::")
+    if (doubleColon != value.lastIndexOf("::")) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+
+    fun parseSide(side: String): List<UShort> =
+        if (side.isEmpty()) {
+            emptyList()
+        } else {
+            side.split(":").map { segment ->
+                if (segment.isEmpty() || segment.length > 4) {
+                    throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+                }
+                segment.toIntOrNull(16)?.let {
+                    if (it in 0..UShort.MAX_VALUE.toInt()) it.toUShort() else null
+                } ?: throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+            }
+        }
+
+    val groups =
+        if (doubleColon >= 0) {
+            val left = parseSide(value.substring(0, doubleColon))
+            val right = parseSide(value.substring(doubleColon + 2))
+            val zeros = 8 - left.size - right.size
+            if (zeros < 1) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+            left + List(zeros) { 0.toUShort() } + right
+        } else {
+            parseSide(value)
+        }
+    if (groups.size != 8) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+
+    return Ipv6Address(
+        groups.flatMap { segment ->
+            listOf(((segment.toInt() ushr 8) and 0xff).toUByte(), (segment.toInt() and 0xff).toUByte())
+        },
+    )
+}
+
+private fun parseIpAddress(value: String): IpAddress =
+    serdeCatching { IpAddress.V4(parseIpv4(value)) as IpAddress }
+        .recoverCatching { IpAddress.V6(parseIpv6(value)) as IpAddress }
+        .getOrThrow()
+
+private fun parseSocketAddressV4(value: String): SocketAddressV4 {
+    val colon = value.lastIndexOf(':')
+    if (colon <= 0 || colon == value.lastIndex) throw SerdeException(SerdeError.custom("invalid IPv4 socket address"))
+    val port = parsePort(value.substring(colon + 1), "invalid IPv4 socket address")
+    return SocketAddressV4(parseIpv4(value.substring(0, colon)), port)
+}
+
+private fun parseSocketAddressV6(value: String): SocketAddressV6 {
+    if (!value.startsWith("[")) throw SerdeException(SerdeError.custom("invalid IPv6 socket address"))
+    val end = value.indexOf("]:")
+    if (end <= 1 || end + 2 >= value.length) throw SerdeException(SerdeError.custom("invalid IPv6 socket address"))
+    val port = parsePort(value.substring(end + 2), "invalid IPv6 socket address")
+    return SocketAddressV6(parseIpv6(value.substring(1, end)), port)
+}
+
+private fun parseSocketAddress(value: String): SocketAddress =
+    serdeCatching { SocketAddress.V4(parseSocketAddressV4(value)) as SocketAddress }
+        .recoverCatching { SocketAddress.V6(parseSocketAddressV6(value)) as SocketAddress }
+        .getOrThrow()
+
+private fun parsePort(
+    value: String,
+    message: String,
+): UShort {
+    val port = value.toIntOrNull() ?: throw SerdeException(SerdeError.custom(message))
+    if (port !in 0..UShort.MAX_VALUE.toInt()) throw SerdeException(SerdeError.custom(message))
+    return port.toUShort()
+}
+
+private class FromStringVisitor<T>(
+    private val expectingMessage: String,
+    private val parse: (String) -> T,
+) : Visitor<T> {
+    override fun expecting(): String = expectingMessage
+
+    override fun visitStr(v: String): SerdeResult<T> = serdeCatching { parse(v) }
+
+    override fun visitString(v: String): SerdeResult<T> = serdeCatching { parse(v) }
+}
+
+private class FixedU8TupleVisitor<T>(
+    private val len: Int,
+    private val expectingMessage: String,
+    private val build: (List<UByte>) -> T,
+) : Visitor<T> {
+    override fun expecting(): String = expectingMessage
+
+    override fun <A> visitSeq(access: A): SerdeResult<T>
+        where A : SeqAccess =
+        serdeCatching {
+            val values = ArrayList<UByte>(len)
+            repeat(len) { index ->
+                values +=
+                    access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow()
+                        ?: throw SerdeException(SerdeError.invalidLength(index, this))
+            }
+            build(values)
+        }
+}
+
+data object Ipv4AddressDeserialize : Deserialize<Ipv4Address> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<Ipv4Address>
+        where D : Deserializer =
+        if (deserializer.isHumanReadable()) {
+            deserializer.deserializeStr(FromStringVisitor("IPv4 address", ::parseIpv4))
+        } else {
+            deserializer.deserializeTuple(4, FixedU8TupleVisitor(4, "IPv4 address", ::Ipv4Address))
+        }
+}
+
+data object Ipv6AddressDeserialize : Deserialize<Ipv6Address> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<Ipv6Address>
+        where D : Deserializer =
+        if (deserializer.isHumanReadable()) {
+            deserializer.deserializeStr(FromStringVisitor("IPv6 address", ::parseIpv6))
+        } else {
+            deserializer.deserializeTuple(16, FixedU8TupleVisitor(16, "IPv6 address", ::Ipv6Address))
+        }
+}
+
+data object IpAddressDeserialize : Deserialize<IpAddress> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<IpAddress>
+        where D : Deserializer =
+        if (deserializer.isHumanReadable()) {
+            deserializer.deserializeStr(FromStringVisitor("IP address", ::parseIpAddress))
+        } else {
+            deserializer.deserializeEnum("IpAddr", listOf("V4", "V6"), IpAddressVisitor)
+        }
+}
+
+private data object IpAddressVisitor : Visitor<IpAddress> {
+    override fun expecting(): String = "a IpAddr"
+
+    override fun <A> visitEnum(access: A): SerdeResult<IpAddress>
+        where A : EnumAccess =
+        serdeCatching {
+            val seed = SeedFromDeserialize(fieldIdentifierDeserialize("`V4` or `V6`", listOf("V4", "V6")))
+            val (field, variant) = access.variantSeed(seed).getOrThrow()
+            when (field) {
+                "V4" -> IpAddress.V4(variant.newtypeVariant(SeedFromDeserialize(Ipv4AddressDeserialize)).getOrThrow())
+                "V6" -> IpAddress.V6(variant.newtypeVariant(SeedFromDeserialize(Ipv6AddressDeserialize)).getOrThrow())
+                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("V4", "V6")))
+            }
+        }
+}
+
+data object SocketAddressDeserialize : Deserialize<SocketAddress> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<SocketAddress>
+        where D : Deserializer =
+        if (deserializer.isHumanReadable()) {
+            deserializer.deserializeStr(FromStringVisitor("socket address", ::parseSocketAddress))
+        } else {
+            deserializer.deserializeEnum("SocketAddr", listOf("V4", "V6"), SocketAddressVisitor)
+        }
+}
+
+data object SocketAddressV4Deserialize : Deserialize<SocketAddressV4> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<SocketAddressV4>
+        where D : Deserializer =
+        if (deserializer.isHumanReadable()) {
+            deserializer.deserializeStr(FromStringVisitor("IPv4 socket address", ::parseSocketAddressV4))
+        } else {
+            pairDeserialize(Ipv4AddressDeserialize, U16Deserialize)
+                .deserialize(deserializer)
+                .map { (ip, port) -> SocketAddressV4(ip, port) }
+        }
+}
+
+data object SocketAddressV6Deserialize : Deserialize<SocketAddressV6> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<SocketAddressV6>
+        where D : Deserializer =
+        if (deserializer.isHumanReadable()) {
+            deserializer.deserializeStr(FromStringVisitor("IPv6 socket address", ::parseSocketAddressV6))
+        } else {
+            pairDeserialize(Ipv6AddressDeserialize, U16Deserialize)
+                .deserialize(deserializer)
+                .map { (ip, port) -> SocketAddressV6(ip, port) }
+        }
+}
+
+private data object SocketAddressVisitor : Visitor<SocketAddress> {
+    override fun expecting(): String = "a SocketAddr"
+
+    override fun <A> visitEnum(access: A): SerdeResult<SocketAddress>
+        where A : EnumAccess =
+        serdeCatching {
+            val seed = SeedFromDeserialize(fieldIdentifierDeserialize("`V4` or `V6`", listOf("V4", "V6")))
+            val (field, variant) = access.variantSeed(seed).getOrThrow()
+            when (field) {
+                "V4" -> SocketAddress.V4(variant.newtypeVariant(SeedFromDeserialize(SocketAddressV4Deserialize)).getOrThrow())
+                "V6" -> SocketAddress.V6(variant.newtypeVariant(SeedFromDeserialize(SocketAddressV6Deserialize)).getOrThrow())
+                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("V4", "V6")))
+            }
+        }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
 data class PathValue(
     val value: String,
 )
