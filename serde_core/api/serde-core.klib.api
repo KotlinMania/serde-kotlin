@@ -2137,6 +2137,7 @@ final object io.github.kotlinmania.serdecore.de/U8Deserialize : io.github.kotlin
 
 final object io.github.kotlinmania.serdecore.de/UnitDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<kotlin/Unit> { // io.github.kotlinmania.serdecore.de/UnitDeserialize|null[0]
     final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.de/UnitDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
+    final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserializeInPlace(#A1, kotlin/Function1<kotlin/Unit, kotlin/Unit>): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.de/UnitDeserialize.deserializeInPlace|deserializeInPlace(0:0;kotlin.Function1<kotlin.Unit,kotlin.Unit>){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/UnitDeserialize.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/UnitDeserialize.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/UnitDeserialize.toString|toString(){}[0]

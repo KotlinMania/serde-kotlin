@@ -24,6 +24,15 @@ data object UnitDeserialize : Deserialize<Unit> {
     override fun <D> deserialize(deserializer: D): SerdeResult<Unit>
         where D : Deserializer =
         deserializer.deserializeUnit(UnitVisitor)
+
+    override fun <D> deserializeInPlace(
+        deserializer: D,
+        place: (Unit) -> Unit,
+    ): SerdeResult<Unit>
+        where D : Deserializer =
+        deserializer.deserializeUnit(UnitVisitor).map {
+            place(Unit)
+        }
 }
 
 // //////////////////////////////////////////////////////////////////////////////
