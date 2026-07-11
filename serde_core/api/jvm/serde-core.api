@@ -1142,7 +1142,7 @@ public final class io/github/kotlinmania/serdecore/de/value/CowStrDeserializer$C
 	public final fun owned (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/value/CowStrDeserializer;
 }
 
-public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer {
+public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/IntoDeserializer {
 	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer$Companion;
 	public fun <init> (Lio/github/kotlinmania/serdecore/de/EnumAccess;)V
 	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -1176,6 +1176,7 @@ public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializ
 	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
 }
 
 public final class io/github/kotlinmania/serdecore/de/value/EnumAccessDeserializer$Companion {
@@ -1262,7 +1263,7 @@ public final class io/github/kotlinmania/serdecore/de/value/IsizeDeserializer$Co
 	public final fun new (J)Lio/github/kotlinmania/serdecore/de/value/IsizeDeserializer;
 }
 
-public final class io/github/kotlinmania/serdecore/de/value/MapAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess {
+public final class io/github/kotlinmania/serdecore/de/value/MapAccessDeserializer : io/github/kotlinmania/serdecore/de/Deserializer, io/github/kotlinmania/serdecore/de/EnumAccess, io/github/kotlinmania/serdecore/de/IntoDeserializer {
 	public static final field Companion Lio/github/kotlinmania/serdecore/de/value/MapAccessDeserializer$Companion;
 	public fun <init> (Lio/github/kotlinmania/serdecore/de/MapAccess;)V
 	public fun deserializeAny (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -1296,6 +1297,7 @@ public final class io/github/kotlinmania/serdecore/de/value/MapAccessDeserialize
 	public fun deserializeU8 (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeUnit (Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun deserializeUnitStruct (Ljava/lang/String;Lio/github/kotlinmania/serdecore/de/Visitor;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
 	public fun variantSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 }
 

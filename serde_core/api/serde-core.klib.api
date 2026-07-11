@@ -560,7 +560,7 @@ abstract class <#A: kotlin/Any?> io.github.kotlinmania.serdecore.de.value/Primit
     open fun intoDeserializer(): io.github.kotlinmania.serdecore.de/Deserializer // io.github.kotlinmania.serdecore.de.value/PrimitiveDeserializer.intoDeserializer|intoDeserializer(){}[0]
 }
 
-final class <#A: io.github.kotlinmania.serdecore.de/EnumAccess> io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer : io.github.kotlinmania.serdecore.de/Deserializer { // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer|null[0]
+final class <#A: io.github.kotlinmania.serdecore.de/EnumAccess> io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer : io.github.kotlinmania.serdecore.de/Deserializer, io.github.kotlinmania.serdecore.de/IntoDeserializer { // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer|null[0]
     constructor <init>(#A) // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.<init>|<init>(1:0){}[0]
 
     final fun <#A1: kotlin/Any?> deserializeAny(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.deserializeAny|deserializeAny(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
@@ -594,6 +594,7 @@ final class <#A: io.github.kotlinmania.serdecore.de/EnumAccess> io.github.kotlin
     final fun <#A1: kotlin/Any?> deserializeU8(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.deserializeU8|deserializeU8(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnit(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.deserializeUnit|deserializeUnit(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnitStruct(kotlin/String, io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.deserializeUnitStruct|deserializeUnitStruct(kotlin.String;io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
+    final fun intoDeserializer(): io.github.kotlinmania.serdecore.de/Deserializer // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.intoDeserializer|intoDeserializer(){}[0]
 
     final object Companion { // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.Companion|null[0]
         final fun <#A2: io.github.kotlinmania.serdecore.de/EnumAccess> new(#A2): io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer<#A2> // io.github.kotlinmania.serdecore.de.value/EnumAccessDeserializer.Companion.new|new(0:0){0§<io.github.kotlinmania.serdecore.de.EnumAccess>}[0]
@@ -679,7 +680,7 @@ final class <#A: io.github.kotlinmania.serdecore.de/IntoDeserializer> io.github.
     final fun sizeHint(): kotlin/Int? // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.sizeHint|sizeHint(){}[0]
 }
 
-final class <#A: io.github.kotlinmania.serdecore.de/MapAccess> io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer : io.github.kotlinmania.serdecore.de/Deserializer, io.github.kotlinmania.serdecore.de/EnumAccess { // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer|null[0]
+final class <#A: io.github.kotlinmania.serdecore.de/MapAccess> io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer : io.github.kotlinmania.serdecore.de/Deserializer, io.github.kotlinmania.serdecore.de/EnumAccess, io.github.kotlinmania.serdecore.de/IntoDeserializer { // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer|null[0]
     constructor <init>(#A) // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.<init>|<init>(1:0){}[0]
 
     final fun <#A1: kotlin/Any?> deserializeAny(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.deserializeAny|deserializeAny(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
@@ -714,6 +715,7 @@ final class <#A: io.github.kotlinmania.serdecore.de/MapAccess> io.github.kotlinm
     final fun <#A1: kotlin/Any?> deserializeUnit(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.deserializeUnit|deserializeUnit(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnitStruct(kotlin/String, io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.deserializeUnitStruct|deserializeUnitStruct(kotlin.String;io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> variantSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<kotlin/Pair<#A1, io.github.kotlinmania.serdecore.de/VariantAccess>> // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.variantSeed|variantSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
+    final fun intoDeserializer(): io.github.kotlinmania.serdecore.de/Deserializer // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.intoDeserializer|intoDeserializer(){}[0]
 
     final object Companion { // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.Companion|null[0]
         final fun <#A2: io.github.kotlinmania.serdecore.de/MapAccess> new(#A2): io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer<#A2> // io.github.kotlinmania.serdecore.de.value/MapAccessDeserializer.Companion.new|new(0:0){0§<io.github.kotlinmania.serdecore.de.MapAccess>}[0]
