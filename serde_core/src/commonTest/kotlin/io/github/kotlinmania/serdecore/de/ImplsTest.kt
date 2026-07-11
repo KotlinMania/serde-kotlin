@@ -9,6 +9,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -109,6 +110,62 @@ public class ImplsTest {
             boundDeserialize(U8Deserialize)
                 .deserialize(BoundEnumDeserializer("Excluded", 0.toUByte().intoDeserializer()))
                 .getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun pathDeserializesBorrowedStringAndBytes() {
+        assertEquals(
+            PathValue("/usr/local/lib"),
+            PathDeserialize.deserialize(BorrowedStrDeserializer("/usr/local/lib")).getOrThrow(),
+        )
+        assertEquals(
+            PathValue("/usr/local/lib"),
+            PathDeserialize.deserialize(BorrowedBytesDeserializer("/usr/local/lib".encodeToByteArray())).getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun pathBufDeserializesStringAndBytes() {
+        assertEquals(
+            PathValue("/usr/local/lib"),
+            PathBufDeserialize.deserialize(StrDeserializer("/usr/local/lib")).getOrThrow(),
+        )
+        assertEquals(
+            PathValue("/usr/local/lib"),
+            PathBufDeserialize.deserialize(StringDeserializer("/usr/local/lib")).getOrThrow(),
+        )
+        assertEquals(
+            PathValue("/usr/local/lib"),
+            PathBufDeserialize.deserialize("/usr/local/lib".encodeToByteArray().intoDeserializer()).getOrThrow(),
+        )
+        assertEquals(
+            PathValue("/usr/local/lib"),
+            PathBufDeserialize.deserialize(BytesDeserializer("/usr/local/lib".encodeToByteArray())).getOrThrow(),
+        )
+    }
+
+    @Test
+    public fun cStringDeserializesBytesStringAndSequence() {
+        assertContentEquals(
+            "abc".encodeToByteArray(),
+            CStringDeserialize.deserialize("abc".encodeToByteArray().intoDeserializer()).getOrThrow().bytes,
+        )
+        assertContentEquals(
+            "abc".encodeToByteArray(),
+            CStringDeserialize.deserialize(StringDeserializer("abc")).getOrThrow().bytes,
+        )
+        assertContentEquals(
+            "abc".encodeToByteArray(),
+            CStringDeserialize
+                .deserialize(
+                    listOf(
+                        'a'.code.toUByte().intoDeserializer(),
+                        'b'.code.toUByte().intoDeserializer(),
+                        'c'.code.toUByte().intoDeserializer(),
+                    ).intoDeserializer(),
+                ).getOrThrow()
+                .bytes,
         )
     }
 
@@ -463,6 +520,14 @@ private class BorrowedStrDeserializer(
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeStr(visitor)
 
     override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBorrowedStr(value)
+}
+
+private class BorrowedBytesDeserializer(
+    private val value: ByteArray,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeBytes(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBorrowedBytes(value)
 }
 
 private class CharDeserializer(

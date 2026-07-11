@@ -169,6 +169,22 @@ public final class io/github/kotlinmania/serdecore/de/BoundValue$Unbounded : io/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/kotlinmania/serdecore/de/CStringDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/CStringDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/CStringValue {
+	public fun <init> ([B)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBytes ()[B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/kotlinmania/serdecore/de/CharDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
 	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/CharDeserialize;
 	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -349,6 +365,33 @@ public abstract interface class io/github/kotlinmania/serdecore/de/MapAccess {
 	public fun nextValue (Lio/github/kotlinmania/serdecore/de/Deserialize;)Lio/github/kotlinmania/serde/SerdeResult;
 	public abstract fun nextValueSeed (Lio/github/kotlinmania/serdecore/de/DeserializeSeed;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun sizeHint ()Ljava/lang/Integer;
+}
+
+public final class io/github/kotlinmania/serdecore/de/PathBufDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/PathBufDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/PathDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/PathDeserialize;
+	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/de/PathValue {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/kotlinmania/serdecore/de/PathValue;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/de/PathValue;Ljava/lang/String;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/de/PathValue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/kotlinmania/serdecore/de/RangeFromValue {
