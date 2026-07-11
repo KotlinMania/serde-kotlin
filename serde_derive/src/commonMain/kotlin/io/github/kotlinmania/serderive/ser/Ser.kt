@@ -229,24 +229,37 @@ private fun serializeTransparent(cont: Container, params: SerParameters): Fragme
             val span = transparentField.original.span()
             checkedQuoteSpanned(span, "_serde.Serialize.serialize")
         }
-        else -> checkedQuote("`#`sw")
+        else -> checkedQuote("`#`sw", "sw" to sw)
     }
 
-    return Fragment.Block(checkedQuote("`#`path(&`#`selfVar.`#`member, __serializer)"))
+    return Fragment.Block(checkedQuote(
+        "`#`path(&`#`selfVar.`#`member, __serializer)",
+        "path" to path,
+        "selfVar" to selfVar,
+        "member" to member,
+    ))
 }
 
 private fun serializeInto(params: SerParameters, typeInto: SynType): Fragment {
     val selfVar = params.selfVar
-    return Fragment.Block(checkedQuote("""
+    return Fragment.Block(checkedQuote(
+        """
         _serde.Serialize.serialize(
             &_serde::`#`Private::Into::<`#`typeInto>::into(_serde::`#`Private::Clone::clone(`#`selfVar)),
             __serializer)
-    """))
+        """,
+        "Private" to Private,
+        "typeInto" to typeInto,
+        "selfVar" to selfVar,
+    ))
 }
 
 private fun serializeUnitStruct(cattrs: AttrContainer): Fragment {
     val typeName = cattrs.name().serializeName()
-    return Fragment.Expr(checkedQuote("_serde::Serializer::serialize_unit_struct(__serializer, `#`typeName)"))
+    return Fragment.Expr(checkedQuote(
+        "_serde::Serializer::serialize_unit_struct(__serializer, `#`typeName)",
+        "typeName" to typeName,
+    ))
 }
 
 private fun serializeNewtypeStruct(
@@ -540,7 +553,7 @@ private fun serializeVariant(
             TagType.None -> serializeUntaggedVariant(params, variant, cattrs)
         })
 
-        checkedQuote("`#`case => `#`body")
+        checkedQuote("`#`case => `#`body", "case" to case, "body" to body)
     }
 }
 
@@ -693,7 +706,7 @@ private fun serializeAdjacentlyTaggedVariant(
 
     val inner = Stmts(variant.attrs.serializeWith()?.let { path ->
         val ser = wrapSerializeVariantWith(params, path, variant)
-        Fragment.Expr(checkedQuote("_serde::Serialize::serialize(`#`ser, __serializer)"))
+        Fragment.Expr(checkedQuote("_serde::Serialize::serialize(`#`ser, __serializer)", "ser" to ser))
     } ?: when (effectiveSerializeStyle(variant)) {
         Style.Unit -> return Fragment.Block(checkedQuote("""
             let mut __struct = _serde::Serializer::serialize_struct(
@@ -794,7 +807,7 @@ private fun serializeUntaggedVariant(
 ): Fragment {
     variant.attrs.serializeWith()?.let { path ->
         val ser = wrapSerializeVariantWith(params, path, variant)
-        return Fragment.Expr(checkedQuote("_serde::Serialize::serialize(`#`ser, __serializer)"))
+        return Fragment.Expr(checkedQuote("_serde::Serialize::serialize(`#`ser, __serializer)", "ser" to ser))
     }
 
     return when (effectiveSerializeStyle(variant)) {
@@ -1091,7 +1104,7 @@ private fun serializeTupleStructVisitor(
         }
         var fieldExpr = if (isEnum) {
             val id = fieldI(i)
-            checkedQuote("`#`id")
+            checkedQuote("`#`id", "id" to id)
         } else {
             getMember(
                 params,
@@ -1101,7 +1114,7 @@ private fun serializeTupleStructVisitor(
         }
 
         val skip = field.attrs.skipSerializingIf()?.let { path ->
-            checkedQuote("`#`path(`#`fieldExpr)")
+            checkedQuote("`#`path(`#`fieldExpr)", "path" to path, "fieldExpr" to fieldExpr)
         }
 
         field.attrs.serializeWith()?.let { path ->
@@ -1110,11 +1123,15 @@ private fun serializeTupleStructVisitor(
 
         val span = field.original.span()
         val func = tupleTrait.serializeElement(span)
-        val ser = checkedQuote("`#`func(&mut __serde_state, `#`fieldExpr)?;")
+        val ser = checkedQuote(
+            "`#`func(&mut __serde_state, `#`fieldExpr)?;",
+            "func" to func,
+            "fieldExpr" to fieldExpr,
+        )
 
         dstFields.add(when (skip) {
             null -> ser
-            else -> checkedQuote("if !`#`skip { `#`ser }")
+            else -> checkedQuote("if !`#`skip { `#`ser }", "skip" to skip, "ser" to ser)
         })
     }
     return dstFields
