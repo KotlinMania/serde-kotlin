@@ -41,7 +41,12 @@ internal fun deserializeEnumUntagged(
         )*
 
         _serde::`#`Private::Err(_serde::de::Error::custom(`#`fallthroughMsgVal))
-    """))
+    """, mapOf(
+        "Private" to Private,
+        "firstAttempt" to firstAttempt,
+        "attempts" to attempts,
+        "fallthroughMsgVal" to fallthroughMsgVal,
+    )))
 }
 
 // Also used by adjacently tagged enums
@@ -55,7 +60,7 @@ internal fun deserializeVariant(
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
         return Fragment.Block(checkedQuote("""
             _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
-        """))
+        """, "Private" to Private, "path" to path, "unwrapFn" to unwrapFn))
     }
 
     val variantIdent = variant.ident
@@ -67,7 +72,7 @@ internal fun deserializeVariant(
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
                 val defaultExpr = Stmts(exprIsMissing(field, cattrs))
-                checkedQuote("(`#`defaultExpr)")
+                checkedQuote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
             } ?: checkedQuote("")
             Fragment.Expr(checkedQuote("""
                 match _serde::Deserializer::deserialize_any(
@@ -77,7 +82,14 @@ internal fun deserializeVariant(
                     _serde::`#`Private::Ok(()) => _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default),
                     _serde::`#`Private::Err(__err) => _serde::`#`Private::Err(__err),
                 }
-            """))
+            """, mapOf(
+                "Private" to Private,
+                "typeName" to typeName,
+                "variantName" to variantName,
+                "thisValue" to thisValue,
+                "variantIdent" to variantIdent,
+                "default" to default,
+            )))
         }
         Style.Newtype -> deserializeNewtypeVariant(variantIdent, params, variant.fields[0])
         Style.Tuple -> deserializeTuple(
@@ -107,14 +119,24 @@ internal fun deserializeNewtypeVariant(
     val fieldPath = field.attrs.deserializeWith()
     return if (fieldPath == null) {
         val span = field.original.span()
-        val func = checkedQuoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize")
+        val func = checkedQuoteSpanned(
+            span,
+            "<`#`fieldTy as _serde::Deserialize>::deserialize",
+            "fieldTy" to fieldTy,
+        )
         Fragment.Expr(checkedQuote("""
             _serde::`#`Private::Result::map(`#`func(__deserializer), `#`thisValue::`#`variantIdent)
-        """))
+        """, "Private" to Private, "func" to func, "thisValue" to thisValue, "variantIdent" to variantIdent))
     } else {
         Fragment.Block(checkedQuote("""
             let __value: _serde::`#`Private::Result<`#`fieldTy, _> = `#`fieldPath(__deserializer);
             _serde::`#`Private::Result::map(__value, `#`thisValue::`#`variantIdent)
-        """))
+        """, mapOf(
+            "Private" to Private,
+            "fieldTy" to fieldTy,
+            "fieldPath" to fieldPath,
+            "thisValue" to thisValue,
+            "variantIdent" to variantIdent,
+        )))
     }
 }

@@ -767,6 +767,58 @@ class TestGenJvmTest {
 
         assertEquals(0, output.exitCode, output.diagnostics)
     }
+
+    @Test
+    fun internallyTaggedDeserializeWithGenericCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use std::result::Result as StdResult;
+
+            fn deserialize_generic<'de, T, D>(deserializer: D) -> StdResult<T, D::Error>
+            where
+                T: Deserialize<'de>,
+                D: Deserializer<'de>,
+            {
+                T::deserialize(deserializer)
+            }
+
+            fn assert_traits<T: DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            #[serde(tag = "tag")]
+            pub enum InternallyTagged {
+                #[serde(deserialize_with = "deserialize_generic")]
+                Unit,
+
+                #[serde(deserialize_with = "deserialize_generic")]
+                Newtype(i32),
+
+                #[serde(deserialize_with = "deserialize_generic")]
+                Struct { f1: String, f2: u8 },
+            }
+        """.trimIndent()
+
+        val declaration = """
+            pub enum InternallyTagged {
+                Unit,
+                Newtype(i32),
+                Struct { f1: String, f2: u8 },
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_internally_tagged_deserialize_with_generic",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<InternallyTagged>(); }",
+            generateSerialize = false,
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
 }
 
 private data class CompileCase(
@@ -787,13 +839,18 @@ private fun compileDerives(
     declaration: String,
     support: String,
     verify: String,
+    generateSerialize: Boolean = true,
 ): CargoOutput {
     val root = findRepositoryRoot()
     val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
     fixture.toFile().deleteRecursively()
     Files.createDirectories(fixture.resolve("src"))
 
-    val serialize = renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    val serialize = if (generateSerialize) {
+        renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    } else {
+        ""
+    }
     val deserialize = renderRust(deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()))
 
     val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')

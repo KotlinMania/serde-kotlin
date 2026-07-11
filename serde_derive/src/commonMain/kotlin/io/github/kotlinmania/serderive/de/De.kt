@@ -918,7 +918,7 @@ internal fun unwrapToVariantClosure(
         Pair(quoteTokens("__wrap"), quoteTokens("__wrap.value"))
     } else {
         val fieldTys = variant.fields.map { it.ty }
-        Pair(quoteTokens("__wrap: (`#`(`#`fieldTys),*)"), quoteTokens("__wrap"))
+        Pair(quoteTokens("__wrap: (`#`(`#`fieldTys),*)", "fieldTys" to fieldTys), quoteTokens("__wrap"))
     }
 
     val fieldAccess = (0 until variant.fields.size).map { n ->
