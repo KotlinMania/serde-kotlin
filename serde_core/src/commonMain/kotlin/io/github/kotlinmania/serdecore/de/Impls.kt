@@ -1614,6 +1614,56 @@ data object BoxedPathDeserialize : Deserialize<BoxedPathValue> {
 
 // //////////////////////////////////////////////////////////////////////////////
 
+sealed class OsStringValue {
+    data class Unix(
+        val bytes: List<UByte>,
+    ) : OsStringValue()
+
+    data class Windows(
+        val wide: List<UShort>,
+    ) : OsStringValue()
+}
+
+data object OsStringDeserialize : Deserialize<OsStringValue> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<OsStringValue>
+        where D : Deserializer =
+        deserializer.deserializeEnum(
+            "OsString",
+            listOf("Unix", "Windows"),
+            OsStringVisitor,
+        )
+}
+
+private data object OsStringVisitor : Visitor<OsStringValue> {
+    override fun expecting(): String = "os string"
+
+    override fun <A> visitEnum(access: A): SerdeResult<OsStringValue>
+        where A : EnumAccess =
+        serdeCatching {
+            val fieldSeed =
+                SeedFromDeserialize(
+                    fieldIdentifierDeserialize(
+                        expectingMessage = "`Unix` or `Windows`",
+                        fields = listOf("Unix", "Windows"),
+                    ),
+                )
+            val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
+            when (field) {
+                "Unix" ->
+                    OsStringValue.Unix(
+                        variant.newtypeVariant(SeedFromDeserialize(mutableListDeserialize(U8Deserialize))).getOrThrow(),
+                    )
+                "Windows" ->
+                    OsStringValue.Windows(
+                        variant.newtypeVariant(SeedFromDeserialize(mutableListDeserialize(U16Deserialize))).getOrThrow(),
+                    )
+                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Unix", "Windows")))
+            }
+        }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
 sealed class BoundValue<out T> {
     data object Unbounded : BoundValue<Nothing>()
 

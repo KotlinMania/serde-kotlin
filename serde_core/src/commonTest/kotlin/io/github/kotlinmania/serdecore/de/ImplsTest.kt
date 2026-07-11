@@ -394,6 +394,40 @@ public class ImplsTest {
     }
 
     @Test
+    public fun osStringDeserializesUnixAndWindowsVariants() {
+        assertEquals(
+            OsStringValue.Unix(listOf(1u, 2u, 3u).map { it.toUByte() }),
+            OsStringDeserialize
+                .deserialize(
+                    compactEnum(
+                        "OsString",
+                        "Unix",
+                        compactTuple(
+                            UByteDeserializer(1u.toUByte()),
+                            UByteDeserializer(2u.toUByte()),
+                            UByteDeserializer(3u.toUByte()),
+                        ),
+                    ),
+                ).getOrThrow(),
+        )
+        assertEquals(
+            OsStringValue.Windows(listOf(1u, 2u, 3u).map { it.toUShort() }),
+            OsStringDeserialize
+                .deserialize(
+                    compactEnum(
+                        "OsString",
+                        "Windows",
+                        compactTuple(
+                            UShortDeserializer(1u.toUShort()),
+                            UShortDeserializer(2u.toUShort()),
+                            UShortDeserializer(3u.toUShort()),
+                        ),
+                    ),
+                ).getOrThrow(),
+        )
+    }
+
+    @Test
     public fun vecDeserializesNestedSequences() {
         val deserialize = mutableListDeserialize(mutableListDeserialize(I32Deserialize))
         val deserializer =
