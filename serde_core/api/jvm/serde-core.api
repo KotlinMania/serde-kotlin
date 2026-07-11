@@ -911,6 +911,7 @@ public final class io/github/kotlinmania/serdecore/de/Unexpected$Unsigned : io/g
 public final class io/github/kotlinmania/serdecore/de/UnitDeserialize : io/github/kotlinmania/serdecore/de/Deserialize {
 	public static final field INSTANCE Lio/github/kotlinmania/serdecore/de/UnitDeserialize;
 	public fun deserialize (Lio/github/kotlinmania/serdecore/de/Deserializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public fun deserializeInPlace (Lio/github/kotlinmania/serdecore/de/Deserializer;Lkotlin/jvm/functions/Function1;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

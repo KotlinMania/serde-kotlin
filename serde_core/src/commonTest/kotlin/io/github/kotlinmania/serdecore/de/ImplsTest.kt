@@ -16,6 +16,21 @@ import kotlin.test.assertTrue
 
 public class ImplsTest {
     @Test
+    public fun boolDeserializesFromBool() {
+        assertEquals(true, BooleanDeserialize.deserialize(BoolDeserializer(true)).getOrThrow())
+        assertEquals(false, BooleanDeserialize.deserialize(BoolDeserializer(false)).getOrThrow())
+    }
+
+    @Test
+    public fun unitDeserializesFromUnitAndInPlace() {
+        assertEquals(Unit, UnitDeserialize.deserialize(UnitDeserializer).getOrThrow())
+
+        var called = false
+        UnitDeserialize.deserializeInPlace(UnitDeserializer) { called = true }.getOrThrow()
+        assertTrue(called)
+    }
+
+    @Test
     public fun stringDeserializesFromStringStrAndChar() {
         assertEquals("abc", StringDeserialize.deserialize(StringDeserializer("abc")).getOrThrow())
         assertEquals("abc", StringDeserialize.deserialize(StrDeserializer("abc")).getOrThrow())
@@ -683,6 +698,14 @@ private class UShortDeserializer(
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeU16(visitor)
 
     override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU16(value)
+}
+
+private class BoolDeserializer(
+    private val value: Boolean,
+) : ForwardingDeserializer() {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeBool(visitor)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBool(value)
 }
 
 private class StringDeserializer(
