@@ -38,7 +38,12 @@ internal fun deserializeEnumExternally(
 
         val block = Match(deserializeExternallyTaggedVariant(params, variant, cattrs))
 
-        checkedQuote("_serde::`#`Private::Ok((__Field::`#`variantName, __variant)) => `#`block")
+        checkedQuote(
+            "_serde::`#`Private::Ok((__Field::`#`variantName, __variant)) => `#`block",
+            "Private" to Private,
+            "variantName" to variantName,
+            "block" to block,
+        )
     }
 
     val allSkipped = variants.all { it.attrs.skipDeserializing() }
@@ -47,14 +52,14 @@ internal fun deserializeEnumExternally(
             _serde::`#`Private::Result::map(
                 _serde::de::EnumAccess::variant::<__Field>(__data),
                 |(__impossible, _)| match __impossible {})
-        """)
+        """, "Private" to Private)
     } else {
         checkedQuote("""
             match _serde::de::EnumAccess::variant(__data) {
                 `#`(`#`variantArms)*
                 _serde::`#`Private::Err(__err) => _serde::`#`Private::Err(__err),
             }
-        """)
+        """, "Private" to Private, "variantArms" to variantArms)
     }
 
     return Fragment.Block(checkedQuote("""
@@ -93,7 +98,20 @@ internal fun deserializeEnumExternally(
                 lifetime: _serde::`#`Private::PhantomData,
             },
         )
-    """))
+    """, mapOf(
+        "variantVisitor" to variantVisitor,
+        "deImplGenerics" to deImplGenerics,
+        "whereClause" to whereClause,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "delife" to delife,
+        "deTyGenerics" to deTyGenerics,
+        "expectingVal" to expectingVal,
+        "matchVariant" to matchVariant,
+        "variantsStmt" to variantsStmt,
+        "typeName" to typeName,
+    )))
 }
 
 private fun deserializeExternallyTaggedVariant(
@@ -108,7 +126,7 @@ private fun deserializeExternallyTaggedVariant(
             `#`wrapper
             _serde::`#`Private::Result::map(
                 _serde::de::VariantAccess::newtype_variant::<`#`wrapperTy>(__variant), `#`unwrapFn)
-        """))
+        """, "wrapper" to wrapper, "Private" to Private, "wrapperTy" to wrapperTy, "unwrapFn" to unwrapFn))
     }
 
     val variantIdent = variant.ident
@@ -119,7 +137,7 @@ private fun deserializeExternallyTaggedVariant(
             Fragment.Block(checkedQuote("""
                 _serde::de::VariantAccess::unit_variant(__variant)?;
                 _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent)
-            """))
+            """, "Private" to Private, "thisValue" to thisValue, "variantIdent" to variantIdent))
         }
         Style.Newtype -> deserializeExternallyTaggedNewtypeVariant(
             variantIdent,
@@ -148,7 +166,11 @@ private fun wrapDeserializeVariantWith(
     deserializeWith: io.github.kotlinmania.syn.Expr.Path
 ): Triple<TokenStream, TokenStream, TokenStream> {
     val fieldTys = variant.fields.map { it.ty }
-    val (wrapper, wrapperTy) = wrapDeserializeWith(params, checkedQuote("(`#`(`#`fieldTys),*)"), deserializeWith)
+    val (wrapper, wrapperTy) = wrapDeserializeWith(
+        params,
+        checkedQuote("(`#`(`#`fieldTys),*)", "fieldTys" to fieldTys),
+        deserializeWith,
+    )
 
     val unwrapFn = unwrapToVariantClosure(params, variant, true)
 
@@ -168,17 +190,21 @@ private fun deserializeExternallyTaggedNewtypeVariant(
         return Fragment.Block(checkedQuote("""
             _serde::de::VariantAccess::unit_variant(__variant)?;
             _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent(`#`default))
-        """))
+        """, "Private" to Private, "thisValue" to thisValue, "variantIdent" to variantIdent, "default" to default))
     }
 
     val fieldPath = field.attrs.deserializeWith()
     return if (fieldPath == null) {
         val fieldTy = field.ty
         val span = field.original.span()
-        val func = checkedQuoteSpanned(span, "_serde::de::VariantAccess::newtype_variant::<`#`fieldTy>")
+        val func = checkedQuoteSpanned(
+            span,
+            "_serde::de::VariantAccess::newtype_variant::<`#`fieldTy>",
+            "fieldTy" to fieldTy,
+        )
         Fragment.Expr(checkedQuote("""
             _serde::`#`Private::Result::map(`#`func(__variant), `#`thisValue::`#`variantIdent)
-        """))
+        """, "Private" to Private, "func" to func, "thisValue" to thisValue, "variantIdent" to variantIdent))
     } else {
         val (wrapper, wrapperTy) = wrapDeserializeFieldWith(params, field.ty, fieldPath)
         Fragment.Block(checkedQuote("""
@@ -186,6 +212,12 @@ private fun deserializeExternallyTaggedNewtypeVariant(
             _serde::`#`Private::Result::map(
                 _serde::de::VariantAccess::newtype_variant::<`#`wrapperTy>(__variant),
                 |__wrapper| `#`thisValue::`#`variantIdent(__wrapper.value))
-        """))
+        """, mapOf(
+            "wrapper" to wrapper,
+            "Private" to Private,
+            "wrapperTy" to wrapperTy,
+            "thisValue" to thisValue,
+            "variantIdent" to variantIdent,
+        )))
     }
 }
