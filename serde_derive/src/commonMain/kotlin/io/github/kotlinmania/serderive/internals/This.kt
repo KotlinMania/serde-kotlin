@@ -1,3 +1,4 @@
+// port-lint: source this.rs
 package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.syn.Path
