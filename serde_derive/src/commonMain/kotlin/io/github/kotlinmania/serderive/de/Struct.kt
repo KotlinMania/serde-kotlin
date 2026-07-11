@@ -714,7 +714,7 @@ private fun deserializeMapInPlace(
         .map { (field, name) ->
             val missingExpr = exprIsMissing(field, cattrs)
             // If the missing expression unconditionally returns an error, don't try
-            // to assign its value to self.place.
+            // to assign its value to the in-place target.
             if (field.attrs.default() is Default.None
                 && cattrs.default() is Default.None
                 && field.attrs.deserializeWith() != null

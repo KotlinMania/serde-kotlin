@@ -170,6 +170,655 @@ class TestGenJvmTest {
             assertEquals(0, output.exitCode, output.diagnostics)
         }
     }
+
+    @Test
+    fun emptyAndSkippedBracedStructsCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val cases = listOf(
+            CompileCase(
+                fixtureName = "test_gen_empty_struct",
+                deriveInput = "pub struct EmptyStruct {}",
+                declaration = "pub struct EmptyStruct {}",
+                verifyType = "EmptyStruct",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_braced",
+                deriveInput = "pub struct EmptyBraced {}",
+                declaration = "pub struct EmptyBraced {}",
+                verifyType = "EmptyBraced",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_braced_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub struct EmptyBracedDenyUnknown {}
+                """.trimIndent(),
+                declaration = "pub struct EmptyBracedDenyUnknown {}",
+                verifyType = "EmptyBracedDenyUnknown",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_braced_skip_all",
+                deriveInput = """
+                    pub struct BracedSkipAll {
+                        #[serde(skip_deserializing)]
+                        f: u8,
+                    }
+                """.trimIndent(),
+                declaration = "pub struct BracedSkipAll { f: u8 }",
+                verifyType = "BracedSkipAll",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_braced_skip_all_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub struct BracedSkipAllDenyUnknown {
+                        #[serde(skip_deserializing)]
+                        f: u8,
+                    }
+                """.trimIndent(),
+                declaration = "pub struct BracedSkipAllDenyUnknown { f: u8 }",
+                verifyType = "BracedSkipAllDenyUnknown",
+            ),
+        )
+
+        for (case in cases) {
+            val output = compileDerives(
+                fixtureName = case.fixtureName,
+                deriveInput = case.deriveInput,
+                declaration = case.declaration,
+                support = support,
+                verify = "fn verify() { assert_traits::<${case.verifyType}>(); }",
+            )
+
+            assertEquals(0, output.exitCode, output.diagnostics)
+        }
+    }
+
+    @Test
+    fun emptyAndSkippedEnumVariantsCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val cases = listOf(
+            CompileCase(
+                fixtureName = "test_gen_empty_enum",
+                deriveInput = "pub enum EmptyEnum {}",
+                declaration = "pub enum EmptyEnum {}",
+                verifyType = "EmptyEnum",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_enum_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub enum EmptyEnumDenyUnknown {}
+                """.trimIndent(),
+                declaration = "pub enum EmptyEnumDenyUnknown {}",
+                verifyType = "EmptyEnumDenyUnknown",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_enum_variant",
+                deriveInput = """
+                    pub enum EmptyEnumVariant {
+                        EmptyStruct {},
+                    }
+                """.trimIndent(),
+                declaration = "pub enum EmptyEnumVariant { EmptyStruct {} }",
+                verifyType = "EmptyEnumVariant",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_variants",
+                deriveInput = """
+                    pub enum EmptyVariants {
+                        Braced {},
+                        Tuple(),
+                        BracedSkip {
+                            #[serde(skip_deserializing)]
+                            f: u8,
+                        },
+                        TupleSkip(#[serde(skip_deserializing)] u8),
+                    }
+                """.trimIndent(),
+                declaration = "pub enum EmptyVariants { Braced {}, Tuple(), BracedSkip { f: u8 }, TupleSkip(u8) }",
+                verifyType = "EmptyVariants",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_empty_variants_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub enum EmptyVariantsDenyUnknown {
+                        Braced {},
+                        Tuple(),
+                        BracedSkip {
+                            #[serde(skip_deserializing)]
+                            f: u8,
+                        },
+                        TupleSkip(#[serde(skip_deserializing)] u8),
+                    }
+                """.trimIndent(),
+                declaration = "pub enum EmptyVariantsDenyUnknown { Braced {}, Tuple(), BracedSkip { f: u8 }, TupleSkip(u8) }",
+                verifyType = "EmptyVariantsDenyUnknown",
+            ),
+            CompileCase(
+                fixtureName = "test_gen_unit_deny_unknown",
+                deriveInput = """
+                    #[serde(deny_unknown_fields)]
+                    pub struct UnitDenyUnknown;
+                """.trimIndent(),
+                declaration = "pub struct UnitDenyUnknown;",
+                verifyType = "UnitDenyUnknown",
+            ),
+        )
+
+        for (case in cases) {
+            val output = compileDerives(
+                fixtureName = case.fixtureName,
+                deriveInput = case.deriveInput,
+                declaration = case.declaration,
+                support = support,
+                verify = "fn verify() { assert_traits::<${case.verifyType}>(); }",
+            )
+
+            assertEquals(0, output.exitCode, output.diagnostics)
+        }
+    }
+
+    @Test
+    fun phantomDataAndNoBoundsCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+            use std::marker::PhantomData;
+            use std::option::Option as StdOption;
+            use std::boxed::Box;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val extraSupport = """
+            $support
+
+            pub struct X;
+        """.trimIndent()
+
+        // PhantomX is not generic; PhantomT and NoBounds are generic.
+        val phantomXOutput = compileDerives(
+            fixtureName = "test_gen_phantom_x",
+            deriveInput = "struct PhantomX { x: PhantomData<X> }",
+            declaration = "struct PhantomX { x: PhantomData<X> }",
+            support = extraSupport,
+            verify = "fn verify() { assert_traits::<PhantomX>(); }",
+        )
+        assertEquals(0, phantomXOutput.exitCode, phantomXOutput.diagnostics)
+
+        val phantomTOutput = compileDerives(
+            fixtureName = "test_gen_phantom_t",
+            deriveInput = "struct PhantomT<T> { t: PhantomData<T> }",
+            declaration = "struct PhantomT<T> { t: PhantomData<T> }",
+            support = extraSupport,
+            verify = "fn verify() { assert_traits::<PhantomT<X>>(); }",
+        )
+        assertEquals(0, phantomTOutput.exitCode, phantomTOutput.diagnostics)
+
+        val noBoundsOutput = compileDerives(
+            fixtureName = "test_gen_no_bounds",
+            deriveInput = """
+                struct NoBounds<T> {
+                    t: T,
+                    option: StdOption<T>,
+                    boxed: Box<T>,
+                    option_boxed: StdOption<Box<T>>,
+                }
+            """.trimIndent(),
+            declaration = "struct NoBounds<T> { t: T, option: StdOption<T>, boxed: Box<T>, option_boxed: StdOption<Box<T>> }",
+            support = extraSupport,
+            verify = "fn verify() { assert_traits::<NoBounds<i32>>(); }",
+        )
+        assertEquals(0, noBoundsOutput.exitCode, noBoundsOutput.diagnostics)
+    }
+
+    @Test
+    fun recursiveTypesCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+            use std::boxed::Box;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            enum TreeNode<D> {
+                Split {
+                    left: Box<TreeNode<D>>,
+                    right: Box<TreeNode<D>>,
+                },
+                Leaf {
+                    data: D,
+                },
+            }
+        """.trimIndent()
+
+        val declaration = deriveInput
+
+        val output = compileDerives(
+            fixtureName = "test_gen_tree_node",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<TreeNode<i32>>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun newtypeAndTupleWithCustomFunctionsCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use serde::ser::{Serialize, Serializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn ser_x<S: Serializer>(_: &X, _: S) -> StdResult<S::Ok, S::Error> {
+                unimplemented!()
+            }
+
+            pub fn de_x<'de, D: Deserializer<'de>>(_: D) -> StdResult<X, D::Error> {
+                unimplemented!()
+            }
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val newtypeOutput = compileDerives(
+            fixtureName = "test_gen_newtype",
+            deriveInput = "struct Newtype(#[serde(serialize_with = \"ser_x\", deserialize_with = \"de_x\")] X);",
+            declaration = "struct Newtype(X);",
+            support = support,
+            verify = "fn verify() { assert_traits::<Newtype>(); }",
+        )
+        assertEquals(0, newtypeOutput.exitCode, newtypeOutput.diagnostics)
+
+        val tupleOutput = compileDerives(
+            fixtureName = "test_gen_tuple",
+            deriveInput = """
+                struct Tuple<T>(
+                    T,
+                    #[serde(serialize_with = "ser_x", deserialize_with = "de_x")] X,
+                );
+            """.trimIndent(),
+            declaration = "struct Tuple<T>(T, X);",
+            support = support,
+            verify = "fn verify() { assert_traits::<Tuple<i32>>(); }",
+        )
+        assertEquals(0, tupleOutput.exitCode, tupleOutput.diagnostics)
+    }
+
+    @Test
+    fun enumWithCustomFunctionsCompile() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use serde::ser::{Serialize, Serializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn ser_x<S: Serializer>(_: &X, _: S) -> StdResult<S::Ok, S::Error> {
+                unimplemented!()
+            }
+
+            pub fn de_x<'de, D: Deserializer<'de>>(_: D) -> StdResult<X, D::Error> {
+                unimplemented!()
+            }
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            enum EnumWith<T> {
+                Unit,
+                Newtype(#[serde(serialize_with = "ser_x", deserialize_with = "de_x")] X),
+                Tuple(
+                    T,
+                    #[serde(serialize_with = "ser_x", deserialize_with = "de_x")] X,
+                ),
+                Struct {
+                    t: T,
+                    #[serde(serialize_with = "ser_x", deserialize_with = "de_x")]
+                    x: X,
+                },
+            }
+        """.trimIndent()
+
+        val declaration = """
+            enum EnumWith<T> {
+                Unit,
+                Newtype(X),
+                Tuple(T, X),
+                Struct {
+                    t: T,
+                    x: X,
+                },
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_enum_with",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<EnumWith<i32>>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun skippedStaticStrCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            struct SkippedStaticStr {
+                #[serde(skip_deserializing)]
+                skipped: &'static str,
+                other: isize,
+            }
+        """.trimIndent()
+
+        val declaration = """
+            struct SkippedStaticStr {
+                skipped: &'static str,
+                other: isize,
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_skipped_static_str",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<SkippedStaticStr>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun transparentWithCustomFunctionsCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use serde::ser::{Serialize, Serializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn ser_x<S: Serializer>(_: &X, _: S) -> StdResult<S::Ok, S::Error> {
+                unimplemented!()
+            }
+
+            pub fn de_x<'de, D: Deserializer<'de>>(_: D) -> StdResult<X, D::Error> {
+                unimplemented!()
+            }
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            #[serde(transparent)]
+            #[allow(dead_code)]
+            pub struct TransparentWith {
+                #[serde(serialize_with = "ser_x")]
+                #[serde(deserialize_with = "de_x")]
+                x: X,
+            }
+        """.trimIndent()
+
+        val declaration = """
+            pub struct TransparentWith {
+                x: X,
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_transparent_with",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<TransparentWith>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun skippedVariantCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            pub struct X;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            enum SkippedVariant<T> {
+                #[serde(skip)]
+                #[allow(dead_code)]
+                T(T),
+                Unit,
+            }
+        """.trimIndent()
+
+        val declaration = """
+            enum SkippedVariant<T> {
+                T(T),
+                Unit,
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_skipped_variant",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<SkippedVariant<X>>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun emptyArrayStructCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            pub struct X;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            pub struct EmptyArray {
+                empty: [X; 0],
+            }
+        """.trimIndent()
+
+        val declaration = """
+            pub struct EmptyArray {
+                empty: [X; 0],
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_empty_array",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<EmptyArray>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun enumSkipAllCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned};
+            use serde::ser::Serialize;
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            pub enum EnumSkipAll {
+                #[serde(skip_deserializing)]
+                #[allow(dead_code)]
+                Variant,
+            }
+        """.trimIndent()
+
+        val declaration = """
+            pub enum EnumSkipAll {
+                Variant,
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_enum_skip_all",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<EnumSkipAll>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun flattenWithCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use serde::ser::{Serialize, Serializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn ser_x<S: Serializer>(_: &X, _: S) -> StdResult<S::Ok, S::Error> {
+                unimplemented!()
+            }
+
+            pub fn de_x<'de, D: Deserializer<'de>>(_: D) -> StdResult<X, D::Error> {
+                unimplemented!()
+            }
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            struct FlattenWith {
+                #[serde(flatten, serialize_with = "ser_x", deserialize_with = "de_x")]
+                x: X,
+            }
+        """.trimIndent()
+
+        val declaration = """
+            struct FlattenWith {
+                x: X,
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_flatten_with",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<FlattenWith>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun internallyTaggedDeserializeWithGenericCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use std::result::Result as StdResult;
+
+            fn deserialize_generic<'de, T, D>(deserializer: D) -> StdResult<T, D::Error>
+            where
+                T: Deserialize<'de>,
+                D: Deserializer<'de>,
+            {
+                T::deserialize(deserializer)
+            }
+
+            fn assert_traits<T: DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            #[serde(tag = "tag")]
+            pub enum InternallyTagged {
+                #[serde(deserialize_with = "deserialize_generic")]
+                Unit,
+
+                #[serde(deserialize_with = "deserialize_generic")]
+                Newtype(i32),
+
+                #[serde(deserialize_with = "deserialize_generic")]
+                Struct { f1: String, f2: u8 },
+            }
+        """.trimIndent()
+
+        val declaration = """
+            pub enum InternallyTagged {
+                Unit,
+                Newtype(i32),
+                Struct { f1: String, f2: u8 },
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_internally_tagged_deserialize_with_generic",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<InternallyTagged>(); }",
+            generateSerialize = false,
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
 }
 
 private data class CompileCase(
@@ -190,13 +839,18 @@ private fun compileDerives(
     declaration: String,
     support: String,
     verify: String,
+    generateSerialize: Boolean = true,
 ): CargoOutput {
     val root = findRepositoryRoot()
     val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
     fixture.toFile().deleteRecursively()
     Files.createDirectories(fixture.resolve("src"))
 
-    val serialize = renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    val serialize = if (generateSerialize) {
+        renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    } else {
+        ""
+    }
     val deserialize = renderRust(deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()))
 
     val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')

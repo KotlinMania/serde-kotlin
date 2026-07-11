@@ -362,27 +362,27 @@ private fun deserializeTransparent(cont: Container, params: Parameters): Fragmen
     val path = when (val dw = transparentField.attrs.deserializeWith()) {
         null -> {
             val span = transparentField.original.span()
-            quoteSpannedTokens(span, "_serde.Deserialize::deserialize")
+            quoteSpannedTokens(span, "_serde::Deserialize::deserialize")
         }
-        else -> quoteTokens("`#`dw")
+        else -> quoteTokens("`#`dw", "dw" to dw)
     }
 
     val assign = fields.map { field ->
         val member = field.member
         if (field === transparentField) {
-            quoteTokens("`#`member: __transparent")
+            quoteTokens("`#`member: __transparent", "member" to member)
         } else {
             val value = when (field.attrs.default()) {
                 is Default.Plain ->
-                    quoteTokens("_serde::`#`Private::Default::default()")
+                    quoteTokens("_serde::`#`Private::Default::default()", "Private" to Private)
                 is Default.Path -> {
                     val p = (field.attrs.default() as Default.Path).path
-                    quoteSpannedTokens(p.span(), "`#`p()")
+                    quoteSpannedTokens(p.span(), "`#`p()", "p" to p)
                 }
                 is Default.None ->
-                    quoteTokens("_serde::`#`Private::PhantomData")
+                    quoteTokens("_serde::`#`Private::PhantomData", "Private" to Private)
             }
-            quoteTokens("`#`member: `#`value")
+            quoteTokens("`#`member: `#`value", "member" to member, "value" to value)
         }
     }
 
@@ -390,23 +390,27 @@ private fun deserializeTransparent(cont: Container, params: Parameters): Fragmen
         _serde::`#`Private::Result::map(
             `#`path(__deserializer),
             |__transparent| `#`thisValue { `#`(`#`assign),* })
-    """))
+    """,
+        "Private" to Private,
+        "path" to path,
+        "thisValue" to thisValue,
+        "assign" to assign))
 }
 
 private fun deserializeFrom(typeFrom: SynType): Fragment {
     return Fragment.Expr(quoteTokens("""
         _serde::`#`Private::Result::map(
-            <`#`typeFrom as _serde.Deserialize>::deserialize(__deserializer),
+            <`#`typeFrom as _serde::Deserialize>::deserialize(__deserializer),
             _serde::`#`Private::From::from)
-    """))
+    """, "Private" to Private, "typeFrom" to typeFrom))
 }
 
 private fun deserializeTryFrom(typeTryFrom: SynType): Fragment {
     return Fragment.Expr(quoteTokens("""
         _serde::`#`Private::Result::and_then(
-            <`#`typeTryFrom as _serde.Deserialize>::deserialize(__deserializer),
+            <`#`typeTryFrom as _serde::Deserialize>::deserialize(__deserializer),
             |v| _serde::`#`Private::TryFrom::try_from(v).map_err(_serde::de::Error::custom))
-    """))
+    """, "Private" to Private, "typeTryFrom" to typeTryFrom))
 }
 
 sealed class TupleForm {
@@ -914,7 +918,7 @@ internal fun unwrapToVariantClosure(
         Pair(quoteTokens("__wrap"), quoteTokens("__wrap.value"))
     } else {
         val fieldTys = variant.fields.map { it.ty }
-        Pair(quoteTokens("__wrap: (`#`(`#`fieldTys),*)"), quoteTokens("__wrap"))
+        Pair(quoteTokens("__wrap: (`#`(`#`fieldTys),*)", "fieldTys" to fieldTys), quoteTokens("__wrap"))
     }
 
     val fieldAccess = (0 until variant.fields.size).map { n ->

@@ -8,15 +8,20 @@ import io.github.kotlinmania.quote.quoteSpanned as quoteSpannedKotlin
 
 private val interpolation = Regex("`#`([A-Za-z_][A-Za-z0-9_]*)")
 
+private val lineComment = Regex("//[^\n]*")
+
 private object EmptyTokens : ToTokens {
     override fun toTokens(tokens: TokenStream) = Unit
 }
+
+private fun stripLineComments(template: String): String =
+    lineComment.replace(template, "")
 
 internal fun checkedQuote(
     template: String,
     interpolations: Map<String, *> = emptyMap<String, Any?>(),
 ): TokenStream =
-    quoteKotlin(template, checkedInterpolations(template, interpolations))
+    quoteKotlin(stripLineComments(template), checkedInterpolations(template, interpolations))
 
 internal fun checkedQuote(template: String, vararg pairs: Pair<String, *>): TokenStream =
     checkedQuote(template, mapOf(*pairs))
@@ -26,7 +31,7 @@ internal fun checkedQuoteSpanned(
     template: String,
     interpolations: Map<String, *> = emptyMap<String, Any?>(),
 ): TokenStream =
-    quoteSpannedKotlin(span, template, checkedInterpolations(template, interpolations))
+    quoteSpannedKotlin(span, stripLineComments(template), checkedInterpolations(template, interpolations))
 
 internal fun checkedQuoteSpanned(
     span: Span,

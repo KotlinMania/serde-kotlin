@@ -29,7 +29,7 @@ internal fun deserializeEnum(
             if let _serde::`#`Private::Result::<_, __D::Error>::Ok(__ok) = (|| `#`taggedFrag)() {
                 return _serde::`#`Private::Ok(__ok);
             }
-        """)
+        """, "Private" to Private, "taggedFrag" to taggedFrag)
         deserializeEnumUntagged(params, untagged, cattrs, firstAttempt)
     } else {
         deserializeHomogeneousEnum(params, variants, cattrs)
@@ -57,13 +57,18 @@ internal fun prepareEnumVariantEnum(variants: List<Variant>): Pair<TokenStream, 
     val fallthrough = deserializedVariants.find { (_, variant) -> variant.attrs.other() }
         ?.let { (i, _) ->
             val ignoreVariant = fieldI(i)
-            checkedQuote("_serde::`#`Private::Ok(__Field::`#`ignoreVariant)")
+            checkedQuote(
+                "_serde::`#`Private::Ok(__Field::`#`ignoreVariant)",
+                "Private" to Private,
+                "ignoreVariant" to ignoreVariant,
+            )
         }
 
+    val variantNames = deserializedVariants.flatMap { (_, variant) -> variant.attrs.aliases() }
     val variantsStmt = checkedQuote("""
         `#`[doc(hidden)]
-        const VARIANTS: &'static [&'static str] = &[ `#`(`#`deserializedVariants.map { it.second.attrs.aliases() }.flatten()),* ];
-    """)
+        const VARIANTS: &'static [&'static str] = &[ `#`(`#`variantNames),* ];
+    """, "variantNames" to variantNames)
 
     val fieldWithAliases = deserializedVariants.map { (i, variant) ->
         FieldWithAliases(

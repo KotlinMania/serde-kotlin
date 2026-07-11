@@ -1,17 +1,13 @@
 // port-lint: source de/enum_internally.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.serderive.checkedQuote
-import io.github.kotlinmania.serderive.checkedQuoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
-import io.github.kotlinmania.serderive.internals.Field
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Match
 import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
-import io.github.kotlinmania.procmacro2.Span
 
 // Generates the deserialize body for an enum with the tag attribute.
 internal fun deserializeEnumInternally(
@@ -30,7 +26,11 @@ internal fun deserializeEnumInternally(
 
         val block = Match(deserializeInternallyTaggedVariant(params, variant, cattrs))
 
-        checkedQuote("__Field::`#`variantName => `#`block")
+        checkedQuote(
+            "__Field::`#`variantName => `#`block",
+            "variantName" to variantName,
+            "block" to block,
+        )
     }
 
     val expecting = "internally tagged enum ${params.typeName()}"
@@ -49,7 +49,14 @@ internal fun deserializeEnumInternally(
         match __tag {
             `#`(`#`variantArms)*
         }
-    """))
+    """, mapOf(
+        "variantVisitor" to variantVisitor,
+        "variantsStmt" to variantsStmt,
+        "Private" to Private,
+        "tag" to tag,
+        "expectingVal" to expectingVal,
+        "variantArms" to variantArms,
+    )))
 }
 
 // Generates significant parts of the sequence and map visitor bodies
@@ -64,7 +71,7 @@ private fun deserializeInternallyTaggedVariant(
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
         return Fragment.Block(checkedQuote("""
             _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
-        """))
+        """, "Private" to Private, "path" to path, "unwrapFn" to unwrapFn))
     }
 
     val variantIdent = variant.ident
@@ -76,12 +83,19 @@ private fun deserializeInternallyTaggedVariant(
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
                 val defaultExpr = Stmts(exprIsMissing(field, cattrs))
-                checkedQuote("(`#`defaultExpr)")
+                checkedQuote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
             } ?: checkedQuote("")
             Fragment.Block(checkedQuote("""
                 _serde::Deserializer::deserialize_any(__deserializer, _serde::`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
                 _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
-            """))
+            """, mapOf(
+                "Private" to Private,
+                "typeName" to typeName,
+                "variantName" to variantName,
+                "thisValue" to thisValue,
+                "variantIdent" to variantIdent,
+                "default" to default,
+            )))
         }
         Style.Newtype -> {
             deserializeNewtypeVariant(variantIdent, params, variant.fields[0])
