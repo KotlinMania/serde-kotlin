@@ -576,7 +576,12 @@ private fun serializeExternallyTaggedVariant(
                 `#`variantName,
                 `#`ser,
             )
-        """))
+        """, mapOf(
+            "typeName" to typeName,
+            "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+            "variantName" to variantName,
+            "ser" to ser,
+        )))
     }
 
     return when (effectiveSerializeStyle(variant)) {
@@ -587,7 +592,11 @@ private fun serializeExternallyTaggedVariant(
                 `#`variantIndex,
                 `#`variantName,
             )
-        """))
+        """, mapOf(
+            "typeName" to typeName,
+            "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+            "variantName" to variantName,
+        )))
         Style.Newtype -> {
             val field = variant.fields[0]
             var fieldExpr = checkedQuote("__field0")
@@ -605,7 +614,13 @@ private fun serializeExternallyTaggedVariant(
                     `#`variantName,
                     `#`fieldExpr,
                 )
-            """))
+            """, mapOf(
+                "func" to func,
+                "typeName" to typeName,
+                "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+                "variantName" to variantName,
+                "fieldExpr" to fieldExpr,
+            )))
         }
         Style.Tuple -> serializeTupleVariant(
             TupleVariant.ExternallyTagged(typeName, variantIndex, variantName),
@@ -644,7 +659,14 @@ private fun serializeInternallyTaggedVariant(
                 `#`variantName,
                 `#`ser,
             )
-        """))
+        """, mapOf(
+            "Private" to Private,
+            "enumIdentStr" to enumIdentStr,
+            "variantIdentStr" to variantIdentStr,
+            "tag" to tag,
+            "variantName" to variantName,
+            "ser" to ser,
+        )))
     }
 
     return when (effectiveSerializeStyle(variant)) {
@@ -654,7 +676,11 @@ private fun serializeInternallyTaggedVariant(
             _serde::ser::SerializeStruct::serialize_field(
                 &mut __struct, `#`tag, `#`variantName)?;
             _serde::ser::SerializeStruct::end(__struct)
-        """))
+        """, mapOf(
+            "typeName" to typeName,
+            "tag" to tag,
+            "variantName" to variantName,
+        )))
         Style.Newtype -> {
             val field = variant.fields[0]
             var fieldExpr = checkedQuote("__field0")
@@ -663,7 +689,11 @@ private fun serializeInternallyTaggedVariant(
             }
 
             val span = field.original.span()
-            val func = checkedQuoteSpanned(span, "_serde::`#`Private::ser::serialize_tagged_newtype")
+            val func = checkedQuoteSpanned(
+                span,
+                "_serde::`#`Private::ser::serialize_tagged_newtype",
+                "Private" to Private,
+            )
             Fragment.Expr(checkedQuote("""
                 `#`func(
                     __serializer,
@@ -673,7 +703,14 @@ private fun serializeInternallyTaggedVariant(
                     `#`variantName,
                     `#`fieldExpr,
                 )
-            """))
+            """, mapOf(
+                "func" to func,
+                "enumIdentStr" to enumIdentStr,
+                "variantIdentStr" to variantIdentStr,
+                "tag" to tag,
+                "variantName" to variantName,
+                "fieldExpr" to fieldExpr,
+            )))
         }
         Style.Struct -> serializeStructVariant(
             StructVariant.InternallyTagged(tag, variantName),
@@ -702,7 +739,12 @@ private fun serializeAdjacentlyTaggedVariant(
             variant_index: `#`variantIndex,
             variant_name: `#`variantName,
         }
-    """)
+    """, mapOf(
+        "Private" to Private,
+        "typeName" to typeName,
+        "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+        "variantName" to variantName,
+    ))
 
     val inner = Stmts(variant.attrs.serializeWith()?.let { path ->
         val ser = wrapSerializeVariantWith(params, path, variant)
@@ -714,7 +756,11 @@ private fun serializeAdjacentlyTaggedVariant(
             _serde::ser::SerializeStruct::serialize_field(
                 &mut __struct, `#`tag, `#`serializeVariant)?;
             _serde::ser::SerializeStruct::end(__struct)
-        """))
+        """, mapOf(
+            "typeName" to typeName,
+            "tag" to tag,
+            "serializeVariant" to serializeVariant,
+        )))
         Style.Newtype -> {
             val field = variant.fields[0]
             var fieldExpr = checkedQuote("__field0")
@@ -732,7 +778,14 @@ private fun serializeAdjacentlyTaggedVariant(
                 `#`func(
                     &mut __struct, `#`content, `#`fieldExpr)?;
                 _serde::ser::SerializeStruct::end(__struct)
-            """))
+            """, mapOf(
+                "typeName" to typeName,
+                "tag" to tag,
+                "serializeVariant" to serializeVariant,
+                "func" to func,
+                "content" to content,
+                "fieldExpr" to fieldExpr,
+            )))
         }
         Style.Tuple -> serializeTupleVariant(TupleVariant.Untagged, params, variant.fields)
         Style.Struct -> serializeStructVariant(
@@ -797,7 +850,21 @@ private fun serializeAdjacentlyTaggedVariant(
                 phantom: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             })?;
         _serde::ser::SerializeStruct::end(__struct)
-    """))
+    """, mapOf(
+        "wrapperImplGenerics" to wrapperImplGenerics,
+        "whereClause" to whereClause,
+        "fieldsTy" to fieldsTy,
+        "Private" to Private,
+        "thisType" to thisType,
+        "tyGenerics" to tyGenerics,
+        "wrapperTyGenerics" to wrapperTyGenerics,
+        "fieldsIdent" to fieldsIdent,
+        "inner" to inner,
+        "typeName" to typeName,
+        "tag" to tag,
+        "serializeVariant" to serializeVariant,
+        "content" to content,
+    )))
 }
 
 private fun serializeUntaggedVariant(
@@ -893,7 +960,14 @@ private fun serializeTupleVariant(
                     `#`len)?;
                 `#`stmts
                 _serde::ser::SerializeTupleVariant::end(__serde_state)
-            """))
+            """, mapOf(
+                "letMut" to letMut,
+                "typeName" to typeName,
+                "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+                "variantName" to variantName,
+                "len" to len,
+                "stmts" to stmts,
+            )))
         }
         TupleVariant.Untagged -> {
             Fragment.Block(checkedQuote("""
@@ -902,7 +976,11 @@ private fun serializeTupleVariant(
                     `#`len)?;
                 `#`stmts
                 _serde::ser::SerializeTuple::end(__serde_state)
-            """))
+            """, mapOf(
+                "letMut" to letMut,
+                "len" to len,
+                "stmts" to stmts,
+            )))
         }
     }
 }
@@ -967,7 +1045,14 @@ private fun serializeStructVariant(
                 )?;
                 `#`stmts
                 _serde::ser::SerializeStructVariant::end(__serde_state)
-            """))
+            """, mapOf(
+                "letMut" to letMut,
+                "name" to name,
+                "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+                "variantName" to variantName,
+                "len" to len,
+                "stmts" to stmts,
+            )))
         }
         is StructVariant.InternallyTagged -> {
             val tag = context.tag
@@ -985,7 +1070,13 @@ private fun serializeStructVariant(
                 )?;
                 `#`stmts
                 _serde::ser::SerializeStruct::end(__serde_state)
-            """))
+            """, mapOf(
+                "name" to name,
+                "len" to len,
+                "tag" to tag,
+                "variantName" to variantName,
+                "stmts" to stmts,
+            )))
         }
         StructVariant.Untagged -> {
             Fragment.Block(checkedQuote("""
@@ -996,7 +1087,12 @@ private fun serializeStructVariant(
                 )?;
                 `#`stmts
                 _serde::ser::SerializeStruct::end(__serde_state)
-            """))
+            """, mapOf(
+                "letMut" to letMut,
+                "name" to name,
+                "len" to len,
+                "stmts" to stmts,
+            )))
         }
     }
 }
