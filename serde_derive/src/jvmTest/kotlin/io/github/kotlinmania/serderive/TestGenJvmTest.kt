@@ -567,6 +567,54 @@ class TestGenJvmTest {
     }
 
     @Test
+    fun transparentWithCustomFunctionsCompiles() {
+        val support =
+            """
+            use serde::de::{Deserialize, DeserializeOwned, Deserializer};
+            use serde::ser::{Serialize, Serializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn ser_x<S: Serializer>(_: &X, _: S) -> StdResult<S::Ok, S::Error> {
+                unimplemented!()
+            }
+
+            pub fn de_x<'de, D: Deserializer<'de>>(_: D) -> StdResult<X, D::Error> {
+                unimplemented!()
+            }
+
+            fn assert_traits<T: Serialize + DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput = """
+            #[serde(transparent)]
+            #[allow(dead_code)]
+            pub struct TransparentWith {
+                #[serde(serialize_with = "ser_x")]
+                #[serde(deserialize_with = "de_x")]
+                x: X,
+            }
+        """.trimIndent()
+
+        val declaration = """
+            pub struct TransparentWith {
+                x: X,
+            }
+        """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_transparent_with",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_traits::<TransparentWith>(); }",
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
     fun skippedVariantCompiles() {
         val support =
             """
