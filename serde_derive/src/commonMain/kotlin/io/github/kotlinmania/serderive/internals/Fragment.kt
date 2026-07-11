@@ -1,3 +1,4 @@
+// port-lint: source fragment.rs
 package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.procmacro2.TokenStream

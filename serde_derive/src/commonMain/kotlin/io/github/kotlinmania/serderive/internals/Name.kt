@@ -1,3 +1,4 @@
+// port-lint: source internals/name.rs
 package io.github.kotlinmania.serderive.internals
 
 
