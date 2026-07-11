@@ -1912,7 +1912,8 @@ fun <K : IntoDeserializer, V : IntoDeserializer> mapDeserializer(
 class MapAccessDeserializer<A : MapAccess>(
     private val map: A,
 ) : Deserializer,
-    EnumAccess {
+    EnumAccess,
+    IntoDeserializer {
     companion object {
         fun <A : MapAccess> new(map: A): MapAccessDeserializer<A> = MapAccessDeserializer(map)
     }
@@ -2000,6 +2001,8 @@ class MapAccessDeserializer<A : MapAccess>(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
+    override fun intoDeserializer(): Deserializer = this
+
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
         serdeCatching {
             val key = map.nextKeySeed(seed).getOrThrow()
@@ -2025,7 +2028,8 @@ class MapAccessDeserializer<A : MapAccess>(
  */
 class EnumAccessDeserializer<A : EnumAccess>(
     private val access: A,
-) : Deserializer {
+) : Deserializer,
+    IntoDeserializer {
     companion object {
         fun <A : EnumAccess> new(access: A): EnumAccessDeserializer<A> = EnumAccessDeserializer(access)
     }
@@ -2112,6 +2116,8 @@ class EnumAccessDeserializer<A : EnumAccess>(
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
 }
 
 // //////////////////////////////////////////////////////////////////////////////
