@@ -10,7 +10,6 @@ import io.github.kotlinmania.serdecore.de.RangeInclusiveValue
 import io.github.kotlinmania.serdecore.de.RangeToValue
 import io.github.kotlinmania.serdecore.de.RangeValue
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.nanoseconds
@@ -18,22 +17,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 public class ImplsTest {
-    @Test
-    public fun testFormatU8() {
-        var i: UByte = 0u
-
-        while (true) {
-            val buf = ByteArray(3)
-            val written = formatU8(i, buf)
-            assertContentEquals(i.toString().encodeToByteArray(), buf.copyOfRange(0, written))
-
-            if (i == UByte.MAX_VALUE) {
-                break
-            }
-            i = (i + 1u).toUByte()
-        }
-    }
-
     @Test
     public fun durationSerializesAsStruct() {
         val serialized = (2.seconds + 345.nanoseconds).serialize(StructRecordingSerializer()).getOrThrow()

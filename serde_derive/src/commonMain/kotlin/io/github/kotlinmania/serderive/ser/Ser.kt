@@ -177,17 +177,10 @@ private fun buildGenerics(cont: Container): Generics {
             cont,
             g2,
             ::needsSerializeBound,
-            parseQuotePath("_serde.Serialize")
+            parse2(PathParse::parse, quote("_serde::Serialize")).getOrThrow()
         )
         else -> withWherePredicates(g2, serBound)
     }
-}
-
-// Parse a quote string into a Path, equivalent to the upstream parse-quote macro.
-private fun parseQuotePath(template: String): Path {
-    val tokens = quote(template.replace(".", "::"))
-    val result = parse2(PathParse::parse, tokens)
-    return result.getOrThrow()
 }
 
 // Fields with a skipSerializing or serializeWith attribute, or which
@@ -227,7 +220,7 @@ private fun serializeTransparent(cont: Container, params: SerParameters): Fragme
     val path = when (val sw = transparentField.attrs.serializeWith()) {
         null -> {
             val span = transparentField.original.span()
-            quoteSpanned(span, "_serde.Serialize.serialize")
+            quoteSpanned(span, "_serde::Serialize::serialize")
         }
         else -> quote("`#`sw", "sw" to sw)
     }
@@ -244,7 +237,7 @@ private fun serializeInto(params: SerParameters, typeInto: SynType): Fragment {
     val selfVar = params.selfVar
     return Fragment.Block(quote(
         """
-        _serde.Serialize.serialize(
+        _serde::Serialize::serialize(
             &_serde::`#`Private::Into::<`#`typeInto>::into(_serde::`#`Private::Clone::clone(`#`selfVar)),
             __serializer)
         """,

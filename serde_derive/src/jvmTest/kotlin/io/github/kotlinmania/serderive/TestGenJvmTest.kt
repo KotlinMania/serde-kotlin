@@ -5,6 +5,20 @@ import io.github.kotlinmania.procmacro2.Delimiter
 import io.github.kotlinmania.procmacro2.Spacing
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.procmacro2.TokenTree
+import io.github.kotlinmania.syn.Attribute
+import io.github.kotlinmania.syn.Block
+import io.github.kotlinmania.syn.Data
+import io.github.kotlinmania.syn.DeriveInput
+import io.github.kotlinmania.syn.DeriveInputParse
+import io.github.kotlinmania.syn.Fields
+import io.github.kotlinmania.syn.Item
+import io.github.kotlinmania.syn.Meta
+import io.github.kotlinmania.syn.ModContent
+import io.github.kotlinmania.syn.Stmt
+import io.github.kotlinmania.syn.SynResult
+import io.github.kotlinmania.syn.UseTree
+import io.github.kotlinmania.syn.parse2
+import io.github.kotlinmania.syn.parseFile
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -1005,6 +1019,165 @@ internal data class CargoOutput(
     val exitCode: Int,
     val diagnostics: String,
 )
+
+internal data class GeneratedRustFixture(
+    val source: String,
+    val serdeDerivedItems: Int,
+)
+
+internal fun generateRustFixtureFromSerdeDerives(source: String): GeneratedRustFixture {
+    val file =
+        parseFile(source).getOrElse { error ->
+            val location = error.span().start()
+            throw IllegalArgumentException(
+                "Failed to parse Rust fixture at ${location.line}:${location.column} " +
+                    "near ${error.span().sourceText()}: $error",
+                error,
+            )
+        }
+    val transformer = RustFixtureTransformer()
+    file.items = transformer.transformItems(file.items)
+    val tokens = TokenStream.new()
+    file.toTokens(tokens)
+    return GeneratedRustFixture(
+        source = renderRust(tokens) + "\n",
+        serdeDerivedItems = transformer.serdeDerivedItems,
+    )
+}
+
+private class RustFixtureTransformer {
+    var serdeDerivedItems: Int = 0
+        private set
+
+    fun transformItems(items: List<Item>): List<Item> =
+        items.mapNotNull(::transformItem)
+
+    private fun transformItem(item: Item): Item? =
+        when (item) {
+            is Item.Use -> if (item.isSerdeDeriveImport()) null else item
+            is Item.Mod ->
+                item.copy(
+                    content =
+                        when (val content = item.content) {
+                            is ModContent.Inline -> content.copy(items = transformItems(content.items))
+                            else -> content
+                        },
+                )
+            is Item.Fn -> item.copy(block = item.block?.let(::transformBlock))
+            is Item.Struct,
+            is Item.Enum,
+            is Item.Union,
+            -> transformDerivedItem(item)
+            else -> item
+        }
+
+    private fun transformBlock(block: Block): Block =
+        block.copy(
+            stmts =
+                block.stmts.mapNotNull { stmt ->
+                    when (stmt) {
+                        is Stmt.ItemStmt -> transformItem(stmt.item)?.let(Stmt::ItemStmt)
+                        else -> stmt
+                    }
+                },
+        )
+
+    private fun transformDerivedItem(item: Item): Item {
+        val originalTokens = item.toTokenStream()
+        val probe = originalTokens.clone().parseDeriveInput()
+        val derives = probe.attrs.flatMap { it.derivePaths().orEmpty() }
+        val serialize = derives.any { it.isIdent("Serialize") }
+        val deserialize = derives.any { it.isIdent("Deserialize") }
+        if (!serialize && !deserialize) return item
+
+        val output = TokenStream.new()
+        val declaration = originalTokens.clone().parseDeriveInput()
+        declaration.stripSerdeAttributes()
+        declaration.toTokens(output)
+        if (serialize) {
+            output.extendTokenStreams(listOf(deriveSerialize(originalTokens.clone().generatorInput())))
+        }
+        if (deserialize) {
+            output.extendTokenStreams(listOf(deriveDeserialize(originalTokens.clone().generatorInput())))
+        }
+        serdeDerivedItems += 1
+        return Item.Verbatim(output)
+    }
+}
+
+private fun Item.Use.isSerdeDeriveImport(): Boolean =
+    (tree as? UseTree.Path)?.ident?.toString() == "serde_derive"
+
+private fun TokenStream.parseDeriveInput(): DeriveInput {
+    val declaration = renderRust(clone())
+    return parse2(DeriveInputParse::parse, this).getOrElse { error ->
+        throw IllegalArgumentException("Failed to parse derive input: $declaration", error)
+    }
+}
+
+private fun TokenStream.generatorInput(): TokenStream {
+    val input =
+        parseDeriveInput().also { input ->
+            input.attrs = input.attrs.filterNot { it.path().isIdent("derive") }
+        }
+    return TokenStream.new().also(input::toTokens)
+}
+
+private fun DeriveInput.stripSerdeAttributes() {
+    attrs = attrs.cleanedForDeclaration()
+    when (val dataValue = data) {
+        is Data.Struct -> dataValue.fields.stripSerdeAttributes()
+        is Data.Enum ->
+            dataValue.variants.toList().forEach { variant ->
+                variant.attrs = variant.attrs.cleanedForDeclaration()
+                variant.fields.stripSerdeAttributes()
+            }
+        is Data.Union ->
+            dataValue.fields.named.toList().forEach { field ->
+                field.attrs = field.attrs.cleanedForDeclaration()
+            }
+    }
+}
+
+private fun Fields.stripSerdeAttributes() {
+    forEach { field ->
+        field.attrs = field.attrs.cleanedForDeclaration()
+    }
+}
+
+private fun List<Attribute>.cleanedForDeclaration(): List<Attribute> =
+    mapNotNull { attribute ->
+        when {
+            attribute.path().isIdent("serde") -> null
+            attribute.path().isIdent("derive") -> attribute.withoutSerdeDerives()
+            else -> attribute
+        }
+    }
+
+private fun Attribute.withoutSerdeDerives(): Attribute? {
+    val retained = derivePaths().orEmpty().filterNot { path ->
+        path.isIdent("Serialize") || path.isIdent("Deserialize")
+    }
+    if (retained.isEmpty()) return null
+    val tokens =
+        TokenStream.fromString(
+            retained.joinToString(", ") { path ->
+                renderRust(TokenStream.new().also(path::toTokens))
+            },
+        ).getOrThrow()
+    val list = meta as Meta.List
+    return copy(meta = list.copy(tokens = tokens))
+}
+
+private fun Attribute.derivePaths(): List<io.github.kotlinmania.syn.Path>? {
+    if (!path().isIdent("derive")) return null
+    val paths = mutableListOf<io.github.kotlinmania.syn.Path>()
+    parseNestedMeta { nested ->
+        paths.add(nested.path)
+        SynResult.success(Unit)
+    }.getOrThrow()
+    return paths
+}
 
 private val rustFixtureLock = Any()
 
