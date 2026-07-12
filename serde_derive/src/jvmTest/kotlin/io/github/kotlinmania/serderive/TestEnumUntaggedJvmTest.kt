@@ -3,8 +3,6 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TestEnumUntaggedJvmTest {
     @Test
@@ -65,29 +63,17 @@ class TestEnumUntaggedJvmTest {
     fun expectingMessage() = runUntaggedRustTest("expecting_message")
 }
 
-private val untaggedFixtureLock = Any()
 private val untaggedFixtureSource by lazy(::buildUntaggedFixtureSource)
 
 private fun runUntaggedRustTest(testName: String) {
-    val output =
-        synchronized(untaggedFixtureLock) {
-            compileRustFixture(
-                fixtureName = "test_enum_untagged",
-                source = untaggedFixtureSource,
-                extraDependencies = "serde_test = \"=1.0.176\"",
-                cargoArguments = listOf("test", "--quiet", testName, "--", "--exact"),
-                reuseFixture = true,
-                offline = false,
-            )
-    }
-    assertEquals(0, output.exitCode, "Rust test $testName failed:\n${output.diagnostics}")
-    assertTrue(
-        output.diagnostics.contains("1 passed; 0 failed"),
-        "Rust test $testName did not execute exactly one passing test:\n${output.diagnostics}",
+    runExactSerdeRustTest(
+        fixtureName = "test_enum_untagged",
+        source = untaggedFixtureSource,
+        testName = testName,
     )
 }
 
-private fun generatedDerives(
+internal fun generatedDerives(
     deriveInput: String,
     declaration: String,
     serialize: Boolean = true,

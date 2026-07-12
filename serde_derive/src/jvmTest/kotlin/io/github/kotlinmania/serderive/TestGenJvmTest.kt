@@ -1006,6 +1006,31 @@ internal data class CargoOutput(
     val diagnostics: String,
 )
 
+private val rustFixtureLock = Any()
+
+internal fun runExactSerdeRustTest(
+    fixtureName: String,
+    source: String,
+    testName: String,
+) {
+    val output =
+        synchronized(rustFixtureLock) {
+            compileRustFixture(
+                fixtureName = fixtureName,
+                source = source,
+                extraDependencies = "serde_test = \"=1.0.176\"",
+                cargoArguments = listOf("test", "--quiet", testName, "--", "--exact"),
+                reuseFixture = true,
+                offline = false,
+            )
+        }
+    assertEquals(0, output.exitCode, "Rust test $testName failed:\n${output.diagnostics}")
+    assertTrue(
+        output.diagnostics.contains("1 passed; 0 failed"),
+        "Rust test $testName did not execute exactly one passing test:\n${output.diagnostics}",
+    )
+}
+
 internal fun compileDerives(
     fixtureName: String,
     deriveInput: String,
