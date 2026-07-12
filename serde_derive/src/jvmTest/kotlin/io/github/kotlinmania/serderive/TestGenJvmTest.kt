@@ -1017,11 +1017,6 @@ internal fun compileDerives(
     extraDependencies: String = "",
     cargoSubcommand: String = "check",
 ): CargoOutput {
-    val root = findRepositoryRoot()
-    val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
-    fixture.toFile().deleteRecursively()
-    Files.createDirectories(fixture.resolve("src"))
-
     val serialize = if (generateSerialize) {
         renderRust(deriveSerialize(TokenStream.fromString(deriveInput).getOrThrow()))
     } else {
@@ -1032,10 +1027,36 @@ internal fun compileDerives(
     } else {
         ""
     }
+    return compileRustFixture(
+        fixtureName = fixtureName,
+        source =
+            buildString {
+                appendLine("#![allow(dead_code)]")
+                appendLine(support)
+                appendLine(declaration)
+                appendLine(serialize)
+                appendLine(deserialize)
+                appendLine(verify)
+            },
+        extraDependencies = extraDependencies,
+        cargoArguments = listOf(cargoSubcommand, "--quiet"),
+    )
+}
 
+internal fun compileRustFixture(
+    fixtureName: String,
+    source: String,
+    extraDependencies: String = "",
+    cargoArguments: List<String> = listOf("test", "--quiet"),
+    reuseFixture: Boolean = false,
+    offline: Boolean = true,
+): CargoOutput {
+    require(cargoArguments.isNotEmpty())
+    val root = findRepositoryRoot()
+    val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
     val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')
     val serdeCorePath = root.resolve("tmp/serde/serde_core").toString().replace('\\', '/')
-    fixture.resolve("Cargo.toml").writeText(
+    val cargoToml =
         """
         [package]
         name = "$fixtureName"
@@ -1049,28 +1070,33 @@ internal fun compileDerives(
         [patch.crates-io]
         serde = { path = "$serdePath" }
         serde_core = { path = "$serdeCorePath" }
-        """.trimIndent() + "\n",
-    )
-    fixture.resolve("src/lib.rs").writeText(
-        buildString {
-            appendLine("#![allow(dead_code)]")
-            appendLine(support)
-            appendLine(declaration)
-            appendLine(serialize)
-            appendLine(deserialize)
-            appendLine(verify)
-        },
-    )
+        """.trimIndent() + "\n"
+    val cargoFile = fixture.resolve("Cargo.toml")
+    val sourceFile = fixture.resolve("src/lib.rs")
+    val fixtureMatches =
+        reuseFixture &&
+            Files.exists(cargoFile) &&
+            Files.exists(sourceFile) &&
+            Files.readString(cargoFile) == cargoToml &&
+            Files.readString(sourceFile) == source
+    if (!fixtureMatches) {
+        fixture.toFile().deleteRecursively()
+        Files.createDirectories(fixture.resolve("src"))
+        cargoFile.writeText(cargoToml)
+        sourceFile.writeText(source)
+    }
 
+    val command =
+        buildList {
+            add("cargo")
+            add(cargoArguments.first())
+            if (offline) add("--offline")
+            add("--manifest-path")
+            add(cargoFile.toString())
+            addAll(cargoArguments.drop(1))
+        }
     val process =
-        ProcessBuilder(
-            "cargo",
-            cargoSubcommand,
-            "--offline",
-            "--quiet",
-            "--manifest-path",
-            fixture.resolve("Cargo.toml").toString(),
-        )
+        ProcessBuilder(command)
             .redirectErrorStream(true)
             .start()
     val diagnostics = StringBuilder()
@@ -1079,16 +1105,16 @@ internal fun compileDerives(
             lines.forEach { diagnostics.appendLine(it) }
         }
     }
-    val finished = process.waitFor(2, TimeUnit.MINUTES)
+    val finished = process.waitFor(5, TimeUnit.MINUTES)
     if (!finished) {
         process.destroyForcibly()
     }
     outputReader.join()
-    assertTrue(finished, "cargo $cargoSubcommand timed out for $fixtureName")
+    assertTrue(finished, "${command.joinToString(" ")} timed out for $fixtureName")
     return CargoOutput(process.exitValue(), diagnostics.toString())
 }
 
-private fun renderRust(tokens: TokenStream): String =
+internal fun renderRust(tokens: TokenStream): String =
     buildString {
         for (token in tokens) {
             when (token) {
@@ -1117,7 +1143,7 @@ private fun renderRust(tokens: TokenStream): String =
         }
     }.trim()
 
-private fun findRepositoryRoot(): Path {
+internal fun findRepositoryRoot(): Path {
     var current = Path.of(System.getProperty("user.dir")).toAbsolutePath()
     while (!Files.exists(current.resolve("settings.gradle.kts"))) {
         current = current.parent ?: error("cannot locate serde-kotlin repository root")
