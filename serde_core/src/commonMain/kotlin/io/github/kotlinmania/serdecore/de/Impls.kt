@@ -5,8 +5,11 @@ import io.github.kotlinmania.serde.SerdeError
 
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serdecore.priv.fromUtf8LossyNoAlloc
 import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.priv.fromUtf8LossyNoAlloc
+import io.github.kotlinmania.serdecore.ser.Serialize
+import io.github.kotlinmania.serdecore.ser.Serializer
+import io.github.kotlinmania.serdecore.ser.serializeNetwork
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
@@ -1311,23 +1314,29 @@ private class ResultVisitor<T, E>(
 
 data class Ipv4Address(
     val octets: List<UByte>,
-) {
+) : Serialize {
     init {
         require(octets.size == 4)
     }
 
     override fun toString(): String = octets.joinToString(".") { it.toString() }
+
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        serializeNetwork(serializer)
 }
 
 data class Ipv6Address(
     val octets: List<UByte>,
-) {
+) : Serialize {
     init {
         require(octets.size == 16)
     }
+
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        serializeNetwork(serializer)
 }
 
-sealed class IpAddress {
+sealed class IpAddress : Serialize {
     data class V4(
         val address: Ipv4Address,
     ) : IpAddress()
@@ -1335,19 +1344,28 @@ sealed class IpAddress {
     data class V6(
         val address: Ipv6Address,
     ) : IpAddress()
+
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        serializeNetwork(serializer)
 }
 
 data class SocketAddressV4(
     val ip: Ipv4Address,
     val port: UShort,
-)
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        serializeNetwork(serializer)
+}
 
 data class SocketAddressV6(
     val ip: Ipv6Address,
     val port: UShort,
-)
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        serializeNetwork(serializer)
+}
 
-sealed class SocketAddress {
+sealed class SocketAddress : Serialize {
     data class V4(
         val address: SocketAddressV4,
     ) : SocketAddress()
@@ -1355,6 +1373,9 @@ sealed class SocketAddress {
     data class V6(
         val address: SocketAddressV6,
     ) : SocketAddress()
+
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        serializeNetwork(serializer)
 }
 
 private fun parseIpv4(value: String): Ipv4Address {

@@ -303,14 +303,15 @@ if (gradle.startParameter.taskNames.any(::requestedTaskWantsAndroid)) {
     installProjectAndroidSdk(serviceOf())
 }
 
-val ensureAndroidSdk by tasks.registering {
-    group = "setup"
-    description = "Ensures the project-local Android SDK is installed (idempotent)."
-    onlyIf("Android SDK already installed at $projectAndroidSdkDir") { !isProjectAndroidSdkInstalled() }
-    doLast {
-        installProjectAndroidSdk(serviceOf())
+val ensureAndroidSdk =
+    tasks.register("ensureAndroidSdk") {
+        group = "setup"
+        description = "Ensures the project-local Android SDK is installed (idempotent)."
+        onlyIf("Android SDK already installed at $projectAndroidSdkDir") { !isProjectAndroidSdkInstalled() }
+        doLast {
+            installProjectAndroidSdk(serviceOf())
+        }
     }
-}
 
 // Secondary net: order every AGP Android task after the installer (a no-op on
 // warm runs). Excludes androidNative* (Kotlin/Native) and the installer itself.
@@ -484,6 +485,9 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation("io.github.kotlinmania:serde-test-kotlin:0.1.0") {
+                exclude(group = "io.github.kotlinmania", module = "serde-kotlin")
+            }
         }
         if (benchmarkEnabled) {
             val commonBenchmark = maybeCreate("commonBenchmark")
@@ -628,13 +632,13 @@ rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") { version.se
 rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") { version.set(wasmYarnVersion) }
 
 rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
-    project.properties
-        .filterKeys { it.startsWith("yarn.resolution.") }
+    providers
+        .gradlePropertiesPrefixedBy("yarn.resolution.")
+        .get()
         .forEach { (key, value) ->
             val pkg = key.removePrefix("yarn.resolution.")
-            val ver = value as? String ?: return@forEach
-            resolution(pkg, ver)
-            resolution("**/$pkg", ver)
+            resolution(pkg, value)
+            resolution("**/$pkg", value)
         }
     // webpack resolution sourced from kotlin-js-store/package.json (see above)
     // rather than a yarn.resolution.webpack property, so it can never override a
