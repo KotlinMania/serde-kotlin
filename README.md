@@ -146,7 +146,7 @@ dependencies {
 ```
 
 The modules are published as separate Maven coordinates: `serde-kotlin:0.1.6`,
-`serde-core:0.1.1`, and `serde-derive:0.1.2`. Most consumers only need
+`serde-core:0.1.6`, and `serde-derive:0.1.6`. Most consumers only need
 `serde-kotlin`, which exposes the other two modules through its API dependencies.
 
 ### Building
