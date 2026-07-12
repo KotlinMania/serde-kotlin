@@ -2,8 +2,8 @@
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.TokenStream
-import io.github.kotlinmania.serderive.checkedQuote
-import io.github.kotlinmania.serderive.checkedQuoteSpanned
+import io.github.kotlinmania.quote.quote
+import io.github.kotlinmania.quote.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Field
 import io.github.kotlinmania.serderive.internals.Fragment
@@ -32,19 +32,19 @@ internal fun deserializeTuple(
     // getters then construct the target type directly.
     val construct = if (params.hasGetter) {
         val local = params.local
-        checkedQuote("`#`local", "local" to local)
+        quote("`#`local", "local" to local)
     } else {
-        checkedQuote("`#`thisValue", "thisValue" to thisValue)
+        quote("`#`thisValue", "thisValue" to thisValue)
     }
 
     val typePath = when (form) {
         TupleForm.Tuple -> construct
-        is TupleForm.ExternallyTagged -> checkedQuote(
+        is TupleForm.ExternallyTagged -> quote(
             "`#`construct::`#`variantIdent",
             "construct" to construct,
             "variantIdent" to form.variantIdent,
         )
-        is TupleForm.Untagged -> checkedQuote(
+        is TupleForm.Untagged -> quote(
             "`#`construct::`#`variantIdent",
             "construct" to construct,
             "variantIdent" to form.variantIdent,
@@ -68,7 +68,7 @@ internal fun deserializeTuple(
 
     val visitSeq = Stmts(deserializeSeq(typePath, params, fields, false, cattrs, expectingVal))
 
-    val visitorExpr = checkedQuote("""
+    val visitorExpr = quote("""
         __Visitor {
             marker: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
             lifetime: _serde::`#`Private::PhantomData,
@@ -77,35 +77,35 @@ internal fun deserializeTuple(
     val dispatch = when (form) {
         TupleForm.Tuple -> if (nfields == 1) {
             val typeName = cattrs.name().deserializeName()
-            checkedQuote(
+            quote(
                 "_serde::Deserializer::deserialize_newtype_struct(__deserializer, `#`typeName, `#`visitorExpr)",
                 "typeName" to typeName,
                 "visitorExpr" to visitorExpr,
             )
         } else {
             val typeName = cattrs.name().deserializeName()
-            checkedQuote(
+            quote(
                 "_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)",
                 "typeName" to typeName,
                 "fieldCount" to fieldCountToken,
                 "visitorExpr" to visitorExpr,
             )
         }
-        is TupleForm.ExternallyTagged -> checkedQuote(
+        is TupleForm.ExternallyTagged -> quote(
             "_serde::de::VariantAccess::tuple_variant(__variant, `#`fieldCount, `#`visitorExpr)",
             "fieldCount" to fieldCountToken,
             "visitorExpr" to visitorExpr,
         )
-        is TupleForm.Untagged -> checkedQuote(
+        is TupleForm.Untagged -> quote(
             "_serde::Deserializer::deserialize_tuple(__deserializer, `#`fieldCount, `#`visitorExpr)",
             "fieldCount" to fieldCountToken,
             "visitorExpr" to visitorExpr,
         )
     }
 
-    val visitorVar = if (fieldCount == 0) checkedQuote("_") else checkedQuote("mut __seq")
+    val visitorVar = if (fieldCount == 0) quote("_") else quote("mut __seq")
 
-    return Fragment.Block(checkedQuote("""
+    return Fragment.Block(quote("""
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
             marker: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
@@ -155,10 +155,10 @@ private fun deserializeNewtypeStructTuple(
 ): TokenStream {
     val delife = params.borrowed.deLifetime()
     val fieldTy = field.ty
-    val deserializerVar = checkedQuote("__e")
+    val deserializerVar = quote("__e")
 
     val value = field.attrs.deserializeWith()?.let { path ->
-        checkedQuoteSpanned(
+        quoteSpanned(
             path.span(),
             "`#`path(`#`deserializerVar)?",
             "path" to path,
@@ -166,16 +166,16 @@ private fun deserializeNewtypeStructTuple(
         )
     } ?: run {
         val span = field.original.span()
-        val func = checkedQuoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize", "fieldTy" to fieldTy)
-        checkedQuote("`#`func(`#`deserializerVar)?", "func" to func, "deserializerVar" to deserializerVar)
+        val func = quoteSpanned(span, "<`#`fieldTy as _serde::Deserialize>::deserialize", "fieldTy" to fieldTy)
+        quote("`#`func(`#`deserializerVar)?", "func" to func, "deserializerVar" to deserializerVar)
     }
 
-    var result = checkedQuote("`#`typePath(__field0)", "typePath" to typePath)
+    var result = quote("`#`typePath(__field0)", "typePath" to typePath)
     if (params.hasGetter) {
         val thisType = params.thisType
         val split = params.generics.splitForImpl()
         val tyGenerics = split.typeGenerics
-        result = checkedQuote(
+        result = quote(
             "_serde::`#`Private::Into::<`#`thisType `#`tyGenerics>::into(`#`result)",
             "Private" to Private,
             "thisType" to thisType,
@@ -184,7 +184,7 @@ private fun deserializeNewtypeStructTuple(
         )
     }
 
-    return checkedQuote("""
+    return quote("""
         `#`[inline]
         fn visit_newtype_struct<__E>(self, `#`deserializerVar: __E) -> _serde::`#`Private::Result<Self::Value, __E::Error>
         where
@@ -227,7 +227,7 @@ internal fun deserializeTupleInPlace(
     val visitNewtypeStruct = if (nfields == 1) {
         check(fields[0].attrs.deserializeWith() == null)
         val index = rustUnsuffixedLiteral(0u)
-        checkedQuote("""
+        quote("""
             `#`[inline]
             fn visit_newtype_struct<__E>(self, __e: __E) -> _serde::`#`Private::Result<Self::Value, __E::Error>
             where
@@ -237,12 +237,12 @@ internal fun deserializeTupleInPlace(
             }
         """, "Private" to Private, "delife" to delife, "index" to index)
     } else {
-        checkedQuote("")
+        quote("")
     }
 
     val visitSeq = Stmts(deserializeSeqInPlace(params, fields, cattrs, expectingVal))
 
-    val visitorExpr = checkedQuote("""
+    val visitorExpr = quote("""
         __Visitor {
             place: __place,
             lifetime: _serde::`#`Private::PhantomData,
@@ -251,13 +251,13 @@ internal fun deserializeTupleInPlace(
 
     val typeName = cattrs.name().deserializeName()
     val dispatch = if (nfields == 1) {
-        checkedQuote(
+        quote(
             "_serde::Deserializer::deserialize_newtype_struct(__deserializer, `#`typeName, `#`visitorExpr)",
             "typeName" to typeName,
             "visitorExpr" to visitorExpr,
         )
     } else {
-        checkedQuote(
+        quote(
             "_serde::Deserializer::deserialize_tuple_struct(__deserializer, `#`typeName, `#`fieldCount, `#`visitorExpr)",
             "typeName" to typeName,
             "fieldCount" to fieldCountToken,
@@ -265,9 +265,9 @@ internal fun deserializeTupleInPlace(
         )
     }
 
-    val visitorVar = if (fieldCount == 0) checkedQuote("_") else checkedQuote("mut __seq")
+    val visitorVar = if (fieldCount == 0) quote("_") else quote("mut __seq")
 
-    return Fragment.Block(checkedQuote("""
+    return Fragment.Block(quote("""
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
             place: &`#`placeLife mut `#`thisType `#`tyGenerics,

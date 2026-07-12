@@ -4,6 +4,7 @@ package io.github.kotlinmania.serderive.internals
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.PathSegment
+import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.PathSep
 
 public fun thisType(cont: Container): Path {
@@ -18,7 +19,7 @@ public fun thisType(cont: Container): Path {
         }
         return thisPath
     } else {
-        return Path.from(cont.ident.deepCopy())
+        return Path.from(cont.ident.copy())
     }
 }
 
@@ -36,6 +37,6 @@ public fun thisValue(cont: Container): Path {
         }
         return thisPath
     } else {
-        return Path.from(cont.ident.deepCopy())
+        return Path.from(cont.ident.copy())
     }
 }

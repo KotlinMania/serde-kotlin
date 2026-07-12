@@ -10,6 +10,7 @@ import io.github.kotlinmania.syn.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.SynType
+import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.Variant as SynVariant
 
 public class Container(
@@ -61,7 +62,7 @@ public class Container(
             }
 
             val container = Container(
-                ident = item.ident.deepCopy(),
+                ident = item.ident.copy(),
                 attrs = attrs,
                 data = data,
                 generics = item.generics,
@@ -127,7 +128,7 @@ private fun enumFromAst(
             private
         )
         Variant(
-            ident = variant.ident.deepCopy(),
+            ident = variant.ident.copy(),
             attrs = attrs,
             style = style,
             fields = fields,
@@ -190,7 +191,7 @@ private fun fieldsFromAst(
     for (field in fields) {
         val ident = field.ident
         val member = if (ident != null) {
-            Member.Named(ident.deepCopy())
+            Member.Named(ident.copy())
         } else {
             Member.Unnamed(io.github.kotlinmania.syn.Index(dstFields.size.toUInt(), io.github.kotlinmania.procmacro2.Span.callSite()))
         }
@@ -212,4 +213,3 @@ private fun fieldsFromAst(
     }
     return dstFields
 }
-

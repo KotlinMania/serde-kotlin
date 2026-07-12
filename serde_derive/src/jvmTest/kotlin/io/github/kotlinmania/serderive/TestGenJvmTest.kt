@@ -1001,12 +1001,12 @@ private data class CompileCase(
     val verifyType: String,
 )
 
-private data class CargoOutput(
+internal data class CargoOutput(
     val exitCode: Int,
     val diagnostics: String,
 )
 
-private fun compileDerives(
+internal fun compileDerives(
     fixtureName: String,
     deriveInput: String,
     declaration: String,
@@ -1014,6 +1014,8 @@ private fun compileDerives(
     verify: String,
     generateSerialize: Boolean = true,
     generateDeserialize: Boolean = true,
+    extraDependencies: String = "",
+    cargoSubcommand: String = "check",
 ): CargoOutput {
     val root = findRepositoryRoot()
     val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
@@ -1032,6 +1034,7 @@ private fun compileDerives(
     }
 
     val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')
+    val serdeCorePath = root.resolve("tmp/serde/serde_core").toString().replace('\\', '/')
     fixture.resolve("Cargo.toml").writeText(
         """
         [package]
@@ -1041,6 +1044,11 @@ private fun compileDerives(
 
         [dependencies]
         serde = { path = "$serdePath" }
+        $extraDependencies
+
+        [patch.crates-io]
+        serde = { path = "$serdePath" }
+        serde_core = { path = "$serdeCorePath" }
         """.trimIndent() + "\n",
     )
     fixture.resolve("src/lib.rs").writeText(
@@ -1055,7 +1063,14 @@ private fun compileDerives(
     )
 
     val process =
-        ProcessBuilder("cargo", "check", "--offline", "--quiet", "--manifest-path", fixture.resolve("Cargo.toml").toString())
+        ProcessBuilder(
+            "cargo",
+            cargoSubcommand,
+            "--offline",
+            "--quiet",
+            "--manifest-path",
+            fixture.resolve("Cargo.toml").toString(),
+        )
             .redirectErrorStream(true)
             .start()
     val diagnostics = StringBuilder()
@@ -1069,7 +1084,7 @@ private fun compileDerives(
         process.destroyForcibly()
     }
     outputReader.join()
-    assertTrue(finished, "cargo check timed out for $fixtureName")
+    assertTrue(finished, "cargo $cargoSubcommand timed out for $fixtureName")
     return CargoOutput(process.exitValue(), diagnostics.toString())
 }
 

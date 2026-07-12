@@ -29,7 +29,10 @@ dokka {
 
     }
     pluginsConfiguration.html {
-        templatesDir = rootDir.resolve("dokka-templates")
+        val customTemplates = rootDir.resolve("dokka-templates")
+        if (customTemplates.isDirectory) {
+            templatesDir = customTemplates
+        }
     }
 }
 

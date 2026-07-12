@@ -1,7 +1,7 @@
 // port-lint: source de/enum_internally.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.serderive.checkedQuote
+import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Match
@@ -26,7 +26,7 @@ internal fun deserializeEnumInternally(
 
         val block = Match(deserializeInternallyTaggedVariant(params, variant, cattrs))
 
-        checkedQuote(
+        quote(
             "__Field::`#`variantName => `#`block",
             "variantName" to variantName,
             "block" to block,
@@ -36,7 +36,7 @@ internal fun deserializeEnumInternally(
     val expecting = "internally tagged enum ${params.typeName()}"
     val expectingVal = cattrs.expecting() ?: expecting
 
-    return Fragment.Block(checkedQuote("""
+    return Fragment.Block(quote("""
         `#`variantVisitor
 
         `#`variantsStmt
@@ -69,7 +69,7 @@ private fun deserializeInternallyTaggedVariant(
     val path = variant.attrs.deserializeWith()
     if (path != null) {
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
-        return Fragment.Block(checkedQuote("""
+        return Fragment.Block(quote("""
             _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
         """, "Private" to Private, "path" to path, "unwrapFn" to unwrapFn))
     }
@@ -83,9 +83,9 @@ private fun deserializeInternallyTaggedVariant(
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
                 val defaultExpr = Stmts(exprIsMissing(field, cattrs))
-                checkedQuote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
-            } ?: checkedQuote("")
-            Fragment.Block(checkedQuote("""
+                quote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
+            } ?: quote("")
+            Fragment.Block(quote("""
                 _serde::Deserializer::deserialize_any(__deserializer, _serde::`#`Private::de::InternallyTaggedUnitVisitor::new(`#`typeName, `#`variantName))?;
                 _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default)
             """, mapOf(

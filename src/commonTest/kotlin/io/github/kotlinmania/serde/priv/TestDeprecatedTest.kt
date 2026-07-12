@@ -1,4 +1,4 @@
-// port-lint: source test_suite/tests/test_deprecated.rs
+// port-lint: tests test_suite/tests/test_deprecated.rs
 package io.github.kotlinmania.serde.`private`
 
 @Deprecated("deprecated upstream enum")
