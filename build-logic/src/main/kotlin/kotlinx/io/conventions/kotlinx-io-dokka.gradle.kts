@@ -9,7 +9,10 @@ plugins {
 
 dokka {
     dokkaSourceSets.configureEach {
-        includes.from("Module.md")
+        val moduleDocumentation = projectDir.resolve("Module.md")
+        if (moduleDocumentation.isFile) {
+            includes.from(moduleDocumentation)
+        }
 
         sourceLink {
             localDirectory = rootDir
