@@ -1,7 +1,6 @@
 // serde_derive — the serde_derive analogue: the derive/codegen port.
 // Depends on :serde-core and the published syn/quote/proc-macro2 ports (nothing vendored).
-// Slimmed to the shared convention plugins (build-logic). Publishing not applied yet —
-// vanniktech is being replaced.
+// This module publishes separately as io.github.kotlinmania:serde-derive.
 
 plugins {
     id("kotlinx-io-multiplatform")

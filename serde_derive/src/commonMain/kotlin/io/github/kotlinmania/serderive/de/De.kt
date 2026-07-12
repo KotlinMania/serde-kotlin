@@ -5,8 +5,8 @@ import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.ToTokens
 import io.github.kotlinmania.quote.appendAll
-import io.github.kotlinmania.serderive.checkedQuote as quoteTokens
-import io.github.kotlinmania.serderive.checkedQuoteSpanned as quoteSpannedTokens
+import io.github.kotlinmania.quote.quote as quoteTokens
+import io.github.kotlinmania.quote.quoteSpanned as quoteSpannedTokens
 import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.AttrField
 import io.github.kotlinmania.serderive.internals.AttrVariant
@@ -47,6 +47,7 @@ import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.WhereClause
+import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.span
 import io.github.kotlinmania.syn.token.Comma
 import io.github.kotlinmania.syn.token.Plus
@@ -160,7 +161,7 @@ private fun preconditionNoDeLifetime(cx: Ctxt, cont: Container) {
 }
 
 class Parameters(cont: Container) {
-    val local: Ident = Ident.new(cont.ident.toString(), cont.ident.span())
+    val local: Ident = cont.ident.copy()
     val thisType: Path = thisType(cont)
     val thisValue: Path = thisValue(cont)
     val borrowed: BorrowedLifetimes = borrowedLifetimes(cont)

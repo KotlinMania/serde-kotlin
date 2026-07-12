@@ -457,10 +457,6 @@ kotlin {
     swiftExport {
         moduleName = frameworkName
         flattenPackage = projectNamespace
-        @OptIn(org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl::class)
-        configure {
-            settings.put("enableCoroutinesSupport", "true")
-        }
     }
 
     // Android KMP library. Block name is `android` — `androidLibrary` is deprecated in current KGP.
@@ -650,8 +646,8 @@ val patchedKarmaWebpackPackage =
         .asFile.absolutePath
         .replace("\\", "/")
 
-// TODO: NodeJsRootExtension.versions.* is deprecated and will be removed when the spec-based
-//       NodeJsEnvSpec API gains equivalent properties. Track KGP release notes before removing.
+// NodeJsEnvSpec does not expose dependency-version properties, so these remain on
+// NodeJsRootExtension while KGP requires that API for webpack and test-runner overrides.
 rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
     versions.webpack.version = webpackVersion
     versions.webpackCli.version = providers.gradleProperty("node.webpackCli.version").getOrElse("7.0.2")
@@ -659,81 +655,6 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
     versions.karmaWebpack.version = "file:$patchedKarmaWebpackPackage"
     versions.mocha.version = providers.gradleProperty("node.mocha.version").getOrElse("12.0.0-beta-10")
     versions.kotlinWebHelpers.version = providers.gradleProperty("node.kotlinWebHelpers.version").getOrElse("3.1.0")
-}
-
-fun patchRootSwiftPackage(packageDir: File) {
-    if (!packageDir.exists()) return
-
-    val staleLexErrorWrapper =
-        Regex(
-            """\n\s+public func from\(\n\s+err: ExportedKotlinPackages\.io\.github\.kotlinmania\.procmacro2\.LexError\n\s+\) -> ExportedKotlinPackages\.io\.github\.kotlinmania\.syn\.SynError \{\n\s+return ExportedKotlinPackages\.io\.github\.kotlinmania\.syn\.SynError\.__createClassWrapper\(externalRCRef: io_github_kotlinmania_syn_SynError_Companion_from__TypesOfArguments__ExportedKotlinPackages_io_github_kotlinmania_procmacro2_LexError__\(self\.__externalRCRef\(\), err\.__externalRCRef\(\)\)\)\n\s+\}""",
-        )
-    val staleLexErrorBridge =
-        Regex(
-            """\n@ExportedBridge\("io_github_kotlinmania_syn_SynError_Companion_from__TypesOfArguments__ExportedKotlinPackages_io_github_kotlinmania_procmacro2_LexError__"\)\npublic fun io_github_kotlinmania_syn_SynError_Companion_from__TypesOfArguments__ExportedKotlinPackages_io_github_kotlinmania_procmacro2_LexError__\(self: kotlin\.native\.internal\.NativePtr, err: kotlin\.native\.internal\.NativePtr\): kotlin\.native\.internal\.NativePtr \{\n\s+val __self = kotlin\.native\.internal\.ref\.dereferenceExternalRCRef\(self\) as io\.github\.kotlinmania\.syn\.SynError\.Companion\n\s+val __err = kotlin\.native\.internal\.ref\.dereferenceExternalRCRef\(err\) as io\.github\.kotlinmania\.procmacro2\.LexError\n\s+val _result = run \{ __self\.from\(__err\) \}\n\s+return kotlin\.native\.internal\.ref\.createRetainedExternalRCRef\(_result\)\n\}""",
-        )
-
-    packageDir
-        .walkTopDown()
-        .filter { it.isFile && (it.extension == "swift" || it.extension == "kt") }
-        .forEach { generatedFile ->
-            val text = generatedFile.readText()
-            val patched =
-                staleLexErrorBridge.replace(
-                    staleLexErrorWrapper.replace(text, ""),
-                    "",
-                )
-            if (patched != text) {
-                generatedFile.writeText(patched)
-            }
-        }
-}
-
-val patchMacosArm64DebugSwiftPackage =
-    tasks.register("patchMacosArm64DebugSwiftPackage") {
-        dependsOn("macosArm64DebugGenerateSPMPackage")
-        doLast {
-            patchRootSwiftPackage(
-                layout.buildDirectory
-                    .dir("SPMPackage/macosArm64/Debug")
-                    .get()
-                    .asFile,
-            )
-        }
-    }
-
-tasks.configureEach {
-    if (name == "macosArm64DebugBuildSPMPackage") {
-        dependsOn(patchMacosArm64DebugSwiftPackage)
-    }
-}
-
-project(":serde-derive") {
-    val patchSerdeDeriveMacosArm64DebugSwiftPackage =
-        tasks.register("patchMacosArm64DebugSwiftPackage") {
-            dependsOn("macosArm64DebugGenerateSPMPackage")
-            dependsOn("macosArm64DebugSwiftExport")
-            doLast {
-                patchRootSwiftPackage(
-                    layout.buildDirectory
-                        .dir("SPMPackage/macosArm64/Debug")
-                        .get()
-                        .asFile,
-                )
-                patchRootSwiftPackage(
-                    layout.buildDirectory
-                        .dir("SwiftExport/macosArm64/Debug/files")
-                        .get()
-                        .asFile,
-                )
-            }
-        }
-
-    tasks.configureEach {
-        if (name == "macosArm64DebugBuildSPMPackage") {
-            dependsOn(patchSerdeDeriveMacosArm64DebugSwiftPackage)
-        }
-    }
 }
 
 // ============================================================================
@@ -787,6 +708,8 @@ tasks.register("test") {
     group = "verification"
     description = "Runs the commonTest-backed KMP suite, Android host tests, and Swift Export smoke test."
     dependsOn("allTests")
+    dependsOn(":serde-core:allTests")
+    dependsOn(":serde-derive:allTests")
     dependsOn("testAndroidHostTest")
     dependsOn("swiftExportSmokeTest")
 }

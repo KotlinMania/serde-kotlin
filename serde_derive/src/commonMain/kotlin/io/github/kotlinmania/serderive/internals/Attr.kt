@@ -8,12 +8,6 @@ import io.github.kotlinmania.syn.*
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.Data as SynData
 
-private fun Path.toTokenStream(): TokenStream {
-    val out = TokenStream.new()
-    toTokens(out)
-    return out
-}
-
 private fun pathSegmentListFrom(segments: List<PathSegment>): PathSegmentList {
     val list = PathSegmentList()
     for ((index, seg) in segments.withIndex()) {
@@ -24,8 +18,6 @@ private fun pathSegmentListFrom(segments: List<PathSegment>): PathSegmentList {
     }
     return list
 }
-
-internal fun Ident.deepCopy(): Ident = Ident.new(this.toString(), this.span())
 
 private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
     return meta.input.peek(io.github.kotlinmania.syn.EqPeek)
@@ -920,7 +912,7 @@ public class AttrField(
                 val span = Span.callSite()
                 val segments = mutableListOf(
                     PathSegment(Ident.new("_serde", span)),
-                    PathSegment(private.deepCopy()),
+                    PathSegment(private.copy()),
                     PathSegment(Ident.new("de", span)),
                     PathSegment(Ident.new("borrow_cow_str", span))
                 )
@@ -933,7 +925,7 @@ public class AttrField(
                 val span = Span.callSite()
                 val segments = mutableListOf(
                     PathSegment(Ident.new("_serde", span)),
-                    PathSegment(private.deepCopy()),
+                    PathSegment(private.copy()),
                     PathSegment(Ident.new("de", span)),
                     PathSegment(Ident.new("borrow_cow_bytes", span))
                 )
@@ -1236,7 +1228,6 @@ private fun isPrimitivePath(path: Path, primitive: String): Boolean {
             path.segments[0].arguments is PathArguments.None
 }
 
-// Parse a string literal like "'a + 'b + 'c" containing lifetimes separated by `+`
 private fun parseLitIntoLifetimes(
     cx: Ctxt,
     meta: ParseNestedMeta

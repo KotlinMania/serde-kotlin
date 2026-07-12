@@ -4,7 +4,7 @@ package io.github.kotlinmania.serderive.internals
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.formatIdent
 import io.github.kotlinmania.serderive.Private
-import io.github.kotlinmania.serderive.checkedQuote
+import io.github.kotlinmania.quote.quote
 
 // Suppress unused-code warnings that would otherwise appear when using a remote
 // derive. Other than this pretend code, a struct annotated with remote derive
@@ -14,7 +14,7 @@ public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream {
     val pretendFields = pretendFieldsUsed(cont, isPacked)
     val pretendVariants = pretendVariantsUsed(cont)
 
-    return checkedQuote("""
+    return quote("""
         `#`pretendFields
         `#`pretendVariants
     """, mapOf(
@@ -35,7 +35,7 @@ private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
                         pretendFieldsUsedStruct(cont, data.fields)
                     }
                 }
-                Style.Unit -> checkedQuote("")
+                Style.Unit -> quote("")
             }
         }
     }
@@ -49,7 +49,7 @@ private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): Token
     val members = fields.map { it.member }
     val placeholders = fields.indices.map { i -> formatIdent("__v$i") }
 
-    return checkedQuote("""
+    return quote("""
         match _serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> {
             _serde::`#`Private::Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) => {}
             _ => {}
@@ -70,7 +70,7 @@ private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>):
 
     val members = fields.map { it.member }
 
-    return checkedQuote("""
+    return quote("""
         match _serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> {
             _serde::`#`Private::Some(__v @ `#`typeIdent { `#`(`#`members: _),* }) => {
                 `#`(
@@ -100,7 +100,7 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
                 val members = variant.fields.map { it.member }
                 val placeholders = variant.fields.indices.map { i -> formatIdent("__v$i") }
                 patterns.add(
-                    checkedQuote(
+                    quote(
                         "`#`typeIdent::`#`variantIdent { `#`(`#`members: `#`placeholders),* }",
                         "typeIdent" to typeIdent,
                         "variantIdent" to variantIdent,
@@ -113,7 +113,7 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
         }
     }
 
-    return checkedQuote("""
+    return quote("""
         match _serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> {
             `#`(
                 _serde::`#`Private::Some(`#`patterns) => {}
@@ -131,7 +131,7 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
 private fun pretendVariantsUsed(cont: Container): TokenStream {
     val variants = when (val data = cont.data) {
         is Data.Enum -> data.variants
-        is Data.Struct -> return checkedQuote("")
+        is Data.Struct -> return quote("")
     }
 
     val typeIdent = cont.ident
@@ -145,20 +145,20 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
         val pat = when (variant.style) {
             Style.Struct -> {
                 val members = variant.fields.map { it.member }
-                checkedQuote(
+                quote(
                     "{ `#`(`#`members: `#`placeholders),* }",
                     "members" to members,
                     "placeholders" to placeholders,
                 )
             }
-            Style.Tuple, Style.Newtype -> checkedQuote(
+            Style.Tuple, Style.Newtype -> quote(
                 "( `#`(`#`placeholders),* )",
                 "placeholders" to placeholders,
             )
-            Style.Unit -> checkedQuote("")
+            Style.Unit -> quote("")
         }
 
-        checkedQuote("""
+        quote("""
             match _serde::`#`Private::None {
                 _serde::`#`Private::Some((`#`(`#`placeholders,)*)) => {
                     let _ = `#`typeIdent::`#`variantIdent `#`turbofish `#`pat;
@@ -175,5 +175,5 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
         ))
     }
 
-    return checkedQuote("`#`(`#`cases)*", "cases" to cases)
+    return quote("`#`(`#`cases)*", "cases" to cases)
 }

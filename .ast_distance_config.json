@@ -6,7 +6,7 @@
     "lang": "rust"
   },
   "target": {
-    "path": "serde/src/commonMain/kotlin/io/github/kotlinmania/serde/priv",
+    "path": "src/commonMain/kotlin/io/github/kotlinmania/serde/priv",
     "lang": "kotlin"
   },
   "checks": {

@@ -1,6 +1,6 @@
 // serde_core — the serde_core analogue: trait/data-model definitions, no derive.
 // Slimmed to the shared convention plugins (build-logic); module-specific config only.
-// Publishing is intentionally NOT applied here yet — vanniktech is being replaced.
+// This module publishes separately as io.github.kotlinmania:serde-core.
 
 plugins {
     id("kotlinx-io-multiplatform")

@@ -10,8 +10,8 @@ detekt = "1.23.8"
 ktlint = "14.2.0"
 kotlinxBenchmark = "0.4.17"
 # Sibling KotlinMania ports consumed by :serde-derive (the serde_derive analogue)
-syn = "0.3.3"
-quote = "0.2.3"
+syn = "0.3.4"
+quote = "0.2.5"
 procMacro2 = "0.1.6"
 # build-logic convention-plugin toolchain + plugin deps (mirrors km-io)
 multi-release-toolchain = "17"
@@ -43,6 +43,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
+maven-publish-gradle-plugin = { group = "com.vanniktech", name = "gradle-maven-publish-plugin", version.ref = "vanniktech" }
 # Sibling KotlinMania ports — published Maven artifacts consumed by :serde-derive only
 syn-kotlin = { module = "io.github.kotlinmania:syn-kotlin", version.ref = "syn" }
 quote-kotlin = { module = "io.github.kotlinmania:quote-kotlin", version.ref = "quote" }
