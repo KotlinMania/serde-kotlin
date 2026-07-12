@@ -1,0 +1,86 @@
+name: Publish serde-test to Maven Central
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "serde-test-kotlin release tag"
+        type: string
+        required: true
+      publish:
+        description: "Publish and release to Maven Central"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish serde-test to Maven Central
+    runs-on: macos-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Validate release tag
+        env:
+          SERDE_TEST_REF: ${{ inputs.ref }}
+        run: |
+          if [[ ! "$SERDE_TEST_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ref must be a serde-test-kotlin release tag such as v0.1.0" >&2
+            exit 1
+          fi
+
+      - name: Checkout serde-test-kotlin
+        uses: actions/checkout@v7
+        with:
+          repository: KotlinMania/serde-test-kotlin
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5.4.0
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.2.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '24'
+          check-latest: true
+
+      - name: Set up Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+
+      - name: Check JavaScript toolchain
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Build publication artifacts
+        if: ${{ !inputs.publish }}
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: ./gradlew setupAndroidSdk compileAndroidMain androidSourcesJar --no-configuration-cache
+
+      - name: Publish to Maven Central
+        if: ${{ inputs.publish }}
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+          ORG_GRADLE_PROJECT_centralPublishingType: "AUTOMATIC"
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+        run: ./gradlew setupAndroidSdk publishToCentralPortal --no-configuration-cache
