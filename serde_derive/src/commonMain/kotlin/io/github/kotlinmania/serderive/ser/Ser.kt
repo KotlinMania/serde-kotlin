@@ -835,7 +835,7 @@ private fun serializeAdjacentlyTaggedVariant(
                 __S: _serde::Serializer,
             {
                 `#`[allow(unused_variables)]
-                let (`#`(`#`fieldsIdent: `#`fieldsIdent,)*) = self.data;
+                let (`#`(`#`fieldsIdent,)*) = self.data;
                 `#`inner
             }
         }
