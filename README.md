@@ -141,12 +141,12 @@ dual licensed as above, without any additional terms or conditions.
 
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:serde-kotlin:0.1.8")
+    implementation("io.github.kotlinmania:serde-kotlin:0.1.9")
 }
 ```
 
-The modules are published as separate Maven coordinates: `serde-kotlin:0.1.8`,
-`serde-core:0.1.8`, and `serde-derive:0.1.8`. Most consumers only need
+The modules are published as separate Maven coordinates: `serde-kotlin:0.1.9`,
+`serde-core:0.1.9`, and `serde-derive:0.1.9`. Most consumers only need
 `serde-kotlin`, which exposes the other two modules through its API dependencies.
 
 ### Building

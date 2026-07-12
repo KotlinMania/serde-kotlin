@@ -1,11 +1,10 @@
-// port-lint: tests serde_derive/src/internals/case.rs
+// port-lint: tests serde_derive_internals/src/case.rs
 package io.github.kotlinmania.serderive.internals
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class CaseTest {
-
+class CaseInternalsTest {
     @Test
     fun renameVariants() {
         val cases = listOf(
@@ -23,16 +22,16 @@ class CaseTest {
             VariantCase("A", "a", "A", "a", "a", "A", "a", "A"),
             VariantCase("Z42", "z42", "Z42", "z42", "z42", "Z42", "z42", "Z42"),
         )
-        for (c in cases) {
-            assertEquals(c.original, RenameRule.None.applyToVariant(c.original))
-            assertEquals(c.lower, RenameRule.LowerCase.applyToVariant(c.original))
-            assertEquals(c.upper, RenameRule.UpperCase.applyToVariant(c.original))
-            assertEquals(c.original, RenameRule.PascalCase.applyToVariant(c.original))
-            assertEquals(c.camel, RenameRule.CamelCase.applyToVariant(c.original))
-            assertEquals(c.snake, RenameRule.SnakeCase.applyToVariant(c.original))
-            assertEquals(c.screaming, RenameRule.ScreamingSnakeCase.applyToVariant(c.original))
-            assertEquals(c.kebab, RenameRule.KebabCase.applyToVariant(c.original))
-            assertEquals(c.screamingKebab, RenameRule.ScreamingKebabCase.applyToVariant(c.original))
+        for (case in cases) {
+            assertEquals(case.original, RenameRule.None.applyToVariant(case.original))
+            assertEquals(case.lower, RenameRule.LowerCase.applyToVariant(case.original))
+            assertEquals(case.upper, RenameRule.UpperCase.applyToVariant(case.original))
+            assertEquals(case.original, RenameRule.PascalCase.applyToVariant(case.original))
+            assertEquals(case.camel, RenameRule.CamelCase.applyToVariant(case.original))
+            assertEquals(case.snake, RenameRule.SnakeCase.applyToVariant(case.original))
+            assertEquals(case.screaming, RenameRule.ScreamingSnakeCase.applyToVariant(case.original))
+            assertEquals(case.kebab, RenameRule.KebabCase.applyToVariant(case.original))
+            assertEquals(case.screamingKebab, RenameRule.ScreamingKebabCase.applyToVariant(case.original))
         }
     }
 
@@ -52,15 +51,15 @@ class CaseTest {
             FieldCase("a", "A", "A", "a", "A", "a", "A"),
             FieldCase("z42", "Z42", "Z42", "z42", "Z42", "z42", "Z42"),
         )
-        for (c in cases) {
-            assertEquals(c.original, RenameRule.None.applyToField(c.original))
-            assertEquals(c.upper, RenameRule.UpperCase.applyToField(c.original))
-            assertEquals(c.pascal, RenameRule.PascalCase.applyToField(c.original))
-            assertEquals(c.camel, RenameRule.CamelCase.applyToField(c.original))
-            assertEquals(c.original, RenameRule.SnakeCase.applyToField(c.original))
-            assertEquals(c.screaming, RenameRule.ScreamingSnakeCase.applyToField(c.original))
-            assertEquals(c.kebab, RenameRule.KebabCase.applyToField(c.original))
-            assertEquals(c.screamingKebab, RenameRule.ScreamingKebabCase.applyToField(c.original))
+        for (case in cases) {
+            assertEquals(case.original, RenameRule.None.applyToField(case.original))
+            assertEquals(case.upper, RenameRule.UpperCase.applyToField(case.original))
+            assertEquals(case.pascal, RenameRule.PascalCase.applyToField(case.original))
+            assertEquals(case.camel, RenameRule.CamelCase.applyToField(case.original))
+            assertEquals(case.original, RenameRule.SnakeCase.applyToField(case.original))
+            assertEquals(case.screaming, RenameRule.ScreamingSnakeCase.applyToField(case.original))
+            assertEquals(case.kebab, RenameRule.KebabCase.applyToField(case.original))
+            assertEquals(case.screamingKebab, RenameRule.ScreamingKebabCase.applyToField(case.original))
         }
     }
 
