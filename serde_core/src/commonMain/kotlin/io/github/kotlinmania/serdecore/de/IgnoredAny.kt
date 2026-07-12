@@ -70,8 +70,6 @@ import io.github.kotlinmania.serde.serdeCatching
  * val s: String = NthElement(3, stringDeserialize).deserialize(deserializer).getOrThrow()
  * ```
  */
-internal typealias Value = IgnoredAny
-
 data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, DeserializeSeed<IgnoredAny> {
     override fun expecting(): String = "anything at all"
 
