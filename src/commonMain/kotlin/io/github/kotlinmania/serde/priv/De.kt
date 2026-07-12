@@ -1,17 +1,27 @@
 // port-lint: source serde/src/private/de.rs
-package io.github.kotlinmania.serde.`private`
+package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serdecore.de.*
+import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.de.Deserialize
+import io.github.kotlinmania.serdecore.de.DeserializeSeed
+import io.github.kotlinmania.serdecore.de.Deserializer
+import io.github.kotlinmania.serdecore.de.EnumAccess
+import io.github.kotlinmania.serdecore.de.Expected
+import io.github.kotlinmania.serdecore.de.IgnoredAny
+import io.github.kotlinmania.serdecore.de.MapAccess
+import io.github.kotlinmania.serdecore.de.SeqAccess
+import io.github.kotlinmania.serdecore.de.Unexpected
+import io.github.kotlinmania.serdecore.de.VariantAccess
+import io.github.kotlinmania.serdecore.de.Visitor
 import io.github.kotlinmania.serdecore.de.value.BytesDeserializer
 import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import io.github.kotlinmania.serdecore.priv.Content
 import io.github.kotlinmania.serdecore.priv.ContentMapEntry
 import io.github.kotlinmania.serdecore.priv.cautious
-import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
@@ -1781,14 +1791,20 @@ internal class BorrowedBytesDeserializer private constructor(
 
 // //////////////////////////////////////////////////////////////////////////////
 
-
 internal class FlatMapBuffer(
-    private val entries: MutableList<ContentMapEntry?> = mutableListOf()
+    private val entries: MutableList<ContentMapEntry?> = mutableListOf(),
 ) {
     val size: Int get() = entries.size
+
     fun get(index: Int): ContentMapEntry? = entries[index]
-    fun setNull(index: Int) { entries[index] = null }
-    fun add(key: Content, value: Content) { entries.add(ContentMapEntry(key, value)) }
+
+    fun setNull(index: Int) {
+        entries[index] = null
+    }
+
+    fun add(key: Content, value: Content) {
+        entries.add(ContentMapEntry(key, value))
+    }
 }
 
 internal class FlatMapDeserializer(
@@ -1808,7 +1824,8 @@ internal class FlatMapDeserializer(
                 val entry = buffer.get(index)
                 val found = flatMapTakeEntry(entry, variants)
                 if (found != null) {
-                    val key = found.key; val value = found.value
+                    val key = found.key
+                    val value = found.value
                     return@serdeCatching visitor.visitEnum(EnumDeserializer.new(key, value)).getOrThrow()
                 }
             }
@@ -1948,7 +1965,8 @@ private class FlatStructAccess(
                 val entry = buffer.get(currentIndex++)
                 val found = flatMapTakeEntry(entry, fields)
                 if (found != null) {
-                    val key = found.key; val value = found.value
+                    val key = found.key
+                    val value = found.value
                     buffer.setNull(index)
                     pendingContent = value
                     return@serdeCatching seed.deserialize(ContentDeserializer.new(key)).getOrThrow()

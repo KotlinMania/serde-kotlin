@@ -1,7 +1,8 @@
 // port-lint: tests test_suite/tests/test_ignored_any.rs
-package io.github.kotlinmania.serde.`private`
+package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.serdecore.de.Deserialize
 import io.github.kotlinmania.serdecore.de.DeserializeSeed
 import io.github.kotlinmania.serdecore.de.Deserializer
@@ -11,13 +12,10 @@ import io.github.kotlinmania.serdecore.de.MapAccess
 import io.github.kotlinmania.serdecore.de.SeqAccess
 import io.github.kotlinmania.serdecore.de.VariantAccess
 import io.github.kotlinmania.serdecore.de.Visitor
-import io.github.kotlinmania.serdecore.de.value.MapDeserializer
-import io.github.kotlinmania.serdecore.de.value.SeqDeserializer
+import io.github.kotlinmania.serdecore.de.value.MapEntry
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import io.github.kotlinmania.serdecore.de.value.mapDeserializer
-import io.github.kotlinmania.serdecore.de.value.MapEntry
 import io.github.kotlinmania.serdecore.de.value.seqDeserializer
-import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

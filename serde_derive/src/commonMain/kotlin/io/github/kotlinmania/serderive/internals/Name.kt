@@ -21,7 +21,8 @@ public class MultiName(
 
     public fun deserializeName(): Name = deserialize
 
-    internal fun deserializeAliases(): Set<Name> = mutableDeserializeAliases
+    internal fun deserializeAliases(): Set<Name> =
+        mutableDeserializeAliases.sorted().toCollection(linkedSetOf())
 
     internal fun applyDeserializeAliasRule(transform: (String) -> String) {
         val aliases = mutableDeserializeAliases.toList()

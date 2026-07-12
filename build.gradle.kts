@@ -40,6 +40,7 @@ val frameworkName = providers.gradleProperty("project.frameworkName").getOrElse(
 val projectNamespace = providers.gradleProperty("project.namespace").getOrElse("io.github.kotlinmania")
 val kotlinVersion = providers.gradleProperty("versions.kotlin").getOrElse("2.4.0")
 val isCodeqlBuild = providers.gradleProperty("kotlinmania.codeql").map(String::toBoolean).getOrElse(false)
+
 fun csvProperty(name: String): Set<String> =
     providers
         .gradleProperty(name)
@@ -614,10 +615,12 @@ val wasmYarnVersion = providers.gradleProperty("wasm.yarn.version").getOrElse(ya
 // store; a Dependabot bump of package.json/yarn.lock is honored rather than
 // overridden. (These two values previously lived in gradle.properties, which
 // Dependabot cannot see, so a bump there would silently revert the build.)
-@Suppress("UNCHECKED_CAST")
 val webpackVersion: String =
-    (groovy.json.JsonSlurper().parse(rootProject.file("kotlin-js-store/package.json")) as Map<String, Any>)
-        .let { it["dependencies"] as Map<String, Any> }["webpack"] as String
+    (groovy.json.JsonSlurper().parse(rootProject.file("kotlin-js-store/package.json")) as? Map<*, *>)
+        ?.get("dependencies")
+        ?.let { it as? Map<*, *> }
+        ?.get("webpack") as? String
+        ?: error("kotlin-js-store/package.json must declare a string dependencies.webpack version")
 
 rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") { version.set(nodeVersion) }
 rootProject.extensions.configure<WasmNodeJsEnvSpec>("kotlinWasmNodeJsSpec") { version.set(wasmNodeVersion) }

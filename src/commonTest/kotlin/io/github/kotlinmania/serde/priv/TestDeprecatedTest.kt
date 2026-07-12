@@ -1,25 +1,25 @@
 // port-lint: tests test_suite/tests/test_deprecated.rs
-package io.github.kotlinmania.serde.`private`
+package io.github.kotlinmania.serde.priv
 
 @Deprecated("deprecated upstream enum")
-private enum class DeprecatedEnum {
+internal enum class DeprecatedEnum {
     A,
     B,
 }
 
 @Deprecated("deprecated upstream struct")
-private data class DeprecatedStruct(
+internal data class DeprecatedStruct(
     val a: Boolean,
 )
 
-private enum class DeprecatedVariant {
+internal enum class DeprecatedVariant {
     A,
 
     @Deprecated("deprecated upstream variant")
     B,
 }
 
-private data class DeprecatedField(
+internal data class DeprecatedField(
     @Deprecated("deprecated upstream field")
     val a: Boolean,
 )
