@@ -7,10 +7,16 @@ import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.serdecore.de.BoundValue
+import io.github.kotlinmania.serdecore.de.IpAddress
+import io.github.kotlinmania.serdecore.de.Ipv4Address
+import io.github.kotlinmania.serdecore.de.Ipv6Address
 import io.github.kotlinmania.serdecore.de.RangeFromValue
 import io.github.kotlinmania.serdecore.de.RangeInclusiveValue
 import io.github.kotlinmania.serdecore.de.RangeToValue
 import io.github.kotlinmania.serdecore.de.RangeValue
+import io.github.kotlinmania.serdecore.de.SocketAddress
+import io.github.kotlinmania.serdecore.de.SocketAddressV4
+import io.github.kotlinmania.serdecore.de.SocketAddressV6
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -257,6 +263,125 @@ internal fun formatU8(
 
 // //////////////////////////////////////////////////////////////////////////////
 
+internal fun <Ok> IpAddress.serializeNetwork(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    when (this) {
+        is IpAddress.V4 ->
+            if (serializer.isHumanReadable()) {
+                address.serialize(serializer)
+            } else {
+                serializer.serializeNewtypeVariant("IpAddr", 0u, "V4", address)
+            }
+        is IpAddress.V6 ->
+            if (serializer.isHumanReadable()) {
+                address.serialize(serializer)
+            } else {
+                serializer.serializeNewtypeVariant("IpAddr", 1u, "V6", address)
+            }
+    }
+
+internal fun <Ok> Ipv4Address.serializeNetwork(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    if (serializer.isHumanReadable()) {
+        serializer.serializeStr(toString())
+    } else {
+        serializeOctets(octets, serializer)
+    }
+
+internal fun <Ok> Ipv6Address.serializeNetwork(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    if (serializer.isHumanReadable()) {
+        serializer.serializeStr(formatIpv6(octets))
+    } else {
+        serializeOctets(octets, serializer)
+    }
+
+internal fun <Ok> SocketAddress.serializeNetwork(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    when (this) {
+        is SocketAddress.V4 ->
+            if (serializer.isHumanReadable()) {
+                address.serialize(serializer)
+            } else {
+                serializer.serializeNewtypeVariant("SocketAddr", 0u, "V4", address)
+            }
+        is SocketAddress.V6 ->
+            if (serializer.isHumanReadable()) {
+                address.serialize(serializer)
+            } else {
+                serializer.serializeNewtypeVariant("SocketAddr", 1u, "V6", address)
+            }
+    }
+
+internal fun <Ok> SocketAddressV4.serializeNetwork(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    if (serializer.isHumanReadable()) {
+        serializer.serializeStr("$ip:$port")
+    } else {
+        serializeSocketAddress(ip, port, serializer)
+    }
+
+internal fun <Ok> SocketAddressV6.serializeNetwork(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    if (serializer.isHumanReadable()) {
+        serializer.serializeStr("[${formatIpv6(ip.octets)}]:$port")
+    } else {
+        serializeSocketAddress(ip, port, serializer)
+    }
+
+private fun <Ok> serializeOctets(
+    octets: List<UByte>,
+    serializer: Serializer<Ok>,
+): SerdeResult<Ok> =
+    serdeCatching {
+        val tuple = serializer.serializeTuple(octets.size).getOrThrow()
+        for (octet in octets) {
+            tuple.serializeElement(UByteSerialize(octet)).getOrThrow()
+        }
+        tuple.end().getOrThrow()
+    }
+
+private fun <Ok> serializeSocketAddress(
+    ip: Serialize,
+    port: UShort,
+    serializer: Serializer<Ok>,
+): SerdeResult<Ok> =
+    serdeCatching {
+        val tuple = serializer.serializeTuple(2).getOrThrow()
+        tuple.serializeElement(ip).getOrThrow()
+        tuple.serializeElement(UShortSerialize(port)).getOrThrow()
+        tuple.end().getOrThrow()
+    }
+
+private fun formatIpv6(octets: List<UByte>): String {
+    val segments =
+        octets.chunked(2).map { pair ->
+            (pair[0].toInt() shl 8) or pair[1].toInt()
+        }
+    var bestStart = -1
+    var bestLength = 0
+    var index = 0
+    while (index < segments.size) {
+        if (segments[index] != 0) {
+            index += 1
+            continue
+        }
+        val start = index
+        while (index < segments.size && segments[index] == 0) index += 1
+        val length = index - start
+        if (length >= 2 && length > bestLength) {
+            bestStart = start
+            bestLength = length
+        }
+    }
+    if (bestStart < 0) return segments.joinToString(":") { it.toString(16) }
+
+    val left = segments.take(bestStart).joinToString(":") { it.toString(16) }
+    val right = segments.drop(bestStart + bestLength).joinToString(":") { it.toString(16) }
+    return when {
+        left.isEmpty() && right.isEmpty() -> "::"
+        left.isEmpty() -> "::$right"
+        right.isEmpty() -> "$left::"
+        else -> "$left::$right"
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
 data class Wrapping<T : Serialize>(
     val value: T,
 ) : Serialize {
@@ -283,6 +408,20 @@ private data class ULongSerialize(
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
         = serializer.serializeU64(value)
+}
+
+private data class UByteSerialize(
+    private val value: UByte,
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+        = serializer.serializeU8(value)
+}
+
+private data class UShortSerialize(
+    private val value: UShort,
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+        = serializer.serializeU16(value)
 }
 
 private data class UIntSerialize(
