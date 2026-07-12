@@ -10,7 +10,7 @@ detekt = "1.23.8"
 ktlint = "14.2.0"
 kotlinxBenchmark = "0.4.17"
 # Sibling KotlinMania ports consumed by :serde-derive (the serde_derive analogue)
-syn = "0.3.2"
+syn = "0.3.3"
 quote = "0.2.3"
 procMacro2 = "0.1.6"
 # build-logic convention-plugin toolchain + plugin deps (mirrors km-io)

@@ -510,7 +510,7 @@ private fun serializeVariant(
             Style.Tuple -> {
                 val fieldNames = (0 until variant.fields.size).map { fieldI(it) }
                 checkedQuote(
-                    "`#`thisValue::`#`variantIdent(`#`(`#`fieldNames: ref `#`fieldNames,*)",
+                    "`#`thisValue::`#`variantIdent(`#`(ref `#`fieldNames),*)",
                     "thisValue" to thisValue,
                     "variantIdent" to variantIdent,
                     "fieldNames" to fieldNames,
@@ -519,7 +519,7 @@ private fun serializeVariant(
             Style.Struct -> {
                 val members = variant.fields.map { it.member }
                 checkedQuote(
-                    "`#`thisValue::`#`variantIdent { `#`(`#`members: ref `#`members,*) }",
+                    "`#`thisValue::`#`variantIdent { `#`(ref `#`members),* }",
                     "thisValue" to thisValue,
                     "variantIdent" to variantIdent,
                     "members" to members,
