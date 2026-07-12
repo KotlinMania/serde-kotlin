@@ -4,14 +4,15 @@ package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serdecore.ser.*
+import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.ser.Serialize
 import io.github.kotlinmania.serdecore.ser.SerializeMap
 import io.github.kotlinmania.serdecore.ser.SerializeStruct
 import io.github.kotlinmania.serdecore.ser.SerializeStructVariant
 import io.github.kotlinmania.serdecore.ser.SerializeTuple
 import io.github.kotlinmania.serdecore.ser.SerializeTupleStruct
 import io.github.kotlinmania.serdecore.ser.SerializeTupleVariant
-import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.ser.Serializer
 
 /**
  * Used to check that serde(getter) attributes return the expected type.
@@ -367,8 +368,7 @@ internal sealed interface Content : Serialize {
         val fields: List<Pair<kotlin.String, Content>>,
     ) : Content
 
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        =
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
         when (this) {
             is Bool -> serializer.serializeBool(value)
             is U8 -> serializer.serializeU8(value)
@@ -447,8 +447,7 @@ internal sealed interface Content : Serialize {
         }
 }
 
-private class ContentSerializer : Serializer<Content>
-    {
+private class ContentSerializer : Serializer<Content> {
     override fun serializeBool(v: Boolean): SerdeResult<Content> = SerdeResult.success(Content.Bool(v))
 
     override fun serializeI8(v: Byte): SerdeResult<Content> = SerdeResult.success(Content.I8(v))
@@ -545,8 +544,7 @@ private class ContentSerializer : Serializer<Content>
 
 private class SerializeSeq(
     len: Int?,
-) : io.github.kotlinmania.serdecore.ser.SerializeSeq<Content>
-    {
+) : io.github.kotlinmania.serdecore.ser.SerializeSeq<Content> {
     private val elements: MutableList<Content> = ArrayList(len ?: 0)
 
     override fun <T> serializeElement(value: T): SerdeResult<Unit>
@@ -560,8 +558,7 @@ private class SerializeSeq(
 
 private class SerializeTuple(
     len: Int,
-) : SerializeTuple<Content>
-    {
+) : SerializeTuple<Content> {
     private val elements: MutableList<Content> = ArrayList(len)
 
     override fun <T> serializeElement(value: T): SerdeResult<Unit>
@@ -576,8 +573,7 @@ private class SerializeTuple(
 private class SerializeTupleStruct(
     private val name: String,
     len: Int,
-) : SerializeTupleStruct<Content>
-    {
+) : SerializeTupleStruct<Content> {
     private val fields: MutableList<Content> = ArrayList(len)
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
@@ -594,8 +590,7 @@ private class SerializeTupleVariant(
     private val variantIndex: UInt,
     private val variant: String,
     len: Int,
-) : SerializeTupleVariant<Content>
-    {
+) : SerializeTupleVariant<Content> {
     private val fields: MutableList<Content> = ArrayList(len)
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
@@ -609,8 +604,7 @@ private class SerializeTupleVariant(
 
 private class SerializeMap(
     len: Int?,
-) : SerializeMap<Content>
-    {
+) : SerializeMap<Content> {
     private val entries: MutableList<Pair<Content, Content>> = ArrayList(len ?: 0)
     private var key: Content? = null
 
@@ -647,8 +641,7 @@ private class SerializeMap(
 private class SerializeStruct(
     private val name: String,
     len: Int,
-) : SerializeStruct<Content>
-    {
+) : SerializeStruct<Content> {
     private val fields: MutableList<Pair<String, Content>> = ArrayList(len)
 
     override fun <T> serializeField(
@@ -668,8 +661,7 @@ private class SerializeStructVariant(
     private val variantIndex: UInt,
     private val variant: String,
     len: Int,
-) : SerializeStructVariant<Content>
-    {
+) : SerializeStructVariant<Content> {
     private val fields: MutableList<Pair<String, Content>> = ArrayList(len)
 
     override fun <T> serializeField(
@@ -923,8 +915,7 @@ internal data class AdjacentlyTaggedEnumVariant(
     val variantIndex: UInt,
     val variantName: String,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        =
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
         serializer.serializeUnitVariant(enumName, variantIndex, variantName)
 }
 

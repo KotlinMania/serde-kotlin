@@ -216,26 +216,27 @@ private fun deserializeIdentifier(
     collectOtherFields: Boolean,
     expecting: String?
 ): Fragment {
-    val strMapping = deserializedFields.map { field ->
+    val strMapping = deserializedFields.flatMap { field ->
         val ident = field.ident
-        val aliases = field.aliases
         // aliases also contains a main name
-        quote(
-            "`#`(`#`aliases),* => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
-            mapOf("aliases" to aliases, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
-        )
+        field.aliases.map { alias ->
+            quote(
+                "`#`alias => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
+                mapOf("alias" to alias, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
+            )
+        }
     }
 
-    val bytesMapping = deserializedFields.map { field ->
+    val bytesMapping = deserializedFields.flatMap { field ->
         val ident = field.ident
         // aliases also contains a main name
-        val byteAliases = field.aliases.map { alias ->
-            Literal.byteString(alias.value.encodeToByteArray())
+        field.aliases.map { alias ->
+            val byteAlias = Literal.byteString(alias.value.encodeToByteArray())
+            quote(
+                "`#`byteAlias => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
+                mapOf("byteAlias" to byteAlias, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
+            )
         }
-        quote(
-            "`#`(`#`byteAliases),* => _serde::`#`Private::Ok(`#`thisValue::`#`ident),",
-            mapOf("byteAliases" to byteAliases, "Private" to Private, "thisValue" to thisValue, "ident" to ident),
-        )
     }
 
     val expectingVal = expecting ?: if (isVariant) "variant identifier" else "field identifier"

@@ -1,8 +1,9 @@
 // port-lint: tests test_suite/tests/test_value.rs
-package io.github.kotlinmania.serde.`private`
+package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.serdecore.de.Deserialize
 import io.github.kotlinmania.serdecore.de.DeserializeSeed
 import io.github.kotlinmania.serdecore.de.Deserializer
@@ -14,13 +15,11 @@ import io.github.kotlinmania.serdecore.de.Visitor
 import io.github.kotlinmania.serdecore.de.value.F64Deserializer
 import io.github.kotlinmania.serdecore.de.value.I128Deserializer
 import io.github.kotlinmania.serdecore.de.value.MapAccessDeserializer
-import io.github.kotlinmania.serdecore.de.value.MapDeserializer
+import io.github.kotlinmania.serdecore.de.value.MapEntry
 import io.github.kotlinmania.serdecore.de.value.StrDeserializer
 import io.github.kotlinmania.serdecore.de.value.U128Deserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
-import io.github.kotlinmania.serdecore.de.value.MapEntry
 import io.github.kotlinmania.serdecore.de.value.mapDeserializer
-import io.github.kotlinmania.serde.serdeCatching
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -133,7 +132,7 @@ private data object F64Capture : Visitor<Double> {
 
 private sealed class PotentialKind {
     data class Airebo(
-        val value: io.github.kotlinmania.serde.`private`.Airebo,
+        val value: io.github.kotlinmania.serde.priv.Airebo,
     ) : PotentialKind()
 
     companion object : Deserialize<PotentialKind> {
