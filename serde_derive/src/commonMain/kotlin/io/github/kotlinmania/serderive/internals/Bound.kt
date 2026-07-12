@@ -268,6 +268,7 @@ public fun withBound(
             )
         )
         return WherePredicate.TypePredicate(
+            lifetimes = null,
             boundedTy = boundedTy,
             colonToken = Colon.default(),
             bounds = boundsList
@@ -310,6 +311,7 @@ public fun withSelfBound(
     )
     mutGenerics.makeWhereClause().predicates.pushPredicate(
         WherePredicate.TypePredicate(
+            lifetimes = null,
             boundedTy = typeOfItem(cont),
             colonToken = Colon.default(),
             bounds = boundsList
@@ -321,7 +323,7 @@ public fun withSelfBound(
 public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
     val bound = Lifetime.new(lifetime, Span.callSite())
     val def = GenericParam.LifetimeParam(
-        attrs = emptyList(),
+        attrs = mutableListOf(),
         lifetime = bound.deepCopy(),
         colonToken = null,
         bounds = LifetimeList()

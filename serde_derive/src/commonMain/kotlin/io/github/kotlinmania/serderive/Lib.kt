@@ -33,7 +33,7 @@ internal fun rustUnsuffixedLiteral(value: UInt): TokenStream =
 // DeriveInput, delegates to expandDeriveSerialize, and converts errors to
 // compile errors.
 public fun deriveSerialize(input: TokenStream): TokenStream {
-    val parsed = parseMacroInput(input, DeriveInputParse)
+    val parsed = parseMacroInput(input, DeriveInputParse::parse)
     return when (parsed) {
         is ParseMacroSynResult.Success -> expandDeriveSerialize(parsed.value)
         is ParseMacroSynResult.CompileError -> parsed.tokens
@@ -44,7 +44,7 @@ public fun deriveSerialize(input: TokenStream): TokenStream {
 // DeriveInput, delegates to expandDeriveDeserialize, and converts errors to
 // compile errors.
 public fun deriveDeserialize(input: TokenStream): TokenStream {
-    val parsed = parseMacroInput(input, DeriveInputParse)
+    val parsed = parseMacroInput(input, DeriveInputParse::parse)
     return when (parsed) {
         is ParseMacroSynResult.Success -> expandDeriveDeserialize(parsed.value)
         is ParseMacroSynResult.CompileError -> parsed.tokens

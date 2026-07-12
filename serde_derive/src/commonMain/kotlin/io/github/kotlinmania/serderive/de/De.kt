@@ -638,7 +638,7 @@ private fun parseQuotePath(
     vararg substitutions: Pair<String, Any?>,
 ): Path {
     val tokens = quoteTokens(template, *substitutions)
-    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse, tokens)
+    val result = io.github.kotlinmania.syn.parse2(io.github.kotlinmania.syn.PathParse::parse, tokens)
     return result.getOrThrow()
 }
 
