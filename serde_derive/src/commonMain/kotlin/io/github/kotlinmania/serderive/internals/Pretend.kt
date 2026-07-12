@@ -1,10 +1,9 @@
 // port-lint: source pretend.rs
 package io.github.kotlinmania.serderive.internals
 
-import io.github.kotlinmania.procmacro2.Ident
-import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.formatIdent
+import io.github.kotlinmania.serderive.Private
 import io.github.kotlinmania.serderive.checkedQuote
 
 // Suppress unused-code warnings that would otherwise appear when using a remote
@@ -18,7 +17,10 @@ public fun pretendUsed(cont: Container, isPacked: Boolean): TokenStream {
     return checkedQuote("""
         `#`pretendFields
         `#`pretendVariants
-    """)
+    """, mapOf(
+        "pretendFields" to pretendFields,
+        "pretendVariants" to pretendVariants,
+    ))
 }
 
 private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
@@ -42,39 +44,53 @@ private fun pretendFieldsUsed(cont: Container, isPacked: Boolean): TokenStream {
 private fun pretendFieldsUsedStruct(cont: Container, fields: List<Field>): TokenStream {
     val typeIdent = cont.ident
     val split = cont.generics.splitForImpl()
+    val tyGenerics = split.typeGenerics
 
     val members = fields.map { it.member }
     val placeholders = fields.indices.map { i -> formatIdent("__v$i") }
 
     return checkedQuote("""
-        when (_serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> ) {
-            _serde::`#`Private::Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) -> {}
+        match _serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> {
+            _serde::`#`Private::Some(`#`typeIdent { `#`(`#`members: `#`placeholders),* }) => {}
             _ => {}
         }
-    """)
+    """, mapOf(
+        "Private" to Private,
+        "typeIdent" to typeIdent,
+        "tyGenerics" to tyGenerics,
+        "members" to members,
+        "placeholders" to placeholders,
+    ))
 }
 
 private fun pretendFieldsUsedStructPacked(cont: Container, fields: List<Field>): TokenStream {
     val typeIdent = cont.ident
     val split = cont.generics.splitForImpl()
+    val tyGenerics = split.typeGenerics
 
     val members = fields.map { it.member }
 
     return checkedQuote("""
-        when (_serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> ) {
+        match _serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> {
             _serde::`#`Private::Some(__v @ `#`typeIdent { `#`(`#`members: _),* }) => {
                 `#`(
-                    let _ = _serde::`#`Private::ptr.addr_of!(__v.`#`members);
+                    let _ = _serde::`#`Private::ptr::addr_of!(__v.`#`members);
                 )*
             }
             _ => {}
         }
-    """)
+    """, mapOf(
+        "Private" to Private,
+        "typeIdent" to typeIdent,
+        "tyGenerics" to tyGenerics,
+        "members" to members,
+    ))
 }
 
 private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): TokenStream {
     val typeIdent = cont.ident
     val split = cont.generics.splitForImpl()
+    val tyGenerics = split.typeGenerics
 
     val patterns = mutableListOf<TokenStream>()
     for (variant in variants) {
@@ -83,20 +99,33 @@ private fun pretendFieldsUsedEnum(cont: Container, variants: List<Variant>): Tok
                 val variantIdent = variant.ident
                 val members = variant.fields.map { it.member }
                 val placeholders = variant.fields.indices.map { i -> formatIdent("__v$i") }
-                patterns.add(checkedQuote("`#`typeIdent::`#`variantIdent { `#`(`#`members: `#`placeholders),* }"))
+                patterns.add(
+                    checkedQuote(
+                        "`#`typeIdent::`#`variantIdent { `#`(`#`members: `#`placeholders),* }",
+                        "typeIdent" to typeIdent,
+                        "variantIdent" to variantIdent,
+                        "members" to members,
+                        "placeholders" to placeholders,
+                    ),
+                )
             }
             Style.Unit -> {}
         }
     }
 
     return checkedQuote("""
-        when (_serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> ) {
+        match _serde::`#`Private::None::<&`#`typeIdent `#`tyGenerics> {
             `#`(
                 _serde::`#`Private::Some(`#`patterns) => {}
             )*
             _ => {}
         }
-    """)
+    """, mapOf(
+        "Private" to Private,
+        "typeIdent" to typeIdent,
+        "tyGenerics" to tyGenerics,
+        "patterns" to patterns,
+    ))
 }
 
 private fun pretendVariantsUsed(cont: Container): TokenStream {
@@ -116,21 +145,35 @@ private fun pretendVariantsUsed(cont: Container): TokenStream {
         val pat = when (variant.style) {
             Style.Struct -> {
                 val members = variant.fields.map { it.member }
-                checkedQuote("{ `#`(`#`members: `#`placeholders),* }")
+                checkedQuote(
+                    "{ `#`(`#`members: `#`placeholders),* }",
+                    "members" to members,
+                    "placeholders" to placeholders,
+                )
             }
-            Style.Tuple, Style.Newtype -> checkedQuote("( `#`(`#`placeholders),* )")
+            Style.Tuple, Style.Newtype -> checkedQuote(
+                "( `#`(`#`placeholders),* )",
+                "placeholders" to placeholders,
+            )
             Style.Unit -> checkedQuote("")
         }
 
         checkedQuote("""
-            when (_serde::`#`Private::None ) {
+            match _serde::`#`Private::None {
                 _serde::`#`Private::Some((`#`(`#`placeholders,)*)) => {
                     let _ = `#`typeIdent::`#`variantIdent `#`turbofish `#`pat;
                 }
                 _ => {}
             }
-        """)
+        """, mapOf(
+            "Private" to Private,
+            "placeholders" to placeholders,
+            "typeIdent" to typeIdent,
+            "variantIdent" to variantIdent,
+            "turbofish" to turbofish,
+            "pat" to pat,
+        ))
     }
 
-    return checkedQuote("`#`(`#`cases)*")
+    return checkedQuote("`#`(`#`cases)*", "cases" to cases)
 }

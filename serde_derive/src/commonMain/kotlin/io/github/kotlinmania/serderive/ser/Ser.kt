@@ -186,7 +186,7 @@ private fun buildGenerics(cont: Container): Generics {
 // Parse a quote string into a Path, equivalent to the upstream parse-quote macro.
 private fun parseQuotePath(template: String): Path {
     val tokens = checkedQuote(template.replace(".", "::"))
-    val result = parse2(PathParse, tokens)
+    val result = parse2(PathParse::parse, tokens)
     return result.getOrThrow()
 }
 
@@ -455,15 +455,15 @@ private fun serializeEnum(params: SerParameters, variants: List<Variant>, cattrs
         ))
     }
 
-    val armsStr = arms.joinToString(separator = "") { it.toString() }
+    val armsTokens = checkedQuote("`#`(`#`arms)*", "arms" to arms)
     return Fragment.Expr(checkedQuote(
         """
         match *`#`selfVar {
-            `#`armsStr
+            `#`armsTokens
         }
         """,
         "selfVar" to selfVar,
-        "armsStr" to armsStr,
+        "armsTokens" to armsTokens,
     ))
 }
 
@@ -510,7 +510,7 @@ private fun serializeVariant(
             Style.Tuple -> {
                 val fieldNames = (0 until variant.fields.size).map { fieldI(it) }
                 checkedQuote(
-                    "`#`thisValue::`#`variantIdent(`#`(`#`fieldNames: ref `#`fieldNames,*)",
+                    "`#`thisValue::`#`variantIdent(`#`(ref `#`fieldNames),*)",
                     "thisValue" to thisValue,
                     "variantIdent" to variantIdent,
                     "fieldNames" to fieldNames,
@@ -519,7 +519,7 @@ private fun serializeVariant(
             Style.Struct -> {
                 val members = variant.fields.map { it.member }
                 checkedQuote(
-                    "`#`thisValue::`#`variantIdent { `#`(`#`members: ref `#`members,*) }",
+                    "`#`thisValue::`#`variantIdent { `#`(ref `#`members),* }",
                     "thisValue" to thisValue,
                     "variantIdent" to variantIdent,
                     "members" to members,
@@ -945,7 +945,7 @@ private fun serializeTupleVariant(
         }
         .fold(zero) { sum, expr -> checkedQuote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
-    val stmts = serializeStmts.joinToString(separator = "") { it.toString() }
+    val stmts = checkedQuote("`#`(`#`serializeStmts)*", "serializeStmts" to serializeStmts)
     return when (context) {
         is TupleVariant.ExternallyTagged -> {
             val typeName = context.typeName
@@ -1030,7 +1030,7 @@ private fun serializeStructVariant(
         }
         .fold(zero) { sum, expr -> checkedQuote("`#`sum + `#`expr", "sum" to sum, "expr" to expr) }
 
-    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
+    val stmts = checkedQuote("`#`(`#`serializeFields)*", "serializeFields" to serializeFields)
     return when (context) {
         is StructVariant.ExternallyTagged -> {
             val variantIndex = context.variantIndex
@@ -1110,7 +1110,7 @@ private fun serializeStructVariantWithFlatten(
 
     val letMut = mutIf(serializedFields.isNotEmpty())
 
-    val stmts = serializeFields.joinToString(separator = "") { it.toString() }
+    val stmts = checkedQuote("`#`(`#`serializeFields)*", "serializeFields" to serializeFields)
     return when (context) {
         is StructVariant.ExternallyTagged -> {
             val variantIndex = context.variantIndex
@@ -1138,7 +1138,7 @@ private fun serializeStructVariantWithFlatten(
                     where
                         __S: _serde::Serializer,
                     {
-                        let (`#`(`#`members: `#`members,)*) = self.data;
+                        let (`#`(`#`members,)*) = self.data;
                         let `#`letMut __serde_state = _serde::Serializer::serialize_map(
                             __serializer,
                             _serde::`#`Private::None)?;
@@ -1156,7 +1156,21 @@ private fun serializeStructVariantWithFlatten(
                         data: (`#`(`#`members,)*),
                         phantom: _serde::`#`Private::PhantomData::<`#`thisType `#`tyGenerics>,
                     })
-            """))
+            """, mapOf(
+                "wrapperImplGenerics" to wrapperImplGenerics,
+                "whereClause" to whereClause,
+                "fieldsTy" to fieldsTy,
+                "Private" to Private,
+                "thisType" to thisType,
+                "tyGenerics" to tyGenerics,
+                "wrapperTyGenerics" to wrapperTyGenerics,
+                "members" to members,
+                "letMut" to letMut,
+                "stmts" to stmts,
+                "name" to name,
+                "variantIndex" to rustUnsuffixedLiteral(variantIndex),
+                "variantName" to variantName,
+            )))
         }
         is StructVariant.InternallyTagged -> {
             val tag = context.tag
@@ -1172,7 +1186,13 @@ private fun serializeStructVariantWithFlatten(
                 )?;
                 `#`stmts
                 _serde::ser::SerializeMap::end(__serde_state)
-            """))
+            """, mapOf(
+                "letMut" to letMut,
+                "Private" to Private,
+                "tag" to tag,
+                "variantName" to variantName,
+                "stmts" to stmts,
+            )))
         }
         StructVariant.Untagged -> {
             Fragment.Block(checkedQuote("""
@@ -1181,7 +1201,11 @@ private fun serializeStructVariantWithFlatten(
                     _serde::`#`Private::None)?;
                 `#`stmts
                 _serde::ser::SerializeMap::end(__serde_state)
-            """))
+            """, mapOf(
+                "letMut" to letMut,
+                "Private" to Private,
+                "stmts" to stmts,
+            )))
         }
     }
 }

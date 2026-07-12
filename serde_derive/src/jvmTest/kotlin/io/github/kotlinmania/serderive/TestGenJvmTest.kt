@@ -531,6 +531,179 @@ class TestGenJvmTest {
     }
 
     @Test
+    fun adjacentlyTaggedVariantWithCustomFunctionsDeserializeCompiles() {
+        val support =
+            """
+            use serde::de::{DeserializeOwned, Deserializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn de_x<'de, D: Deserializer<'de>>(_: D) -> StdResult<X, D::Error> {
+                unimplemented!()
+            }
+
+            pub fn deserialize_some_unit_variant<'de, D: Deserializer<'de>>(_: D) -> StdResult<(), D::Error> {
+                unimplemented!()
+            }
+
+            pub fn deserialize_some_other_variant<'de, D: Deserializer<'de>>(_: D) -> StdResult<(String, u8), D::Error> {
+                unimplemented!()
+            }
+
+            fn assert_de<T: DeserializeOwned>() {}
+            """.trimIndent()
+
+        val deriveInput =
+            """
+            #[serde(tag = "t", content = "c")]
+            enum AdjacentlyTaggedVariantWith {
+                #[serde(deserialize_with = "de_x")]
+                Newtype(X),
+                #[serde(deserialize_with = "deserialize_some_other_variant")]
+                Tuple(String, u8),
+                #[serde(deserialize_with = "de_x")]
+                Struct1 { x: X },
+                #[serde(deserialize_with = "deserialize_some_other_variant")]
+                Struct { f1: String, f2: u8 },
+                #[serde(deserialize_with = "deserialize_some_unit_variant")]
+                Unit,
+            }
+            """.trimIndent()
+
+        val declaration =
+            """
+            enum AdjacentlyTaggedVariantWith {
+                Newtype(X),
+                Tuple(String, u8),
+                Struct1 { x: X },
+                Struct { f1: String, f2: u8 },
+                Unit,
+            }
+            """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_adjacently_tagged_variant_with_deserialize",
+            deriveInput = deriveInput,
+            declaration = declaration,
+            support = support,
+            verify = "fn verify() { assert_de::<AdjacentlyTaggedVariantWith>(); }",
+            generateSerialize = false,
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun remoteDefinitionsCompile() {
+        val support = "use serde::de::Deserialize; use serde::ser::Serialize;"
+
+        val enumOutput = compileDerives(
+            fixtureName = "test_gen_remote_or",
+            deriveInput =
+                """
+                #[serde(untagged, remote = "Or")]
+                pub enum OrDef<A, B> {
+                    A(A),
+                    B(B),
+                }
+                """.trimIndent(),
+            declaration =
+                """
+                pub enum Or<A, B> { A(A), B(B) }
+                pub enum OrDef<A, B> { A(A), B(B) }
+                """.trimIndent(),
+            support = support,
+            verify = "",
+        )
+        assertEquals(0, enumOutput.exitCode, enumOutput.diagnostics)
+
+        val strOutput = compileDerives(
+            fixtureName = "test_gen_remote_str",
+            deriveInput =
+                """
+                #[serde(remote = "Str")]
+                struct StrDef<'a>(&'a str);
+                """.trimIndent(),
+            declaration =
+                """
+                struct Str<'a>(&'a str);
+                struct StrDef<'a>(&'a str);
+                """.trimIndent(),
+            support = support,
+            verify = "",
+        )
+        assertEquals(0, strOutput.exitCode, strOutput.diagnostics)
+    }
+
+    @Test
+    fun remotePackedSerializeCompiles() {
+        val output = compileDerives(
+            fixtureName = "test_gen_remote_packed",
+            deriveInput =
+                """
+                #[repr(C, packed)]
+                #[serde(remote = "RemotePacked")]
+                pub struct RemotePackedDef {
+                    a: u16,
+                    b: u32,
+                }
+                """.trimIndent(),
+            declaration =
+                """
+                #[repr(C, packed)]
+                pub struct RemotePacked {
+                    pub a: u16,
+                    pub b: u32,
+                }
+
+                #[repr(C, packed)]
+                pub struct RemotePackedDef {
+                    pub a: u16,
+                    pub b: u32,
+                }
+                """.trimIndent(),
+            support = "use serde::ser::Serialize;",
+            verify = "",
+            generateDeserialize = false,
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
+    fun flattenWithSerializeCompiles() {
+        val support =
+            """
+            use serde::ser::{Serialize, Serializer};
+            use std::result::Result as StdResult;
+
+            pub struct X;
+
+            pub fn ser_x<S: Serializer>(_: &X, _: S) -> StdResult<S::Ok, S::Error> {
+                unimplemented!()
+            }
+            """.trimIndent()
+
+        val output = compileDerives(
+            fixtureName = "test_gen_flatten_with_serialize",
+            deriveInput =
+                """
+                struct FlattenWith {
+                    #[serde(flatten, serialize_with = "ser_x")]
+                    x: X,
+                }
+                """.trimIndent(),
+            declaration = "struct FlattenWith { x: X }",
+            support = support,
+            verify = "fn verify() { fn assert_ser<T: Serialize>() {} assert_ser::<FlattenWith>(); }",
+            generateDeserialize = false,
+        )
+
+        assertEquals(0, output.exitCode, output.diagnostics)
+    }
+
+    @Test
     fun skippedStaticStrCompiles() {
         val support =
             """
@@ -840,6 +1013,7 @@ private fun compileDerives(
     support: String,
     verify: String,
     generateSerialize: Boolean = true,
+    generateDeserialize: Boolean = true,
 ): CargoOutput {
     val root = findRepositoryRoot()
     val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
@@ -851,7 +1025,11 @@ private fun compileDerives(
     } else {
         ""
     }
-    val deserialize = renderRust(deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    val deserialize = if (generateDeserialize) {
+        renderRust(deriveDeserialize(TokenStream.fromString(deriveInput).getOrThrow()))
+    } else {
+        ""
+    }
 
     val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')
     fixture.resolve("Cargo.toml").writeText(

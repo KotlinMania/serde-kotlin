@@ -74,4 +74,3 @@ public class Ctxt {
 
     // Note: Kotlin doesn't have Drop. Calling `check()` manually is strictly required!
 }
-
