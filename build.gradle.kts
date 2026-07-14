@@ -485,7 +485,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation("io.github.kotlinmania:serde-test-kotlin:0.1.0") {
+            implementation("io.github.kotlinmania:serde-test-kotlin:0.1.1") {
                 exclude(group = "io.github.kotlinmania", module = "serde-kotlin")
             }
         }
