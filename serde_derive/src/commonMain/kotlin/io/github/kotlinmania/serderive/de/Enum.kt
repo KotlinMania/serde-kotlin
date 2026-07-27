@@ -10,7 +10,7 @@ import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.TagType
 import io.github.kotlinmania.serderive.internals.Variant
 
-// Generates the deserialize body for an enum.
+// Generates the Deserialize.deserialize body for an enum Enum { ... }
 internal fun deserializeEnum(
     params: Parameters,
     variants: List<Variant>,
@@ -79,7 +79,7 @@ internal fun prepareEnumVariantEnum(variants: List<Variant>): Pair<TokenStream, 
 
     val variantVisitor = Stmts(deserializeGenerated(
         fieldWithAliases,
-        false,
+        false, // variant identifiers do not depend on the presence of flatten fields
         true,
         null,
         fallthrough

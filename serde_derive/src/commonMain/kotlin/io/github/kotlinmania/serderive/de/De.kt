@@ -443,11 +443,12 @@ internal fun memberAccess(member: Member): TokenStream =
     }
 
 // The submodule functions are implemented in the sibling files:
-//   Enum.kt — deserializeEnum, deserializeCustomIdentifier, prepareEnumVariantEnum
+//   Enum.kt — deserializeEnum, prepareEnumVariantEnum
 //   Struct.kt — deserializeStruct, deserializeStructInPlace
 //   Tuple.kt — deserializeTuple, deserializeTupleInPlace
 //   Unit.kt — deserializeUnit
-//   Identifier.kt — deserializeGenerated, deserializeCustom
+//   Identifier.kt — deserializeCustom, deserializeGenerated
+//   De.kt — deserializeCustomIdentifier, exprIsMissing
 // All are in the same package and called directly.
 
 internal fun deserializeCustomIdentifier(
