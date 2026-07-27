@@ -3,9 +3,9 @@ package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.Match
-import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 
@@ -82,7 +82,7 @@ private fun deserializeInternallyTaggedVariant(
             val typeName = params.typeName()
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
-                val defaultExpr = Stmts(exprIsMissing(field, cattrs))
+                val defaultExpr = Expr(exprIsMissing(field, cattrs))
                 quote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
             } ?: quote("")
             Fragment.Block(quote("""

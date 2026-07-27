@@ -9,7 +9,6 @@ import io.github.kotlinmania.serderive.internals.AttrContainer
 import io.github.kotlinmania.serderive.internals.Expr
 import io.github.kotlinmania.serderive.internals.Field
 import io.github.kotlinmania.serderive.internals.Fragment
-import io.github.kotlinmania.serderive.internals.Stmts
 import io.github.kotlinmania.serderive.internals.Style
 import io.github.kotlinmania.serderive.internals.Variant
 import io.github.kotlinmania.syn.span
@@ -25,6 +24,12 @@ internal fun deserializeEnumUntagged(
         .filter { !it.attrs.skipDeserializing() }
         .map { variant -> Expr(deserializeVariant(params, variant, cattrs)) }
 
+    // This message could be better by saving the errors from the failed
+    // attempts. The heuristic used by TOML was to count the number of fields
+    // processed before an error, and use the error that happened after the
+    // largest number of fields. It might be better to save all the errors and
+    // combine them into one message that explains why none of the variants
+    // matched.
     val fallthroughMsg = "data did not match any variant of untagged enum ${params.typeName()}"
     val fallthroughMsgVal = cattrs.expecting() ?: fallthroughMsg
 
@@ -71,7 +76,7 @@ internal fun deserializeVariant(
             val typeName = params.typeName()
             val variantName = variant.ident.toString()
             val default = variant.fields.firstOrNull()?.let { field ->
-                val defaultExpr = Stmts(exprIsMissing(field, cattrs))
+                val defaultExpr = Expr(exprIsMissing(field, cattrs))
                 quote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
             } ?: quote("")
             Fragment.Expr(quote("""

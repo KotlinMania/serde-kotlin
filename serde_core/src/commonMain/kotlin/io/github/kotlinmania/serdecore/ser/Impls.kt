@@ -14,6 +14,7 @@ import io.github.kotlinmania.serdecore.de.RangeFromValue
 import io.github.kotlinmania.serdecore.de.RangeInclusiveValue
 import io.github.kotlinmania.serdecore.de.RangeToValue
 import io.github.kotlinmania.serdecore.de.RangeValue
+import io.github.kotlinmania.serdecore.de.ResultValue
 import io.github.kotlinmania.serdecore.de.SocketAddress
 import io.github.kotlinmania.serdecore.de.SocketAddressV4
 import io.github.kotlinmania.serdecore.de.SocketAddressV6
@@ -64,7 +65,7 @@ fun <Ok> Char.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
 fun <Ok> String.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
     = serializer.serializeStr(this)
 
-internal class FormatArguments(
+class FormatArguments(
     private val value: Any,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
@@ -195,6 +196,16 @@ fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(
         tuple.serializeElement(second).getOrThrow()
         tuple.serializeElement(third).getOrThrow()
         tuple.end().getOrThrow()
+    }
+
+// //////////////////////////////////////////////////////////////////////////////
+
+fun <Ok, T, E> ResultValue<T, E>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
+    where T : Serialize,
+          E : Serialize =
+    when (this) {
+        is ResultValue.Ok -> serializer.serializeNewtypeVariant("Result", 0u, "Ok", value)
+        is ResultValue.Err -> serializer.serializeNewtypeVariant("Result", 1u, "Err", error)
     }
 
 // //////////////////////////////////////////////////////////////////////////////
