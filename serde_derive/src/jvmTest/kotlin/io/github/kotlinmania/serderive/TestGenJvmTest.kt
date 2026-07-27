@@ -1185,13 +1185,20 @@ internal fun runExactSerdeRustTest(
     fixtureName: String,
     source: String,
     testName: String,
+    extraDependencies: String = "",
+    serdeFeatures: List<String> = emptyList(),
 ) {
     val output =
         synchronized(rustFixtureLock) {
             compileRustFixture(
                 fixtureName = fixtureName,
                 source = source,
-                extraDependencies = "serde_test = \"=1.0.176\"",
+                extraDependencies =
+                    buildString {
+                        appendLine("serde_test = \"=1.0.176\"")
+                        append(extraDependencies)
+                    },
+                serdeFeatures = serdeFeatures,
                 cargoArguments = listOf("test", "--quiet", testName, "--", "--exact"),
                 reuseFixture = true,
                 offline = false,
@@ -1245,6 +1252,7 @@ internal fun compileRustFixture(
     fixtureName: String,
     source: String,
     extraDependencies: String = "",
+    serdeFeatures: List<String> = emptyList(),
     cargoArguments: List<String> = listOf("test", "--quiet"),
     reuseFixture: Boolean = false,
     offline: Boolean = true,
@@ -1254,6 +1262,8 @@ internal fun compileRustFixture(
     val fixture = root.resolve("build/rust-compile-tests/$fixtureName")
     val serdePath = root.resolve("tmp/serde/serde").toString().replace('\\', '/')
     val serdeCorePath = root.resolve("tmp/serde/serde_core").toString().replace('\\', '/')
+    val serdeFeatureList = serdeFeatures.joinToString(", ") { "\"$it\"" }
+    val serdeFeatureClause = if (serdeFeatureList.isEmpty()) "" else ", features = [$serdeFeatureList]"
     val cargoToml =
         """
         [package]
@@ -1262,7 +1272,7 @@ internal fun compileRustFixture(
         edition = "2021"
 
         [dependencies]
-        serde = { path = "$serdePath" }
+        serde = { path = "$serdePath"$serdeFeatureClause }
         $extraDependencies
 
         [patch.crates-io]

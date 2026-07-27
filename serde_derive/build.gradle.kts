@@ -21,5 +21,10 @@ kotlin {
             api(project(":serde-core"))
             implementation(libs.bundles.serde.derive.commonMain)
         }
+        jvmTest.dependencies {
+            implementation("io.github.kotlinmania:serde-test-kotlin:0.1.1") {
+                exclude(group = "io.github.kotlinmania", module = "serde-kotlin")
+            }
+        }
     }
 }
