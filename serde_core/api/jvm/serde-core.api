@@ -389,7 +389,8 @@ public abstract interface class io/github/kotlinmania/serdecore/de/IntoDeseriali
 	public abstract fun intoDeserializer ()Lio/github/kotlinmania/serdecore/de/Deserializer;
 }
 
-public abstract class io/github/kotlinmania/serdecore/de/IpAddress {
+public abstract class io/github/kotlinmania/serdecore/de/IpAddress : io/github/kotlinmania/serdecore/ser/Serialize {
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 }
 
 public final class io/github/kotlinmania/serdecore/de/IpAddress$V4 : io/github/kotlinmania/serdecore/de/IpAddress {
@@ -422,7 +423,7 @@ public final class io/github/kotlinmania/serdecore/de/IpAddressDeserialize : io/
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/github/kotlinmania/serdecore/de/Ipv4Address {
+public final class io/github/kotlinmania/serdecore/de/Ipv4Address : io/github/kotlinmania/serdecore/ser/Serialize {
 	public fun <init> (Ljava/util/List;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun copy (Ljava/util/List;)Lio/github/kotlinmania/serdecore/de/Ipv4Address;
@@ -430,6 +431,7 @@ public final class io/github/kotlinmania/serdecore/de/Ipv4Address {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOctets ()Ljava/util/List;
 	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -441,7 +443,7 @@ public final class io/github/kotlinmania/serdecore/de/Ipv4AddressDeserialize : i
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/github/kotlinmania/serdecore/de/Ipv6Address {
+public final class io/github/kotlinmania/serdecore/de/Ipv6Address : io/github/kotlinmania/serdecore/ser/Serialize {
 	public fun <init> (Ljava/util/List;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun copy (Ljava/util/List;)Lio/github/kotlinmania/serdecore/de/Ipv6Address;
@@ -449,6 +451,7 @@ public final class io/github/kotlinmania/serdecore/de/Ipv6Address {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOctets ()Ljava/util/List;
 	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -614,7 +617,8 @@ public final class io/github/kotlinmania/serdecore/de/SerdeDeserializationExcept
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public abstract class io/github/kotlinmania/serdecore/de/SocketAddress {
+public abstract class io/github/kotlinmania/serdecore/de/SocketAddress : io/github/kotlinmania/serdecore/ser/Serialize {
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 }
 
 public final class io/github/kotlinmania/serdecore/de/SocketAddress$V4 : io/github/kotlinmania/serdecore/de/SocketAddress {
@@ -647,7 +651,7 @@ public final class io/github/kotlinmania/serdecore/de/SocketAddressDeserialize :
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/github/kotlinmania/serdecore/de/SocketAddressV4 {
+public final class io/github/kotlinmania/serdecore/de/SocketAddressV4 : io/github/kotlinmania/serdecore/ser/Serialize {
 	public synthetic fun <init> (Lio/github/kotlinmania/serdecore/de/Ipv4Address;SLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/github/kotlinmania/serdecore/de/Ipv4Address;
 	public final fun component2-Mh2AYeg ()S
@@ -657,6 +661,7 @@ public final class io/github/kotlinmania/serdecore/de/SocketAddressV4 {
 	public final fun getIp ()Lio/github/kotlinmania/serdecore/de/Ipv4Address;
 	public final fun getPort-Mh2AYeg ()S
 	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -668,7 +673,7 @@ public final class io/github/kotlinmania/serdecore/de/SocketAddressV4Deserialize
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/github/kotlinmania/serdecore/de/SocketAddressV6 {
+public final class io/github/kotlinmania/serdecore/de/SocketAddressV6 : io/github/kotlinmania/serdecore/ser/Serialize {
 	public synthetic fun <init> (Lio/github/kotlinmania/serdecore/de/Ipv6Address;SLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/github/kotlinmania/serdecore/de/Ipv6Address;
 	public final fun component2-Mh2AYeg ()S
@@ -678,6 +683,7 @@ public final class io/github/kotlinmania/serdecore/de/SocketAddressV6 {
 	public final fun getIp ()Lio/github/kotlinmania/serdecore/de/Ipv6Address;
 	public final fun getPort-Mh2AYeg ()S
 	public fun hashCode ()I
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -2025,6 +2031,11 @@ public final class io/github/kotlinmania/serdecore/priv/StringKt {
 	public static final fun fromUtf8LossyNoAlloc ([B)Ljava/lang/String;
 }
 
+public final class io/github/kotlinmania/serdecore/ser/FormatArguments : io/github/kotlinmania/serdecore/ser/Serialize {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+}
+
 public final class io/github/kotlinmania/serdecore/ser/FormatterSerializer : io/github/kotlinmania/serdecore/ser/Serializer {
 	public fun <init> (Ljava/lang/Appendable;)V
 	public fun collectStr (Ljava/lang/Object;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -2072,6 +2083,7 @@ public final class io/github/kotlinmania/serdecore/ser/ImplsKt {
 	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeInclusiveValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeToValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/RangeValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize (Lio/github/kotlinmania/serdecore/de/ResultValue;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Lio/github/kotlinmania/serdecore/ser/Serialize;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Ljava/lang/Iterable;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (Ljava/lang/String;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;

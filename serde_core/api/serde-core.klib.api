@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <serde-kotlin:serde-core>
+// Library unique name: <io.github.kotlinmania:serde-core>
 abstract fun interface io.github.kotlinmania.serdecore.de/Expected { // io.github.kotlinmania.serdecore.de/Expected|null[0]
     abstract fun expecting(): kotlin/String // io.github.kotlinmania.serdecore.de/Expected.expecting|expecting(){}[0]
 }
@@ -1412,12 +1412,13 @@ final class io.github.kotlinmania.serdecore.de/CStringValue { // io.github.kotli
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/CStringValue.toString|toString(){}[0]
 }
 
-final class io.github.kotlinmania.serdecore.de/Ipv4Address { // io.github.kotlinmania.serdecore.de/Ipv4Address|null[0]
+final class io.github.kotlinmania.serdecore.de/Ipv4Address : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/Ipv4Address|null[0]
     constructor <init>(kotlin.collections/List<kotlin/UByte>) // io.github.kotlinmania.serdecore.de/Ipv4Address.<init>|<init>(kotlin.collections.List<kotlin.UByte>){}[0]
 
     final val octets // io.github.kotlinmania.serdecore.de/Ipv4Address.octets|{}octets[0]
         final fun <get-octets>(): kotlin.collections/List<kotlin/UByte> // io.github.kotlinmania.serdecore.de/Ipv4Address.octets.<get-octets>|<get-octets>(){}[0]
 
+    final fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de/Ipv4Address.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
     final fun component1(): kotlin.collections/List<kotlin/UByte> // io.github.kotlinmania.serdecore.de/Ipv4Address.component1|component1(){}[0]
     final fun copy(kotlin.collections/List<kotlin/UByte> = ...): io.github.kotlinmania.serdecore.de/Ipv4Address // io.github.kotlinmania.serdecore.de/Ipv4Address.copy|copy(kotlin.collections.List<kotlin.UByte>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Ipv4Address.equals|equals(kotlin.Any?){}[0]
@@ -1425,12 +1426,13 @@ final class io.github.kotlinmania.serdecore.de/Ipv4Address { // io.github.kotlin
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Ipv4Address.toString|toString(){}[0]
 }
 
-final class io.github.kotlinmania.serdecore.de/Ipv6Address { // io.github.kotlinmania.serdecore.de/Ipv6Address|null[0]
+final class io.github.kotlinmania.serdecore.de/Ipv6Address : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/Ipv6Address|null[0]
     constructor <init>(kotlin.collections/List<kotlin/UByte>) // io.github.kotlinmania.serdecore.de/Ipv6Address.<init>|<init>(kotlin.collections.List<kotlin.UByte>){}[0]
 
     final val octets // io.github.kotlinmania.serdecore.de/Ipv6Address.octets|{}octets[0]
         final fun <get-octets>(): kotlin.collections/List<kotlin/UByte> // io.github.kotlinmania.serdecore.de/Ipv6Address.octets.<get-octets>|<get-octets>(){}[0]
 
+    final fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de/Ipv6Address.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
     final fun component1(): kotlin.collections/List<kotlin/UByte> // io.github.kotlinmania.serdecore.de/Ipv6Address.component1|component1(){}[0]
     final fun copy(kotlin.collections/List<kotlin/UByte> = ...): io.github.kotlinmania.serdecore.de/Ipv6Address // io.github.kotlinmania.serdecore.de/Ipv6Address.copy|copy(kotlin.collections.List<kotlin.UByte>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Ipv6Address.equals|equals(kotlin.Any?){}[0]
@@ -1455,7 +1457,7 @@ final class io.github.kotlinmania.serdecore.de/SerdeDeserializationException : k
     constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.de/SerdeDeserializationException.<init>|<init>(kotlin.String){}[0]
 }
 
-final class io.github.kotlinmania.serdecore.de/SocketAddressV4 { // io.github.kotlinmania.serdecore.de/SocketAddressV4|null[0]
+final class io.github.kotlinmania.serdecore.de/SocketAddressV4 : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/SocketAddressV4|null[0]
     constructor <init>(io.github.kotlinmania.serdecore.de/Ipv4Address, kotlin/UShort) // io.github.kotlinmania.serdecore.de/SocketAddressV4.<init>|<init>(io.github.kotlinmania.serdecore.de.Ipv4Address;kotlin.UShort){}[0]
 
     final val ip // io.github.kotlinmania.serdecore.de/SocketAddressV4.ip|{}ip[0]
@@ -1463,6 +1465,7 @@ final class io.github.kotlinmania.serdecore.de/SocketAddressV4 { // io.github.ko
     final val port // io.github.kotlinmania.serdecore.de/SocketAddressV4.port|{}port[0]
         final fun <get-port>(): kotlin/UShort // io.github.kotlinmania.serdecore.de/SocketAddressV4.port.<get-port>|<get-port>(){}[0]
 
+    final fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de/SocketAddressV4.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
     final fun component1(): io.github.kotlinmania.serdecore.de/Ipv4Address // io.github.kotlinmania.serdecore.de/SocketAddressV4.component1|component1(){}[0]
     final fun component2(): kotlin/UShort // io.github.kotlinmania.serdecore.de/SocketAddressV4.component2|component2(){}[0]
     final fun copy(io.github.kotlinmania.serdecore.de/Ipv4Address = ..., kotlin/UShort = ...): io.github.kotlinmania.serdecore.de/SocketAddressV4 // io.github.kotlinmania.serdecore.de/SocketAddressV4.copy|copy(io.github.kotlinmania.serdecore.de.Ipv4Address;kotlin.UShort){}[0]
@@ -1471,7 +1474,7 @@ final class io.github.kotlinmania.serdecore.de/SocketAddressV4 { // io.github.ko
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/SocketAddressV4.toString|toString(){}[0]
 }
 
-final class io.github.kotlinmania.serdecore.de/SocketAddressV6 { // io.github.kotlinmania.serdecore.de/SocketAddressV6|null[0]
+final class io.github.kotlinmania.serdecore.de/SocketAddressV6 : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/SocketAddressV6|null[0]
     constructor <init>(io.github.kotlinmania.serdecore.de/Ipv6Address, kotlin/UShort) // io.github.kotlinmania.serdecore.de/SocketAddressV6.<init>|<init>(io.github.kotlinmania.serdecore.de.Ipv6Address;kotlin.UShort){}[0]
 
     final val ip // io.github.kotlinmania.serdecore.de/SocketAddressV6.ip|{}ip[0]
@@ -1479,6 +1482,7 @@ final class io.github.kotlinmania.serdecore.de/SocketAddressV6 { // io.github.ko
     final val port // io.github.kotlinmania.serdecore.de/SocketAddressV6.port|{}port[0]
         final fun <get-port>(): kotlin/UShort // io.github.kotlinmania.serdecore.de/SocketAddressV6.port.<get-port>|<get-port>(){}[0]
 
+    final fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de/SocketAddressV6.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
     final fun component1(): io.github.kotlinmania.serdecore.de/Ipv6Address // io.github.kotlinmania.serdecore.de/SocketAddressV6.component1|component1(){}[0]
     final fun component2(): kotlin/UShort // io.github.kotlinmania.serdecore.de/SocketAddressV6.component2|component2(){}[0]
     final fun copy(io.github.kotlinmania.serdecore.de/Ipv6Address = ..., kotlin/UShort = ...): io.github.kotlinmania.serdecore.de/SocketAddressV6 // io.github.kotlinmania.serdecore.de/SocketAddressV6.copy|copy(io.github.kotlinmania.serdecore.de.Ipv6Address;kotlin.UShort){}[0]
@@ -1501,6 +1505,12 @@ final class io.github.kotlinmania.serdecore.priv/ContentMapEntry { // io.github.
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.priv/ContentMapEntry.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.priv/ContentMapEntry.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.priv/ContentMapEntry.toString|toString(){}[0]
+}
+
+final class io.github.kotlinmania.serdecore.ser/FormatArguments : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.ser/FormatArguments|null[0]
+    constructor <init>(kotlin/Any) // io.github.kotlinmania.serdecore.ser/FormatArguments.<init>|<init>(kotlin.Any){}[0]
+
+    final fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.ser/FormatArguments.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
 }
 
 final class io.github.kotlinmania.serdecore.ser/FormatterSerializer : io.github.kotlinmania.serdecore.ser/Serializer<kotlin/Unit> { // io.github.kotlinmania.serdecore.ser/FormatterSerializer|null[0]
@@ -1651,7 +1661,9 @@ sealed class <#A: out kotlin/Any?> io.github.kotlinmania.serdecore.de/BoundValue
     }
 }
 
-sealed class io.github.kotlinmania.serdecore.de/IpAddress { // io.github.kotlinmania.serdecore.de/IpAddress|null[0]
+sealed class io.github.kotlinmania.serdecore.de/IpAddress : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/IpAddress|null[0]
+    open fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de/IpAddress.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
+
     final class V4 : io.github.kotlinmania.serdecore.de/IpAddress { // io.github.kotlinmania.serdecore.de/IpAddress.V4|null[0]
         constructor <init>(io.github.kotlinmania.serdecore.de/Ipv4Address) // io.github.kotlinmania.serdecore.de/IpAddress.V4.<init>|<init>(io.github.kotlinmania.serdecore.de.Ipv4Address){}[0]
 
@@ -1707,7 +1719,9 @@ sealed class io.github.kotlinmania.serdecore.de/OsStringValue { // io.github.kot
     }
 }
 
-sealed class io.github.kotlinmania.serdecore.de/SocketAddress { // io.github.kotlinmania.serdecore.de/SocketAddress|null[0]
+sealed class io.github.kotlinmania.serdecore.de/SocketAddress : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/SocketAddress|null[0]
+    open fun <#A1: kotlin/Any?> serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de/SocketAddress.serialize|serialize(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>}[0]
+
     final class V4 : io.github.kotlinmania.serdecore.de/SocketAddress { // io.github.kotlinmania.serdecore.de/SocketAddress.V4|null[0]
         constructor <init>(io.github.kotlinmania.serdecore.de/SocketAddressV4) // io.github.kotlinmania.serdecore.de/SocketAddress.V4.<init>|<init>(io.github.kotlinmania.serdecore.de.SocketAddressV4){}[0]
 
@@ -2176,6 +2190,7 @@ final fun <#A: io.github.kotlinmania.serdecore.de/IntoDeserializer, #B: io.githu
 final fun <#A: io.github.kotlinmania.serdecore.de/IntoDeserializer> (kotlin.collections/Iterable<#A>).io.github.kotlinmania.serdecore.de.value/intoDeserializer(): io.github.kotlinmania.serdecore.de.value/SeqDeserializer<#A> // io.github.kotlinmania.serdecore.de.value/intoDeserializer|intoDeserializer@kotlin.collections.Iterable<0:0>(){0§<io.github.kotlinmania.serdecore.de.IntoDeserializer>}[0]
 final fun <#A: io.github.kotlinmania.serdecore.de/IntoDeserializer> io.github.kotlinmania.serdecore.de.value/seqDeserializer(kotlin.collections/Iterator<#A>): io.github.kotlinmania.serdecore.de.value/SeqDeserializer<#A> // io.github.kotlinmania.serdecore.de.value/seqDeserializer|seqDeserializer(kotlin.collections.Iterator<0:0>){0§<io.github.kotlinmania.serdecore.de.IntoDeserializer>}[0]
 final fun <#A: kotlin/Any?, #B: io.github.kotlinmania.serdecore.ser/Serialize, #C: io.github.kotlinmania.serdecore.ser/Serialize, #D: io.github.kotlinmania.serdecore.ser/Serialize> (kotlin/Triple<#B, #C, #D>).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@kotlin.Triple<0:1,0:2,0:3>(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>;1§<io.github.kotlinmania.serdecore.ser.Serialize>;2§<io.github.kotlinmania.serdecore.ser.Serialize>;3§<io.github.kotlinmania.serdecore.ser.Serialize>}[0]
+final fun <#A: kotlin/Any?, #B: io.github.kotlinmania.serdecore.ser/Serialize, #C: io.github.kotlinmania.serdecore.ser/Serialize> (io.github.kotlinmania.serdecore.de/ResultValue<#B, #C>).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@io.github.kotlinmania.serdecore.de.ResultValue<0:1,0:2>(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>;1§<io.github.kotlinmania.serdecore.ser.Serialize>;2§<io.github.kotlinmania.serdecore.ser.Serialize>}[0]
 final fun <#A: kotlin/Any?, #B: io.github.kotlinmania.serdecore.ser/Serialize, #C: io.github.kotlinmania.serdecore.ser/Serialize> (kotlin.collections/Map<#B, #C>).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@kotlin.collections.Map<0:1,0:2>(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>;1§<io.github.kotlinmania.serdecore.ser.Serialize>;2§<io.github.kotlinmania.serdecore.ser.Serialize>}[0]
 final fun <#A: kotlin/Any?, #B: io.github.kotlinmania.serdecore.ser/Serialize, #C: io.github.kotlinmania.serdecore.ser/Serialize> (kotlin/Pair<#B, #C>).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@kotlin.Pair<0:1,0:2>(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>;1§<io.github.kotlinmania.serdecore.ser.Serialize>;2§<io.github.kotlinmania.serdecore.ser.Serialize>}[0]
 final fun <#A: kotlin/Any?, #B: io.github.kotlinmania.serdecore.ser/Serialize> (#B?).io.github.kotlinmania.serdecore.ser/serialize(io.github.kotlinmania.serdecore.ser/Serializer<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serdecore.ser/serialize|serialize@0:1?(io.github.kotlinmania.serdecore.ser.Serializer<0:0>){0§<kotlin.Any?>;1§<io.github.kotlinmania.serdecore.ser.Serialize>}[0]

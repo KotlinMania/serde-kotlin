@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <serde-kotlin:serde-derive>
+// Library unique name: <io.github.kotlinmania:serde-derive>
 final enum class io.github.kotlinmania.serderive.internals/Derive : kotlin/Enum<io.github.kotlinmania.serderive.internals/Derive> { // io.github.kotlinmania.serderive.internals/Derive|null[0]
     enum entry Deserialize // io.github.kotlinmania.serderive.internals/Derive.Deserialize|null[0]
     enum entry Serialize // io.github.kotlinmania.serderive.internals/Derive.Serialize|null[0]
