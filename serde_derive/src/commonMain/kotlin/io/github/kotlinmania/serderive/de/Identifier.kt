@@ -17,7 +17,7 @@ import io.github.kotlinmania.serderive.internals.Variant
 // Deserialization of struct field identifiers and enum variant identifiers by
 // way of an enum.
 
-// Generates the deserialize body for an enum with
+// Generates the Deserialize.deserialize body for an enum with
 // the fieldIdentifier or variantIdentifier attribute.
 internal fun deserializeCustom(
     params: Parameters,
