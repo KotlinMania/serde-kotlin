@@ -2,7 +2,7 @@
   "name": "kotlin-js-store",
   "private": true,
   "dependencies": {
-    "webpack": "5.109.1"
+    "webpack": "5.109.2"
   },
   "resolutions": {
     "ws": "8.21.0",
