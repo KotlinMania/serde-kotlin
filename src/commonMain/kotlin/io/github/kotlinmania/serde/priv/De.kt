@@ -1,4 +1,4 @@
-// port-lint: source serde/src/private/de.rs
+// port-lint: source de.rs
 package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeError

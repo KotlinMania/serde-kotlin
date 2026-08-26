@@ -1,4 +1,4 @@
-// port-lint: source serde/src/private/mod.rs
+// port-lint: source mod.rs
 package io.github.kotlinmania.serde.priv
 
 // Tracking file for upstream serde/src/private/mod.rs.
