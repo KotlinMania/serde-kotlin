@@ -206,7 +206,7 @@ private enum class Unsupported {
     Enum,
     ;
 
-    override fun toString(): String =
+    fun fmt(): String =
         when (this) {
             Boolean -> "a boolean"
             Integer -> "an integer"
@@ -220,6 +220,8 @@ private enum class Unsupported {
             TupleStruct -> "a tuple struct"
             Enum -> "an enum"
         }
+
+    override fun toString(): String = fmt()
 }
 
 internal sealed interface Content : Serialize {
@@ -448,6 +450,9 @@ internal sealed interface Content : Serialize {
 }
 
 private class ContentSerializer : Serializer<Content> {
+    companion object {
+        fun new(): ContentSerializer = ContentSerializer()
+    }
     override fun serializeBool(v: Boolean): SerdeResult<Content> = SerdeResult.success(Content.Bool(v))
 
     override fun serializeI8(v: Byte): SerdeResult<Content> = SerdeResult.success(Content.I8(v))
@@ -682,6 +687,14 @@ private class SerializeTupleVariantAsMapValue<Ok, M>(
     len: Int,
 ) : SerializeTupleVariant<Ok>
     where M : SerializeMap<Ok> {
+    companion object {
+        fun <Ok, M : SerializeMap<Ok>> new(
+            map: M,
+            name: String,
+            len: Int,
+        ): SerializeTupleVariantAsMapValue<Ok, M> = SerializeTupleVariantAsMapValue(map, name, len)
+    }
+
     private val fields: MutableList<Content> = ArrayList(len)
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
@@ -703,6 +716,14 @@ private class SerializeStructVariantAsMapValue<Ok, M>(
     len: Int,
 ) : SerializeStructVariant<Ok>
     where M : SerializeMap<Ok> {
+    companion object {
+        fun <Ok, M : SerializeMap<Ok>> new(
+            map: M,
+            name: String,
+            len: Int,
+        ): SerializeStructVariantAsMapValue<Ok, M> = SerializeStructVariantAsMapValue(map, name, len)
+    }
+
     private val fields: MutableList<Pair<String, Content>> = ArrayList(len)
 
     override fun <T> serializeField(
@@ -874,6 +895,11 @@ private class FlatMapSerializeTupleVariantAsMapValue<MOk, M>(
     len: Int,
 ) : SerializeTupleVariant<Unit>
     where M : SerializeMap<MOk> {
+    companion object {
+        fun <MOk, M : SerializeMap<MOk>> new(map: M, len: Int = 0): FlatMapSerializeTupleVariantAsMapValue<MOk, M> =
+            FlatMapSerializeTupleVariantAsMapValue(map, len)
+    }
+
     private val fields: MutableList<Content> = ArrayList(len)
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
@@ -893,6 +919,13 @@ private class FlatMapSerializeStructVariantAsMapValue<MOk, M>(
     private val name: String,
 ) : SerializeStructVariant<Unit>
     where M : SerializeMap<MOk> {
+    companion object {
+        fun <MOk, M : SerializeMap<MOk>> new(
+            map: M,
+            name: String,
+        ): FlatMapSerializeStructVariantAsMapValue<MOk, M> = FlatMapSerializeStructVariantAsMapValue(map, name)
+    }
+
     private val fields: MutableList<Pair<String, Content>> = ArrayList()
 
     override fun <T> serializeField(
@@ -924,5 +957,7 @@ internal data class AdjacentlyTaggedEnumVariant(
 internal data class CannotSerializeVariant<T>(
     val value: T,
 ) {
-    override fun toString(): String = "enum variant cannot be serialized: $value"
+    fun fmt(): String = "enum variant cannot be serialized: $value"
+
+    override fun toString(): String = fmt()
 }
