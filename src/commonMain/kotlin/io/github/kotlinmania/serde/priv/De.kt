@@ -116,53 +116,61 @@ internal fun <V> missingField(
     return deserialize.deserialize(MissingFieldDeserializer(field))
 }
 
-internal fun borrowCowStr(deserializer: Deserializer): SerdeResult<String> {
-    val cowStrVisitor =
-        object : Visitor<String> {
-            override fun expecting(): String = "a string"
+internal class CowStrVisitor : Visitor<String> {
+    companion object {
+        fun new(): CowStrVisitor = CowStrVisitor()
+    }
 
-            override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success(v)
+    override fun expecting(): String = "a string"
 
-            override fun visitBorrowedStr(v: String): SerdeResult<String> = SerdeResult.success(v)
+    fun fmt(): String = expecting()
 
-            override fun visitString(v: String): SerdeResult<String> = SerdeResult.success(v)
+    override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-            override fun visitBytes(v: ByteArray): SerdeResult<String> =
-                serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
-                    .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+    override fun visitBorrowedStr(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-            override fun visitBorrowedBytes(v: ByteArray): SerdeResult<String> =
-                serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
-                    .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+    override fun visitString(v: String): SerdeResult<String> = SerdeResult.success(v)
 
-            override fun visitByteBuf(v: ByteArray): SerdeResult<String> =
-                serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
-                    .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
-        }
+    override fun visitBytes(v: ByteArray): SerdeResult<String> =
+        serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
+            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
 
-    return deserializer.deserializeStr(cowStrVisitor)
+    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<String> =
+        serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
+            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<String> =
+        serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
+            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
 }
 
-internal fun borrowCowBytes(deserializer: Deserializer): SerdeResult<ByteArray> {
-    val cowBytesVisitor =
-        object : Visitor<ByteArray> {
-            override fun expecting(): String = "a byte array"
+internal fun borrowCowStr(deserializer: Deserializer): SerdeResult<String> =
+    deserializer.deserializeStr(CowStrVisitor.new())
 
-            override fun visitStr(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
+internal class CowBytesVisitor : Visitor<ByteArray> {
+    companion object {
+        fun new(): CowBytesVisitor = CowBytesVisitor()
+    }
 
-            override fun visitBorrowedStr(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
+    override fun expecting(): String = "a byte array"
 
-            override fun visitString(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
+    fun fmt(): String = expecting()
 
-            override fun visitBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
+    override fun visitStr(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
 
-            override fun visitBorrowedBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
+    override fun visitBorrowedStr(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
 
-            override fun visitByteBuf(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
-        }
+    override fun visitString(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
 
-    return deserializer.deserializeBytes(cowBytesVisitor)
+    override fun visitBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
+
+    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
 }
+
+internal fun borrowCowBytes(deserializer: Deserializer): SerdeResult<ByteArray> =
+    deserializer.deserializeBytes(CowBytesVisitor.new())
 
 // //////////////////////////////////////////////////////////////////////////////
 
@@ -213,6 +221,8 @@ private fun contentClone(content: Content): Content =
         is Content.Seq -> Content.Seq(content.value.map(::contentClone))
         is Content.Map -> Content.Map(content.value.map { entry -> ContentMapEntry(contentClone(entry.key), contentClone(entry.value)) })
     }
+
+internal fun Content.clone(): Content = contentClone(this)
 
 private fun contentUnexpected(content: Content): Unexpected =
     when (content) {
@@ -356,6 +366,8 @@ internal class TagOrContentVisitor(
     }
 
     override fun expecting(): String = "a type tag `$name` or any other value"
+
+    fun fmt(): String = expecting()
 
     override fun <D> deserialize(deserializer: D): SerdeResult<TagOrContent>
         where D : Deserializer =
@@ -563,6 +575,8 @@ internal class TagOrContentFieldVisitor(
     Visitor<TagOrContentField> {
     override fun expecting(): String = "\"$tag\" or \"$content\""
 
+    fun fmt(): String = expecting()
+
     override fun <D> deserialize(deserializer: D): SerdeResult<TagOrContentField>
         where D : Deserializer =
         deserializer.deserializeIdentifier(this)
@@ -616,6 +630,8 @@ internal class TagContentOtherFieldVisitor(
 ) : DeserializeSeed<TagContentOtherField>,
     Visitor<TagContentOtherField> {
     override fun expecting(): String = "\"$tag\", \"$content\", or other ignored fields"
+
+    fun fmt(): String = expecting()
 
     override fun <D> deserialize(deserializer: D): SerdeResult<TagContentOtherField>
         where D : Deserializer =
@@ -2028,6 +2044,8 @@ internal class AdjacentlyTaggedEnumVariantVisitor<F>(
 ) : Visitor<F> {
     override fun expecting(): String = "variant of enum $enumName"
 
+    fun fmt(): String = expecting()
+
     override fun <A> visitEnum(access: A): SerdeResult<F>
         where A : EnumAccess =
         serdeCatching {
@@ -2834,6 +2852,76 @@ private class VariantRefDeserializer(
                     ),
                 )
         }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Visitor for deserializing an internally tagged unit variant.
+ *
+ * Not public API.
+ */
+internal class InternallyTaggedUnitVisitor(
+    private val typeName: String,
+    private val variantName: String,
+) : Visitor<Unit> {
+    companion object {
+        fun new(typeName: String, variantName: String): InternallyTaggedUnitVisitor =
+            InternallyTaggedUnitVisitor(typeName, variantName)
+    }
+
+    override fun expecting(): String = "unit variant $typeName::$variantName"
+
+    fun fmt(): String = expecting()
+
+    override fun <A> visitSeq(access: A): SerdeResult<Unit>
+        where A : SeqAccess = SerdeResult.success(Unit)
+
+    override fun <A> visitMap(access: A): SerdeResult<Unit>
+        where A : MapAccess =
+        serdeCatching {
+            while (access.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
+                // discard entries
+            }
+        }
+}
+
+/**
+ * Visitor for deserializing an untagged unit variant.
+ *
+ * Not public API.
+ */
+internal class UntaggedUnitVisitor(
+    private val typeName: String,
+    private val variantName: String,
+) : Visitor<Unit> {
+    companion object {
+        fun new(typeName: String, variantName: String): UntaggedUnitVisitor =
+            UntaggedUnitVisitor(typeName, variantName)
+    }
+
+    override fun expecting(): String = "unit variant $typeName::$variantName"
+
+    fun fmt(): String = expecting()
+
+    override fun visitUnit(): SerdeResult<Unit> = SerdeResult.success(Unit)
+
+    override fun visitNone(): SerdeResult<Unit> = SerdeResult.success(Unit)
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A DeserializeSeed helper for implementing deserializeInPlace Visitors.
+ *
+ * Wraps a mutable reference and calls deserializeInPlace on it.
+ */
+internal class InPlaceSeed<T>(
+    val place: T,
+    val deserializeInPlace: (Deserializer, T) -> SerdeResult<Unit>,
+) : DeserializeSeed<Unit> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<Unit>
+        where D : Deserializer = deserializeInPlace(deserializer, place)
 }
 
 // //////////////////////////////////////////////////////////////////////////////
