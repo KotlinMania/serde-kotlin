@@ -103,109 +103,93 @@ internal fun <Ok> serializeEmptyArray(serializer: Serializer<Ok>): SerdeResult<O
         serializer.serializeTuple(0).getOrThrow().end().getOrThrow()
     }
 
-fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
+fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         val tuple = serializer.serializeTuple(size).getOrThrow()
         for (element in this) {
-            tuple.serializeElement(element).getOrThrow()
+            tuple.serializeElement(asSerialize(element)).getOrThrow()
         }
         tuple.end().getOrThrow()
     }
 
-fun <Ok, T> Iterable<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
-    serializer.collectSeq(this)
+fun <Ok, T> Iterable<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serializer.collectSeq(this.map(::asSerialize))
 
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok, K, V> Map<K, V>.serialize(
     serializer: Serializer<Ok>,
-): SerdeResult<Ok>
-    where K : Serialize,
-          V : Serialize =
-    serializer.collectMap(this.entries.asIterable().map { it.key to it.value })
+): SerdeResult<Ok> =
+    serializer.collectMap(this.entries.asIterable().map { asSerialize(it.key) to asSerialize(it.value) })
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
+fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         val state = serializer.serializeStruct("Range", 2).getOrThrow()
-        state.serializeField("start", start).getOrThrow()
-        state.serializeField("end", end).getOrThrow()
+        state.serializeField("start", asSerialize(start)).getOrThrow()
+        state.serializeField("end", asSerialize(end)).getOrThrow()
         state.end().getOrThrow()
     }
 
-fun <Ok, T> RangeFromValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
+fun <Ok, T> RangeFromValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         val state = serializer.serializeStruct("RangeFrom", 1).getOrThrow()
-        state.serializeField("start", start).getOrThrow()
+        state.serializeField("start", asSerialize(start)).getOrThrow()
         state.end().getOrThrow()
     }
 
-fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
+fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         val state = serializer.serializeStruct("RangeInclusive", 2).getOrThrow()
-        state.serializeField("start", start).getOrThrow()
-        state.serializeField("end", end).getOrThrow()
+        state.serializeField("start", asSerialize(start)).getOrThrow()
+        state.serializeField("end", asSerialize(end)).getOrThrow()
         state.end().getOrThrow()
     }
 
-fun <Ok, T> RangeToValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
+fun <Ok, T> RangeToValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         val state = serializer.serializeStruct("RangeTo", 1).getOrThrow()
-        state.serializeField("end", end).getOrThrow()
+        state.serializeField("end", asSerialize(end)).getOrThrow()
         state.end().getOrThrow()
     }
 
-fun <Ok, T> BoundValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize =
+fun <Ok, T> BoundValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     when (this) {
         BoundValue.Unbounded -> serializer.serializeUnitVariant("Bound", 0u, "Unbounded")
-        is BoundValue.Included -> serializer.serializeNewtypeVariant("Bound", 1u, "Included", value)
-        is BoundValue.Excluded -> serializer.serializeNewtypeVariant("Bound", 2u, "Excluded", value)
+        is BoundValue.Included -> serializer.serializeNewtypeVariant("Bound", 1u, "Included", asSerialize(value))
+        is BoundValue.Excluded -> serializer.serializeNewtypeVariant("Bound", 2u, "Excluded", asSerialize(value))
     }
 
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok, T0, T1> Pair<T0, T1>.serialize(
     serializer: Serializer<Ok>,
-): SerdeResult<Ok>
-    where T0 : Serialize,
-          T1 : Serialize =
+): SerdeResult<Ok> =
     serdeCatching {
         val tuple = serializer.serializeTuple(2).getOrThrow()
-        tuple.serializeElement(first).getOrThrow()
-        tuple.serializeElement(second).getOrThrow()
+        tuple.serializeElement(asSerialize(first)).getOrThrow()
+        tuple.serializeElement(asSerialize(second)).getOrThrow()
         tuple.end().getOrThrow()
     }
 
 fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(
     serializer: Serializer<Ok>,
-): SerdeResult<Ok>
-    where T0 : Serialize,
-          T1 : Serialize,
-          T2 : Serialize =
+): SerdeResult<Ok> =
     serdeCatching {
         val tuple = serializer.serializeTuple(3).getOrThrow()
-        tuple.serializeElement(first).getOrThrow()
-        tuple.serializeElement(second).getOrThrow()
-        tuple.serializeElement(third).getOrThrow()
+        tuple.serializeElement(asSerialize(first)).getOrThrow()
+        tuple.serializeElement(asSerialize(second)).getOrThrow()
+        tuple.serializeElement(asSerialize(third)).getOrThrow()
         tuple.end().getOrThrow()
     }
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok, T, E> ResultValue<T, E>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    where T : Serialize,
-          E : Serialize =
+fun <Ok, T, E> ResultValue<T, E>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     when (this) {
-        is ResultValue.Ok -> serializer.serializeNewtypeVariant("Result", 0u, "Ok", value)
-        is ResultValue.Err -> serializer.serializeNewtypeVariant("Result", 1u, "Err", error)
+        is ResultValue.Ok -> serializer.serializeNewtypeVariant("Result", 0u, "Ok", asSerialize(value))
+        is ResultValue.Err -> serializer.serializeNewtypeVariant("Result", 1u, "Err", asSerialize(error))
     }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -441,3 +425,45 @@ private data class UIntSerialize(
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
         = serializer.serializeU32(value)
 }
+
+private class AnySerialize(
+    private val value: Any?,
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+        when (val v = value) {
+            null -> serializer.serializeNone()
+            is Serialize -> v.serialize(serializer)
+            is Boolean -> v.serialize(serializer)
+            is Byte -> v.serialize(serializer)
+            is Short -> v.serialize(serializer)
+            is Int -> v.serialize(serializer)
+            is Long -> v.serialize(serializer)
+            is UByte -> v.serialize(serializer)
+            is UShort -> v.serialize(serializer)
+            is UInt -> v.serialize(serializer)
+            is ULong -> v.serialize(serializer)
+            is Float -> v.serialize(serializer)
+            is Double -> v.serialize(serializer)
+            is Char -> v.serialize(serializer)
+            is String -> v.serialize(serializer)
+            is ByteArray -> v.serialize(serializer)
+            is Unit -> v.serialize(serializer)
+            is Array<*> -> v.serialize(serializer)
+            is Iterable<*> -> v.serialize(serializer)
+            is Map<*, *> -> v.serialize(serializer)
+            is Pair<*, *> -> v.serialize(serializer)
+            is Triple<*, *, *> -> v.serialize(serializer)
+            is RangeValue<*> -> v.serialize(serializer)
+            is RangeFromValue<*> -> v.serialize(serializer)
+            is RangeInclusiveValue<*> -> v.serialize(serializer)
+            is RangeToValue<*> -> v.serialize(serializer)
+            is BoundValue<*> -> v.serialize(serializer)
+            is ResultValue<*, *> -> v.serialize(serializer)
+            is Duration -> v.serialize(serializer)
+            is Instant -> v.serialize(serializer)
+            else -> SerdeResult.failure(SerdeError.custom("type does not implement Serialize: ${v::class}"))
+        }
+}
+
+private fun asSerialize(value: Any?): Serialize =
+    if (value is Serialize) value else AnySerialize(value)
