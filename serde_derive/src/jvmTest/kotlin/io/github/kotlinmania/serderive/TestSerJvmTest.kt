@@ -85,8 +85,8 @@ class TestSerJvmTest {
 
     @Test
     fun testResult() {
-        val ok: ResultValue<I32Value, I32Value> = ResultValue.Ok(I32Value(0))
-        val err: ResultValue<I32Value, I32Value> = ResultValue.Err(I32Value(1))
+        val ok: ResultValue<Int, Int> = ResultValue.Ok(0)
+        val err: ResultValue<Int, Int> = ResultValue.Err(1)
         assertKotlinSerTokens(
             listOf(Token.NewtypeVariant("Result", "Ok"), Token.I32(0)),
         ) { ok.serialize(it) }
@@ -98,30 +98,30 @@ class TestSerJvmTest {
     @Test
     fun testSlice() {
         assertKotlinSerTokens(listOf(Token.Seq(0), Token.SeqEnd)) {
-            emptyList<I32Value>().serialize(it)
+            emptyList<Int>().serialize(it)
         }
         assertKotlinSerTokens(
             listOf(Token.Seq(3), Token.I32(1), Token.I32(2), Token.I32(3), Token.SeqEnd),
-        ) { listOf(I32Value(1), I32Value(2), I32Value(3)).serialize(it) }
+        ) { listOf(1, 2, 3).serialize(it) }
     }
 
     @Test
     fun testArray() {
         assertKotlinSerTokens(listOf(Token.Tuple(0), Token.TupleEnd)) {
-            emptyArray<I32Value>().serialize(it)
+            emptyArray<Int>().serialize(it)
         }
         assertKotlinSerTokens(
             listOf(Token.Tuple(3), Token.I32(1), Token.I32(2), Token.I32(3), Token.TupleEnd),
-        ) { arrayOf(I32Value(1), I32Value(2), I32Value(3)).serialize(it) }
+        ) { arrayOf(1, 2, 3).serialize(it) }
     }
 
     @Test
     fun testVec() {
         val values =
             listOf(
-                SequenceValue(emptyList()),
-                SequenceValue(listOf(I32Value(1))),
-                SequenceValue(listOf(I32Value(2), I32Value(3))),
+                emptyList(),
+                listOf(1),
+                listOf(2, 3),
             )
         assertKotlinSerTokens(
             listOf(
@@ -143,20 +143,20 @@ class TestSerJvmTest {
     @Test
     fun testBtreeset() {
         assertKotlinSerTokens(listOf(Token.Seq(0), Token.SeqEnd)) {
-            emptySet<I32Value>().serialize(it)
+            emptySet<Int>().serialize(it)
         }
         assertKotlinSerTokens(listOf(Token.Seq(1), Token.I32(1), Token.SeqEnd)) {
-            linkedSetOf(I32Value(1)).serialize(it)
+            linkedSetOf(1).serialize(it)
         }
     }
 
     @Test
     fun testHashset() {
         assertKotlinSerTokens(listOf(Token.Seq(0), Token.SeqEnd)) {
-            emptySet<I32Value>().serialize(it)
+            emptySet<Int>().serialize(it)
         }
         assertKotlinSerTokens(listOf(Token.Seq(1), Token.I32(1), Token.SeqEnd)) {
-            hashSetOf(I32Value(1)).serialize(it)
+            hashSetOf(1).serialize(it)
         }
     }
 
@@ -165,7 +165,7 @@ class TestSerJvmTest {
         // Rust singleton tuple syntax has no Kotlin tuple counterpart.
         assertKotlinSerTokens(
             listOf(Token.Tuple(3), Token.I32(1), Token.I32(2), Token.I32(3), Token.TupleEnd),
-        ) { Triple(I32Value(1), I32Value(2), I32Value(3)).serialize(it) }
+        ) { Triple(1, 2, 3).serialize(it) }
     }
 
     @Test
@@ -173,12 +173,12 @@ class TestSerJvmTest {
         assertKotlinSerTokens(
             listOf(Token.Map(2), Token.I32(1), Token.I32(2), Token.I32(3), Token.I32(4), Token.MapEnd),
         ) {
-            linkedMapOf(I32Value(1) to I32Value(2), I32Value(3) to I32Value(4)).serialize(it)
+            linkedMapOf(1 to 2, 3 to 4).serialize(it)
         }
         val nested =
             linkedMapOf(
-                I32Value(1) to MapValue(emptyMap()),
-                I32Value(2) to MapValue(linkedMapOf(I32Value(3) to I32Value(4), I32Value(5) to I32Value(6))),
+                1 to emptyMap(),
+                2 to linkedMapOf(3 to 4, 5 to 6),
             )
         assertKotlinSerTokens(
             listOf(
@@ -201,10 +201,10 @@ class TestSerJvmTest {
     @Test
     fun testHashmap() {
         assertKotlinSerTokens(listOf(Token.Map(0), Token.MapEnd)) {
-            emptyMap<I32Value, I32Value>().serialize(it)
+            emptyMap<Int, Int>().serialize(it)
         }
         assertKotlinSerTokens(listOf(Token.Map(1), Token.I32(1), Token.I32(2), Token.MapEnd)) {
-            mapOf(I32Value(1) to I32Value(2)).serialize(it)
+            mapOf(1 to 2).serialize(it)
         }
     }
 
@@ -254,42 +254,42 @@ class TestSerJvmTest {
     @Test
     fun testRange() {
         assertKotlinSerTokens(rangeTokens("Range", "start" to 1, "end" to 2)) {
-            RangeValue(U32Value(1u), U32Value(2u)).serialize(it)
+            RangeValue(1u, 2u).serialize(it)
         }
     }
 
     @Test
     fun testRangeInclusive() {
         assertKotlinSerTokens(rangeTokens("RangeInclusive", "start" to 1, "end" to 2)) {
-            RangeInclusiveValue(U32Value(1u), U32Value(2u)).serialize(it)
+            RangeInclusiveValue(1u, 2u).serialize(it)
         }
     }
 
     @Test
     fun testRangeFrom() {
         assertKotlinSerTokens(rangeTokens("RangeFrom", "start" to 1)) {
-            RangeFromValue(U32Value(1u)).serialize(it)
+            RangeFromValue(1u).serialize(it)
         }
     }
 
     @Test
     fun testRangeTo() {
         assertKotlinSerTokens(rangeTokens("RangeTo", "end" to 2)) {
-            RangeToValue(U32Value(2u)).serialize(it)
+            RangeToValue(2u).serialize(it)
         }
     }
 
     @Test
     fun testBound() {
-        val unbounded: BoundValue<U8Value> = BoundValue.Unbounded
+        val unbounded: BoundValue<UByte> = BoundValue.Unbounded
         assertKotlinSerTokens(listOf(Token.Enum("Bound"), Token.Str("Unbounded"), Token.UnitValue)) {
             unbounded.serialize(it)
         }
         assertKotlinSerTokens(listOf(Token.Enum("Bound"), Token.Str("Included"), Token.U8(0u))) {
-            BoundValue.Included(U8Value(0u)).serialize(it)
+            BoundValue.Included(0.toUByte()).serialize(it)
         }
         assertKotlinSerTokens(listOf(Token.Enum("Bound"), Token.Str("Excluded"), Token.U8(0u))) {
-            BoundValue.Excluded(U8Value(0u)).serialize(it)
+            BoundValue.Excluded(0.toUByte()).serialize(it)
         }
     }
 
@@ -306,12 +306,12 @@ class TestSerJvmTest {
 
     @Test
     fun testWrapping() {
-        assertKotlinSerTokens(listOf(Token.U64(1u))) { Wrapping(U64Value(1u)).serialize(it) }
+        assertKotlinSerTokens(listOf(Token.U64(1u))) { Wrapping(1uL).serialize(it) }
     }
 
     @Test
     fun testSaturating() {
-        assertKotlinSerTokens(listOf(Token.U64(1u))) { Saturating(U64Value(1u)).serialize(it) }
+        assertKotlinSerTokens(listOf(Token.U64(1u))) { Saturating(1uL).serialize(it) }
     }
 
     // test_rc_dst: Rust Rc ownership of dynamically sized str and slice values has no Kotlin counterpart.
@@ -492,32 +492,3 @@ private data class I32Value(
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = value.serialize(serializer)
 }
 
-private data class U8Value(
-    val value: UByte,
-) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = value.serialize(serializer)
-}
-
-private data class U32Value(
-    val value: UInt,
-) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = value.serialize(serializer)
-}
-
-private data class U64Value(
-    val value: ULong,
-) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = value.serialize(serializer)
-}
-
-private data class SequenceValue<T : Serialize>(
-    val values: List<T>,
-) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = values.serialize(serializer)
-}
-
-private data class MapValue<K : Serialize, V : Serialize>(
-    val values: Map<K, V>,
-) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = values.serialize(serializer)
-}
