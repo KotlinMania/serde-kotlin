@@ -377,25 +377,25 @@ private fun formatIpv6(octets: List<UByte>): String {
 
 // //////////////////////////////////////////////////////////////////////////////
 
-data class Wrapping<T : Serialize>(
+data class Wrapping<T>(
     val value: T,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = value.serialize(serializer)
+        = asSerialize(value).serialize(serializer)
 }
 
-data class Saturating<T : Serialize>(
+data class Saturating<T>(
     val value: T,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = value.serialize(serializer)
+        = asSerialize(value).serialize(serializer)
 }
 
-data class Reverse<T : Serialize>(
+data class Reverse<T>(
     val value: T,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = value.serialize(serializer)
+        = asSerialize(value).serialize(serializer)
 }
 
 private data class ULongSerialize(

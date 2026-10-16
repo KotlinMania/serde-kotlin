@@ -210,3 +210,5 @@ private fun KotlinMultiplatformExtension.nativeTargets() {
 
     mingwX64()
 }
+
+

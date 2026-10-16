@@ -453,6 +453,7 @@ private class ContentSerializer : Serializer<Content> {
     companion object {
         fun new(): ContentSerializer = ContentSerializer()
     }
+
     override fun serializeBool(v: Boolean): SerdeResult<Content> = SerdeResult.success(Content.Bool(v))
 
     override fun serializeI8(v: Byte): SerdeResult<Content> = SerdeResult.success(Content.I8(v))

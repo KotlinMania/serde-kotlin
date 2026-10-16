@@ -634,10 +634,20 @@ val webpackVersion: String =
 
 rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") { version.set(nodeVersion) }
 rootProject.extensions.configure<WasmNodeJsEnvSpec>("kotlinWasmNodeJsSpec") { version.set(wasmNodeVersion) }
-rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") { version.set(yarnVersion) }
-rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") { version.set(wasmYarnVersion) }
+rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") {
+    version.set(yarnVersion)
+    yarnLockMismatchReport.set(org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING)
+    yarnLockAutoReplace.set(true)
+}
+rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") {
+    version.set(wasmYarnVersion)
+    yarnLockMismatchReport.set(org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING)
+    yarnLockAutoReplace.set(true)
+}
 
 rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
+    yarnLockMismatchReport = org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING
+    yarnLockAutoReplace = true
     providers
         .gradlePropertiesPrefixedBy("yarn.resolution.")
         .get()
@@ -723,6 +733,22 @@ tasks.register("setupAndroidSdk") {
     dependsOn("ensureAndroidSdk")
 }
 
+tasks.register("test") {
+    group = "verification"
+    description = "Runs the commonTest-backed KMP suite, Android host tests, and Swift Export smoke test."
+    dependsOn("hostTests", "swiftExportSmokeTest")
+}
+
+tasks.register("publishToCentralPortal") {
+    group = "publishing"
+    description = "Publishes and releases all modules to the Sonatype Central Portal."
+    dependsOn(
+        "publishAndReleaseToMavenCentral",
+        ":serde-core:publishAndReleaseToMavenCentral",
+        ":serde-derive:publishAndReleaseToMavenCentral",
+    )
+}
+
 // Explicit test runner. Named hostTests to avoid shadowing the KMP allTests
 // lifecycle task. Do not use findByName/mapNotNull here: missing test tasks
 // mean the target surface drifted and must fail loudly.
@@ -736,6 +762,12 @@ tasks.register("hostTests") {
         "wasmJsNodeTest",
         "wasmWasiNodeTest",
         "testAndroidHostTest",
+        ":serde-core:jvmTest",
+        ":serde-core:macosArm64Test",
+        ":serde-core:jsNodeTest",
+        ":serde-core:wasmJsNodeTest",
+        ":serde-core:wasmWasiNodeTest",
+        ":serde-core:testAndroidHostTest",
     )
 }
 
@@ -751,18 +783,22 @@ tasks.register("swiftExportSmokeTest") {
 
     doLast {
         val execOperations = serviceOf<ExecOperations>()
-        val swiftBuildDir =
+        val swiftBuildFile =
             layout.buildDirectory
                 .dir("swift-test")
                 .get()
                 .asFile
-                .absolutePath
+        if (swiftBuildFile.exists()) {
+            swiftBuildFile.deleteRecursively()
+        }
+        swiftBuildFile.mkdirs()
+        val swiftBuildDir = swiftBuildFile.absolutePath
         execOperations
             .exec {
                 workingDir = projectDir
                 commandLine(
                     "./gradlew",
-                    "embedSwiftExportForXcode",
+                    ":embedSwiftExportForXcode",
                     "--no-configuration-cache",
                     "--no-daemon",
                     "--console=plain",

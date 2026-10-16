@@ -5,7 +5,7 @@ let package = Package(
     name: "SwiftTestHarness",
     platforms: [.macOS(.v14)],
     dependencies: [
-        .package(name: "Serde", path: "../serde/build/SPMPackage/macosArm64/Debug")
+        .package(name: "Serde", path: "../build/SPMPackage/macosArm64/Debug")
     ],
     targets: [
         .testTarget(
@@ -20,7 +20,7 @@ let package = Package(
             ],
             linkerSettings: [
                 .unsafeFlags([
-                    "-L", "../serde/build/swift-test",
+                    "-L", "../build/swift-test",
                     "-lSerde",
                     "-F", "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
                     "-Xlinker", "-rpath", "-Xlinker", "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",

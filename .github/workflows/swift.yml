@@ -85,7 +85,7 @@ jobs:
           FRAMEWORKS_FOLDER_PATH: Frameworks
           MACOSX_DEPLOYMENT_TARGET: "14.0"
           DEPLOYMENT_TARGET_SETTING_NAME: MACOSX_DEPLOYMENT_TARGET
-        run: ./gradlew embedSwiftExportForXcode --no-configuration-cache
+        run: ./gradlew :embedSwiftExportForXcode --no-configuration-cache
 
       - name: Run swift test against Kotlin-exported module
         working-directory: swift-test-harness

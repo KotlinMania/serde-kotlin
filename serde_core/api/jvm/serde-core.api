@@ -2095,7 +2095,7 @@ public final class io/github/kotlinmania/serdecore/ser/ImplsKt {
 	public static final fun serialize (SLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize (ZLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize ([BLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
-	public static final fun serialize ([Lio/github/kotlinmania/serdecore/ser/Serialize;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
+	public static final fun serialize ([Ljava/lang/Object;Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize-0ky7B_Q (BLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize-4PLdz1A (JLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public static final fun serialize-VtjQ1oo (JLio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
@@ -2122,24 +2122,24 @@ public final class io/github/kotlinmania/serdecore/ser/PhantomData : io/github/k
 }
 
 public final class io/github/kotlinmania/serdecore/ser/Reverse : io/github/kotlinmania/serdecore/ser/Serialize {
-	public fun <init> (Lio/github/kotlinmania/serdecore/ser/Serialize;)V
-	public final fun component1 ()Lio/github/kotlinmania/serdecore/ser/Serialize;
-	public final fun copy (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serdecore/ser/Reverse;
-	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Reverse;Lio/github/kotlinmania/serdecore/ser/Serialize;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Reverse;
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Reverse;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Reverse;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Reverse;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public final fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/kotlinmania/serdecore/ser/Saturating : io/github/kotlinmania/serdecore/ser/Serialize {
-	public fun <init> (Lio/github/kotlinmania/serdecore/ser/Serialize;)V
-	public final fun component1 ()Lio/github/kotlinmania/serdecore/ser/Serialize;
-	public final fun copy (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serdecore/ser/Saturating;
-	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Saturating;Lio/github/kotlinmania/serdecore/ser/Serialize;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Saturating;
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Saturating;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Saturating;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Saturating;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public final fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
@@ -2232,12 +2232,12 @@ public abstract interface class io/github/kotlinmania/serdecore/ser/Serializer {
 }
 
 public final class io/github/kotlinmania/serdecore/ser/Wrapping : io/github/kotlinmania/serdecore/ser/Serialize {
-	public fun <init> (Lio/github/kotlinmania/serdecore/ser/Serialize;)V
-	public final fun component1 ()Lio/github/kotlinmania/serdecore/ser/Serialize;
-	public final fun copy (Lio/github/kotlinmania/serdecore/ser/Serialize;)Lio/github/kotlinmania/serdecore/ser/Wrapping;
-	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Wrapping;Lio/github/kotlinmania/serdecore/ser/Serialize;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Wrapping;
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Wrapping;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/ser/Wrapping;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/ser/Wrapping;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Lio/github/kotlinmania/serdecore/ser/Serialize;
+	public final fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
