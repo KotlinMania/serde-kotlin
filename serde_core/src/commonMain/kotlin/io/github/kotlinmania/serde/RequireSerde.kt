@@ -1,4 +1,3 @@
-// port-lint: source serde/src/lib.rs
 package io.github.kotlinmania.serde
 
 /**

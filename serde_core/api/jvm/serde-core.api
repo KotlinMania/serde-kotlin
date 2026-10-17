@@ -2,7 +2,7 @@ public final class io/github/kotlinmania/serde/Integer128Kt {
 	public static final fun serdeIfInteger128 (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
-public final class io/github/kotlinmania/serde/LibKt {
+public final class io/github/kotlinmania/serde/RequireSerdeKt {
 	public static final fun __requireSerdeNotSerdeCore ()V
 }
 

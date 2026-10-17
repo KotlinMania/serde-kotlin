@@ -1,4 +1,3 @@
-// port-lint: source lib.rs
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.procmacro2.Ident
