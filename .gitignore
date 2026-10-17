@@ -53,6 +53,7 @@ NEXT_ACTIONS.md
 port_status_report.md
 high_priority_ports.md
 port_lint_proposed_changes.md
+deep_symbol_inventory.txt
 
 # Node modules (yarn install artifact)
 kotlin-js-store/node_modules

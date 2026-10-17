@@ -28,6 +28,11 @@ public final class io/github/kotlinmania/serderive/DeTypeGenerics : io/github/ko
 	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
 }
 
+public final class io/github/kotlinmania/serderive/DeriveKt {
+	public static final fun deriveDeserialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
+	public static final fun deriveSerialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
+}
+
 public final class io/github/kotlinmania/serderive/FieldWithAliases {
 	public fun <init> (Lio/github/kotlinmania/procmacro2/Ident;Ljava/util/Set;)V
 	public final fun getAliases ()Ljava/util/Set;
@@ -61,11 +66,6 @@ public final class io/github/kotlinmania/serderive/InPlaceTypeGenerics : io/gith
 	public fun <init> (Lio/github/kotlinmania/serderive/Parameters;)V
 	public final fun getParams ()Lio/github/kotlinmania/serderive/Parameters;
 	public fun toTokens (Lio/github/kotlinmania/procmacro2/TokenStream;)V
-}
-
-public final class io/github/kotlinmania/serderive/LibKt {
-	public static final fun deriveDeserialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
-	public static final fun deriveSerialize (Lio/github/kotlinmania/procmacro2/TokenStream;)Lio/github/kotlinmania/procmacro2/TokenStream;
 }
 
 public final class io/github/kotlinmania/serderive/Parameters {
