@@ -34,7 +34,7 @@ import io.github.kotlinmania.serderive.internals.wrapInConst
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Expr
 import io.github.kotlinmania.syn.Generics
-import io.github.kotlinmania.syn.Ident
+import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Path

@@ -39,7 +39,7 @@ import io.github.kotlinmania.serderive.internals.thisValue
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.GenericParam
-import io.github.kotlinmania.syn.Ident
+import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Lifetime
 import io.github.kotlinmania.syn.Member
