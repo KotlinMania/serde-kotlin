@@ -6,7 +6,7 @@ import io.github.kotlinmania.syn.Data as SynData
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Fields
 import io.github.kotlinmania.syn.Generics
-import io.github.kotlinmania.syn.Ident
+import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.SynType

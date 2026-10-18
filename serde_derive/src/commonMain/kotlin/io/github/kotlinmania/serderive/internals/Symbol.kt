@@ -1,7 +1,7 @@
 // port-lint: source internals/symbol.rs
 package io.github.kotlinmania.serderive.internals
 
-import io.github.kotlinmania.syn.Ident
+import io.github.kotlinmania.procmacro2.Ident
 import io.github.kotlinmania.syn.Path
 
 public class Symbol(public val word: String) {
