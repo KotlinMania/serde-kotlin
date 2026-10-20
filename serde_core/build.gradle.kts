@@ -15,10 +15,4 @@ kotlin {
     android {
         namespace = "io.github.kotlinmania.serdecore"
     }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(libs.bundles.serde.commonMain)
-        }
-    }
 }
