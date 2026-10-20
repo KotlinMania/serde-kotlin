@@ -9,7 +9,6 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import kotlin.jvm.optionals.getOrNull
 
 plugins {
@@ -20,7 +19,6 @@ plugins {
 }
 
 val kotlinVersion = providers.gradleProperty("versions.kotlin").getOrElse("2.3.21")
-val isCodeqlBuild = providers.gradleProperty("kotlinmania.codeql").map(String::toBoolean).getOrElse(false)
 val jvmToolchainVersion = providers.gradleProperty("jvm.toolchain").getOrElse("21").toInt()
 val projectCompileSdk = providers.gradleProperty("android.compileSdk").getOrElse("34").toInt()
 val projectMinSdk = providers.gradleProperty("android.minSdk").getOrElse("24").toInt()
@@ -41,19 +39,10 @@ configurations.configureEach {
     }
 }
 
-// Swift Export compiles KGP-generated stdlib and coroutine bridges alongside the
-// module bridge. Those generated files contain unavoidable casts for Serde's
-// public, generic-by-design serializer and deserializer contracts.
-tasks.withType<KotlinCompilationTask<*>>().configureEach {
-    if (name.startsWith("compileSwiftExport")) {
-        compilerOptions.allWarningsAsErrors.set(false)
-    }
-}
-
 kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
-        allWarningsAsErrors.set(!isCodeqlBuild)
+        allWarningsAsErrors.set(true)
         languageVersion.set(KotlinVersion.KOTLIN_2_4)
         apiVersion.set(KotlinVersion.KOTLIN_2_4)
         freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -189,14 +178,12 @@ fun KotlinSourceSet.configureSourceSet() {
 }
 
 private fun KotlinMultiplatformExtension.nativeTargets() {
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
     tvosArm64()
     tvosSimulatorArm64()
 
-    watchosArm64()
     watchosSimulatorArm64()
     watchosDeviceArm64()
 
