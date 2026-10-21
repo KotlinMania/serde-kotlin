@@ -37,7 +37,7 @@ group = providers.gradleProperty("project.group").getOrElse("io.github.kotlinman
 version = providers.gradleProperty("project.version").getOrElse("0.1.0-SNAPSHOT")
 val frameworkName = providers.gradleProperty("project.frameworkName").getOrElse("Unnamed")
 val projectNamespace = providers.gradleProperty("project.namespace").getOrElse("io.github.kotlinmania")
-val kotlinVersion = providers.gradleProperty("versions.kotlin").getOrElse("2.4.0")
+val kotlinVersion = libs.versions.kotlin.get()
 
 fun csvProperty(name: String): Set<String> =
     providers
@@ -778,6 +778,7 @@ tasks.register("swiftExportSmokeTest") {
                     ":embedSwiftExportForXcode",
                     "--no-configuration-cache",
                     "--no-daemon",
+                    "--max-workers=2",
                     "--console=plain",
                 )
                 environment(
@@ -790,26 +791,10 @@ tasks.register("swiftExportSmokeTest") {
                         "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
                         "MACOSX_DEPLOYMENT_TARGET" to "15.0",
                         "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+                        "XCODE_XCCONFIG_FILE" to layout.projectDirectory.file("swift-test-harness/Strict.xcconfig").asFile.absolutePath,
                     ),
                 )
             }.assertNormalExitValue()
-
-        val generatedPackageSwift =
-            layout.buildDirectory
-                .file("SPMPackage/macosArm64/Debug/Package.swift")
-                .get()
-                .asFile
-        if (generatedPackageSwift.exists()) {
-            val text = generatedPackageSwift.readText()
-            if (!text.contains("platforms:")) {
-                generatedPackageSwift.writeText(
-                    text.replaceFirst(
-                        Regex("(name:\\s*\"[^\"]*\",)"),
-                        "\$1\n    platforms: [.macOS(\"15.0\")],",
-                    ),
-                )
-            }
-        }
 
         execOperations
             .exec {
@@ -820,7 +805,22 @@ tasks.register("swiftExportSmokeTest") {
         execOperations
             .exec {
                 workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
-                commandLine("swift", "test")
+                commandLine(
+                    "swift",
+                    "test",
+                    "--jobs",
+                    "2",
+                    "-Xswiftc",
+                    "-swift-version",
+                    "-Xswiftc",
+                    "6",
+                    "-Xswiftc",
+                    "-warnings-as-errors",
+                    "-Xswiftc",
+                    "-target",
+                    "-Xswiftc",
+                    "arm64-apple-macosx15.0",
+                )
             }.assertNormalExitValue()
     }
 }
