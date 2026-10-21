@@ -431,9 +431,7 @@ kotlin {
         nodejs()
     }
 
-    // Swift Export bridge — Experimental per Kotlin 2.4.0 release notes.
-    // KGP 2.4.0 does not expose a public opt-in annotation; warnings (if any)
-    // arrive via KotlinToolingDiagnostics, not @RequiresOptIn.
+    @OptIn(org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl::class)
     swiftExport {
         moduleName = frameworkName
         flattenPackage = projectNamespace
@@ -625,8 +623,8 @@ rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") {
 }
 
 rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
-    yarnLockMismatchReport = org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING
-    yarnLockAutoReplace = true
+    yarnLockMismatchReportProperty.set(org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING)
+    yarnLockAutoReplaceProperty.set(true)
     providers
         .gradlePropertiesPrefixedBy("yarn.resolution.")
         .get()

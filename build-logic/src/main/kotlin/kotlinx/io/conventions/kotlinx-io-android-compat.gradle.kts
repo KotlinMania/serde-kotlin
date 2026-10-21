@@ -11,9 +11,9 @@ pluginManager.withPlugin("org.gradle.java-base") {
     configure<AnimalSnifferExtension> {
         defaultTargets = setOf("jvmMain")
     }
-    val signature: Configuration by configurations
+    val signature = configurations.getByName("signature")
     dependencies {
         // Use the same API level as OkHttp
-        signature("net.sf.androidscents.signature:android-api-level-21:5.0.1_r2@signature")
+        add(signature.name, "net.sf.androidscents.signature:android-api-level-21:5.0.1_r2@signature")
     }
 }

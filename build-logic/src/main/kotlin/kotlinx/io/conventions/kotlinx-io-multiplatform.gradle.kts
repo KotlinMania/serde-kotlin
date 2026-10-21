@@ -132,7 +132,7 @@ kotlin {
     sourceSets.findByName("androidDeviceTest")?.kotlin?.srcDir("android/test")
 
     tasks {
-        val jvmJar by existing(Jar::class) {
+        named<Jar>("jvmJar") {
             manifest {
                 attributes(
                     "Multi-Release" to true,
