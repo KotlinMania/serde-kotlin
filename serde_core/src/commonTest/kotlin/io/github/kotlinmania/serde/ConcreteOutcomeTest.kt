@@ -25,6 +25,9 @@ class ConcreteOutcomeTest {
         assertEquals(false, SerdeDecoding.boolean(SerdeDecodeInput.boolean(false)).value)
         assertEquals(0L, SerdeDecoding.signed(SerdeDecodeInput.signed(0)).value)
         assertEquals("", SerdeDecoding.text(SerdeDecodeInput.text("")).value)
+        assertEquals(false, SerdeBooleanOutcome.success(false).getOrThrow())
+        assertEquals(0L, SerdeLongOutcome.success(0).getOrThrow())
+        assertEquals("", SerdeStringOutcome.success("").getOrThrow())
     }
 
     @Test
@@ -63,5 +66,7 @@ class ConcreteOutcomeTest {
         val caught: SerdeResult<Unit> = serdeCatching { error.raise() }
         assertSame(error, caught.exceptionOrNull())
         assertSame(error, serdeCatching { SerdeStringOutcome.failure(error).getOrThrow() }.exceptionOrNull())
+        assertSame(error, serdeCatching { SerdeLongOutcome.failure(error).getOrThrow() }.exceptionOrNull())
+        assertSame(error, serdeCatching { SerdeBooleanOutcome.failure(error).getOrThrow() }.exceptionOrNull())
     }
 }

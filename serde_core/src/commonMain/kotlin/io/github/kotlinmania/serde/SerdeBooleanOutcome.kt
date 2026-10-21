@@ -13,7 +13,12 @@ class SerdeBooleanOutcome private constructor(
 
     val isFailure: Boolean get() = error != null
 
-    fun getOrThrow(): Boolean = value ?: error!!.raise()
+    fun getOrThrow(): Boolean =
+        when {
+            value != null -> value
+            error != null -> error.raise()
+            else -> kotlin.error("SerdeBooleanOutcome invariant violated")
+        }
 
     fun exceptionOrNull(): SerdeError? = error
 

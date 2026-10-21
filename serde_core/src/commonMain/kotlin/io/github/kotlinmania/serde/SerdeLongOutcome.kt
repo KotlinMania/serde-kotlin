@@ -13,7 +13,12 @@ class SerdeLongOutcome private constructor(
 
     val isFailure: Boolean get() = error != null
 
-    fun getOrThrow(): Long = value ?: error!!.raise()
+    fun getOrThrow(): Long =
+        when {
+            value != null -> value
+            error != null -> error.raise()
+            else -> kotlin.error("SerdeLongOutcome invariant violated")
+        }
 
     fun exceptionOrNull(): SerdeError? = error
 
