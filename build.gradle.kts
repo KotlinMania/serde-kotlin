@@ -884,7 +884,7 @@ tasks.register("swiftExportSmokeTest") {
                 workingDir = projectDir
                 commandLine(
                     requireNotNull(gradle.gradleHomeDir).resolve("bin/gradle"),
-                    "embedSwiftExportForXcode",
+                    ":embedSwiftExportForXcode",
                     "--gradle-user-home",
                     layout.buildDirectory
                         .dir("swift-tooling/export-gradle-home")
@@ -952,11 +952,20 @@ tasks.register("swiftExportSmokeTest") {
                 "--scratch-path",
                 swiftScratch.absolutePath,
                 "--cache-path",
-                layout.buildDirectory.dir("swift-cache").get().asFile.absolutePath,
+                layout.buildDirectory
+                    .dir("swift-cache")
+                    .get()
+                    .asFile.absolutePath,
                 "--config-path",
-                layout.buildDirectory.dir("swift-config").get().asFile.absolutePath,
+                layout.buildDirectory
+                    .dir("swift-config")
+                    .get()
+                    .asFile.absolutePath,
                 "--security-path",
-                layout.buildDirectory.dir("swift-security").get().asFile.absolutePath,
+                layout.buildDirectory
+                    .dir("swift-security")
+                    .get()
+                    .asFile.absolutePath,
                 "--jobs",
                 "2",
                 "-v",
