@@ -882,19 +882,21 @@ internal class ContentDeserializer(
                         val iter = content.value.iterator()
                         val first =
                             iter.nextOrNull()
-                                ?: (SerdeError.invalidValue(
+                                ?: SerdeError
+                                    .invalidValue(
                                         Unexpected.Map,
                                         object : Expected {
                                             override fun expecting(): String = "map with a single key"
                                         },
-                                    )).raise()
+                                    ).raise()
                         if (iter.hasNext()) {
-                            (SerdeError.invalidValue(
+                            SerdeError
+                                .invalidValue(
                                     Unexpected.Map,
                                     object : Expected {
                                         override fun expecting(): String = "map with a single key"
                                     },
-                                )).raise()
+                                ).raise()
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
                         first.key to first.value
@@ -902,12 +904,14 @@ internal class ContentDeserializer(
 
                     is Content.StringValue -> content to null
                     is Content.Str -> content to null
-                    else -> (SerdeError.invalidType(
-                            contentUnexpected(content),
-                            object : Expected {
-                                override fun expecting(): String = "string or map"
-                            },
-                        )).raise()
+                    else ->
+                        SerdeError
+                            .invalidType(
+                                contentUnexpected(content),
+                                object : Expected {
+                                    override fun expecting(): String = "string or map"
+                                },
+                            ).raise()
                 }
 
             visitor.visitEnum(EnumDeserializer.new(variant, value)).getOrThrow()
@@ -2255,19 +2259,21 @@ internal class ContentRefDeserializer(
                         val iter = content.value.iterator()
                         val first =
                             iter.nextOrNull()
-                                ?: (SerdeError.invalidValue(
+                                ?: SerdeError
+                                    .invalidValue(
                                         Unexpected.Map,
                                         object : Expected {
                                             override fun expecting(): String = "map with a single key"
                                         },
-                                    )).raise()
+                                    ).raise()
                         if (iter.hasNext()) {
-                            (SerdeError.invalidValue(
+                            SerdeError
+                                .invalidValue(
                                     Unexpected.Map,
                                     object : Expected {
                                         override fun expecting(): String = "map with a single key"
                                     },
-                                )).raise()
+                                ).raise()
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
                         first.key to first.value
@@ -2275,12 +2281,14 @@ internal class ContentRefDeserializer(
 
                     is Content.StringValue -> content to null
                     is Content.Str -> content to null
-                    else -> (SerdeError.invalidType(
-                            contentUnexpected(content),
-                            object : Expected {
-                                override fun expecting(): String = "string or map"
-                            },
-                        )).raise()
+                    else ->
+                        SerdeError
+                            .invalidType(
+                                contentUnexpected(content),
+                                object : Expected {
+                                    override fun expecting(): String = "string or map"
+                                },
+                            ).raise()
                 }
 
             visitor.visitEnum(EnumRefDeserializer(variant, value)).getOrThrow()
