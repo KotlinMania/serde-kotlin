@@ -6,7 +6,10 @@ import Serde
 struct SerdeExportTests {
     @Test("Swift module loads")
     func testSwiftModuleLoads() {
-        #expect(Bool(true), "Serde swift module imported cleanly")
+        let outcome = io.github.kotlinmania.serde.SerdeDecoding.shared.unit(
+            input: io.github.kotlinmania.serde.SerdeDecodeInput.companion.unit())
+        #expect(outcome.completed)
+        #expect(outcome.error == nil)
     }
 }
 #elseif canImport(XCTest)
@@ -15,7 +18,10 @@ import Serde
 
 final class SerdeExportTests: XCTestCase {
     func testSwiftModuleLoads() throws {
-        XCTAssertTrue(true, "Serde swift module imported cleanly")
+        let outcome = io.github.kotlinmania.serde.SerdeDecoding.shared.unit(
+            input: io.github.kotlinmania.serde.SerdeDecodeInput.companion.unit())
+        XCTAssertTrue(outcome.completed)
+        XCTAssertNil(outcome.error)
     }
 }
 #endif

@@ -20,10 +20,9 @@ let package = Package(
                 .unsafeFlags([
                     "-L", "\(exportBuild)/swift-test",
                     "-lSerde",
-
-
                 ]),
             ]
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v6]
 )
