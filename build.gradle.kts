@@ -437,6 +437,7 @@ kotlin {
     swiftExport {
         moduleName = frameworkName
         flattenPackage = projectNamespace
+        export(project(":serde-core")) { moduleName = "SerdeCore" }
     }
 
     // Android KMP library. Block name is `android` — `androidLibrary` is deprecated in current KGP.

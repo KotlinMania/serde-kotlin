@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serde.SerdeError
-import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.serdecore.de.Deserialize
@@ -133,15 +132,15 @@ internal class CowStrVisitor : Visitor<String> {
 
     override fun visitBytes(v: ByteArray): SerdeResult<String> =
         serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
-            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+            .recoverCatching { (SerdeError.invalidValue(Unexpected.Bytes(v), this)).raise() }
 
     override fun visitBorrowedBytes(v: ByteArray): SerdeResult<String> =
         serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
-            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+            .recoverCatching { (SerdeError.invalidValue(Unexpected.Bytes(v), this)).raise() }
 
     override fun visitByteBuf(v: ByteArray): SerdeResult<String> =
         serdeCatching { v.decodeToString(throwOnInvalidSequence = true) }
-            .recoverCatching { throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this)) }
+            .recoverCatching { (SerdeError.invalidValue(Unexpected.Bytes(v), this)).raise() }
 }
 
 internal fun borrowCowStr(deserializer: Deserializer): SerdeResult<String> =
@@ -503,7 +502,7 @@ internal class TaggedContentVisitor<T>(
                             ): SerdeResult<T>
                             where D : Deserializer = deserializeTag.deserialize(deserializer)
                         },
-                    ).getOrThrow() ?: throw SerdeException(SerdeError.missingField(tagName))
+                    ).getOrThrow() ?: (SerdeError.missingField(tagName)).raise()
 
             val rest = SeqAccessDeserializer.new(access)
             val content = ContentVisitor.new().deserialize(rest).getOrThrow()
@@ -520,7 +519,7 @@ internal class TaggedContentVisitor<T>(
                 when (key) {
                     TagOrContent.Tag -> {
                         if (tag != null) {
-                            throw SerdeException(SerdeError.duplicateField(tagName))
+                            (SerdeError.duplicateField(tagName)).raise()
                         }
                         tag =
                             access
@@ -543,7 +542,7 @@ internal class TaggedContentVisitor<T>(
             }
 
             when (val finalTag = tag) {
-                null -> throw SerdeException(SerdeError.missingField(tagName))
+                null -> (SerdeError.missingField(tagName)).raise()
                 else -> finalTag to Content.Map(values)
             }
         }
@@ -883,23 +882,19 @@ internal class ContentDeserializer(
                         val iter = content.value.iterator()
                         val first =
                             iter.nextOrNull()
-                                ?: throw SerdeException(
-                                    SerdeError.invalidValue(
+                                ?: (SerdeError.invalidValue(
                                         Unexpected.Map,
                                         object : Expected {
                                             override fun expecting(): String = "map with a single key"
                                         },
-                                    ),
-                                )
+                                    )).raise()
                         if (iter.hasNext()) {
-                            throw SerdeException(
-                                SerdeError.invalidValue(
+                            (SerdeError.invalidValue(
                                     Unexpected.Map,
                                     object : Expected {
                                         override fun expecting(): String = "map with a single key"
                                     },
-                                ),
-                            )
+                                )).raise()
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
                         first.key to first.value
@@ -907,14 +902,12 @@ internal class ContentDeserializer(
 
                     is Content.StringValue -> content to null
                     is Content.Str -> content to null
-                    else -> throw SerdeException(
-                        SerdeError.invalidType(
+                    else -> (SerdeError.invalidType(
                             contentUnexpected(content),
                             object : Expected {
                                 override fun expecting(): String = "string or map"
                             },
-                        ),
-                    )
+                        )).raise()
                 }
 
             visitor.visitEnum(EnumDeserializer.new(variant, value)).getOrThrow()
@@ -976,7 +969,7 @@ private class SeqDeserializer(
             if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
+                (SerdeError.invalidLength(count + remaining, ExpectedInSeq(count))).raise()
             }
         }
 
@@ -1112,7 +1105,7 @@ private class MapDeserializer(
             if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
+                (SerdeError.invalidLength(count + remaining, ExpectedInMap(count))).raise()
             }
         }
 
@@ -1282,7 +1275,7 @@ private class PairDeserializer(
                 val remaining = pairVisitor.sizeHint() ?: 0
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                throw SerdeException(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
+                (SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining))).raise()
             }
         }
 
@@ -1846,7 +1839,7 @@ internal class FlatMapDeserializer(
                 }
             }
 
-            throw SerdeException(SerdeError.custom("no variant of enum $name found in flattened data"))
+            (SerdeError.custom("no variant of enum $name found in flattened data")).raise()
         }
 
     override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> =
@@ -1961,7 +1954,7 @@ private class FlatMapAccess(
 
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> =
         serdeCatching {
-            val value = pendingContent ?: throw SerdeException(SerdeError.custom("value is missing"))
+            val value = pendingContent ?: (SerdeError.custom("value is missing")).raise()
             pendingContent = null
             seed.deserialize(ContentRefDeserializer.new(value)).getOrThrow()
         }
@@ -1993,7 +1986,7 @@ private class FlatStructAccess(
 
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> =
         serdeCatching {
-            val value = pendingContent ?: throw SerdeException(SerdeError.custom("value is missing"))
+            val value = pendingContent ?: (SerdeError.custom("value is missing")).raise()
             pendingContent = null
             seed.deserialize(ContentDeserializer.new(value)).getOrThrow()
         }
@@ -2262,23 +2255,19 @@ internal class ContentRefDeserializer(
                         val iter = content.value.iterator()
                         val first =
                             iter.nextOrNull()
-                                ?: throw SerdeException(
-                                    SerdeError.invalidValue(
+                                ?: (SerdeError.invalidValue(
                                         Unexpected.Map,
                                         object : Expected {
                                             override fun expecting(): String = "map with a single key"
                                         },
-                                    ),
-                                )
+                                    )).raise()
                         if (iter.hasNext()) {
-                            throw SerdeException(
-                                SerdeError.invalidValue(
+                            (SerdeError.invalidValue(
                                     Unexpected.Map,
                                     object : Expected {
                                         override fun expecting(): String = "map with a single key"
                                     },
-                                ),
-                            )
+                                )).raise()
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
                         first.key to first.value
@@ -2286,14 +2275,12 @@ internal class ContentRefDeserializer(
 
                     is Content.StringValue -> content to null
                     is Content.Str -> content to null
-                    else -> throw SerdeException(
-                        SerdeError.invalidType(
+                    else -> (SerdeError.invalidType(
                             contentUnexpected(content),
                             object : Expected {
                                 override fun expecting(): String = "string or map"
                             },
-                        ),
-                    )
+                        )).raise()
                 }
 
             visitor.visitEnum(EnumRefDeserializer(variant, value)).getOrThrow()
@@ -2355,7 +2342,7 @@ private class SeqRefDeserializer(
             if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
+                (SerdeError.invalidLength(count + remaining, ExpectedInSeq(count))).raise()
             }
         }
 
@@ -2480,7 +2467,7 @@ private class MapRefDeserializer(
             if (remaining != 0) {
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
+                (SerdeError.invalidLength(count + remaining, ExpectedInMap(count))).raise()
             }
         }
 
@@ -2650,7 +2637,7 @@ private class PairRefDeserializer(
                 val remaining = pairVisitor.sizeHint() ?: 0
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                throw SerdeException(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
+                (SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining))).raise()
             }
         }
 

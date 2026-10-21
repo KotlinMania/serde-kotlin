@@ -1,28 +1,12 @@
 package io.github.kotlinmania.serde
 
-import io.github.kotlinmania.serde.SerdeResult
-
-import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serdecore.StdError
 
 /**
- * The result of a serde serialization or deserialization operation.
+ * A typed result used by generic Kotlin serialization algorithms.
  *
- * Upstream serde returns `Result<S::Ok, S::Error>`, where `Ok` and `Error`
- * are associated types projected from the concrete `Serializer`/`Deserializer`.
- * Kotlin has no associated types, and the original port modeled the return as
- * the stdlib `kotlin.Result<Ok>` — an inline value class over `Any?` whose
- * error is erased to `Throwable`. Swift Export cannot bridge that nominally:
- * it erases the value to `Any?` and emits unchecked casts into the generated
- * `KotlinStdlib.kt`, which fail under `allWarningsAsErrors = true`.
- *
- * `SerdeResult` is a concrete, serde-owned nominal type. It is strongly typed
- * over the success value [T] and carries a concrete, non-`Throwable` [SerdeError]
- * in the failure case, so Swift Export can bridge it by construction — no
- * `@HiddenFromObjC`, no stdlib erasure.
- *
- * Named `SerdeResult` (not `Result`) so it does not collide with Swift's
- * built-in `Result` type nor with `kotlin.Result`.
+ * Generic success values do not retain a concrete Swift export type. Operations
+ * with known output types expose separate concrete outcomes.
  */
 sealed class SerdeResult<out T> {
     /** Successful result carrying the serialized/deserialized value. */
@@ -153,22 +137,14 @@ inline fun <T> serdeCatching(block: () -> T): SerdeResult<T> =
         SerdeResult.failure(SerdeError(e.message ?: e.toString()))
     }
 
-/**
- * A generic serde error carrying a human-readable message.
- *
- * Intentionally **not** a `Throwable` subclass. Swift Export's Class-Stdlib
- * hazard drags the `Throwable.getStackTrace()` → `Array` bridge into the
- * generated `KotlinStdlib.kt` for any public `Throwable` subtype, which fails
- * under `allWarningsAsErrors = true`. Keeping `SerdeError` a plain class makes
- * it bridgeable, so it can sit in a public [SerdeResult.Failure] position.
- *
- * Kotlin callers that need to throw an error wrap it at the throw site via
- * [SerdeException] (see [SerdeResult.getOrThrow]).
- */
+/** A serialization diagnostic with a message and an optional original cause. */
 class SerdeError(
     val message: String,
     override val source: SerdeError? = null,
 ) : StdError {
+    /** Throws this diagnostic through the Kotlin exception boundary. */
+    fun raise(): Nothing = throw SerdeException(this)
+
     override fun equals(other: Any?): Boolean = other is SerdeError && other.message == message && other.source == source
 
     override fun hashCode(): Int = message.hashCode() * 31 + (source?.hashCode() ?: 0)
@@ -248,13 +224,8 @@ class SerdeError(
     }
 }
 
-/**
- * Throwable wrapper used at Kotlin throw sites for a [SerdeError].
- *
- * This type only ever appears as a thrown exception — never in a public,
- * Swift-exported signature position — so its `Throwable` ancestry does not
- * reach the Swift Export bridge.
- */
-class SerdeException(
-    val error: SerdeError,
-) : IllegalStateException(error.message)
+/** Carries the original diagnostic between Kotlin throw and catch boundaries. */
+@PublishedApi
+internal class SerdeException(
+    override val error: SerdeError,
+) : IllegalStateException(error.message), SerdeDiagnosticCarrier
