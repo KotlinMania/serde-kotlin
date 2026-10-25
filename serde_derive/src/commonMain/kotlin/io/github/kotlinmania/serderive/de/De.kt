@@ -44,6 +44,7 @@ import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Lifetime
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Path
+import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.WhereClause
@@ -52,17 +53,16 @@ import io.github.kotlinmania.syn.span
 import io.github.kotlinmania.syn.token.Comma
 import io.github.kotlinmania.syn.token.Plus
 
-public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
+public fun expandDeriveDeserialize(input: DeriveInput): SynResult<TokenStream> {
     val rewrittenInput = replaceReceiver(input)
 
     val ctxt = Ctxt()
     val cont = Container.fromAst(ctxt, rewrittenInput, Derive.Deserialize, Private.ident())
     if (cont == null) {
-        ctxt.check()
-        return TokenStream.new()
+        return SynResult.failure(checkNotNull(ctxt.check().exceptionOrNull()))
     }
     precondition(ctxt, cont)
-    ctxt.check()
+    ctxt.check().getOrElse { return SynResult.failure(it) }
 
     val ident = cont.ident
     val params = Parameters(cont)
@@ -129,7 +129,7 @@ public fun expandDeriveDeserialize(input: DeriveInput): TokenStream {
         ))
     }
 
-    return wrapInConst(cont.attrs.serdePath(), implBlock)
+    return SynResult.success(wrapInConst(cont.attrs.serdePath(), implBlock))
 }
 
 private fun precondition(cx: Ctxt, cont: Container) {
@@ -276,7 +276,7 @@ sealed class BorrowedLifetimes {
                 lifetime = Lifetime.new("'de", Span.callSite()),
                 colonToken = null,
                 bounds = io.github.kotlinmania.syn.LifetimeList().also { ll ->
-                    for (lt in lifetimes) ll.push(lt) { Plus.default() }
+                    for (lt in lifetimes) ll.push(lt.clone()) { Plus.default() }
                 }
             )
             is Static -> null
@@ -288,13 +288,13 @@ private fun borrowedLifetimes(cont: Container): BorrowedLifetimes {
     val lifetimes = mutableSetOf<Lifetime>()
     for (field in cont.data.allFields()) {
         if (!field.attrs.skipDeserializing()) {
-            lifetimes.addAll(field.attrs.borrowedLifetimes())
+            lifetimes.addAll(field.attrs.borrowedLifetimes().map { it.clone() })
         }
     }
     return if (lifetimes.any { it.toString() == "'static" }) {
         BorrowedLifetimes.Static
     } else {
-        BorrowedLifetimes.Borrowed(lifetimes)
+        BorrowedLifetimes.Borrowed(lifetimes.sorted().toCollection(linkedSetOf()))
     }
 }
 

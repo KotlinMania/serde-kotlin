@@ -39,21 +39,21 @@ import io.github.kotlinmania.syn.Index
 import io.github.kotlinmania.syn.Member
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathParse
+import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.SynType
 import io.github.kotlinmania.syn.parse2
 import io.github.kotlinmania.syn.span
 
-public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
+public fun expandDeriveSerialize(input: DeriveInput): SynResult<TokenStream> {
     val rewrittenInput = replaceReceiver(input)
 
     val ctxt = Ctxt()
     val cont = Container.fromAst(ctxt, rewrittenInput, Derive.Serialize, Private.ident())
     if (cont == null) {
-        ctxt.check()
-        return TokenStream.new()
+        return SynResult.failure(checkNotNull(ctxt.check().exceptionOrNull()))
     }
     precondition(ctxt, cont)
-    ctxt.check()
+    ctxt.check().getOrElse { return SynResult.failure(it) }
 
     val ident = cont.ident
     val params = SerParameters(cont)
@@ -114,7 +114,7 @@ public fun expandDeriveSerialize(input: DeriveInput): TokenStream {
         ))
     }
 
-    return wrapInConst(cont.attrs.serdePath(), implBlock)
+    return SynResult.success(wrapInConst(cont.attrs.serdePath(), implBlock))
 }
 
 private fun precondition(cx: Ctxt, cont: Container) {

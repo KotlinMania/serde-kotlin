@@ -9,6 +9,7 @@ import io.github.kotlinmania.serdecore.de.Deserializer
 import io.github.kotlinmania.serdecore.de.EnumAccess
 import io.github.kotlinmania.serdecore.de.MapAccess
 import io.github.kotlinmania.serdecore.de.SeqAccess
+import io.github.kotlinmania.serdecore.de.SeqElement
 import io.github.kotlinmania.serdecore.de.Unexpected
 import io.github.kotlinmania.serdecore.de.Visitor
 
@@ -146,8 +147,10 @@ internal class ContentVisitor : Visitor<Content>, DeserializeSeed<Content> {
         serdeCatching {
             val elements = ArrayList<Content>(cautious<Content>(access.sizeHint()))
             while (true) {
-                val next = access.nextElementSeed(new()).getOrThrow() ?: break
-                elements += next
+                when (val next = access.nextElementSeed(new()).getOrThrow()) {
+                    is SeqElement.Some -> elements += next.value
+                    SeqElement.None -> break
+                }
             }
             Content.Seq(elements)
         }

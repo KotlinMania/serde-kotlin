@@ -21,7 +21,6 @@ import io.github.kotlinmania.serdecore.ser.Serializer
 import io.github.kotlinmania.serdecore.ser.Wrapping
 import io.github.kotlinmania.serdecore.ser.serialize
 import io.github.kotlinmania.serdetest.Token
-import io.github.kotlinmania.serdetest.TokenSerializer
 import io.github.kotlinmania.serdetest.compact
 import io.github.kotlinmania.serdetest.readable
 import java.nio.file.Files
@@ -443,7 +442,7 @@ private fun assertKotlinSerTokens(
     tokens: List<Token>,
     serialize: (Serializer<Unit>) -> SerdeResult<Unit>,
 ) {
-    val serializer = TokenSerializer.new(tokens)
+    val serializer = io.github.kotlinmania.serdetest.Serializer.new(tokens)
     when (val result = serialize(serializer)) {
         is SerdeResult.Success -> Unit
         is SerdeResult.Failure -> error("value failed to serialize: ${result.error}")
@@ -456,7 +455,7 @@ private fun assertKotlinSerTokensError(
     error: String,
     serialize: (Serializer<Unit>) -> SerdeResult<Unit>,
 ) {
-    val serializer = TokenSerializer.new(tokens)
+    val serializer = io.github.kotlinmania.serdetest.Serializer.new(tokens)
     when (val result = serialize(serializer)) {
         is SerdeResult.Success -> error("value serialized successfully")
         is SerdeResult.Failure -> assertEquals(error, result.error.message)

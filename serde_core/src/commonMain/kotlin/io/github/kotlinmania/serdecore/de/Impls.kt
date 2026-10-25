@@ -606,8 +606,10 @@ private data object CStringVisitor : Visitor<CStringValue> {
         serdeCatching {
             val values = mutableListOf<Byte>()
             while (true) {
-                val value = access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow() ?: break
-                values += value.toByte()
+                when (val value = access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow()) {
+                    is SeqElement.Some -> values += value.value.toByte()
+                    SeqElement.None -> break
+                }
             }
             cStringFromBytes(values.toByteArray())
         }
@@ -686,8 +688,10 @@ fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<
                             val values = ArrayList<T>(hint)
                             val seed = SeedFromDeserialize(elementDeserialize)
                             while (true) {
-                                val next = access.nextElementSeed(seed).getOrThrow() ?: break
-                                values.add(next)
+                                when (val next = access.nextElementSeed(seed).getOrThrow()) {
+                                    is SeqElement.Some -> values.add(next.value)
+                                    SeqElement.None -> break
+                                }
                             }
                             values
                         }
@@ -712,8 +716,10 @@ fun <T> mutableSetDeserialize(elementDeserialize: Deserialize<T>): Deserialize<M
                             val values = LinkedHashSet<T>(hint)
                             val seed = SeedFromDeserialize(elementDeserialize)
                             while (true) {
-                                val next = access.nextElementSeed(seed).getOrThrow() ?: break
-                                values.add(next)
+                                when (val next = access.nextElementSeed(seed).getOrThrow()) {
+                                    is SeqElement.Some -> values.add(next.value)
+                                    SeqElement.None -> break
+                                }
                             }
                             values
                         }
@@ -797,8 +803,9 @@ private class ArrayVisitor<T>(
             val values = ArrayList<T>(len)
             repeat(len) { index ->
                 values +=
-                    access.nextElementSeed(seed).getOrThrow()
-                        ?: throw SerdeException(SerdeError.invalidLength(index, this))
+                    access.nextElementSeed(seed).getOrThrow().unwrapOrElse {
+                        throw SerdeException(SerdeError.invalidLength(index, this))
+                    }
             }
             ArrayValue(values)
         }
@@ -848,11 +855,13 @@ fun <T0, T1> pairDeserialize(
                         where A : SeqAccess =
                         serdeCatching {
                             val first =
-                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
-                                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow().unwrapOrElse {
+                                    throw SerdeException(SerdeError.invalidLength(0, this))
+                                }
                             val second =
-                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
-                                    ?: throw SerdeException(SerdeError.invalidLength(1, this))
+                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow().unwrapOrElse {
+                                    throw SerdeException(SerdeError.invalidLength(1, this))
+                                }
                             first to second
                         }
                 },
@@ -876,14 +885,17 @@ fun <T0, T1, T2> tripleDeserialize(
                         where A : SeqAccess =
                         serdeCatching {
                             val first =
-                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow()
-                                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow().unwrapOrElse {
+                                    throw SerdeException(SerdeError.invalidLength(0, this))
+                                }
                             val second =
-                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow()
-                                    ?: throw SerdeException(SerdeError.invalidLength(1, this))
+                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow().unwrapOrElse {
+                                    throw SerdeException(SerdeError.invalidLength(1, this))
+                                }
                             val third =
-                                access.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow()
-                                    ?: throw SerdeException(SerdeError.invalidLength(2, this))
+                                access.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow().unwrapOrElse {
+                                    throw SerdeException(SerdeError.invalidLength(2, this))
+                                }
                             Triple(first, second, third)
                         }
                 },
@@ -970,11 +982,13 @@ private class RangeVisitor<T, R>(
         serdeCatching {
             val seed = SeedFromDeserialize(valueDeserialize)
             val start =
-                access.nextElementSeed(seed).getOrThrow()
-                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                access.nextElementSeed(seed).getOrThrow().unwrapOrElse {
+                    throw SerdeException(SerdeError.invalidLength(0, this))
+                }
             val end =
-                access.nextElementSeed(seed).getOrThrow()
-                    ?: throw SerdeException(SerdeError.invalidLength(1, this))
+                access.nextElementSeed(seed).getOrThrow().unwrapOrElse {
+                    throw SerdeException(SerdeError.invalidLength(1, this))
+                }
             build(start, end)
         }
 
@@ -1025,8 +1039,9 @@ private class RangeFromVisitor<T>(
         where A : SeqAccess =
         serdeCatching {
             val start =
-                access.nextElementSeed(SeedFromDeserialize(valueDeserialize)).getOrThrow()
-                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                access.nextElementSeed(SeedFromDeserialize(valueDeserialize)).getOrThrow().unwrapOrElse {
+                    throw SerdeException(SerdeError.invalidLength(0, this))
+                }
             RangeFromValue(start)
         }
 
@@ -1071,8 +1086,9 @@ private class RangeToVisitor<T>(
         where A : SeqAccess =
         serdeCatching {
             val end =
-                access.nextElementSeed(SeedFromDeserialize(valueDeserialize)).getOrThrow()
-                    ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                access.nextElementSeed(SeedFromDeserialize(valueDeserialize)).getOrThrow().unwrapOrElse {
+                    throw SerdeException(SerdeError.invalidLength(0, this))
+                }
             RangeToValue(end)
         }
 
@@ -1118,11 +1134,13 @@ data object DurationDeserialize : Deserialize<Duration> {
                     where A : SeqAccess =
                     serdeCatching {
                         val secs =
-                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
-                                ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow().unwrapOrElse {
+                                throw SerdeException(SerdeError.invalidLength(0, this))
+                            }
                         val nanos =
-                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
-                                ?: throw SerdeException(SerdeError.invalidLength(1, this))
+                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow().unwrapOrElse {
+                                throw SerdeException(SerdeError.invalidLength(1, this))
+                            }
                         durationFromParts(secs, nanos)
                     }
 
@@ -1212,11 +1230,13 @@ data object SystemTimeDeserialize : Deserialize<Instant> {
                     where A : SeqAccess =
                     serdeCatching {
                         val secs =
-                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow()
-                                ?: throw SerdeException(SerdeError.invalidLength(0, this))
+                            access.nextElementSeed(SeedFromDeserialize(U64Deserialize)).getOrThrow().unwrapOrElse {
+                                throw SerdeException(SerdeError.invalidLength(0, this))
+                            }
                         val nanos =
-                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow()
-                                ?: throw SerdeException(SerdeError.invalidLength(1, this))
+                            access.nextElementSeed(SeedFromDeserialize(U32Deserialize)).getOrThrow().unwrapOrElse {
+                                throw SerdeException(SerdeError.invalidLength(1, this))
+                            }
                         instantFromEpochParts(secs, nanos)
                     }
 
@@ -1487,8 +1507,9 @@ private class FixedU8TupleVisitor<T>(
             val values = ArrayList<UByte>(len)
             repeat(len) { index ->
                 values +=
-                    access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow()
-                        ?: throw SerdeException(SerdeError.invalidLength(index, this))
+                    access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow().unwrapOrElse {
+                        throw SerdeException(SerdeError.invalidLength(index, this))
+                    }
             }
             build(values)
         }

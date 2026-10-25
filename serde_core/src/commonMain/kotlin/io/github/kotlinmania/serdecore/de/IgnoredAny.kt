@@ -18,6 +18,8 @@ import io.github.kotlinmania.serde.serdeCatching
  * import io.github.kotlinmania.serdecore.de.Deserializer
  * import io.github.kotlinmania.serdecore.de.IgnoredAny
  * import io.github.kotlinmania.serdecore.de.SeqAccess
+ * import io.github.kotlinmania.serdecore.de.SeqElement
+ * import io.github.kotlinmania.serdecore.de.unwrapOrElse
  * import io.github.kotlinmania.serdecore.de.Visitor
  *
  * /**
@@ -41,7 +43,7 @@ import io.github.kotlinmania.serde.serdeCatching
  *         where A : SeqAccess =
  *         serdeCatching {
  *             for (index in 0 until n) {
- *                 if (access.nextElement(IgnoredAny).getOrThrow() == null) {
+ *                 if (access.nextElement(IgnoredAny).getOrThrow() == SeqElement.None) {
  *                     throw SerdeException(SerdeError.invalidLength(index, this))
  *                 }
  *             }
@@ -50,9 +52,11 @@ import io.github.kotlinmania.serde.serdeCatching
  *                 override fun <D> deserialize(deserializer: D): SerdeResult<T>
  *                     where D : Deserializer =
  *                     deserializeValue.deserialize(deserializer)
- *             }).getOrThrow() ?: throw SerdeException(SerdeError.invalidLength(n, this))
+ *             }).getOrThrow().unwrapOrElse {
+ *                 throw SerdeException(SerdeError.invalidLength(n, this))
+ *             }
  *
- *             while (access.nextElement(IgnoredAny).getOrThrow() != null) {
+ *             while (access.nextElement(IgnoredAny).getOrThrow() is SeqElement.Some) {
  *                 // ignore
  *             }
  *
@@ -100,7 +104,7 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
     override fun <A> visitSeq(access: A): SerdeResult<IgnoredAny>
         where A : SeqAccess =
         serdeCatching {
-            while (access.nextElementSeed(IgnoredAny).getOrThrow() != null) {
+            while (access.nextElementSeed(IgnoredAny).getOrThrow() is SeqElement.Some) {
             }
             IgnoredAny
         }

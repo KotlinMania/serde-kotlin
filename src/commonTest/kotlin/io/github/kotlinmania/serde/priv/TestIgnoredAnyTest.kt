@@ -12,6 +12,7 @@ import io.github.kotlinmania.serdecore.de.MapAccess
 import io.github.kotlinmania.serdecore.de.SeqAccess
 import io.github.kotlinmania.serdecore.de.VariantAccess
 import io.github.kotlinmania.serdecore.de.Visitor
+import io.github.kotlinmania.serdecore.de.unwrapOrElse
 import io.github.kotlinmania.serdecore.de.value.MapEntry
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import io.github.kotlinmania.serdecore.de.value.mapDeserializer
@@ -204,8 +205,14 @@ private data object IgnoredAnyTupleVisitor : Visitor<Target> {
     override fun <A> visitSeq(access: A): SerdeResult<Target>
         where A : SeqAccess =
         serdeCatching {
-            val first = access.nextElementSeed(IgnoredAnyIntSeed).getOrThrow() ?: throw AssertionError("missing first tuple field")
-            val second = access.nextElementSeed(IgnoredAnyIntSeed).getOrThrow() ?: throw AssertionError("missing second tuple field")
+            val first =
+                access.nextElementSeed(IgnoredAnyIntSeed).getOrThrow().unwrapOrElse {
+                    throw AssertionError("missing first tuple field")
+                }
+            val second =
+                access.nextElementSeed(IgnoredAnyIntSeed).getOrThrow().unwrapOrElse {
+                    throw AssertionError("missing second tuple field")
+                }
             Target.Tuple(first, second)
         }
 }

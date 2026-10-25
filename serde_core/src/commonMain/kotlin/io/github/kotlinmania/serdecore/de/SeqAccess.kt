@@ -11,22 +11,22 @@ import io.github.kotlinmania.serde.SerdeResult
  */
 interface SeqAccess {
     /**
-     * This returns `SerdeResult.success(value)` for the next value in the sequence, or
-     * `SerdeResult.success(null)` if there are no more remaining items.
+     * This returns `SerdeResult.success(SeqElement.Some(value))` for the next value in the sequence, or
+     * `SerdeResult.success(SeqElement.None)` if there are no more remaining items.
      */
-    fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?>
+    fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>>
 
     /**
-     * This returns `SerdeResult.success(value)` for the next value in the sequence, or
-     * `SerdeResult.success(null)` if there are no more remaining items.
+     * This returns `SerdeResult.success(SeqElement.Some(value))` for the next value in the sequence, or
+     * `SerdeResult.success(SeqElement.None)` if there are no more remaining items.
      */
-    fun <T> nextElement(seed: DeserializeSeed<T>): SerdeResult<T?> = nextElementSeed(seed)
+    fun <T> nextElement(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> = nextElementSeed(seed)
 
     /**
-     * This returns `SerdeResult.success(value)` for the next value in the sequence, or
-     * `SerdeResult.success(null)` if there are no more remaining items.
+     * This returns `SerdeResult.success(SeqElement.Some(value))` for the next value in the sequence, or
+     * `SerdeResult.success(SeqElement.None)` if there are no more remaining items.
      */
-    fun <T> nextElement(deserialize: Deserialize<T>): SerdeResult<T?> =
+    fun <T> nextElement(deserialize: Deserialize<T>): SerdeResult<SeqElement<T>> =
         nextElementSeed(seedFromDeserialize(deserialize))
 
     /**

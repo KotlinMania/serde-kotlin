@@ -15,23 +15,14 @@ public class MultiName(
     internal val deserializeRenamed: Boolean,
     deserializeAliases: Set<Name>,
 ) {
-    private val mutableDeserializeAliases: MutableSet<Name> = deserializeAliases.toMutableSet()
+    internal val deserializeAliases: MutableSet<Name> = deserializeAliases.toMutableSet()
 
     public fun serializeName(): Name = serialize
 
     public fun deserializeName(): Name = deserialize
 
     internal fun deserializeAliases(): Set<Name> =
-        mutableDeserializeAliases.sorted().toCollection(linkedSetOf())
-
-    internal fun applyDeserializeAliasRule(transform: (String) -> String) {
-        val aliases = mutableDeserializeAliases.toList()
-        mutableDeserializeAliases.clear()
-        for (alias in aliases) {
-            mutableDeserializeAliases.add(Name(transform(alias.value), alias.span))
-        }
-        mutableDeserializeAliases.add(deserialize.clone())
-    }
+        deserializeAliases.sorted().toCollection(linkedSetOf())
 
     internal companion object {
         fun fromAttrs(
@@ -55,7 +46,7 @@ public class MultiName(
             return MultiName(
                 serialize = serNameVal ?: sourceName.clone(),
                 serializeRenamed = serRenamed,
-                deserialize = deNameVal ?: sourceName.clone(),
+                deserialize = deNameVal ?: sourceName,
                 deserializeRenamed = deRenamed,
                 deserializeAliases = aliasSet
             )

@@ -820,11 +820,11 @@ private class CompactSeqAccess(
 ) : SeqAccess {
     private val iterator = values.iterator()
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         if (iterator.hasNext()) {
-            seed.deserialize(iterator.next()).map { it }
+            seed.deserialize(iterator.next()).map { SeqElement.Some(it) }
         } else {
-            SerdeResult.success(null)
+            SerdeResult.success(SeqElement.None)
         }
 
     override fun sizeHint(): Int? = null

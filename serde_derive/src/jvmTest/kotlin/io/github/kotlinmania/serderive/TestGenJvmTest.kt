@@ -15,6 +15,7 @@ import io.github.kotlinmania.syn.Item
 import io.github.kotlinmania.syn.Meta
 import io.github.kotlinmania.syn.ModContent
 import io.github.kotlinmania.syn.Stmt
+import io.github.kotlinmania.syn.SynError
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.UseTree
 import io.github.kotlinmania.syn.parse2
@@ -1025,11 +1026,18 @@ internal data class GeneratedRustFixture(
     val serdeDerivedItems: Int,
 )
 
+internal class RustFixtureParseException(
+    message: String,
+    val diagnostic: SynError,
+) : IllegalArgumentException(message)
+
 internal fun generateRustFixtureFromSerdeDerives(source: String): GeneratedRustFixture {
+    val parsed = parseFile(source)
     val file =
-        parseFile(source).getOrElse { error ->
+        parsed.getOrNull() ?: run {
+            val error = checkNotNull(parsed.exceptionOrNull())
             val location = error.span().start()
-            throw IllegalArgumentException(
+            throw RustFixtureParseException(
                 "Failed to parse Rust fixture at ${location.line}:${location.column} " +
                     "near ${error.span().sourceText()}: $error",
                 error,
@@ -1111,7 +1119,7 @@ private fun Item.Use.isSerdeDeriveImport(): Boolean =
 private fun TokenStream.parseDeriveInput(): DeriveInput {
     val declaration = renderRust(clone())
     return parse2(DeriveInputParse::parse, this).getOrElse { error ->
-        throw IllegalArgumentException("Failed to parse derive input: $declaration", error)
+        throw RustFixtureParseException("Failed to parse derive input: $declaration", error)
     }
 }
 

@@ -12,9 +12,11 @@ import io.github.kotlinmania.serdecore.de.Expected
 import io.github.kotlinmania.serdecore.de.IgnoredAny
 import io.github.kotlinmania.serdecore.de.MapAccess
 import io.github.kotlinmania.serdecore.de.SeqAccess
+import io.github.kotlinmania.serdecore.de.SeqElement
 import io.github.kotlinmania.serdecore.de.Unexpected
 import io.github.kotlinmania.serdecore.de.VariantAccess
 import io.github.kotlinmania.serdecore.de.Visitor
+import io.github.kotlinmania.serdecore.de.unwrapOrElse
 import io.github.kotlinmania.serdecore.de.value.BytesDeserializer
 import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
@@ -314,8 +316,10 @@ internal class ContentVisitor :
             val hint = access.sizeHint()
             val values = ArrayList<Content>(cautious<Content>(hint))
             while (true) {
-                val next = access.nextElementSeed(new()).getOrThrow() ?: break
-                values.add(next)
+                when (val next = access.nextElementSeed(new()).getOrThrow()) {
+                    is SeqElement.Some -> values.add(next.value)
+                    SeqElement.None -> break
+                }
             }
             Content.Seq(values)
         }
@@ -502,7 +506,8 @@ internal class TaggedContentVisitor<T>(
                             ): SerdeResult<T>
                             where D : Deserializer = deserializeTag.deserialize(deserializer)
                         },
-                    ).getOrThrow() ?: (SerdeError.missingField(tagName)).raise()
+                    ).getOrThrow()
+                    .unwrapOrElse { (SerdeError.missingField(tagName)).raise() }
 
             val rest = SeqAccessDeserializer.new(access)
             val content = ContentVisitor.new().deserialize(rest).getOrThrow()
@@ -1061,17 +1066,17 @@ private class SeqDeserializer(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             if (remainingHint != null) {
                 remainingHint = maxOf(0, remainingHint!! - 1)
             }
             val next = if (iter.hasNext()) iter.next() else null
             if (next == null) {
-                null
+                SeqElement.None
             } else {
                 count += 1
-                seed.deserialize(ContentDeserializer.new(next)).getOrThrow()
+                SeqElement.Some(seed.deserialize(ContentDeserializer.new(next)).getOrThrow())
             }
         }
 
@@ -1250,13 +1255,13 @@ private class MapDeserializer(
             }
         }
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             val pair = nextPair()
             if (pair == null) {
-                null
+                SeqElement.None
             } else {
-                seed.deserialize(PairDeserializer(pair.key, pair.value)).getOrThrow()
+                SeqElement.Some(seed.deserialize(PairDeserializer(pair.key, pair.value)).getOrThrow())
             }
         }
 
@@ -1375,7 +1380,7 @@ private class PairVisitor(
 
     fun hasRemaining(): Boolean = keySlot != null || valueSlot != null
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             val next =
                 when {
@@ -1384,9 +1389,9 @@ private class PairVisitor(
                     else -> null
                 }
             if (next == null) {
-                null
+                SeqElement.None
             } else {
-                seed.deserialize(ContentDeserializer.new(next)).getOrThrow()
+                SeqElement.Some(seed.deserialize(ContentDeserializer.new(next)).getOrThrow())
             }
         }
 
@@ -2438,17 +2443,17 @@ private class SeqRefDeserializer(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             if (remainingHint != null) {
                 remainingHint = maxOf(0, remainingHint!! - 1)
             }
             val next = if (iter.hasNext()) iter.next() else null
             if (next == null) {
-                null
+                SeqElement.None
             } else {
                 count += 1
-                seed.deserialize(ContentRefDeserializer.new(next)).getOrThrow()
+                SeqElement.Some(seed.deserialize(ContentRefDeserializer.new(next)).getOrThrow())
             }
         }
 
@@ -2616,13 +2621,13 @@ private class MapRefDeserializer(
             }
         }
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             val pair = nextPair()
             if (pair == null) {
-                null
+                SeqElement.None
             } else {
-                seed.deserialize(PairRefDeserializer(pair.key, pair.value)).getOrThrow()
+                SeqElement.Some(seed.deserialize(PairRefDeserializer(pair.key, pair.value)).getOrThrow())
             }
         }
 
@@ -2741,7 +2746,7 @@ private class PairRefVisitor(
 
     fun hasRemaining(): Boolean = keySlot != null || valueSlot != null
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             val next =
                 when {
@@ -2750,9 +2755,9 @@ private class PairRefVisitor(
                     else -> null
                 }
             if (next == null) {
-                null
+                SeqElement.None
             } else {
-                seed.deserialize(ContentRefDeserializer.new(next)).getOrThrow()
+                SeqElement.Some(seed.deserialize(ContentRefDeserializer.new(next)).getOrThrow())
             }
         }
 

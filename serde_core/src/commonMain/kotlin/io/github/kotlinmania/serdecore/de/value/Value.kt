@@ -1443,14 +1443,14 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <R> nextElementSeed(seed: DeserializeSeed<R>): SerdeResult<R?> =
+    override fun <R> nextElementSeed(seed: DeserializeSeed<R>): SerdeResult<SeqElement<R>> =
         serdeCatching {
             val next = if (iter.hasNext()) iter.next() else null
             if (next == null) {
-                null
+                SeqElement.None
             } else {
                 count += 1
-                seed.deserialize(next.intoDeserializer()).getOrThrow()
+                SeqElement.Some(seed.deserialize(next.intoDeserializer()).getOrThrow())
             }
         }
 
@@ -1621,15 +1621,15 @@ class MapDeserializer<K, V> internal constructor(
             seed.deserialize(value.intoDeserializer()).getOrThrow()
         }
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
             val next = nextPair()
             if (next == null) {
-                null
+                SeqElement.None
             } else {
                 val (key, value) = next
                 val pairDeserializer = PairDeserializer(key, value)
-                seed.deserialize(pairDeserializer).getOrThrow()
+                SeqElement.Some(seed.deserialize(pairDeserializer).getOrThrow())
             }
         }
 
@@ -1863,19 +1863,19 @@ class MapDeserializer<K, V> internal constructor(
         private var key: K? = key
         private var value: V? = value
 
-        override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
+        override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
             serdeCatching {
                 val k = key
                 if (k != null) {
                     key = null
-                    seed.deserialize(k.intoDeserializer()).getOrThrow()
+                    SeqElement.Some(seed.deserialize(k.intoDeserializer()).getOrThrow())
                 } else {
                     val v = value
                     if (v != null) {
                         value = null
-                        seed.deserialize(v.intoDeserializer()).getOrThrow()
+                        SeqElement.Some(seed.deserialize(v.intoDeserializer()).getOrThrow())
                     } else {
-                        null
+                        SeqElement.None
                     }
                 }
             }
