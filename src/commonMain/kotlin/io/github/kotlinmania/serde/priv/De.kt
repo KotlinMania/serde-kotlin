@@ -22,7 +22,8 @@ import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
 import io.github.kotlinmania.serdecore.priv.Content
 import io.github.kotlinmania.serdecore.priv.ContentMapEntry
-import io.github.kotlinmania.serdecore.priv.cautious
+import io.github.kotlinmania.serdecore.priv.cautiousContentCapacity
+import io.github.kotlinmania.serdecore.priv.cautiousContentMapCapacity
 
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
@@ -314,7 +315,7 @@ internal class ContentVisitor :
         where A : SeqAccess =
         serdeCatching {
             val hint = access.sizeHint()
-            val values = ArrayList<Content>(cautious<Content>(hint))
+            val values = ArrayList<Content>(cautiousContentCapacity(hint))
             while (true) {
                 when (val next = access.nextElementSeed(new()).getOrThrow()) {
                     is SeqElement.Some -> values.add(next.value)
@@ -328,7 +329,7 @@ internal class ContentVisitor :
         where A : MapAccess =
         serdeCatching {
             val hint = access.sizeHint()
-            val values = ArrayList<ContentMapEntry>(cautious<ContentMapEntry>(hint))
+            val values = ArrayList<ContentMapEntry>(cautiousContentMapCapacity(hint))
             while (true) {
                 val next = access.nextEntrySeed(new(), new()).getOrThrow() ?: break
                 values.add(ContentMapEntry(next.first, next.second))
@@ -518,7 +519,7 @@ internal class TaggedContentVisitor<T>(
         where A : MapAccess =
         serdeCatching {
             var tag: T? = null
-            val values = ArrayList<ContentMapEntry>(cautious<ContentMapEntry>(access.sizeHint()))
+            val values = ArrayList<ContentMapEntry>(cautiousContentMapCapacity(access.sizeHint()))
             while (true) {
                 val key = access.nextKeySeed(TagOrContentVisitor.new(tagName)).getOrThrow() ?: break
                 when (key) {

@@ -2,8 +2,12 @@
 package io.github.kotlinmania.serdecore.priv
 
 import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.priv.generated.string.from_utf8_lossy as generatedFromUtf8Lossy
+import org.rustlang.core.slice.SharedByteSlice
 
-fun fromUtf8Lossy(bytes: ByteArray): String = bytes.decodeToString()
+// Compatibility entry point materializes text; the generated entry point retains Cow ownership.
+fun fromUtf8Lossy(bytes: ByteArray): String =
+    generatedFromUtf8Lossy(SharedByteSlice.borrow(bytes)).toText()
 
 // The generated code calls this like:
 //

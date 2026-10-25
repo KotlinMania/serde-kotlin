@@ -132,7 +132,7 @@ abstract interface <#A: kotlin/Any?> io.github.kotlinmania.serdecore.ser/Seriali
 }
 
 abstract interface <#A: out kotlin/Any?> io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint : kotlin.collections/Iterator<#A> { // io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint|null[0]
-    abstract fun sizeHint(): kotlin/Pair<kotlin/Int, kotlin/Int?> // io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint.sizeHint|sizeHint(){}[0]
+    abstract fun sizeHint(): kotlin/Pair<kotlin/ULong, kotlin/ULong?> // io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint.sizeHint|sizeHint(){}[0]
 }
 
 abstract interface io.github.kotlinmania.serdecore.de/Deserializer { // io.github.kotlinmania.serdecore.de/Deserializer|null[0]
@@ -243,6 +243,16 @@ abstract interface io.github.kotlinmania.serdecore/ForwardToDeserializeAnyDeseri
 abstract interface io.github.kotlinmania.serdecore/StdError { // io.github.kotlinmania.serdecore/StdError|null[0]
     open val source // io.github.kotlinmania.serdecore/StdError.source|{}source[0]
         open fun <get-source>(): io.github.kotlinmania.serdecore/StdError? // io.github.kotlinmania.serdecore/StdError.source.<get-source>|<get-source>(){}[0]
+}
+
+sealed interface <#A: kotlin/Any?> io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0 { // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0|null[0]
+    abstract fun size_hint(#A): kotlin/Pair<kotlin/ULong, io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/ULong>> // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0.size_hint|size_hint(1:0){}[0]
+
+    final class <#A1: io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint<*>> Case0 : io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0<#A1> { // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0.Case0|null[0]
+        constructor <init>() // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0.Case0.<init>|<init>(){}[0]
+
+        final fun size_hint(#A1): kotlin/Pair<kotlin/ULong, io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/ULong>> // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0.Case0.size_hint|size_hint(1:0){}[0]
+    }
 }
 
 sealed interface io.github.kotlinmania.serdecore.priv/Content { // io.github.kotlinmania.serdecore.priv/Content|null[0]
@@ -1491,6 +1501,10 @@ final class io.github.kotlinmania.serdecore.de/SocketAddressV6 : io.github.kotli
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/SocketAddressV6.toString|toString(){}[0]
 }
 
+final class io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkPanic : kotlin/RuntimeException { // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkPanic|null[0]
+    constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkPanic.<init>|<init>(kotlin.String){}[0]
+}
+
 final class io.github.kotlinmania.serdecore.priv/ContentMapEntry { // io.github.kotlinmania.serdecore.priv/ContentMapEntry|null[0]
     constructor <init>(io.github.kotlinmania.serdecore.priv/Content, io.github.kotlinmania.serdecore.priv/Content) // io.github.kotlinmania.serdecore.priv/ContentMapEntry.<init>|<init>(io.github.kotlinmania.serdecore.priv.Content;io.github.kotlinmania.serdecore.priv.Content){}[0]
 
@@ -1551,6 +1565,21 @@ final class io.github.kotlinmania.serdecore.ser/FormatterSerializer : io.github.
 
 final class io.github.kotlinmania.serdecore.ser/SerdeSerializationException : kotlin/IllegalStateException { // io.github.kotlinmania.serdecore.ser/SerdeSerializationException|null[0]
     constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.ser/SerdeSerializationException.<init>|<init>(kotlin.String){}[0]
+}
+
+final class org.rustlang.core.slice/SharedByteSlice { // org.rustlang.core.slice/SharedByteSlice|null[0]
+    final val size // org.rustlang.core.slice/SharedByteSlice.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // org.rustlang.core.slice/SharedByteSlice.size.<get-size>|<get-size>(){}[0]
+    final val start // org.rustlang.core.slice/SharedByteSlice.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // org.rustlang.core.slice/SharedByteSlice.start.<get-start>|<get-start>(){}[0]
+
+    final fun copyBytes(): kotlin/ByteArray // org.rustlang.core.slice/SharedByteSlice.copyBytes|copyBytes(){}[0]
+    final fun get(kotlin/Int): kotlin/Byte // org.rustlang.core.slice/SharedByteSlice.get|get(kotlin.Int){}[0]
+    final fun isSameRegion(org.rustlang.core.slice/SharedByteSlice): kotlin/Boolean // org.rustlang.core.slice/SharedByteSlice.isSameRegion|isSameRegion(org.rustlang.core.slice.SharedByteSlice){}[0]
+
+    final object Companion { // org.rustlang.core.slice/SharedByteSlice.Companion|null[0]
+        final fun borrow(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): org.rustlang.core.slice/SharedByteSlice // org.rustlang.core.slice/SharedByteSlice.Companion.borrow|borrow(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+    }
 }
 
 sealed class <#A: out kotlin/Any?, #B: out kotlin/Any?> io.github.kotlinmania.serdecore.de/ResultValue { // io.github.kotlinmania.serdecore.de/ResultValue|null[0]
@@ -1658,6 +1687,27 @@ sealed class <#A: out kotlin/Any?> io.github.kotlinmania.serdecore.de/BoundValue
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/BoundValue.Unbounded.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/BoundValue.Unbounded.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/BoundValue.Unbounded.toString|toString(){}[0]
+    }
+}
+
+sealed class <#A: out kotlin/Any?> io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption { // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption|null[0]
+    final class <#A1: kotlin/Any?> Some : io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<#A1> { // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some|null[0]
+        constructor <init>(#A1) // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.<init>|<init>(1:0){}[0]
+
+        final val value // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.value|{}value[0]
+            final fun <get-value>(): #A1 // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.value.<get-value>|<get-value>(){}[0]
+
+        final fun component1(): #A1 // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.component1|component1(){}[0]
+        final fun copy(#A1 = ...): io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some<#A1> // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.copy|copy(1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.Some.toString|toString(){}[0]
+    }
+
+    final object None : io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/Nothing> { // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.None|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.None.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.None.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption.None.toString|toString(){}[0]
     }
 }
 
@@ -1917,6 +1967,23 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
     }
 }
 
+sealed class org.rustlang.alloc.borrow/Utf8Cow { // org.rustlang.alloc.borrow/Utf8Cow|null[0]
+    final val bytes // org.rustlang.alloc.borrow/Utf8Cow.bytes|{}bytes[0]
+        final fun <get-bytes>(): org.rustlang.core.slice/SharedByteSlice // org.rustlang.alloc.borrow/Utf8Cow.bytes.<get-bytes>|<get-bytes>(){}[0]
+    final val isBorrowed // org.rustlang.alloc.borrow/Utf8Cow.isBorrowed|{}isBorrowed[0]
+        final fun <get-isBorrowed>(): kotlin/Boolean // org.rustlang.alloc.borrow/Utf8Cow.isBorrowed.<get-isBorrowed>|<get-isBorrowed>(){}[0]
+
+    final fun toText(): kotlin/String // org.rustlang.alloc.borrow/Utf8Cow.toText|toText(){}[0]
+
+    final class Borrowed : org.rustlang.alloc.borrow/Utf8Cow // org.rustlang.alloc.borrow/Utf8Cow.Borrowed|null[0]
+
+    final class Owned : org.rustlang.alloc.borrow/Utf8Cow // org.rustlang.alloc.borrow/Utf8Cow.Owned|null[0]
+
+    final object Companion { // org.rustlang.alloc.borrow/Utf8Cow.Companion|null[0]
+        final fun fromUtf8Lossy(org.rustlang.core.slice/SharedByteSlice): org.rustlang.alloc.borrow/Utf8Cow // org.rustlang.alloc.borrow/Utf8Cow.Companion.fromUtf8Lossy|fromUtf8Lossy(org.rustlang.core.slice.SharedByteSlice){}[0]
+    }
+}
+
 final object io.github.kotlinmania.serdecore.de/BooleanDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<kotlin/Boolean> { // io.github.kotlinmania.serdecore.de/BooleanDeserialize|null[0]
     final fun <#A1: io.github.kotlinmania.serdecore.de/Deserializer> deserialize(#A1): io.github.kotlinmania.serde/SerdeResult<kotlin/Boolean> // io.github.kotlinmania.serdecore.de/BooleanDeserialize.deserialize|deserialize(0:0){0§<io.github.kotlinmania.serdecore.de.Deserializer>}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/BooleanDeserialize.equals|equals(kotlin.Any?){}[0]
@@ -2166,6 +2233,14 @@ final object io.github.kotlinmania.serdecore.ser/PhantomData : io.github.kotlinm
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.ser/PhantomData.toString|toString(){}[0]
 }
 
+final object org.rustlang.core.str/Utf8ByteOperations { // org.rustlang.core.str/Utf8ByteOperations|null[0]
+    final fun appendContinuationBits(kotlin/Int, kotlin/Byte): kotlin/Int // org.rustlang.core.str/Utf8ByteOperations.appendContinuationBits|appendContinuationBits(kotlin.Int;kotlin.Byte){}[0]
+    final fun hasNonAsciiByte64(kotlin/Long): kotlin/Boolean // org.rustlang.core.str/Utf8ByteOperations.hasNonAsciiByte64|hasNonAsciiByte64(kotlin.Long){}[0]
+    final fun isCharBoundaryByte(kotlin/Byte): kotlin/Boolean // org.rustlang.core.str/Utf8ByteOperations.isCharBoundaryByte|isCharBoundaryByte(kotlin.Byte){}[0]
+    final fun isContinuationByte(kotlin/Byte): kotlin/Boolean // org.rustlang.core.str/Utf8ByteOperations.isContinuationByte|isContinuationByte(kotlin.Byte){}[0]
+    final fun sequenceByteWidth(kotlin/Byte): kotlin/Long // org.rustlang.core.str/Utf8ByteOperations.sequenceByteWidth|sequenceByteWidth(kotlin.Byte){}[0]
+}
+
 final fun (kotlin/Boolean).io.github.kotlinmania.serdecore.de.value/intoDeserializer(): io.github.kotlinmania.serdecore.de.value/BoolDeserializer // io.github.kotlinmania.serdecore.de.value/intoDeserializer|intoDeserializer@kotlin.Boolean(){}[0]
 final fun (kotlin/Byte).io.github.kotlinmania.serdecore.de.value/intoDeserializer(): io.github.kotlinmania.serdecore.de.value/I8Deserializer // io.github.kotlinmania.serdecore.de.value/intoDeserializer|intoDeserializer@kotlin.Byte(){}[0]
 final fun (kotlin/ByteArray).io.github.kotlinmania.serdecore.de.value/intoDeserializer(): io.github.kotlinmania.serdecore.de.value/BytesDeserializer // io.github.kotlinmania.serdecore.de.value/intoDeserializer|intoDeserializer@kotlin.ByteArray(){}[0]
@@ -2234,8 +2309,13 @@ final fun <#A: kotlin/Any?> io.github.kotlinmania.serdecore.de/rangeFromDeserial
 final fun <#A: kotlin/Any?> io.github.kotlinmania.serdecore.de/rangeInclusiveDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>): io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/RangeInclusiveValue<#A>> // io.github.kotlinmania.serdecore.de/rangeInclusiveDeserialize|rangeInclusiveDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.kotlinmania.serdecore.de/rangeToDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>): io.github.kotlinmania.serdecore.de/Deserialize<io.github.kotlinmania.serdecore.de/RangeToValue<#A>> // io.github.kotlinmania.serdecore.de/rangeToDeserialize|rangeToDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.kotlinmania.serdecore.de/setDeserialize(io.github.kotlinmania.serdecore.de/Deserialize<#A>): io.github.kotlinmania.serdecore.de/Deserialize<kotlin.collections/Set<#A>> // io.github.kotlinmania.serdecore.de/setDeserialize|setDeserialize(io.github.kotlinmania.serdecore.de.Deserialize<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> io.github.kotlinmania.serdecore.priv.generated.sizehint/from_bounds(#A, io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0<#A>): io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/ULong> // io.github.kotlinmania.serdecore.priv.generated.sizehint/from_bounds|from_bounds(0:0;io.github.kotlinmania.serdecore.priv.generated.sizehint.__rtkBound0<0:0>){0§<kotlin.Any?>}[0]
 final fun io.github.kotlinmania.serde/__requireSerdeNotSerdeCore() // io.github.kotlinmania.serde/__requireSerdeNotSerdeCore|__requireSerdeNotSerdeCore(){}[0]
-final fun io.github.kotlinmania.serdecore.priv/fromBounds(io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint<*>): kotlin/Int? // io.github.kotlinmania.serdecore.priv/fromBounds|fromBounds(io.github.kotlinmania.serdecore.priv.IteratorWithSizeHint<*>){}[0]
+final fun io.github.kotlinmania.serdecore.priv.generated.sizehint/cautious(io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/ULong>, kotlin/ULong): kotlin/ULong // io.github.kotlinmania.serdecore.priv.generated.sizehint/cautious|cautious(io.github.kotlinmania.serdecore.priv.generated.sizehint.__rtkOption<kotlin.ULong>;kotlin.ULong){}[0]
+final fun io.github.kotlinmania.serdecore.priv.generated.string/from_utf8_lossy(org.rustlang.core.slice/SharedByteSlice): org.rustlang.alloc.borrow/Utf8Cow // io.github.kotlinmania.serdecore.priv.generated.string/from_utf8_lossy|from_utf8_lossy(org.rustlang.core.slice.SharedByteSlice){}[0]
+final fun io.github.kotlinmania.serdecore.priv/cautiousContentCapacity(kotlin/Int?): kotlin/Int // io.github.kotlinmania.serdecore.priv/cautiousContentCapacity|cautiousContentCapacity(kotlin.Int?){}[0]
+final fun io.github.kotlinmania.serdecore.priv/cautiousContentMapCapacity(kotlin/Int?): kotlin/Int // io.github.kotlinmania.serdecore.priv/cautiousContentMapCapacity|cautiousContentMapCapacity(kotlin.Int?){}[0]
+final fun io.github.kotlinmania.serdecore.priv/fromBounds(io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint<*>): kotlin/ULong? // io.github.kotlinmania.serdecore.priv/fromBounds|fromBounds(io.github.kotlinmania.serdecore.priv.IteratorWithSizeHint<*>){}[0]
 final fun io.github.kotlinmania.serdecore.priv/fromUtf8Lossy(kotlin/ByteArray): kotlin/String // io.github.kotlinmania.serdecore.priv/fromUtf8Lossy|fromUtf8Lossy(kotlin.ByteArray){}[0]
 final fun io.github.kotlinmania.serdecore.priv/fromUtf8LossyNoAlloc(kotlin/ByteArray): kotlin/String // io.github.kotlinmania.serdecore.priv/fromUtf8LossyNoAlloc|fromUtf8LossyNoAlloc(kotlin.ByteArray){}[0]
 final inline fun <#A: kotlin/Any?> io.github.kotlinmania.serde/serdeCatching(kotlin/Function0<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serde/serdeCatching|serdeCatching(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]

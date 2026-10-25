@@ -1,0 +1,32 @@
+{
+  "kernel": {
+    "commit": "300f7970376260e1dde63fa820fe900c66a3528e",
+    "sources": {
+      "/Volumes/stuff/Projects/kotlinmania/rust-lang-kotlin/candidates/core/kotlin/org/rustlang/core/slice/SharedByteSlice.kt": "5471fe0864ecd74b927b94d6d02db873d685690a70b6e3864921dc625104f312",
+      "/Volumes/stuff/Projects/kotlinmania/rust-lang-kotlin/candidates/alloc/kotlin/org/rustlang/alloc/borrow/Utf8Cow.kt": "276f25348ec41df25b90a8d13de29e8a720821a7846ee3569915370aebb92a53",
+      "/Volumes/stuff/Projects/kotlinmania/rust-lang-kotlin/candidates/core/kotlin/org/rustlang/core/str/Utf8ByteOperations.kt": "911121cff904bcfa00c27b88e41516c1bd7ab0abc04851bcbeb93d836ff6bfda"
+    }
+  },
+  "rust_layout_sources": {
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde/src/core/private/size_hint.rs": "350694a2abaad94ca5d33958710a5bb8973a2ea1a3dcc50a41405c943761b81f",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde/src/core/private/content.rs": "5fdfb2bb95ecc80375507acb813a4c640496385e56fc99ab448f6b19e01fcc01",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde/src/core/de/impls.rs": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde/src/private/de.rs": "68ee17774d3bbc693d9f19803747fa2c3afdb7046482e6d94ac6cf7db5a4fe20",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde_core/src/private/content.rs": "5fdfb2bb95ecc80375507acb813a4c640496385e56fc99ab448f6b19e01fcc01"
+  },
+  "rust_compiler": {
+    "RUSTC": "/Volumes/stuff/Projects/kotlinmania/automation-artifacts/rust-jvm-j2k-experiment-20261024-task5/rustup-home/toolchains/nightly-2026-10-23-aarch64-apple-darwin/bin/rustc",
+    "RUSTFLAGS": "--cfg feature=\"std\" --cfg feature=\"alloc\" --check-cfg=cfg(feature,values(\"std\",\"alloc\")) -C overflow-checks=on -C debug-assertions=yes -C panic=unwind -Dwarnings"
+  },
+  "string_source_sha256": "c1500fd4b64c24a5e45fa5f48c85c802816d6954a2999a72fc5a8861687212d4",
+  "size_hint_source_sha256": "350694a2abaad94ca5d33958710a5bb8973a2ea1a3dcc50a41405c943761b81f",
+  "native_tests": {
+    "serde-core": 74,
+    "serde-kotlin": 15
+  },
+  "rust_comparison_rows": {
+    "string": 608,
+    "size_hint": 138,
+    "iterator": 30
+  }
+}

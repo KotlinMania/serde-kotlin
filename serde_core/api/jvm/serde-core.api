@@ -2005,6 +2005,11 @@ public final class io/github/kotlinmania/serdecore/priv/Content$Unit : io/github
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/kotlinmania/serdecore/priv/ContentLayoutKt {
+	public static final fun cautiousContentCapacity (Ljava/lang/Integer;)I
+	public static final fun cautiousContentMapCapacity (Ljava/lang/Integer;)I
+}
+
 public final class io/github/kotlinmania/serdecore/priv/ContentMapEntry {
 	public fun <init> (Lio/github/kotlinmania/serdecore/priv/Content;Lio/github/kotlinmania/serdecore/priv/Content;)V
 	public final fun component1 ()Lio/github/kotlinmania/serdecore/priv/Content;
@@ -2023,12 +2028,57 @@ public abstract interface class io/github/kotlinmania/serdecore/priv/IteratorWit
 }
 
 public final class io/github/kotlinmania/serdecore/priv/SizeHintKt {
-	public static final fun fromBounds (Lio/github/kotlinmania/serdecore/priv/IteratorWithSizeHint;)Ljava/lang/Integer;
+	public static final fun cautious-vI5HfzU (Lkotlin/ULong;J)J
+	public static final fun fromBounds (Lio/github/kotlinmania/serdecore/priv/IteratorWithSizeHint;)Lkotlin/ULong;
 }
 
 public final class io/github/kotlinmania/serdecore/priv/StringKt {
 	public static final fun fromUtf8Lossy ([B)Ljava/lang/String;
 	public static final fun fromUtf8LossyNoAlloc ([B)Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/generated/sizehint/SizeHintKt {
+	public static final fun cautious-2TYgG_w (Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption;J)J
+	public static final fun from_bounds (Ljava/lang/Object;Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkBound0;)Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption;
+}
+
+public abstract interface class io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkBound0 {
+	public abstract fun size_hint (Ljava/lang/Object;)Lkotlin/Pair;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkBound0$Case0 : io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkBound0 {
+	public fun <init> ()V
+	public fun size_hint (Lio/github/kotlinmania/serdecore/priv/IteratorWithSizeHint;)Lkotlin/Pair;
+	public synthetic fun size_hint (Ljava/lang/Object;)Lkotlin/Pair;
+}
+
+public abstract class io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption {
+}
+
+public final class io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption$None : io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption {
+	public static final field INSTANCE Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption$Some : io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption$Some;
+	public static synthetic fun copy$default (Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption$Some;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkOption$Some;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/kotlinmania/serdecore/priv/generated/sizehint/__rtkPanic : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class io/github/kotlinmania/serdecore/priv/generated/string/StringKt {
+	public static final fun from_utf8_lossy (Lorg/rustlang/core/slice/SharedByteSlice;)Lorg/rustlang/alloc/borrow/Utf8Cow;
 }
 
 public final class io/github/kotlinmania/serdecore/ser/FormatArguments : io/github/kotlinmania/serdecore/ser/Serialize {
@@ -2241,5 +2291,45 @@ public final class io/github/kotlinmania/serdecore/ser/Wrapping : io/github/kotl
 	public fun hashCode ()I
 	public fun serialize (Lio/github/kotlinmania/serdecore/ser/Serializer;)Lio/github/kotlinmania/serde/SerdeResult;
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/rustlang/alloc/borrow/Utf8Cow {
+	public static final field Companion Lorg/rustlang/alloc/borrow/Utf8Cow$Companion;
+	public final fun getBytes ()Lorg/rustlang/core/slice/SharedByteSlice;
+	public final fun isBorrowed ()Z
+	public final fun toText ()Ljava/lang/String;
+}
+
+public final class org/rustlang/alloc/borrow/Utf8Cow$Borrowed : org/rustlang/alloc/borrow/Utf8Cow {
+}
+
+public final class org/rustlang/alloc/borrow/Utf8Cow$Companion {
+	public final fun fromUtf8Lossy (Lorg/rustlang/core/slice/SharedByteSlice;)Lorg/rustlang/alloc/borrow/Utf8Cow;
+}
+
+public final class org/rustlang/alloc/borrow/Utf8Cow$Owned : org/rustlang/alloc/borrow/Utf8Cow {
+}
+
+public final class org/rustlang/core/slice/SharedByteSlice {
+	public static final field Companion Lorg/rustlang/core/slice/SharedByteSlice$Companion;
+	public final fun copyBytes ()[B
+	public final fun get (I)B
+	public final fun getSize ()I
+	public final fun getStart ()I
+	public final fun isSameRegion (Lorg/rustlang/core/slice/SharedByteSlice;)Z
+}
+
+public final class org/rustlang/core/slice/SharedByteSlice$Companion {
+	public final fun borrow ([BII)Lorg/rustlang/core/slice/SharedByteSlice;
+	public static synthetic fun borrow$default (Lorg/rustlang/core/slice/SharedByteSlice$Companion;[BIIILjava/lang/Object;)Lorg/rustlang/core/slice/SharedByteSlice;
+}
+
+public final class org/rustlang/core/str/Utf8ByteOperations {
+	public static final field INSTANCE Lorg/rustlang/core/str/Utf8ByteOperations;
+	public final fun appendContinuationBits (IB)I
+	public final fun hasNonAsciiByte64 (J)Z
+	public final fun isCharBoundaryByte (B)Z
+	public final fun isContinuationByte (B)Z
+	public final fun sequenceByteWidth (B)J
 }
 

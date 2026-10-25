@@ -145,7 +145,7 @@ internal class ContentVisitor : Visitor<Content>, DeserializeSeed<Content> {
     override fun <A> visitSeq(access: A): SerdeResult<Content>
         where A : SeqAccess =
         serdeCatching {
-            val elements = ArrayList<Content>(cautious<Content>(access.sizeHint()))
+            val elements = ArrayList<Content>(cautiousContentCapacity(access.sizeHint()))
             while (true) {
                 when (val next = access.nextElementSeed(new()).getOrThrow()) {
                     is SeqElement.Some -> elements += next.value
@@ -158,7 +158,7 @@ internal class ContentVisitor : Visitor<Content>, DeserializeSeed<Content> {
     override fun <A> visitMap(access: A): SerdeResult<Content>
         where A : MapAccess =
         serdeCatching {
-            val entries = ArrayList<ContentMapEntry>(cautious<ContentMapEntry>(access.sizeHint()))
+            val entries = ArrayList<ContentMapEntry>(cautiousContentMapCapacity(access.sizeHint()))
             while (true) {
                 val next = access.nextEntrySeed(new(), new()).getOrThrow() ?: break
                 entries += ContentMapEntry(next.first, next.second)
