@@ -1,0 +1,66 @@
+{
+  "observed_at_utc": "2026-10-25 23:40 UTC",
+  "blocked_coordinate": "io.github.kotlinmania:num-traits-kotlin:0.2.15",
+  "target_coordinate": "io.github.kotlinmania:num-traits-kotlin-macosarm64:0.2.15",
+  "local_metadata": {
+    "/Users/sydney/.m2/repository/io/github/kotlinmania/num-traits-kotlin/0.2.15/num-traits-kotlin-0.2.15.module": "a6ad814021474f8160ff60eb131340472f492b8b955419cc1ad4eaa569a16d36",
+    "/Users/sydney/.m2/repository/io/github/kotlinmania/num-traits-kotlin-macosarm64/0.2.15/num-traits-kotlin-macosarm64-0.2.15.module": "86c33da5bfa42c9644a7dfecfb580d9b1592339c140263ff7636c39bb159cb84"
+  },
+  "local_klib": {
+    "/Users/sydney/.m2/repository/io/github/kotlinmania/num-traits-kotlin-macosarm64/0.2.15/num-traits-kotlin-macosarm64-0.2.15.klib": "1282b482f6b4608fdefc9e6e7540cba00fb95408bcd42c20e4c543c4fa0e3fb9"
+  },
+  "direct_native_klib_sha256": "1282b482f6b4608fdefc9e6e7540cba00fb95408bcd42c20e4c543c4fa0e3fb9",
+  "native_variant": {
+    "name": "macosArm64ApiElements-published",
+    "attributes": {
+      "org.gradle.category": "library",
+      "org.gradle.jvm.environment": "non-jvm",
+      "org.gradle.usage": "kotlin-api",
+      "org.jetbrains.kotlin.native.target": "macos_arm64",
+      "org.jetbrains.kotlin.platform.type": "native"
+    },
+    "dependencies": [
+      {
+        "group": "org.jetbrains.kotlin",
+        "module": "kotlin-stdlib",
+        "version": {
+          "requires": "2.4.21"
+        }
+      },
+      {
+        "group": "org.jetbrains.kotlinx",
+        "module": "kotlinx-coroutines-core",
+        "version": {
+          "requires": "1.11.0"
+        }
+      },
+      {
+        "group": "org.jetbrains.kotlinx",
+        "module": "kotlinx-datetime",
+        "version": {
+          "requires": "0.8.0"
+        }
+      },
+      {
+        "group": "org.jetbrains.kotlinx",
+        "module": "kotlinx-collections-immutable",
+        "version": {
+          "requires": "0.5.2"
+        }
+      }
+    ],
+    "files": [
+      {
+        "name": "num-traits-kotlin-macosArm64Main-0.2.15.klib",
+        "url": "num-traits-kotlin-macosarm64-0.2.15.klib",
+        "size": 180719,
+        "sha512": "3a8a35dda6fb21180619f99968c35fdbc85aaa126211b05a166c15324496d4ea284f68ab07d74dbc19db4dc1ddca23f3062cca566d561e6aae5c823f427c8b92",
+        "sha256": "1282b482f6b4608fdefc9e6e7540cba00fb95408bcd42c20e4c543c4fa0e3fb9",
+        "sha1": "ea8d7d3d6bcd5c528a08a1abf72d01b99293dd02",
+        "md5": "4c3ae67fa18faa26d8dc3391495197ed"
+      }
+    ]
+  },
+  "diagnosis": "The configured Google/Maven Central offline resolution has no usable NumTraits root metadata. The existing local Maven metadata and matching Native KLIB are present; publication or a NumTraits source mutation is not indicated.",
+  "pending_action": "If separately authorized, validate using the existing project.repositories.mavenLocal=true property and maven.repo.local=/Users/sydney/.m2/repository. This opt-in has not been executed."
+}

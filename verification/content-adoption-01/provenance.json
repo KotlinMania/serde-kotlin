@@ -1,0 +1,6 @@
+{
+  "raw_source": "/Volumes/stuff/Projects/kotlinmania/rust-kotlin/verification/foundation-batch-04/content-01/generated/generated.kt",
+  "raw_sha256": "b2ba1c9cd56f95e112763f26fffccf6848fed96c0a88a41e61d5a81726560b75",
+  "destination": "serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/generated/content/Content.kt",
+  "packaging": "Port-lint header and package prepended; complete generated body unchanged"
+}

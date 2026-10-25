@@ -161,6 +161,7 @@ sealed class Unexpected {
             is Unsigned -> "integer `$value`"
             is Signed -> "integer `$value`"
             is FloatValue -> "floating point `${WithDecimalPoint(value)}`"
+            is UnexpectedScalarChar -> "character `${io.github.kotlinmania.serdecore.priv.contentaccess.scalarText(codePoint)}`"
             is CharValue -> "character `$value`"
             is Str -> "string \"$value\""
             is Bytes -> "byte array"

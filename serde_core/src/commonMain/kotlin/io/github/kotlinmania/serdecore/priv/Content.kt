@@ -1,4 +1,4 @@
-// port-lint: source private/content.rs
+// Compatibility inputs for the generated Content representation.
 package io.github.kotlinmania.serdecore.priv
 
 // Used from generated code to buffer the contents of the Deserializer when

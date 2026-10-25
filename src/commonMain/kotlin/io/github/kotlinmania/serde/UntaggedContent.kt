@@ -4,7 +4,7 @@ import io.github.kotlinmania.serde.priv.ContentRefDeserializer
 import io.github.kotlinmania.serde.priv.ContentVisitor
 import io.github.kotlinmania.serdecore.de.Deserialize
 import io.github.kotlinmania.serdecore.de.Deserializer
-import io.github.kotlinmania.serdecore.priv.Content
+import io.github.kotlinmania.serdecore.priv.generated.content.Content
 
 /** Captured Serde input that can be tried against multiple untagged variants. */
 public class UntaggedContent private constructor(private val content: Content) {

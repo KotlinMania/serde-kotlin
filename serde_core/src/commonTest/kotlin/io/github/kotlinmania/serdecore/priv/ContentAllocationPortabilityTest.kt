@@ -5,6 +5,8 @@ import io.github.kotlinmania.serdecore.de.DeserializeSeed
 import io.github.kotlinmania.serdecore.de.MapAccess
 import io.github.kotlinmania.serdecore.de.SeqAccess
 import io.github.kotlinmania.serdecore.de.SeqElement
+import io.github.kotlinmania.serdecore.priv.generated.content.Content as GeneratedContent
+import io.github.kotlinmania.serdecore.priv.contentaccess.value
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -30,13 +32,13 @@ class ContentAllocationPortabilityTest {
                 override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
                     SerdeResult.success(SeqElement.None)
             }).getOrThrow()
-            assertEquals(emptyList(), assertIs<Content.Seq>(seq).value)
+            assertEquals(emptyList(), assertIs<GeneratedContent.Seq>(seq).value)
             val map = ContentVisitor.new().visitMap(object : MapAccess {
                 override fun sizeHint(): Int? = hint
                 override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> = SerdeResult.success(null)
                 override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> = error("No key was supplied")
             }).getOrThrow()
-            assertEquals(emptyList(), assertIs<Content.Map>(map).value)
+            assertEquals(emptyList(), assertIs<GeneratedContent.Map>(map).value)
         }
     }
 

@@ -1,6 +1,10 @@
 // port-lint: source de.rs
 package io.github.kotlinmania.serde.priv
 
+import io.github.kotlinmania.serdecore.priv.generated.content.Content
+import io.github.kotlinmania.serdecore.priv.contentaccess.*
+import org.rustlang.core.slice.SharedByteSlice
+
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
@@ -20,10 +24,6 @@ import io.github.kotlinmania.serdecore.de.unwrapOrElse
 import io.github.kotlinmania.serdecore.de.value.BytesDeserializer
 import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
-import io.github.kotlinmania.serdecore.priv.Content
-import io.github.kotlinmania.serdecore.priv.ContentMapEntry
-import io.github.kotlinmania.serdecore.priv.newContentBuffer
-import io.github.kotlinmania.serdecore.priv.newContentMapBuffer
 
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
@@ -188,7 +188,7 @@ internal fun borrowCowBytes(deserializer: Deserializer): SerdeResult<ByteArray> 
 internal fun contentAsStr(content: Content): String? =
     when (content) {
         is Content.Str -> content.value
-        is Content.StringValue -> content.value
+        is Content.String -> content.value
         is Content.Bytes ->
             serdeCatching { content.value.decodeToString(throwOnInvalidSequence = true) }.getOrNull()
 
@@ -212,16 +212,16 @@ private fun contentClone(content: Content): Content =
         is Content.F32 -> content
         is Content.F64 -> content
         is Content.Char -> content
-        is Content.StringValue -> Content.StringValue(content.value)
-        is Content.Str -> Content.Str(content.value)
-        is Content.ByteBuf -> Content.ByteBuf(content.value.copyOf())
-        is Content.Bytes -> Content.Bytes(content.value)
+        is Content.String -> newStringContent(content.value)
+        is Content.Str -> newStrContent(content.value)
+        is Content.ByteBuf -> newByteBufContent(content.value.copyOf())
+        is Content.Bytes -> newBytesContent(content.value)
         Content.None -> Content.None
-        is Content.Some -> Content.Some(contentClone(content.value))
+        is Content.Some -> newSomeContent(contentClone(content.value))
         Content.Unit -> Content.Unit
-        is Content.Newtype -> Content.Newtype(contentClone(content.value))
-        is Content.Seq -> Content.Seq(content.value.map(::contentClone))
-        is Content.Map -> Content.Map(content.value.map { entry -> ContentMapEntry(contentClone(entry.key), contentClone(entry.value)) })
+        is Content.Newtype -> newNewtypeContent(contentClone(content.value))
+        is Content.Seq -> newSeqContent(content.value.map(::contentClone))
+        is Content.Map -> newMapContent(content.value.map { entry -> ContentMapEntry(contentClone(entry.key), contentClone(entry.value)) })
     }
 
 internal fun Content.clone(): Content = contentClone(this)
@@ -239,11 +239,11 @@ private fun contentUnexpected(content: Content): Unexpected =
         is Content.I64 -> Unexpected.Signed(content.value)
         is Content.F32 -> Unexpected.FloatValue(content.value.toDouble())
         is Content.F64 -> Unexpected.FloatValue(content.value)
-        is Content.Char -> Unexpected.CharValue(content.value)
-        is Content.StringValue -> Unexpected.Str(content.value)
+        is Content.Char -> unexpectedChar(content.value)
+        is Content.String -> Unexpected.Str(content.value)
         is Content.Str -> Unexpected.Str(content.value)
         is Content.ByteBuf -> Unexpected.Bytes(content.value)
-        is Content.Bytes -> Unexpected.Bytes(content.value)
+        is Content.Bytes -> Unexpected.Bytes(content.value.copyBytes())
         Content.None, is Content.Some -> Unexpected.Option
         Content.Unit -> Unexpected.UnitValue
         is Content.Newtype -> Unexpected.NewtypeStruct
@@ -263,41 +263,45 @@ internal class ContentVisitor :
     override fun <D> deserialize(deserializer: D): SerdeResult<Content>
         where D : Deserializer = deserializer.deserializeAny(this)
 
-    override fun visitBool(v: Boolean): SerdeResult<Content> = SerdeResult.success(Content.Bool(v))
+    override fun visitBool(v: Boolean): SerdeResult<Content> = SerdeResult.success(newBoolContent(v))
 
-    override fun visitI8(v: Byte): SerdeResult<Content> = SerdeResult.success(Content.I8(v))
+    override fun visitI8(v: Byte): SerdeResult<Content> = SerdeResult.success(newI8Content(v))
 
-    override fun visitI16(v: Short): SerdeResult<Content> = SerdeResult.success(Content.I16(v))
+    override fun visitI16(v: Short): SerdeResult<Content> = SerdeResult.success(newI16Content(v))
 
-    override fun visitI32(v: Int): SerdeResult<Content> = SerdeResult.success(Content.I32(v))
+    override fun visitI32(v: Int): SerdeResult<Content> = SerdeResult.success(newI32Content(v))
 
-    override fun visitI64(v: Long): SerdeResult<Content> = SerdeResult.success(Content.I64(v))
+    override fun visitI64(v: Long): SerdeResult<Content> = SerdeResult.success(newI64Content(v))
 
-    override fun visitU8(v: UByte): SerdeResult<Content> = SerdeResult.success(Content.U8(v))
+    override fun visitU8(v: UByte): SerdeResult<Content> = SerdeResult.success(newU8Content(v))
 
-    override fun visitU16(v: UShort): SerdeResult<Content> = SerdeResult.success(Content.U16(v))
+    override fun visitU16(v: UShort): SerdeResult<Content> = SerdeResult.success(newU16Content(v))
 
-    override fun visitU32(v: UInt): SerdeResult<Content> = SerdeResult.success(Content.U32(v))
+    override fun visitU32(v: UInt): SerdeResult<Content> = SerdeResult.success(newU32Content(v))
 
-    override fun visitU64(v: ULong): SerdeResult<Content> = SerdeResult.success(Content.U64(v))
+    override fun visitU64(v: ULong): SerdeResult<Content> = SerdeResult.success(newU64Content(v))
 
-    override fun visitF32(v: Float): SerdeResult<Content> = SerdeResult.success(Content.F32(v))
+    override fun visitF32(v: Float): SerdeResult<Content> = SerdeResult.success(newF32Content(v))
 
-    override fun visitF64(v: Double): SerdeResult<Content> = SerdeResult.success(Content.F64(v))
+    override fun visitF64(v: Double): SerdeResult<Content> = SerdeResult.success(newF64Content(v))
 
-    override fun visitChar(v: Char): SerdeResult<Content> = SerdeResult.success(Content.Char(v))
+    override fun visitChar(v: Char): SerdeResult<Content> = visitCharCodePoint(v.code)
 
-    override fun visitStr(v: String): SerdeResult<Content> = SerdeResult.success(Content.StringValue(v))
+    override fun visitCharCodePoint(codePoint: Int): SerdeResult<Content> = serdeCatching { newCharContent(codePoint) }
 
-    override fun visitBorrowedStr(v: String): SerdeResult<Content> = SerdeResult.success(Content.Str(v))
+    override fun visitBorrowedByteSlice(v: SharedByteSlice): SerdeResult<Content> = SerdeResult.success(newBytesContent(v))
 
-    override fun visitString(v: String): SerdeResult<Content> = SerdeResult.success(Content.StringValue(v))
+    override fun visitStr(v: String): SerdeResult<Content> = serdeCatching { newStringContent(v) }
 
-    override fun visitBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.ByteBuf(v.copyOf()))
+    override fun visitBorrowedStr(v: String): SerdeResult<Content> = serdeCatching { newStrContent(v) }
 
-    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.Bytes(v))
+    override fun visitString(v: String): SerdeResult<Content> = serdeCatching { newStringContent(v) }
 
-    override fun visitByteBuf(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.ByteBuf(v))
+    override fun visitBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(newByteBufContent(v.copyOf()))
+
+    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(newBytesContent(v))
+
+    override fun visitByteBuf(v: ByteArray): SerdeResult<Content> = SerdeResult.success(newByteBufContent(v))
 
     override fun visitUnit(): SerdeResult<Content> = SerdeResult.success(Content.Unit)
 
@@ -305,11 +309,11 @@ internal class ContentVisitor :
 
     override fun <D> visitSome(deserializer: D): SerdeResult<Content>
         where D : Deserializer =
-        deserialize(deserializer).map { Content.Some(it) }
+        deserialize(deserializer).map { newSomeContent(it) }
 
     override fun <D> visitNewtypeStruct(deserializer: D): SerdeResult<Content>
         where D : Deserializer =
-        deserialize(deserializer).map { Content.Newtype(it) }
+        deserialize(deserializer).map { newNewtypeContent(it) }
 
     override fun <A> visitSeq(access: A): SerdeResult<Content>
         where A : SeqAccess =
@@ -322,19 +326,19 @@ internal class ContentVisitor :
                     SeqElement.None -> break
                 }
             }
-            Content.Seq(values)
+            takeSeqContent(values)
         }
 
     override fun <A> visitMap(access: A): SerdeResult<Content>
         where A : MapAccess =
         serdeCatching {
             val hint = access.sizeHint()
-            val values = newContentMapBuffer(hint)
+            val values = newContentPairBuffer(hint)
             while (true) {
                 val next = access.nextEntrySeed(new(), new()).getOrThrow() ?: break
-                values.add(ContentMapEntry(next.first, next.second))
+                values.add(next)
             }
-            Content.Map(values)
+            takeMapContent(values)
         }
 
     override fun <A> visitEnum(access: A): SerdeResult<Content>
@@ -403,6 +407,15 @@ internal class TagOrContentVisitor(
     override fun visitF64(v: Double): SerdeResult<TagOrContent> = ContentVisitor.new().visitF64(v).map { TagOrContent.ContentValue(it) }
 
     override fun visitChar(v: Char): SerdeResult<TagOrContent> = ContentVisitor.new().visitChar(v).map { TagOrContent.ContentValue(it) }
+
+    override fun visitCharCodePoint(codePoint: Int): SerdeResult<TagOrContent> = ContentVisitor.new().visitCharCodePoint(codePoint).map { TagOrContent.ContentValue(it) }
+
+    override fun visitBorrowedByteSlice(v: SharedByteSlice): SerdeResult<TagOrContent> {
+        val tagBytes = name.encodeToByteArray()
+        return if (v.size == tagBytes.size && tagBytes.indices.all { v[it] == tagBytes[it] }) SerdeResult.success(TagOrContent.Tag)
+        else ContentVisitor.new().visitBorrowedByteSlice(v).map { TagOrContent.ContentValue(it) }
+    }
+
 
     override fun visitStr(v: String): SerdeResult<TagOrContent> =
         if (v == name) {
@@ -519,7 +532,7 @@ internal class TaggedContentVisitor<T>(
         where A : MapAccess =
         serdeCatching {
             var tag: T? = null
-            val values = newContentMapBuffer(access.sizeHint())
+            val values = newContentPairBuffer(access.sizeHint())
             while (true) {
                 val key = access.nextKeySeed(TagOrContentVisitor.new(tagName)).getOrThrow() ?: break
                 when (key) {
@@ -542,14 +555,14 @@ internal class TaggedContentVisitor<T>(
 
                     is TagOrContent.ContentValue -> {
                         val value = access.nextValueSeed(ContentVisitor.new()).getOrThrow()
-                        values.add(ContentMapEntry(key.value, value))
+                        values.add(key.value to value)
                     }
                 }
             }
 
             when (val finalTag = tag) {
                 null -> (SerdeError.missingField(tagName)).raise()
-                else -> finalTag to Content.Map(values)
+                else -> finalTag to takeMapContent(values)
             }
         }
 }
@@ -667,6 +680,7 @@ internal class ContentDeserializer(
     companion object {
         // Private API, don't use.
         fun new(content: Content): ContentDeserializer = ContentDeserializer(content)
+        fun new(content: io.github.kotlinmania.serdecore.priv.Content): ContentDeserializer = ContentDeserializer(content.toGeneratedContent())
     }
 
     private fun invalidType(exp: Expected): SerdeError = SerdeError.invalidType(contentUnexpected(content), exp)
@@ -712,11 +726,11 @@ internal class ContentDeserializer(
             is Content.I64 -> visitor.visitI64(content.value)
             is Content.F32 -> visitor.visitF32(content.value)
             is Content.F64 -> visitor.visitF64(content.value)
-            is Content.Char -> visitor.visitChar(content.value)
-            is Content.StringValue -> visitor.visitString(content.value)
+            is Content.Char -> visitor.visitCharCodePoint(content.value)
+            is Content.String -> visitor.visitString(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitByteBuf(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             Content.Unit -> visitor.visitUnit()
             Content.None -> visitor.visitNone()
             is Content.Some -> visitor.visitSome(new(content.value))
@@ -753,8 +767,8 @@ internal class ContentDeserializer(
 
     override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.Char -> visitor.visitChar(content.value)
-            is Content.StringValue -> visitor.visitString(content.value)
+            is Content.Char -> visitor.visitCharCodePoint(content.value)
+            is Content.String -> visitor.visitString(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             else -> SerdeResult.failure(invalidType(visitor))
         }
@@ -763,10 +777,10 @@ internal class ContentDeserializer(
 
     override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.StringValue -> visitor.visitString(content.value)
+            is Content.String -> visitor.visitString(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitByteBuf(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             else -> SerdeResult.failure(invalidType(visitor))
         }
 
@@ -774,10 +788,10 @@ internal class ContentDeserializer(
 
     override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.StringValue -> visitor.visitString(content.value)
+            is Content.String -> visitor.visitString(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitByteBuf(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             is Content.Seq -> visitContentSeq(content.value, visitor)
             else -> SerdeResult.failure(invalidType(visitor))
         }
@@ -908,7 +922,7 @@ internal class ContentDeserializer(
                         first.key to first.value
                     }
 
-                    is Content.StringValue -> content to null
+                    is Content.String -> content to null
                     is Content.Str -> content to null
                     else ->
                         SerdeError
@@ -925,10 +939,10 @@ internal class ContentDeserializer(
 
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.StringValue -> visitor.visitString(content.value)
+            is Content.String -> visitor.visitString(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitByteBuf(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             is Content.U8 -> visitor.visitU8(content.value)
             is Content.U64 -> visitor.visitU64(content.value)
             else -> SerdeResult.failure(invalidType(visitor))
@@ -2076,6 +2090,7 @@ internal class ContentRefDeserializer(
     companion object {
         // Private API, don't use.
         fun new(content: Content): ContentRefDeserializer = ContentRefDeserializer(content)
+        fun new(content: io.github.kotlinmania.serdecore.priv.Content): ContentRefDeserializer = ContentRefDeserializer(content.toGeneratedContent())
     }
 
     private fun invalidType(exp: Expected): SerdeError = SerdeError.invalidType(contentUnexpected(content), exp)
@@ -2121,11 +2136,11 @@ internal class ContentRefDeserializer(
             is Content.I64 -> visitor.visitI64(content.value)
             is Content.F32 -> visitor.visitF32(content.value)
             is Content.F64 -> visitor.visitF64(content.value)
-            is Content.Char -> visitor.visitChar(content.value)
-            is Content.StringValue -> visitor.visitStr(content.value)
+            is Content.Char -> visitor.visitCharCodePoint(content.value)
+            is Content.String -> visitor.visitStr(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitBytes(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             Content.Unit -> visitor.visitUnit()
             Content.None -> visitor.visitNone()
             is Content.Some -> visitor.visitSome(new(content.value))
@@ -2162,18 +2177,18 @@ internal class ContentRefDeserializer(
 
     override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.Char -> visitor.visitChar(content.value)
-            is Content.StringValue -> visitor.visitStr(content.value)
+            is Content.Char -> visitor.visitCharCodePoint(content.value)
+            is Content.String -> visitor.visitStr(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             else -> SerdeResult.failure(invalidType(visitor))
         }
 
     override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.StringValue -> visitor.visitStr(content.value)
+            is Content.String -> visitor.visitStr(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitBytes(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             else -> SerdeResult.failure(invalidType(visitor))
         }
 
@@ -2181,10 +2196,10 @@ internal class ContentRefDeserializer(
 
     override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.StringValue -> visitor.visitStr(content.value)
+            is Content.String -> visitor.visitStr(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitBytes(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             is Content.Seq -> visitContentSeqRef(content.value, visitor)
             else -> SerdeResult.failure(invalidType(visitor))
         }
@@ -2285,7 +2300,7 @@ internal class ContentRefDeserializer(
                         first.key to first.value
                     }
 
-                    is Content.StringValue -> content to null
+                    is Content.String -> content to null
                     is Content.Str -> content to null
                     else ->
                         SerdeError
@@ -2302,10 +2317,10 @@ internal class ContentRefDeserializer(
 
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
-            is Content.StringValue -> visitor.visitStr(content.value)
+            is Content.String -> visitor.visitStr(content.value)
             is Content.Str -> visitor.visitBorrowedStr(content.value)
             is Content.ByteBuf -> visitor.visitBytes(content.value)
-            is Content.Bytes -> visitor.visitBorrowedBytes(content.value)
+            is Content.Bytes -> visitor.visitBorrowedByteSlice(content.value)
             is Content.U8 -> visitor.visitU8(content.value)
             is Content.U64 -> visitor.visitU64(content.value)
             else -> SerdeResult.failure(invalidType(visitor))

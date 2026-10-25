@@ -55,3 +55,8 @@ private fun verifiedRustContentSizes(target: String): Pair<ULong, ULong>? = when
     "aarch64-apple-darwin" -> Pair(32uL, 64uL)
     else -> null
 }
+
+internal fun <T> generatedContentCapacity(hint: Int?, pairs: Boolean): ArrayList<T> {
+    val sizes = verifiedRustContentSizes(rustContentLayoutTarget())
+    return contentBuffer(hint, if (pairs) sizes?.second else sizes?.first)
+}
