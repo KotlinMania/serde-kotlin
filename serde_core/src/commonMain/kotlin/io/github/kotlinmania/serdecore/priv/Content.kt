@@ -93,6 +93,7 @@ sealed interface Content {
         override fun hashCode(): Int = value.contentHashCode()
     }
 
+    /** Retains borrowed storage. The owner must not mutate it while this value or a clone is live. */
     data class Bytes(
         val value: ByteArray,
     ) : Content {

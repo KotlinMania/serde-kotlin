@@ -39,7 +39,7 @@ internal fun contentClone(content: Content): Content =
         is Content.StringValue -> Content.StringValue(content.value)
         is Content.Str -> Content.Str(content.value)
         is Content.ByteBuf -> Content.ByteBuf(content.value.copyOf())
-        is Content.Bytes -> Content.Bytes(content.value.copyOf())
+        is Content.Bytes -> Content.Bytes(content.value)
         Content.None -> Content.None
         is Content.Some -> Content.Some(contentClone(content.value))
         Content.Unit -> Content.Unit
@@ -126,7 +126,7 @@ internal class ContentVisitor : Visitor<Content>, DeserializeSeed<Content> {
 
     override fun visitBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.ByteBuf(v.copyOf()))
 
-    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.Bytes(v.copyOf()))
+    override fun visitBorrowedBytes(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.Bytes(v))
 
     override fun visitByteBuf(v: ByteArray): SerdeResult<Content> = SerdeResult.success(Content.ByteBuf(v.copyOf()))
 

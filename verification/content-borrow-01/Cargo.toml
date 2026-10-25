@@ -1,0 +1,10 @@
+[package]
+name = "serde-content-borrow-oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+[[bin]]
+name = "serde-content-borrow-oracle"
+path = "Oracle.rs"
+[dependencies]
+serde = { path = "../../tmp/serde/serde", default-features = false, features = ["std", "alloc"] }

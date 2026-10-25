@@ -105,6 +105,7 @@ interface Visitor<Value> : Expected {
 
     /**
      * The input contains a byte array that lives at least as long as the `Deserializer`.
+     * The owner must keep its contents immutable while a retained borrowed value is live.
      */
     fun visitBorrowedBytes(v: ByteArray): SerdeResult<Value> = visitBytes(v)
 
