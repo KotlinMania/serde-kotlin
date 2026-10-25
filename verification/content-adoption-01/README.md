@@ -77,11 +77,11 @@ from this direct Content regression run: they require the external `serde-test`
 transitive dependency graph. This does not establish all-target, Swift, ABI,
 serde-json, or full Gradle task success.
 
-The normal offline Gradle attempt stopped before source compilation because
+The initial offline Gradle attempt stopped before source compilation because
 `io.github.kotlinmania:num-traits-kotlin:0.2.15` was not resolvable from the
-configured offline repository metadata (`build-02.log`). Local Maven validation
-requires the separately requested authorization; no repository/configuration
-changes or publication were performed.
+configured offline repository metadata (`build-02.log`). After authorization,
+the existing command-line local Maven opt-in resolved this blocker. No persistent
+repository/configuration changes or publication were performed.
 
 `foreign-before.json` records pre-existing dirty/untracked file hashes. Only the
 new scalar diagnostic branch was added to the already-edited `Unexpected.kt`;
@@ -97,6 +97,27 @@ Final run `native-05`: both complete production modules compiled; 83 core tests,
 Read-only NumTraits inspection found both root/target module metadata and the
 matching macosArm64 KLIB already in `/Users/sydney/.m2/repository`. The local
 KLIB exactly matches the cached binary used by the direct Native proof. The
-missing step is resolving through that existing metadata with the repository's
-explicit local-validation opt-in, if authorized, not publishing or changing
-NumTraits. See `num-traits-resolution.json`. No opt-in was executed.
+subsequent authorized validation used that existing metadata through the
+repository's explicit local-validation opt-in; NumTraits was not modified or
+published. See `num-traits-resolution.json`.
+
+## Authorized Gradle follow-up
+
+At 2026-10-25 23:44 UTC, the following invocation completed successfully:
+
+```
+./gradlew --offline --no-daemon -Pproject.repositories.mavenLocal=true -Dmaven.repo.local=/Users/sydney/.m2/repository :serde-core:macosArm64Test :macosArm64Test
+```
+
+Gradle compiled the current production modules and ran **83 core tests and 21
+root tests**, with zero failures, errors, or skips. This invocation excluded no
+tests: the two `TestRoundtripTest` network-address cases excluded from the earlier
+direct compiler run both passed here. Scope is these two macosArm64 Gradle test
+tasks; this is not a claim of all-target, Swift, derive, ABI, or serde-json success.
+
+`gradle-local-validation.json` records the exact invocation, source commit,
+per-suite XML counts/hashes, and before/after artifact and foreign-work checks.
+`gradle-local-01.log` preserves the output with trailing whitespace normalized;
+the raw log hash is in the receipt and the raw local copy remains at
+`tmp/content-adoption-01/gradle-local-01-raw.log`. All sources still match the
+earlier direct Native receipt, preserving its separate 894-row Rust comparison.

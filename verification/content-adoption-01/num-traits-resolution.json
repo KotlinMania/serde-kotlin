@@ -62,5 +62,12 @@
     ]
   },
   "diagnosis": "The configured Google/Maven Central offline resolution has no usable NumTraits root metadata. The existing local Maven metadata and matching Native KLIB are present; publication or a NumTraits source mutation is not indicated.",
-  "pending_action": "If separately authorized, validate using the existing project.repositories.mavenLocal=true property and maven.repo.local=/Users/sydney/.m2/repository. This opt-in has not been executed."
+  "validation_follow_up": {
+    "status": "passed",
+    "receipt": "gradle-local-validation.json",
+    "opt_in_executed": true,
+    "publication_or_persistent_configuration_changes": false
+  },
+  "initial_pending_action": "If separately authorized, validate using the existing project.repositories.mavenLocal=true property and maven.repo.local=/Users/sydney/.m2/repository. This opt-in has not been executed.",
+  "pending_action": null
 }

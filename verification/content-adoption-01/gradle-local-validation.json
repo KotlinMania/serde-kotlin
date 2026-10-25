@@ -1,0 +1,203 @@
+{
+  "status": "passed",
+  "exit_code": 0,
+  "commit": "5123dd122462549299164489a44598ab24a0baac",
+  "command": "./gradlew --offline --no-daemon -Pproject.repositories.mavenLocal=true -Dmaven.repo.local=/Users/sydney/.m2/repository :serde-core:macosArm64Test :macosArm64Test",
+  "target": "macos_arm64",
+  "scope": "Core and root Native Gradle test tasks only; no test exclusions in this invocation, no all-target/Swift/derive/ABI claim",
+  "modules": {
+    "serde-core": {
+      "tests": 83,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.ConcreteOutcomeTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.ConcreteOutcomeTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "c314cdedc4aa3d34862ee7296e0e011c2485b4937027352127cc8e3aa26510f9"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.ImplsErrorTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.ImplsErrorTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "d3628e034284028f86bb7f4f6db485297b15fdd4063f19e071765122c121ecea"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.ImplsTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.ImplsTest",
+          "tests": 32,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "2c173f503bbd5d83c19f31d5a94198991c7b52611ca14391209e6a5145377eca"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.NullableSequenceTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.NullableSequenceTest",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "5850a419bfa07a5a7afc83e695e80305620b739f8c869ac672e1ff9538f17199"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "40b4324c22d7c7d310e3bb2bb49bf7c4d0ccdbdd9cabce441dc27197ad0785a4"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "de5c6534328eb2ed35c8bb8141639103cdc15dfe6ab4f60a738c11861456e8f6"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "d6f3534148c47b104d2ed42c075fe9d19a2bd0f50939851a31551af2defb5264"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "26c518309ce1ebbfab35b3149aac742d56d10d35aeebfc024915e54799a31665"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "596334dccfcbf9886da4edad7d024146a9ce0f37ea5428171c2e8912d0628152"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "c087b22708808481bc10d64cd1bbc71bbc94ee1605147721542bdf197bf2e338"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "d0564c593f6af8b4eb8e150b734cd46b70df8d3964bd13a9ef187a16a0841833"
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "a77e530887786f6d7a7a1ed2cc26ce47edafb554f60bb08a37a7d8eeeff5abd1"
+        }
+      ]
+    },
+    "serde": {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.TestRoundtripTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.TestRoundtripTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "546dba419f697980c89bae00533630b11c3e9eccdaf31e7834a2d0b8d9014d48"
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.UntaggedContentTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.UntaggedContentTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "3b87188db774cbdd9f126b84fa9601543f89d7490bf04ad41b1ca1305b7dc903"
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "ae70699af7abb5b6bd472f746db5855b1a165c551d926bf6766aad837b07df70"
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.priv.GeneratedContentReplayTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "5c488d8f8bec5de5ad328eed02bd036af78d523bdc71e6ecff683bbbf23bf707"
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.NullableContentSequenceTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.priv.NullableContentSequenceTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "b611e32a8695cb03fe9d9740ac3fb21587321533e4482fa9cdf575babab40f36"
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.TestIgnoredAnyTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.priv.TestIgnoredAnyTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "89b8380a29e0ca7a0cd893c3ca4b4bf7eac951fa4569a4ae75bc7d76ea567d66"
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.TestValueTest.xml",
+          "name": "macosArm64Test.io.github.kotlinmania.serde.priv.TestValueTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "sha256": "b2ae31480914e0f89c9f572c0f446b83d76da937ead0640355f26ad357c6e1cf"
+        }
+      ]
+    }
+  },
+  "source_hashes_match_direct_native_receipt": true,
+  "foreign_work_preserved": true,
+  "num_traits_receipt_hashes_match_before_and_after": true,
+  "raw_log_sha256": "ee9100178b2c5da53b56fcb347c9852e86596a5532a304de2637ca2c41008914",
+  "completed_at_utc": "2026-10-25 23:44 UTC",
+  "saved_log_sha256": "bf278a4f6a10c58fb91be96a081076be139f608cd021b6d454053a7e7b6ea0c6"
+}
