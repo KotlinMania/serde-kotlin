@@ -13,6 +13,8 @@ SizeHint.kt delegates exact iterator bounds and the unsigned explicit-size overl
 
 ## Exact layout and compatibility
 
+Subsequent repair: [Content allocation portability](../content-allocation-repair-01/README.md) restores capture on unmeasured targets through ordinary Kotlin list growth. The exact-size helpers still reject absent layout evidence. The runtime rejection described below records the original integration and its subsequently repaired regression.
+
 ContentLayout.kt carries the measured sizes of canonical serde_core 1.0.228 `__private228::Content<'static>` (32 bytes) and the complete `(Content<'static>, Content<'static>)` tuple (64 bytes). The tuple was measured independently, not computed by addition. The measurement is for Rust revision 7189d39d9ce936881b8132c6addeaf3e295cd455, std + alloc, aarch64-apple-darwin only. The Native implementation admits only macOS ARM64; every other target explicitly rejects missing evidence. Existing targets are retained. This is a runtime limitation on allocation paths for unmeasured targets, not a claim that their layouts equal Apple's.
 
 The legacy public `cautious<Element>(Int?)` signature remains callable but now rejects missing Rust layout evidence, including open/unknown types. It no longer guesses eight bytes. External users must migrate to `cautious(ULong?, rustElementSizeBytes: ULong)` with the exact source Element/profile size. `sizeOf<Element>()` also rejects missing evidence. ULong iterator bounds from commit 79992ae remain unsigned. A scalar supplied by an external caller is an obligation, not a runtime proof of that caller's Rust type. The generated 64-bit profile and zero-sized branch are unchanged.

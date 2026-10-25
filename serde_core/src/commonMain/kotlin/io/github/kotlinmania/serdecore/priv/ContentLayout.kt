@@ -15,6 +15,29 @@ private fun contentCapacity(hint: Int?, rustElementSizeBytes: ULong): Int {
     return capacity.toInt()
 }
 
+/**
+ * Kotlin allocation adapter for Content capture. On the measured Rust profile,
+ * preallocate using the exact generated bound. Else use ordinary Kotlin list
+ * growth: no Rust element size or equivalent capacity is implied for that target.
+ */
+fun newContentBuffer(hint: Int?): ArrayList<Content> =
+    contentBuffer(hint, verifiedRustContentSizes(rustContentLayoutTarget())?.first)
+
+/** Kotlin allocation adapter for the source's (Content, Content) sequence. */
+fun newContentMapBuffer(hint: Int?): ArrayList<ContentMapEntry> =
+    contentBuffer(hint, verifiedRustContentSizes(rustContentLayoutTarget())?.second)
+
+internal fun <T> contentBuffer(hint: Int?, rustElementSizeBytes: ULong?): ArrayList<T> {
+    require(hint == null || hint >= 0) { "A Rust size hint cannot be negative" }
+    return if (rustElementSizeBytes == null) {
+        // Missing layout disables optional reservation, not deserialization.
+        // This is a portability adapter, not a size or capacity estimate.
+        ArrayList()
+    } else {
+        ArrayList(contentCapacity(hint, rustElementSizeBytes))
+    }
+}
+
 internal expect fun rustContentLayoutTarget(): String
 
 // Measured from serde_core 1.0.228's canonical __private228::Content<'static> and
@@ -24,7 +47,11 @@ internal expect fun rustContentLayoutTarget(): String
 // SHA-256: 5fdfb2bb95ecc80375507acb813a4c640496385e56fc99ab448f6b19e01fcc01.
 // Evidence and reproduction: verification/direct-adoption-01/README.md.
 // These are Rust sizes, not Kotlin object sizes. The tuple was measured separately.
-internal fun rustContentSizes(target: String): Pair<ULong, ULong> = when (target) {
+internal fun rustContentSizes(target: String): Pair<ULong, ULong> =
+    verifiedRustContentSizes(target)
+        ?: throw IllegalStateException("Missing verified Rust Content layout for target $target")
+
+private fun verifiedRustContentSizes(target: String): Pair<ULong, ULong>? = when (target) {
     "aarch64-apple-darwin" -> Pair(32uL, 64uL)
-    else -> throw IllegalStateException("Missing verified Rust Content layout for target $target")
+    else -> null
 }

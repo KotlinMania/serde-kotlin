@@ -2174,6 +2174,8 @@ public final class io/github/kotlinmania/serdecore/priv/Content$Unit : io/github
 public final class io/github/kotlinmania/serdecore/priv/ContentLayoutKt {
 	public static final fun cautiousContentCapacity (Ljava/lang/Integer;)I
 	public static final fun cautiousContentMapCapacity (Ljava/lang/Integer;)I
+	public static final fun newContentBuffer (Ljava/lang/Integer;)Ljava/util/ArrayList;
+	public static final fun newContentMapBuffer (Ljava/lang/Integer;)Ljava/util/ArrayList;
 }
 
 public final class io/github/kotlinmania/serdecore/priv/ContentMapEntry {
