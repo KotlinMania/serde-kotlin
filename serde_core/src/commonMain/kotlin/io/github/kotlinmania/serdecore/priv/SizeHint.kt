@@ -2,10 +2,10 @@
 package io.github.kotlinmania.serdecore.priv
 
 interface IteratorWithSizeHint<out T> : Iterator<T> {
-    fun sizeHint(): Pair<Int, Int?>
+    fun sizeHint(): Pair<ULong, ULong?>
 }
 
-fun fromBounds(iter: IteratorWithSizeHint<*>): Int? = helper(iter.sizeHint())
+fun fromBounds(iter: IteratorWithSizeHint<*>): ULong? = helper(iter.sizeHint())
 
 inline fun <reified Element> cautious(hint: Int?): Int {
     val maxPreallocBytes = 1024 * 1024
@@ -20,7 +20,7 @@ inline fun <reified Element> cautious(hint: Int?): Int {
     }
 }
 
-private fun helper(bounds: Pair<Int, Int?>): Int? {
+private fun helper(bounds: Pair<ULong, ULong?>): ULong? {
     val (lower, upper) = bounds
     return when {
         upper != null && lower == upper -> upper
