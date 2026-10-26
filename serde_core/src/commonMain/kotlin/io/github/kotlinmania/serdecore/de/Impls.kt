@@ -6,6 +6,7 @@ import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
+import io.github.kotlinmania.serdecore.priv.InPlaceSeed
 import io.github.kotlinmania.serdecore.priv.fromUtf8LossyNoAlloc
 import io.github.kotlinmania.serdecore.ser.Serialize
 import io.github.kotlinmania.serdecore.ser.Serializer
@@ -720,13 +721,7 @@ private class MutableListInPlaceVisitor<T>(
         // ordinary growth policy instead of guessing the source's byte reservation.
         for (index in values.indices) {
             val slot = mutablePlace({ values[index] }, { values[index] = it })
-            // Reuse the existing Deserialize-to-seed adapter until verified raw
-            // InPlaceSeed output is available. This is the generator handoff site.
-            val element = object : Deserialize<Unit> {
-                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Unit> =
-                    elementDeserialize.deserializeInPlace(deserializer, slot)
-            }
-            when (val result = access.nextElement(element)) {
+            when (val result = access.nextElementSeed(InPlaceSeed(slot, elementDeserialize))) {
                 is SerdeResult.Failure -> return result
                 is SerdeResult.Success -> when (result.value) {
                     is SeqElement.Some -> Unit
