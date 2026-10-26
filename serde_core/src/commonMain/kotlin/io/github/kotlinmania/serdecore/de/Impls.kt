@@ -697,7 +697,57 @@ fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<
                         }
                 },
             )
+
+        override fun <D> deserializeInPlace(
+            deserializer: D,
+            place: MutablePlace<MutableList<T>>,
+        ): SerdeResult<Unit>
+            where D : Deserializer =
+            deserializer.deserializeSeq(MutableListInPlaceVisitor(elementDeserialize, place.value))
     }
+
+/** The value/mutation path of Rust Vec<T>::deserialize_in_place in de/impls.rs. */
+private class MutableListInPlaceVisitor<T>(
+    private val elementDeserialize: Deserialize<T>,
+    private val values: MutableList<T>,
+) : Visitor<Unit> {
+    override fun expecting(): String = "a sequence"
+
+    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Unit> {
+        val hint = access.sizeHint()
+        require(hint == null || hint >= 0) { "A Rust size hint cannot be negative" }
+        // No generic Rust T layout is available. Retain this Kotlin list and its
+        // ordinary growth policy instead of guessing the source's byte reservation.
+        for (index in values.indices) {
+            val slot = mutablePlace({ values[index] }, { values[index] = it })
+            // Reuse the existing Deserialize-to-seed adapter until verified raw
+            // InPlaceSeed output is available. This is the generator handoff site.
+            val element = object : Deserialize<Unit> {
+                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Unit> =
+                    elementDeserialize.deserializeInPlace(deserializer, slot)
+            }
+            when (val result = access.nextElement(element)) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> when (result.value) {
+                    is SeqElement.Some -> Unit
+                    SeqElement.None -> {
+                        values.subList(index, values.size).clear()
+                        return SerdeResult.success(Unit)
+                    }
+                }
+            }
+        }
+        while (true) {
+            when (val result = access.nextElement(elementDeserialize)) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> when (val next = result.value) {
+                    is SeqElement.Some -> values.add(next.value)
+                    SeqElement.None -> return SerdeResult.success(Unit)
+                }
+            }
+        }
+    }
+}
 
 // //////////////////////////////////////////////////////////////////////////////
 

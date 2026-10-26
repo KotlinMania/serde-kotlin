@@ -1,0 +1,10 @@
+[package]
+name = "serde-writable-place-oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+[[bin]]
+name = "serde-writable-place-oracle"
+path = "Oracle.rs"
+[dependencies]
+serde_core = { path = "../../tmp/serde/serde_core", default-features = false, features = ["std", "alloc"] }

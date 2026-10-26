@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "target": "macos_arm64",
+  "modules": {
+    "serde-core": {
+      "tests": 91,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "serde": {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "command": "./gradlew --offline --no-daemon -Pproject.repositories.mavenLocal=true -Dmaven.repo.local=/Users/sydney/.m2/repository :serde-core:macosArm64Test :macosArm64Test",
+  "raw_log_sha256": "8028259bc66df0e0fa9ee452055ac6f79398cc5073f40b02927eee6090b1d83d",
+  "saved_log_sha256": "4da173ac851c2ddad7b6eeade37757b1e48b1de176e4dd839ef6702140725033",
+  "foreign_work_preserved": true,
+  "exclusions": [],
+  "new_translated_files": 0,
+  "new_adopted_files": 0
+}
