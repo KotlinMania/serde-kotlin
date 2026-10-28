@@ -893,7 +893,9 @@ kotlin {
         .configureEach {
             // KGP's generated SPBridge files (KotlinStdlib.kt, <Module>.kt) emit
             // type-erased generic casts without @Suppress("UNCHECKED_CAST").
-            compilerOptions.allWarningsAsErrors.set(false)
+            // Suppress UNCHECKED_CAST on KGP's generated bridge while keeping
+            // allWarningsAsErrors = true for all other diagnostics.
+            compilerOptions.freeCompilerArgs.add("-Xsuppress-warning=UNCHECKED_CAST")
         }
 
     // KGP 2.4.21's SwiftExportTask calls `workerExecutor.processIsolation { workerSpec -> ... }`
