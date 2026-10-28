@@ -1937,13 +1937,15 @@ if (napiFfiEnabled) {
 
     val copyNodeFfi =
         tasks.register<Copy>("copyNode$ffiName") {
-            dependsOn(buildNodeFfi)
+            dependsOn(buildNodeFfi, "kotlinNpmInstall")
+            outputs.upToDateWhen { false }
             from(ffiNapiDir)
             into(layout.buildDirectory.dir("js/node_modules/$ffiNpmPackage"))
         }
     val copyWasmNodeFfi =
         tasks.register<Copy>("copyWasmNode$ffiName") {
-            dependsOn(buildNodeFfi)
+            dependsOn(buildNodeFfi, "kotlinWasmNpmInstall")
+            outputs.upToDateWhen { false }
             from(ffiNapiDir)
             into(layout.buildDirectory.dir("wasm/node_modules/$ffiNpmPackage"))
         }
@@ -1986,13 +1988,15 @@ gradle.includedBuilds.forEach { ib ->
         if (ibNapiFfi) {
             val copyIbNode =
                 tasks.register<Copy>("copyIncludedNode$ibFfiName") {
-                    dependsOn(ib.task(":buildNode$ibFfiName"))
+                    dependsOn(ib.task(":buildNode$ibFfiName"), "kotlinNpmInstall")
+                    outputs.upToDateWhen { false }
                     from(File(ib.projectDir, "native/node-$ibFfiLower"))
                     into(layout.buildDirectory.dir("js/node_modules/@kotlinmania/$ibFfiLower-native-bindings"))
                 }
             val copyIbWasmNode =
                 tasks.register<Copy>("copyIncludedWasmNode$ibFfiName") {
-                    dependsOn(ib.task(":buildNode$ibFfiName"))
+                    dependsOn(ib.task(":buildNode$ibFfiName"), "kotlinWasmNpmInstall")
+                    outputs.upToDateWhen { false }
                     from(File(ib.projectDir, "native/node-$ibFfiLower"))
                     into(layout.buildDirectory.dir("wasm/node_modules/@kotlinmania/$ibFfiLower-native-bindings"))
                 }
