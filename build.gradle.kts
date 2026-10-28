@@ -317,9 +317,6 @@ configurations.configureEach {
     if (name.contains("androidDeviceTest", ignoreCase = true)) {
         exclude(group = "org.jetbrains", module = "annotations")
     }
-    if (name.contains("Test", ignoreCase = true)) {
-        exclude(group = project.group.toString(), module = publishProjectName)
-    }
     if (name == "swiftExportClasspath") {
         // KotlinMania patched exporter: emits `internal import` instead of
         // `@_implementationOnly import` (Xcode 26.5 flags the latter as
@@ -1155,7 +1152,13 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
-            commonTestDependencyBundle?.let { implementation(it) }
+            commonTestDependencyBundle?.let { bundle ->
+                bundle.get().forEach { dep ->
+                    implementation(dep) {
+                        exclude(group = project.group.toString(), module = publishProjectName)
+                    }
+                }
+            }
         }
         if (benchmarkEnabled) {
             val commonBenchmark = maybeCreate("commonBenchmark")
