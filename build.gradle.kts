@@ -896,6 +896,60 @@ kotlin {
             compilerOptions.allWarningsAsErrors.set(false)
         }
 
+    // KGP 2.4.21's SwiftExportTask calls `workerExecutor.processIsolation { workerSpec -> ... }`
+    // without setting `workerSpec.forkOptions.maxHeapSize`, so Gradle spawns the isolated
+    // `Gradle Worker Daemon` with its 512 MB default (`-Xmx512m`). Exporting large crates
+    // (such as `libc-kotlin`, whose generated `Libc.swift` is ~24 MB) exhausts the 512 MB
+    // worker heap inside the Kotlin Analysis API / IntelliJ standalone platform, causing
+    // `SocketConnection.dispatch` to throw `OutOfMemoryError: Java heap space` when sending
+    // `ResponseProtocol.completed(DefaultWorkResult)` back to the parent Gradle daemon and
+    // deadlocking both processes indefinitely. Wrapping `SwiftExportTask.workerExecutor` to
+    // set `forkOptions.maxHeapSize` (configurable via `project.swiftExport.workerMaxHeapSize`,
+    // default `4g`) prevents the worker OOM and hang.
+    val swiftExportWorkerMaxHeapSize =
+        providers.gradleProperty("project.swiftExport.workerMaxHeapSize").getOrElse("4g")
+    tasks
+        .matching {
+            it.javaClass.name.startsWith(
+                "org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.tasks.SwiftExportTask",
+            )
+        }.configureEach {
+            doFirst {
+                val field =
+                    generateSequence<Class<*>>(javaClass) { it.superclass }
+                        .firstNotNullOfOrNull { cls ->
+                            cls.declaredFields.firstOrNull { it.name == "workerExecutor" }
+                        }
+                if (field != null) {
+                    field.isAccessible = true
+                    val delegate = field.get(this) as? org.gradle.workers.WorkerExecutor
+                    if (delegate != null) {
+                        field.set(
+                            this,
+                            object : org.gradle.workers.WorkerExecutor by delegate {
+                                override fun processIsolation(): org.gradle.workers.WorkQueue =
+                                    delegate.processIsolation {
+                                        if (forkOptions.maxHeapSize.isNullOrBlank()) {
+                                            forkOptions.maxHeapSize = swiftExportWorkerMaxHeapSize
+                                        }
+                                    }
+
+                                override fun processIsolation(
+                                    action: Action<in org.gradle.workers.ProcessWorkerSpec>,
+                                ): org.gradle.workers.WorkQueue =
+                                    delegate.processIsolation {
+                                        if (forkOptions.maxHeapSize.isNullOrBlank()) {
+                                            forkOptions.maxHeapSize = swiftExportWorkerMaxHeapSize
+                                        }
+                                        action.execute(this)
+                                    }
+                            },
+                        )
+                    }
+                }
+            }
+        }
+
     // Android KMP library. Block name is `android` — `androidLibrary` is deprecated in current KGP.
     android {
         namespace = projectNamespace
@@ -2181,6 +2235,14 @@ tasks.register("swiftExportSmokeTest") {
             swiftBuildFile.deleteRecursively()
         }
         swiftBuildFile.mkdirs()
+        val spmPackageDir =
+            layout.buildDirectory
+                .dir("SPMPackage")
+                .get()
+                .asFile
+        if (spmPackageDir.exists()) {
+            spmPackageDir.deleteRecursively()
+        }
         val swiftBuildDir = swiftBuildFile.absolutePath
         execOperations
             .exec {
