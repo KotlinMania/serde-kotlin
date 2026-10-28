@@ -79,15 +79,22 @@ val commonMainApiDependencyBundle =
                 .orElseThrow { GradleException("Missing public API bundle '$bundleName'") }
         }
 // kotlinmania:common-api-bundle:v1 end
-val commonMainBundleName = providers.gradleProperty("project.dependencies.commonMainBundle").get()
 val versionCatalog =
     extensions
         .getByType(VersionCatalogsExtension::class.java)
         .named("libs")
+val commonMainBundleName =
+    providers
+        .gradleProperty("project.dependencies.commonMainBundle")
+        .orNull
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
 val commonMainDependencyBundle =
-    versionCatalog
-        .findBundle(commonMainBundleName)
-        .orElseThrow { GradleException("Missing libs bundle '$commonMainBundleName'") }
+    commonMainBundleName?.let { bundleName ->
+        versionCatalog
+            .findBundle(bundleName)
+            .orElseThrow { GradleException("Missing libs bundle '$bundleName'") }
+    }
 
 fun csvProperty(name: String): Set<String> =
     providers
@@ -174,10 +181,13 @@ val intellijCoroutinesVersion =
 // from gradle.properties so one build.gradle.kts serves every project.
 // ============================================================================
 val swiftExportModuleName = optionalTrimmedProperty("project.swiftExport.moduleName") ?: frameworkName
-val swiftExportFlattenPackage =
+val swiftExportRootPackage =
     optionalTrimmedProperty("project.swiftExport.rootPackage")
         ?: optionalTrimmedProperty("project.swiftExport.flattenPackage")
         ?: projectNamespace
+
+val org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.SwiftExportedModuleMetadata.rootPackage: org.gradle.api.provider.Property<String>
+    get() = flattenPackage
 val swiftExportEnableCoroutinesSupport =
     providers
         .gradleProperty("project.swiftExport.enableCoroutinesSupport")
@@ -763,7 +773,7 @@ kotlin {
     // Swift Export bridge — driven by `project.swiftExport.*` in gradle.properties.
     swiftExport {
         moduleName = swiftExportModuleName
-        flattenPackage = swiftExportFlattenPackage
+        rootPackage = swiftExportRootPackage
         configure {
             settings.put("enableCoroutinesSupport", swiftExportEnableCoroutinesSupport)
             swiftExportSettings.forEach { (key, value) ->
@@ -786,7 +796,7 @@ kotlin {
                         moduleName = exported.moduleName
                     }
                     if (exported.rootPackage.isNotEmpty()) {
-                        flattenPackage = exported.rootPackage
+                        rootPackage = exported.rootPackage
                     }
                 }
             }
@@ -1147,7 +1157,7 @@ kotlin {
             }
         }
         commonMain.dependencies {
-            implementation(commonMainDependencyBundle)
+            commonMainDependencyBundle?.let { implementation(it) }
             commonMainApiDependencyBundle?.let { api(it) }
         }
         commonTest.dependencies {
@@ -1937,14 +1947,14 @@ if (napiFfiEnabled) {
 
     val copyNodeFfi =
         tasks.register<Copy>("copyNode$ffiName") {
-            dependsOn(buildNodeFfi, "kotlinNpmInstall")
+            dependsOn(buildNodeFfi, "kotlinNpmInstall", "kotlinUpgradeYarnLock")
             outputs.upToDateWhen { false }
             from(ffiNapiDir)
             into(layout.buildDirectory.dir("js/node_modules/$ffiNpmPackage"))
         }
     val copyWasmNodeFfi =
         tasks.register<Copy>("copyWasmNode$ffiName") {
-            dependsOn(buildNodeFfi, "kotlinWasmNpmInstall")
+            dependsOn(buildNodeFfi, "kotlinWasmNpmInstall", "kotlinWasmUpgradeYarnLock")
             outputs.upToDateWhen { false }
             from(ffiNapiDir)
             into(layout.buildDirectory.dir("wasm/node_modules/$ffiNpmPackage"))
@@ -1988,14 +1998,14 @@ gradle.includedBuilds.forEach { ib ->
         if (ibNapiFfi) {
             val copyIbNode =
                 tasks.register<Copy>("copyIncludedNode$ibFfiName") {
-                    dependsOn(ib.task(":buildNode$ibFfiName"), "kotlinNpmInstall")
+                    dependsOn(ib.task(":buildNode$ibFfiName"), "kotlinNpmInstall", "kotlinUpgradeYarnLock")
                     outputs.upToDateWhen { false }
                     from(File(ib.projectDir, "native/node-$ibFfiLower"))
                     into(layout.buildDirectory.dir("js/node_modules/@kotlinmania/$ibFfiLower-native-bindings"))
                 }
             val copyIbWasmNode =
                 tasks.register<Copy>("copyIncludedWasmNode$ibFfiName") {
-                    dependsOn(ib.task(":buildNode$ibFfiName"), "kotlinWasmNpmInstall")
+                    dependsOn(ib.task(":buildNode$ibFfiName"), "kotlinWasmNpmInstall", "kotlinWasmUpgradeYarnLock")
                     outputs.upToDateWhen { false }
                     from(File(ib.projectDir, "native/node-$ibFfiLower"))
                     into(layout.buildDirectory.dir("wasm/node_modules/@kotlinmania/$ibFfiLower-native-bindings"))

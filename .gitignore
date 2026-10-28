@@ -29,6 +29,8 @@ deep_symbol_inventory.txt
 direct-translation/
 *.log
 *.stderr
+*.o.tmp
+src/nativeInterop/cinterop/*.a
 .cache/
 *.lock
 kotlin-js-store/*
