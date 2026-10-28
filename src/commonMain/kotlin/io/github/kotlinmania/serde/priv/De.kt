@@ -3,7 +3,7 @@ package io.github.kotlinmania.serde.priv
 
 import io.github.kotlinmania.serdecore.priv.generated.content.Content
 import io.github.kotlinmania.serdecore.priv.contentaccess.*
-import org.rustlang.core.slice.SharedByteSlice
+import io.github.kotlinmania.serdecore.priv.SharedByteSlice
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult

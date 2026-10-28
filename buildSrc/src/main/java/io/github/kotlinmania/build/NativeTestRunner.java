@@ -26,7 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Runs a linked native test executable on this host or an existing Parallels guest. */
+/**
+ * Runs an already linked Linux ARM64/x64 or Windows x64 test executable locally or in an existing
+ * selected Parallels guest. It checks architecture and binary hashes, executes real test cases,
+ * and writes runtime evidence/JUnit reports. It can copy/run files in the guest; it neither builds
+ * the product nor silently substitutes another platform.
+ */
 public final class NativeTestRunner {
     private static final Set<String> TARGETS = Set.of("linuxArm64", "linuxX64", "mingwX64");
     private static final Set<String> LINUX_GUESTS = Set.of(

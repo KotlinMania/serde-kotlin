@@ -1,14 +1,13 @@
 // swift-tools-version: 6.0
-import Foundation
 import PackageDescription
-
-let exportBuild = ProcessInfo.processInfo.environment["KOTLINMANIA_SWIFT_EXPORT_BUILD"] ?? "../build"
 
 let package = Package(
     name: "SwiftTestHarness",
-    platforms: [.macOS(.v15)],
+    platforms: [
+        .macOS(.v15),
+    ],
     dependencies: [
-        .package(name: "Serde", path: "\(exportBuild)/SPMPackage/macosArm64/Debug")
+        .package(name: "Serde", path: "../build/SPMPackage/macosArm64/Debug")
     ],
     targets: [
         .testTarget(
@@ -18,7 +17,7 @@ let package = Package(
             ],
             linkerSettings: [
                 .unsafeFlags([
-                    "-L", "\(exportBuild)/swift-test",
+                    "-L", "../build/swift-test",
                     "-lSerde",
                 ]),
             ]

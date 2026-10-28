@@ -7,7 +7,7 @@ import io.github.kotlinmania.serdecore.de.value.BorrowedByteSliceDeserializer
 import io.github.kotlinmania.serdecore.de.value.CharCodePointDeserializer
 import io.github.kotlinmania.serdecore.priv.contentaccess.*
 import io.github.kotlinmania.serdecore.priv.generated.content.Content
-import org.rustlang.core.slice.SharedByteSlice
+import io.github.kotlinmania.serdecore.priv.SharedByteSlice
 import kotlin.test.*
 
 class GeneratedContentReplayTest {

@@ -1,6 +1,5 @@
 import Testing
 import Serde
-import SerdeCore
 
 @Suite("Concrete Serde outcomes")
 struct ConcreteOutcomeTests {

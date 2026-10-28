@@ -2,11 +2,11 @@
   "type": "port",
   "name": "serde",
   "source": {
-    "path": "tmp/serde/serde/src/private",
+    "path": "tmp/serde",
     "lang": "rust"
   },
   "target": {
-    "path": "src/commonMain/kotlin/io/github/kotlinmania/serde/priv",
+    "path": "src/commonMain/kotlin/io/github/kotlinmania",
     "lang": "kotlin"
   },
   "checks": {
