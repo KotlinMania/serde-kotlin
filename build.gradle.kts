@@ -1,15 +1,21 @@
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+@file:OptIn(
+    ExperimentalKotlinGradlePluginApi::class,
+    org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl::class,
+)
 
 import groovy.json.JsonSlurper
 import io.github.kotlinmania.build.BuildToolTask
 import io.github.kotlinmania.build.NativeTestRunner
 import io.github.kotlinmania.build.NodeFfiBuilder
 import io.github.kotlinmania.build.SwiftManifestEnforcer
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
@@ -54,6 +60,7 @@ plugins {
 
 group = providers.gradleProperty("project.group").getOrElse("io.github.kotlinmania")
 version = providers.gradleProperty("project.version").getOrElse("0.1.0-SNAPSHOT")
+val publishProjectName = providers.gradleProperty("project.name").getOrElse("unnamed-project")
 val frameworkName = providers.gradleProperty("project.frameworkName").getOrElse("Unnamed")
 val projectNamespace = providers.gradleProperty("project.namespace").getOrElse("io.github.kotlinmania")
 val kotlinVersion = providers.gradleProperty("versions.kotlin").getOrElse("2.4.0")
@@ -73,10 +80,12 @@ val commonMainApiDependencyBundle =
         }
 // kotlinmania:common-api-bundle:v1 end
 val commonMainBundleName = providers.gradleProperty("project.dependencies.commonMainBundle").get()
-val commonMainDependencyBundle =
+val versionCatalog =
     extensions
         .getByType(VersionCatalogsExtension::class.java)
         .named("libs")
+val commonMainDependencyBundle =
+    versionCatalog
         .findBundle(commonMainBundleName)
         .orElseThrow { GradleException("Missing libs bundle '$commonMainBundleName'") }
 
@@ -158,6 +167,137 @@ val benchmarkIterationTimeUnit = providers.gradleProperty("project.benchmark.ite
 val intellijCoroutinesVersion =
     providers.gradleProperty("versions.intellij.coroutines").getOrElse("1.10.2-intellij-1")
 
+// ============================================================================
+// Swift Export & Native Binary Configuration (gradle.properties)
+// ----------------------------------------------------------------------------
+// Drives `swiftExport {}`, `binaries.framework {}`, and `binaries.sharedLib {}`
+// from gradle.properties so one build.gradle.kts serves every project.
+// ============================================================================
+val swiftExportModuleName = optionalTrimmedProperty("project.swiftExport.moduleName") ?: frameworkName
+val swiftExportFlattenPackage =
+    optionalTrimmedProperty("project.swiftExport.rootPackage")
+        ?: optionalTrimmedProperty("project.swiftExport.flattenPackage")
+        ?: projectNamespace
+val swiftExportEnableCoroutinesSupport =
+    providers
+        .gradleProperty("project.swiftExport.enableCoroutinesSupport")
+        .getOrElse("true")
+        .trim()
+val swiftExportSettings =
+    providers
+        .gradlePropertiesPrefixedBy("project.swiftExport.settings.")
+        .getOrElse(emptyMap())
+val swiftExportFreeCompilerArgs = csvProperty("project.swiftExport.freeCompilerArgs")
+val swiftExportLinkFreeCompilerArgs = csvProperty("project.swiftExport.linkTask.freeCompilerArgs")
+val swiftExportExportApiBundle = boolProperty("project.swiftExport.exportApiBundle", false)
+val swiftExportHiddenDependencies = csvProperty("project.swiftExport.hidden")
+val appleFrameworkStatic = boolProperty("project.apple.framework.static", false)
+val nativeSharedLibEnabled = boolProperty("project.native.sharedLib", true)
+
+enum class SwiftExportModuleVisibility {
+    EXPOSED,
+    HIDDEN,
+}
+
+data class SwiftExportModuleSpec(
+    val key: String,
+    val dependency: Any,
+    val moduleName: String,
+    val rootPackage: String,
+    val visibility: SwiftExportModuleVisibility,
+)
+
+fun deriveSwiftModuleName(rawName: String): String =
+    rawName
+        .removePrefix(":")
+        .substringAfterLast(":")
+        .removeSuffix("-kotlin")
+        .split('-', '_', '.')
+        .filter { it.isNotEmpty() }
+        .joinToString("") { part -> part.replaceFirstChar { it.uppercase() } }
+
+fun parseSwiftExportModuleSpec(rawEntry: String): SwiftExportModuleSpec {
+    val parts = rawEntry.split("|").map { it.trim() }
+    val rawDep = parts.firstOrNull().orEmpty()
+    if (rawDep.isEmpty()) {
+        throw GradleException("Malformed project.swiftExport.exports entry: '$rawEntry'")
+    }
+    val resolvedDep: Any =
+        when {
+            rawDep.startsWith(":") -> project(rawDep)
+            ":" in rawDep -> rawDep
+            else ->
+                versionCatalog
+                    .findLibrary(rawDep)
+                    .orElseThrow {
+                        GradleException(
+                            "Unknown Swift Export library alias '$rawDep' in libs.versions.toml " +
+                                "(use a catalog alias, 'group:artifact:version', or ':subproject')",
+                        )
+                    }.get()
+        }
+    val explicitVisibility =
+        when (val rawVis = parts.getOrNull(3)?.uppercase().orEmpty()) {
+            "", "EXPOSED" -> SwiftExportModuleVisibility.EXPOSED
+            "HIDDEN" -> SwiftExportModuleVisibility.HIDDEN
+            else -> throw GradleException("Unknown Swift Export visibility '$rawVis' in '$rawEntry' (expected EXPOSED or HIDDEN)")
+        }
+    val visibility =
+        if (rawDep in swiftExportHiddenDependencies) {
+            SwiftExportModuleVisibility.HIDDEN
+        } else {
+            explicitVisibility
+        }
+    val moduleName = parts.getOrNull(1)?.takeIf { it.isNotEmpty() } ?: deriveSwiftModuleName(rawDep)
+    return SwiftExportModuleSpec(
+        key = rawDep,
+        dependency = resolvedDep,
+        moduleName = moduleName,
+        rootPackage = parts.getOrNull(2).orEmpty(),
+        visibility = visibility,
+    )
+}
+
+val swiftExportModuleExports: List<SwiftExportModuleSpec> =
+    buildList {
+        val explicitSpecs = LinkedHashMap<String, SwiftExportModuleSpec>()
+        csvProperty("project.swiftExport.exports").forEach { entry ->
+            val spec = parseSwiftExportModuleSpec(entry)
+            explicitSpecs[spec.key] = spec
+        }
+        providers
+            .gradlePropertiesPrefixedBy("project.swiftExport.export.")
+            .getOrElse(emptyMap())
+            .toSortedMap()
+            .forEach { (_, entry) ->
+                val trimmed = entry.trim()
+                if (trimmed.isNotEmpty()) {
+                    val spec = parseSwiftExportModuleSpec(trimmed)
+                    explicitSpecs[spec.key] = spec
+                }
+            }
+        if (swiftExportExportApiBundle && commonMainApiDependencyBundle != null) {
+            commonMainApiDependencyBundle.get().forEach { dep ->
+                val coordKey = "${dep.module.group}:${dep.module.name}"
+                val artifactKey = dep.module.name
+                if (coordKey !in explicitSpecs && artifactKey !in explicitSpecs) {
+                    val isHidden = coordKey in swiftExportHiddenDependencies || artifactKey in swiftExportHiddenDependencies
+                    val derivedModule = deriveSwiftModuleName(artifactKey)
+                    val derivedPackage = "${dep.module.group}.${artifactKey.removeSuffix("-kotlin").replace("-", "").replace("_", "")}"
+                    explicitSpecs[coordKey] =
+                        SwiftExportModuleSpec(
+                            key = coordKey,
+                            dependency = dep,
+                            moduleName = derivedModule,
+                            rootPackage = derivedPackage,
+                            visibility = if (isHidden) SwiftExportModuleVisibility.HIDDEN else SwiftExportModuleVisibility.EXPOSED,
+                        )
+                }
+            }
+        }
+        addAll(explicitSpecs.values)
+    }
+
 val projectKonanDataDirectory =
     providers
         .environmentVariable("KONAN_DATA_DIR")
@@ -176,6 +316,9 @@ configurations.configureEach {
     // Android device-test classpath.
     if (name.contains("androidDeviceTest", ignoreCase = true)) {
         exclude(group = "org.jetbrains", module = "annotations")
+    }
+    if (name.contains("Test", ignoreCase = true)) {
+        exclude(group = project.group.toString(), module = publishProjectName)
     }
     if (name == "swiftExportClasspath") {
         // KotlinMania patched exporter: emits `internal import` instead of
@@ -494,12 +637,20 @@ kotlin {
     val frameworkBundleId = projectNamespace
 
     // Local helper: attach this target's framework to the XCFramework.
-    fun KotlinNativeTarget.addToXcf(static: Boolean = false) {
+    fun KotlinNativeTarget.addToXcf(static: Boolean = appleFrameworkStatic) {
         binaries.framework {
             baseName = frameworkName
             if (static) isStatic = true
             xcf.add(this)
             binaryOption("bundleId", frameworkBundleId)
+        }
+    }
+
+    // Local helper: emit dynamic shared libraries (.dylib / .so / .dll) for native targets.
+    fun KotlinNativeTarget.addSharedLib() {
+        if (!nativeSharedLibEnabled) return
+        binaries.sharedLib {
+            baseName = frameworkName
         }
     }
 
@@ -518,14 +669,15 @@ kotlin {
     macosArm64 {
         configureBenchmarkCompilation()
         addToXcf()
+        addSharedLib()
     }
     iosArm64 {
         configureBenchmarkCompilation()
-        addToXcf(static = true)
+        addToXcf()
     }
     iosSimulatorArm64 {
         configureBenchmarkCompilation()
-        addToXcf(static = true)
+        addToXcf()
     }
     tvosArm64 {
         configureBenchmarkCompilation()
@@ -546,13 +698,28 @@ kotlin {
     }
 
     // Other native — Tier 1/2
-    linuxX64 { configureBenchmarkCompilation() }
-    linuxArm64 { configureBenchmarkCompilation() }
-    mingwX64 { configureBenchmarkCompilation() }
+    linuxX64 {
+        configureBenchmarkCompilation()
+        addSharedLib()
+    }
+    linuxArm64 {
+        configureBenchmarkCompilation()
+        addSharedLib()
+    }
+    mingwX64 {
+        configureBenchmarkCompilation()
+        addSharedLib()
+    }
 
     // Android NDK — 64-bit only (32-bit retired §5.5.3, 2026-06-25).
-    androidNativeArm64 { configureBenchmarkCompilation() }
-    androidNativeX64 { configureBenchmarkCompilation() }
+    androidNativeArm64 {
+        configureBenchmarkCompilation()
+        addSharedLib()
+    }
+    androidNativeX64 {
+        configureBenchmarkCompilation()
+        addSharedLib()
+    }
 
     // Web
     js {
@@ -596,17 +763,46 @@ kotlin {
         nodejs()
     }
 
-    // Swift Export bridge — Experimental per Kotlin 2.4.0 release notes.
-    // KGP 2.4.0 does not expose a public opt-in annotation; warnings (if any)
-    // arrive via KotlinToolingDiagnostics, not @RequiresOptIn.
+    // Swift Export bridge — driven by `project.swiftExport.*` in gradle.properties.
     swiftExport {
-        moduleName = frameworkName
-        flattenPackage = projectNamespace
-        @OptIn(org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl::class)
+        moduleName = swiftExportModuleName
+        flattenPackage = swiftExportFlattenPackage
         configure {
-            settings.put("enableCoroutinesSupport", "true")
+            settings.put("enableCoroutinesSupport", swiftExportEnableCoroutinesSupport)
+            swiftExportSettings.forEach { (key, value) ->
+                settings.put(key, value)
+            }
+            if (swiftExportFreeCompilerArgs.isNotEmpty()) {
+                freeCompilerArgs.addAll(swiftExportFreeCompilerArgs)
+            }
         }
+        linkTask {
+            if (swiftExportLinkFreeCompilerArgs.isNotEmpty()) {
+                toolOptions.freeCompilerArgs.addAll(swiftExportLinkFreeCompilerArgs)
+            }
+        }
+        swiftExportModuleExports
+            .filter { it.visibility == SwiftExportModuleVisibility.EXPOSED }
+            .forEach { exported ->
+                export(exported.dependency) {
+                    if (exported.moduleName.isNotEmpty()) {
+                        moduleName = exported.moduleName
+                    }
+                    if (exported.rootPackage.isNotEmpty()) {
+                        flattenPackage = exported.rootPackage
+                    }
+                }
+            }
     }
+
+    tasks
+        .withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>()
+        .matching { it.name.startsWith("compileSwiftExportMain") }
+        .configureEach {
+            // KGP's generated SPBridge files (KotlinStdlib.kt, <Module>.kt) emit
+            // type-erased generic casts without @Suppress("UNCHECKED_CAST").
+            compilerOptions.allWarningsAsErrors.set(false)
+        }
 
     // Android KMP library. Block name is `android` — `androidLibrary` is deprecated in current KGP.
     android {
@@ -794,7 +990,7 @@ kotlin {
                                         if (clangBin.exists() && sysroot.exists()) {
                                             execOps
                                                 .exec {
-                                                    commandLine(clangBin.absolutePath, "--sysroot=${sysroot.absolutePath}", "-Wall", "-Wextra", "-Werror", "-c", "-I${cSource.parent}", cSource.absolutePath, "-o", tempObj.absolutePath)
+                                                    commandLine(clangBin.absolutePath, "--sysroot=${sysroot.absolutePath}", "-fPIC", "-Wall", "-Wextra", "-Werror", "-c", "-I${cSource.parent}", cSource.absolutePath, "-o", tempObj.absolutePath)
                                                 }.assertNormalExitValue()
                                             execOps
                                                 .exec {
@@ -959,9 +1155,6 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation("io.github.kotlinmania:serde-test-kotlin:0.1.2") {
-                exclude(group = "io.github.kotlinmania", module = "serde-kotlin")
-            }
             commonTestDependencyBundle?.let { implementation(it) }
         }
         if (benchmarkEnabled) {
@@ -1233,7 +1426,6 @@ tasks
 // Flow: publish all KMP publications into a local staging Maven layout ->
 // zip it -> POST the zip to the Portal upload endpoint with a Bearer token.
 // ============================================================================
-val publishProjectName = providers.gradleProperty("project.name").getOrElse("unnamed-project")
 
 // Central requires a Javadoc jar per publication; KMP produces none, so attach
 // an empty one to every Maven publication.
@@ -1466,7 +1658,13 @@ tasks.register("setupAndroidSdk") {
 // internal `<Lib>Jni` bridge resolves. Transliterated from libc-kotlin's
 // compileLibcJni with the lib name parameterized on project.ffi.name.
 // ============================================================================
+abstract class AndroidJniCompileTask : DefaultTask() {
+    @get:OutputDirectory
+    abstract val nativeDirectory: DirectoryProperty
+}
+
 if (jvmFfiEnabled) {
+    val projectNsPath = projectNamespace.replace(".", "/")
     val compileFfiJni =
         tasks.register("compile${ffiName}Jni") {
             group = "build"
@@ -1478,6 +1676,7 @@ if (jvmFfiEnabled) {
                     .get()
                     .asFile
             inputs.file(cSource)
+            inputs.files(fileTree("src/nativeInterop/cinterop") { include("*.h") })
             outputs.dir(outDir)
 
             doLast {
@@ -1536,6 +1735,35 @@ if (jvmFfiEnabled) {
             }
         }
 
+    val packageFfiJni =
+        tasks.register<Sync>("package${ffiName}Jni") {
+            dependsOn(compileFfiJni)
+            val hostPlatform =
+                if (isWindowsHost) {
+                    "windows"
+                } else if (isMacHost) {
+                    "macos"
+                } else {
+                    "linux"
+                }
+            val hostArchitecture =
+                when (providers.systemProperty("os.arch").get().lowercase()) {
+                    "aarch64", "arm64" -> "aarch64"
+                    "amd64", "x86_64" -> "x86_64"
+                    else -> throw GradleException("Unsupported JNI host architecture")
+                }
+            from(layout.buildDirectory.dir("natives")) {
+                include("*.so", "*.dll", "*.dylib")
+                into("$projectNsPath/native/$hostPlatform-$hostArchitecture")
+            }
+            from(layout.buildDirectory.dir("jni-distribution")) {
+                exclude("$hostPlatform-$hostArchitecture/**")
+                into("$projectNsPath/native")
+            }
+            into(layout.buildDirectory.dir("generated/jniResources"))
+        }
+    kotlin.sourceSets.named("jvmMain") { resources.srcDir(packageFfiJni) }
+
     tasks.withType<Test>().matching { it.name == "jvmTest" || it.name == "testAndroidHostTest" }.configureEach {
         dependsOn(compileFfiJni)
         systemProperty(
@@ -1546,6 +1774,93 @@ if (jvmFfiEnabled) {
                 .asFile.absolutePath,
         )
     }
+
+    val packagedJniTest =
+        tasks.register<Test>("packagedJniTest") {
+            dependsOn("jvmJar", "jvmTestClasses")
+            val jvmTest = tasks.named<Test>("jvmTest")
+            testClassesDirs = jvmTest.get().testClassesDirs
+            val mainOutput =
+                kotlin.targets
+                    .getByName("jvm")
+                    .compilations
+                    .getByName("main")
+                    .output.allOutputs
+            classpath = files(tasks.named<Jar>("jvmJar").flatMap { it.archiveFile }) + jvmTest.get().classpath.minus(mainOutput)
+            systemProperty(
+                "java.library.path",
+                layout.buildDirectory
+                    .dir("empty-native-search-path")
+                    .get()
+                    .asFile.absolutePath,
+            )
+            filter.isFailOnNoMatchingTests = false
+            filter.includeTestsMatching("*.HostIoTest")
+        }
+    tasks.named("check") { dependsOn(packagedJniTest) }
+
+    val compileAndroidJni =
+        tasks.register<AndroidJniCompileTask>("compileAndroidJni") {
+            if (nativeFfiEnabled && nativeFfiCompileWrapper) {
+                dependsOn("compile${ffiName}WrapperForAndroidNativeArm64", "compile${ffiName}WrapperForAndroidNativeX64")
+            }
+            inputs.file("src/jvmMain/c/${ffiNameLower}_jni.c")
+            inputs.files(fileTree("src/nativeInterop/cinterop") { include("*.h") })
+            nativeDirectory.set(layout.buildDirectory.dir("android-jni"))
+            doLast {
+                if (isWindowsHost) throw GradleException("Build Android JNI payloads on the coordinated macOS or Linux host")
+                val host = if (isMacHost) "osx" else "linux"
+                val dependencyName = "target-toolchain-2-$host-android_ndk"
+                val compilerDependencies = File(projectKonanDataDirectory.get(), "dependencies")
+                val compilerReceipt = File(compilerDependencies, ".extracted")
+                val compilerDirectory = File(compilerDependencies, dependencyName)
+                val ndk =
+                    if (
+                        compilerReceipt.isFile && dependencyName in compilerReceipt.readLines() &&
+                        compilerDirectory.isDirectory && compilerDirectory.list()?.isNotEmpty() == true
+                    ) {
+                        compilerDirectory
+                    } else {
+                        layout.buildDirectory
+                            .dir("native-wrapper-dependencies/$dependencyName")
+                            .get()
+                            .asFile
+                    }
+                val source = file("src/jvmMain/c/${ffiNameLower}_jni.c")
+                val api = providers.gradleProperty("android.minSdk").getOrElse("24")
+                val execOps = project.serviceOf<ExecOperations>()
+                for ((abi, triple) in listOf("arm64-v8a" to "aarch64-linux-android", "x86_64" to "x86_64-linux-android")) {
+                    val compiler = File(ndk, "bin/$triple$api-clang")
+                    if (!compiler.exists()) throw GradleException("Missing Android JNI compiler $compiler")
+                    val output = nativeDirectory.get().asFile.resolve("$abi/lib${ffiNameLower}_jni.so")
+                    output.parentFile.mkdirs()
+                    execOps
+                        .exec {
+                            commandLine(compiler.absolutePath, "--sysroot=${ndk.resolve("sysroot")}", "-shared", "-fPIC", "-O2", "-Wall", "-Wextra", "-Werror", "-Wl,-z,max-page-size=16384", source.absolutePath, "-o", output.absolutePath)
+                        }.assertNormalExitValue()
+                }
+            }
+        }
+    extensions.getByType<com.android.build.api.variant.KotlinMultiplatformAndroidComponentsExtension>().onVariants { variant ->
+        requireNotNull(variant.sources.jniLibs).addGeneratedSourceDirectory(compileAndroidJni) { it.nativeDirectory }
+    }
+
+    val verifyJniDistribution =
+        tasks.register("verifyJniDistribution") {
+            dependsOn(packageFfiJni)
+            doLast {
+                val root =
+                    layout.buildDirectory
+                        .dir("generated/jniResources/$projectNsPath/native")
+                        .get()
+                        .asFile
+                val required = listOf("macos-aarch64/lib${ffiNameLower}_jni.dylib", "linux-x86_64/lib${ffiNameLower}_jni.so", "linux-aarch64/lib${ffiNameLower}_jni.so", "windows-x86_64/${ffiNameLower}_jni.dll")
+                required.forEach { relative ->
+                    if (!root.resolve(relative).isFile) throw GradleException("Missing release JNI payload: $relative")
+                }
+            }
+        }
+    tasks.named("publishToCentralPortal") { dependsOn(verifyJniDistribution) }
 }
 
 // ============================================================================
