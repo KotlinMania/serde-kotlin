@@ -2264,15 +2264,17 @@ if (file("verification/macro-layout-wasm.c").isFile) {
                             .readLines()
                             .filter { it.startsWith("llvm-") }
                             .distinct()
-                            .map { File(dependencies, "$it/bin") }
+                            .sortedByDescending { name ->
+                                name
+                                    .removePrefix("llvm-")
+                                    .substringBefore('-')
+                                    .toIntOrNull() ?: 0
+                            }.map { File(dependencies, "$it/bin") }
                             .filter { File(it, "clang").canExecute() && File(it, "lld").canExecute() }
                     } else {
                         emptyList()
                     }
-                require(candidates.size <= 1) {
-                    "Multiple installed LLVM toolchains; select project.macroFixture.llvmBin explicitly: $candidates"
-                }
-                candidates.singleOrNull()?.absolutePath ?: ""
+                candidates.firstOrNull()?.absolutePath ?: ""
             },
         )
     val compileMacroLayoutWasm =
