@@ -81,4 +81,4 @@ These are source-backed consumer comparisons, not generated seed verification.
 - Foreign edits were verified unchanged. ABI dump files remain user-owned edits.
 
 Reproduce after the Native Gradle build:
-`python3 verification/seed-place-prep-01/check.py --out tmp/seed-place-prep-01/compare-new`.
+`./verification/seed-place-prep-01/check.sh --out build/seed-place-prep-01/compare-new`.

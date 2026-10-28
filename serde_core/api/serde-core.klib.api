@@ -1,5 +1,5 @@
 // Klib ABI Dump
-// Targets: [androidNativeArm64, androidNativeX64, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, wasmWasi, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64]
+// Targets: [androidNativeArm64, androidNativeX64, iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, wasmWasi, watchosDeviceArm64, watchosSimulatorArm64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -189,9 +189,9 @@ abstract interface io.github.kotlinmania.serdecore.de/MapAccess { // io.github.k
 }
 
 abstract interface io.github.kotlinmania.serdecore.de/SeqAccess { // io.github.kotlinmania.serdecore.de/SeqAccess|null[0]
-    abstract fun <#A1: kotlin/Any?> nextElementSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1?> // io.github.kotlinmania.serdecore.de/SeqAccess.nextElementSeed|nextElementSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
-    open fun <#A1: kotlin/Any?> nextElement(io.github.kotlinmania.serdecore.de/Deserialize<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1?> // io.github.kotlinmania.serdecore.de/SeqAccess.nextElement|nextElement(io.github.kotlinmania.serdecore.de.Deserialize<0:0>){0§<kotlin.Any?>}[0]
-    open fun <#A1: kotlin/Any?> nextElement(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1?> // io.github.kotlinmania.serdecore.de/SeqAccess.nextElement|nextElement(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
+    abstract fun <#A1: kotlin/Any?> nextElementSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/SeqElement<#A1>> // io.github.kotlinmania.serdecore.de/SeqAccess.nextElementSeed|nextElementSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
+    open fun <#A1: kotlin/Any?> nextElement(io.github.kotlinmania.serdecore.de/Deserialize<#A1>): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/SeqElement<#A1>> // io.github.kotlinmania.serdecore.de/SeqAccess.nextElement|nextElement(io.github.kotlinmania.serdecore.de.Deserialize<0:0>){0§<kotlin.Any?>}[0]
+    open fun <#A1: kotlin/Any?> nextElement(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/SeqElement<#A1>> // io.github.kotlinmania.serdecore.de/SeqAccess.nextElement|nextElement(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
     open fun sizeHint(): kotlin/Int? // io.github.kotlinmania.serdecore.de/SeqAccess.sizeHint|sizeHint(){}[0]
 }
 
@@ -253,6 +253,32 @@ sealed interface <#A: kotlin/Any?> io.github.kotlinmania.serdecore.priv.generate
 
         final fun size_hint(#A1): kotlin/Pair<kotlin/ULong, io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/ULong>> // io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkBound0.Case0.size_hint|size_hint(1:0){}[0]
     }
+}
+
+sealed interface <#A: out kotlin/Any?> io.github.kotlinmania.serdecore.de/SeqElement { // io.github.kotlinmania.serdecore.de/SeqElement|null[0]
+    final class <#A1: out kotlin/Any?> Some : io.github.kotlinmania.serdecore.de/SeqElement<#A1> { // io.github.kotlinmania.serdecore.de/SeqElement.Some|null[0]
+        constructor <init>(#A1) // io.github.kotlinmania.serdecore.de/SeqElement.Some.<init>|<init>(1:0){}[0]
+
+        final val value // io.github.kotlinmania.serdecore.de/SeqElement.Some.value|{}value[0]
+            final fun <get-value>(): #A1 // io.github.kotlinmania.serdecore.de/SeqElement.Some.value.<get-value>|<get-value>(){}[0]
+
+        final fun component1(): #A1 // io.github.kotlinmania.serdecore.de/SeqElement.Some.component1|component1(){}[0]
+        final fun copy(#A1 = ...): io.github.kotlinmania.serdecore.de/SeqElement.Some<#A1> // io.github.kotlinmania.serdecore.de/SeqElement.Some.copy|copy(1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/SeqElement.Some.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/SeqElement.Some.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/SeqElement.Some.toString|toString(){}[0]
+    }
+
+    final object None : io.github.kotlinmania.serdecore.de/SeqElement<kotlin/Nothing> { // io.github.kotlinmania.serdecore.de/SeqElement.None|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/SeqElement.None.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/SeqElement.None.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/SeqElement.None.toString|toString(){}[0]
+    }
+}
+
+sealed interface io.github.kotlinmania.serde/SerdeDiagnosticCarrier { // io.github.kotlinmania.serde/SerdeDiagnosticCarrier|null[0]
+    abstract val error // io.github.kotlinmania.serde/SerdeDiagnosticCarrier.error|{}error[0]
+        abstract fun <get-error>(): io.github.kotlinmania.serde/SerdeError // io.github.kotlinmania.serde/SerdeDiagnosticCarrier.error.<get-error>|<get-error>(){}[0]
 }
 
 sealed interface io.github.kotlinmania.serdecore.priv/Content { // io.github.kotlinmania.serdecore.priv/Content|null[0]
@@ -644,7 +670,7 @@ final class <#A: io.github.kotlinmania.serdecore.de/IntoDeserializer, #B: io.git
     final fun <#A1: kotlin/Any?> deserializeU8(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.deserializeU8|deserializeU8(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnit(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.deserializeUnit|deserializeUnit(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnitStruct(kotlin/String, io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.deserializeUnitStruct|deserializeUnitStruct(kotlin.String;io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
-    final fun <#A1: kotlin/Any?> nextElementSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1?> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.nextElementSeed|nextElementSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> nextElementSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/SeqElement<#A1>> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.nextElementSeed|nextElementSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> nextKeySeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1?> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.nextKeySeed|nextKeySeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> nextValueSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.nextValueSeed|nextValueSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
     final fun end(): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.de.value/MapDeserializer.end|end(){}[0]
@@ -684,7 +710,7 @@ final class <#A: io.github.kotlinmania.serdecore.de/IntoDeserializer> io.github.
     final fun <#A1: kotlin/Any?> deserializeU8(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.deserializeU8|deserializeU8(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnit(io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.deserializeUnit|deserializeUnit(io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> deserializeUnitStruct(kotlin/String, io.github.kotlinmania.serdecore.de/Visitor<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.deserializeUnitStruct|deserializeUnitStruct(kotlin.String;io.github.kotlinmania.serdecore.de.Visitor<0:0>){0§<kotlin.Any?>}[0]
-    final fun <#A1: kotlin/Any?> nextElementSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1?> // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.nextElementSeed|nextElementSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> nextElementSeed(io.github.kotlinmania.serdecore.de/DeserializeSeed<#A1>): io.github.kotlinmania.serde/SerdeResult<io.github.kotlinmania.serdecore.de/SeqElement<#A1>> // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.nextElementSeed|nextElementSeed(io.github.kotlinmania.serdecore.de.DeserializeSeed<0:0>){0§<kotlin.Any?>}[0]
     final fun end(): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.end|end(){}[0]
     final fun intoDeserializer(): io.github.kotlinmania.serdecore.de/Deserializer // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.intoDeserializer|intoDeserializer(){}[0]
     final fun sizeHint(): kotlin/Int? // io.github.kotlinmania.serdecore.de.value/SeqDeserializer.sizeHint|sizeHint(){}[0]
@@ -911,6 +937,37 @@ final class <#A: kotlin/Any?> io.github.kotlinmania.serdecore.ser/Wrapping : io.
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.ser/Wrapping.toString|toString(){}[0]
 }
 
+final class io.github.kotlinmania.serde/SerdeBooleanOutcome { // io.github.kotlinmania.serde/SerdeBooleanOutcome|null[0]
+    final val error // io.github.kotlinmania.serde/SerdeBooleanOutcome.error|{}error[0]
+        final fun <get-error>(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeBooleanOutcome.error.<get-error>|<get-error>(){}[0]
+    final val isFailure // io.github.kotlinmania.serde/SerdeBooleanOutcome.isFailure|{}isFailure[0]
+        final fun <get-isFailure>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeBooleanOutcome.isFailure.<get-isFailure>|<get-isFailure>(){}[0]
+    final val isSuccess // io.github.kotlinmania.serde/SerdeBooleanOutcome.isSuccess|{}isSuccess[0]
+        final fun <get-isSuccess>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeBooleanOutcome.isSuccess.<get-isSuccess>|<get-isSuccess>(){}[0]
+    final val value // io.github.kotlinmania.serde/SerdeBooleanOutcome.value|{}value[0]
+        final fun <get-value>(): kotlin/Boolean? // io.github.kotlinmania.serde/SerdeBooleanOutcome.value.<get-value>|<get-value>(){}[0]
+
+    final fun exceptionOrNull(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeBooleanOutcome.exceptionOrNull|exceptionOrNull(){}[0]
+    final fun getOrThrow(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeBooleanOutcome.getOrThrow|getOrThrow(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serde/SerdeBooleanOutcome.Companion|null[0]
+        final fun failure(io.github.kotlinmania.serde/SerdeError): io.github.kotlinmania.serde/SerdeBooleanOutcome // io.github.kotlinmania.serde/SerdeBooleanOutcome.Companion.failure|failure(io.github.kotlinmania.serde.SerdeError){}[0]
+        final fun success(kotlin/Boolean): io.github.kotlinmania.serde/SerdeBooleanOutcome // io.github.kotlinmania.serde/SerdeBooleanOutcome.Companion.success|success(kotlin.Boolean){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serde/SerdeDecodeInput { // io.github.kotlinmania.serde/SerdeDecodeInput|null[0]
+    final fun <#A1: kotlin/Any?> decode(io.github.kotlinmania.serdecore.de/Deserialize<#A1>): io.github.kotlinmania.serde/SerdeResult<#A1> // io.github.kotlinmania.serde/SerdeDecodeInput.decode|decode(io.github.kotlinmania.serdecore.de.Deserialize<0:0>){0§<kotlin.Any?>}[0]
+
+    final object Companion { // io.github.kotlinmania.serde/SerdeDecodeInput.Companion|null[0]
+        final fun boolean(kotlin/Boolean): io.github.kotlinmania.serde/SerdeDecodeInput // io.github.kotlinmania.serde/SerdeDecodeInput.Companion.boolean|boolean(kotlin.Boolean){}[0]
+        final fun fromDeserializer(io.github.kotlinmania.serdecore.de/Deserializer): io.github.kotlinmania.serde/SerdeDecodeInput // io.github.kotlinmania.serde/SerdeDecodeInput.Companion.fromDeserializer|fromDeserializer(io.github.kotlinmania.serdecore.de.Deserializer){}[0]
+        final fun signed(kotlin/Long): io.github.kotlinmania.serde/SerdeDecodeInput // io.github.kotlinmania.serde/SerdeDecodeInput.Companion.signed|signed(kotlin.Long){}[0]
+        final fun text(kotlin/String): io.github.kotlinmania.serde/SerdeDecodeInput // io.github.kotlinmania.serde/SerdeDecodeInput.Companion.text|text(kotlin.String){}[0]
+        final fun unit(): io.github.kotlinmania.serde/SerdeDecodeInput // io.github.kotlinmania.serde/SerdeDecodeInput.Companion.unit|unit(){}[0]
+    }
+}
+
 final class io.github.kotlinmania.serde/SerdeError : io.github.kotlinmania.serdecore/StdError { // io.github.kotlinmania.serde/SerdeError|null[0]
     constructor <init>(kotlin/String, io.github.kotlinmania.serde/SerdeError? = ...) // io.github.kotlinmania.serde/SerdeError.<init>|<init>(kotlin.String;io.github.kotlinmania.serde.SerdeError?){}[0]
 
@@ -921,6 +978,7 @@ final class io.github.kotlinmania.serde/SerdeError : io.github.kotlinmania.serde
 
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serde/SerdeError.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.kotlinmania.serde/SerdeError.hashCode|hashCode(){}[0]
+    final fun raise(): kotlin/Nothing // io.github.kotlinmania.serde/SerdeError.raise|raise(){}[0]
     final fun toString(): kotlin/String // io.github.kotlinmania.serde/SerdeError.toString|toString(){}[0]
 
     final object Companion { // io.github.kotlinmania.serde/SerdeError.Companion|null[0]
@@ -935,11 +993,65 @@ final class io.github.kotlinmania.serde/SerdeError : io.github.kotlinmania.serde
     }
 }
 
-final class io.github.kotlinmania.serde/SerdeException : kotlin/IllegalStateException { // io.github.kotlinmania.serde/SerdeException|null[0]
+final class io.github.kotlinmania.serde/SerdeException : io.github.kotlinmania.serde/SerdeDiagnosticCarrier, kotlin/IllegalStateException { // io.github.kotlinmania.serde/SerdeException|null[0]
     constructor <init>(io.github.kotlinmania.serde/SerdeError) // io.github.kotlinmania.serde/SerdeException.<init>|<init>(io.github.kotlinmania.serde.SerdeError){}[0]
 
     final val error // io.github.kotlinmania.serde/SerdeException.error|{}error[0]
         final fun <get-error>(): io.github.kotlinmania.serde/SerdeError // io.github.kotlinmania.serde/SerdeException.error.<get-error>|<get-error>(){}[0]
+}
+
+final class io.github.kotlinmania.serde/SerdeLongOutcome { // io.github.kotlinmania.serde/SerdeLongOutcome|null[0]
+    final val error // io.github.kotlinmania.serde/SerdeLongOutcome.error|{}error[0]
+        final fun <get-error>(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeLongOutcome.error.<get-error>|<get-error>(){}[0]
+    final val isFailure // io.github.kotlinmania.serde/SerdeLongOutcome.isFailure|{}isFailure[0]
+        final fun <get-isFailure>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeLongOutcome.isFailure.<get-isFailure>|<get-isFailure>(){}[0]
+    final val isSuccess // io.github.kotlinmania.serde/SerdeLongOutcome.isSuccess|{}isSuccess[0]
+        final fun <get-isSuccess>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeLongOutcome.isSuccess.<get-isSuccess>|<get-isSuccess>(){}[0]
+    final val value // io.github.kotlinmania.serde/SerdeLongOutcome.value|{}value[0]
+        final fun <get-value>(): kotlin/Long? // io.github.kotlinmania.serde/SerdeLongOutcome.value.<get-value>|<get-value>(){}[0]
+
+    final fun exceptionOrNull(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeLongOutcome.exceptionOrNull|exceptionOrNull(){}[0]
+    final fun getOrThrow(): kotlin/Long // io.github.kotlinmania.serde/SerdeLongOutcome.getOrThrow|getOrThrow(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serde/SerdeLongOutcome.Companion|null[0]
+        final fun failure(io.github.kotlinmania.serde/SerdeError): io.github.kotlinmania.serde/SerdeLongOutcome // io.github.kotlinmania.serde/SerdeLongOutcome.Companion.failure|failure(io.github.kotlinmania.serde.SerdeError){}[0]
+        final fun success(kotlin/Long): io.github.kotlinmania.serde/SerdeLongOutcome // io.github.kotlinmania.serde/SerdeLongOutcome.Companion.success|success(kotlin.Long){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serde/SerdeStringOutcome { // io.github.kotlinmania.serde/SerdeStringOutcome|null[0]
+    final val error // io.github.kotlinmania.serde/SerdeStringOutcome.error|{}error[0]
+        final fun <get-error>(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeStringOutcome.error.<get-error>|<get-error>(){}[0]
+    final val isFailure // io.github.kotlinmania.serde/SerdeStringOutcome.isFailure|{}isFailure[0]
+        final fun <get-isFailure>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeStringOutcome.isFailure.<get-isFailure>|<get-isFailure>(){}[0]
+    final val isSuccess // io.github.kotlinmania.serde/SerdeStringOutcome.isSuccess|{}isSuccess[0]
+        final fun <get-isSuccess>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeStringOutcome.isSuccess.<get-isSuccess>|<get-isSuccess>(){}[0]
+    final val value // io.github.kotlinmania.serde/SerdeStringOutcome.value|{}value[0]
+        final fun <get-value>(): kotlin/String? // io.github.kotlinmania.serde/SerdeStringOutcome.value.<get-value>|<get-value>(){}[0]
+
+    final fun exceptionOrNull(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeStringOutcome.exceptionOrNull|exceptionOrNull(){}[0]
+    final fun getOrThrow(): kotlin/String // io.github.kotlinmania.serde/SerdeStringOutcome.getOrThrow|getOrThrow(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serde/SerdeStringOutcome.Companion|null[0]
+        final fun failure(io.github.kotlinmania.serde/SerdeError): io.github.kotlinmania.serde/SerdeStringOutcome // io.github.kotlinmania.serde/SerdeStringOutcome.Companion.failure|failure(io.github.kotlinmania.serde.SerdeError){}[0]
+        final fun success(kotlin/String): io.github.kotlinmania.serde/SerdeStringOutcome // io.github.kotlinmania.serde/SerdeStringOutcome.Companion.success|success(kotlin.String){}[0]
+    }
+}
+
+final class io.github.kotlinmania.serde/SerdeUnitOutcome { // io.github.kotlinmania.serde/SerdeUnitOutcome|null[0]
+    final val completed // io.github.kotlinmania.serde/SerdeUnitOutcome.completed|{}completed[0]
+        final fun <get-completed>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeUnitOutcome.completed.<get-completed>|<get-completed>(){}[0]
+    final val error // io.github.kotlinmania.serde/SerdeUnitOutcome.error|{}error[0]
+        final fun <get-error>(): io.github.kotlinmania.serde/SerdeError? // io.github.kotlinmania.serde/SerdeUnitOutcome.error.<get-error>|<get-error>(){}[0]
+    final val isFailure // io.github.kotlinmania.serde/SerdeUnitOutcome.isFailure|{}isFailure[0]
+        final fun <get-isFailure>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeUnitOutcome.isFailure.<get-isFailure>|<get-isFailure>(){}[0]
+    final val isSuccess // io.github.kotlinmania.serde/SerdeUnitOutcome.isSuccess|{}isSuccess[0]
+        final fun <get-isSuccess>(): kotlin/Boolean // io.github.kotlinmania.serde/SerdeUnitOutcome.isSuccess.<get-isSuccess>|<get-isSuccess>(){}[0]
+
+    final object Companion { // io.github.kotlinmania.serde/SerdeUnitOutcome.Companion|null[0]
+        final fun failure(io.github.kotlinmania.serde/SerdeError): io.github.kotlinmania.serde/SerdeUnitOutcome // io.github.kotlinmania.serde/SerdeUnitOutcome.Companion.failure|failure(io.github.kotlinmania.serde.SerdeError){}[0]
+        final fun success(): io.github.kotlinmania.serde/SerdeUnitOutcome // io.github.kotlinmania.serde/SerdeUnitOutcome.Companion.success|success(){}[0]
+    }
 }
 
 final class io.github.kotlinmania.serdecore.de.value/BoolDeserializer : io.github.kotlinmania.serdecore.de.value/PrimitiveDeserializer<kotlin/Boolean> { // io.github.kotlinmania.serdecore.de.value/BoolDeserializer|null[0]
@@ -1463,10 +1575,6 @@ final class io.github.kotlinmania.serdecore.de/PathValue { // io.github.kotlinma
     final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/PathValue.toString|toString(){}[0]
 }
 
-final class io.github.kotlinmania.serdecore.de/SerdeDeserializationException : kotlin/IllegalStateException { // io.github.kotlinmania.serdecore.de/SerdeDeserializationException|null[0]
-    constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.de/SerdeDeserializationException.<init>|<init>(kotlin.String){}[0]
-}
-
 final class io.github.kotlinmania.serdecore.de/SocketAddressV4 : io.github.kotlinmania.serdecore.ser/Serialize { // io.github.kotlinmania.serdecore.de/SocketAddressV4|null[0]
     constructor <init>(io.github.kotlinmania.serdecore.de/Ipv4Address, kotlin/UShort) // io.github.kotlinmania.serdecore.de/SocketAddressV4.<init>|<init>(io.github.kotlinmania.serdecore.de.Ipv4Address;kotlin.UShort){}[0]
 
@@ -1561,10 +1669,6 @@ final class io.github.kotlinmania.serdecore.ser/FormatterSerializer : io.github.
     final fun serializeUnit(): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.ser/FormatterSerializer.serializeUnit|serializeUnit(){}[0]
     final fun serializeUnitStruct(kotlin/String): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.ser/FormatterSerializer.serializeUnitStruct|serializeUnitStruct(kotlin.String){}[0]
     final fun serializeUnitVariant(kotlin/String, kotlin/UInt, kotlin/String): io.github.kotlinmania.serde/SerdeResult<kotlin/Unit> // io.github.kotlinmania.serdecore.ser/FormatterSerializer.serializeUnitVariant|serializeUnitVariant(kotlin.String;kotlin.UInt;kotlin.String){}[0]
-}
-
-final class io.github.kotlinmania.serdecore.ser/SerdeSerializationException : kotlin/IllegalStateException { // io.github.kotlinmania.serdecore.ser/SerdeSerializationException|null[0]
-    constructor <init>(kotlin/String) // io.github.kotlinmania.serdecore.ser/SerdeSerializationException.<init>|<init>(kotlin.String){}[0]
 }
 
 final class org.rustlang.core.slice/SharedByteSlice { // org.rustlang.core.slice/SharedByteSlice|null[0]
@@ -1800,7 +1904,7 @@ sealed class io.github.kotlinmania.serdecore.de/SocketAddress : io.github.kotlin
 }
 
 sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected|null[0]
-    open fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.toString|toString(){}[0]
+    final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.toString|toString(){}[0]
 
     final class Bool : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Bool|null[0]
         constructor <init>(kotlin/Boolean) // io.github.kotlinmania.serdecore.de/Unexpected.Bool.<init>|<init>(kotlin.Boolean){}[0]
@@ -1812,7 +1916,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/Boolean = ...): io.github.kotlinmania.serdecore.de/Unexpected.Bool // io.github.kotlinmania.serdecore.de/Unexpected.Bool.copy|copy(kotlin.Boolean){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Bool.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Bool.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Bool.toString|toString(){}[0]
     }
 
     final class Bytes : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Bytes|null[0]
@@ -1825,7 +1928,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/ByteArray = ...): io.github.kotlinmania.serdecore.de/Unexpected.Bytes // io.github.kotlinmania.serdecore.de/Unexpected.Bytes.copy|copy(kotlin.ByteArray){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Bytes.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Bytes.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Bytes.toString|toString(){}[0]
     }
 
     final class CharValue : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.CharValue|null[0]
@@ -1838,7 +1940,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/Char = ...): io.github.kotlinmania.serdecore.de/Unexpected.CharValue // io.github.kotlinmania.serdecore.de/Unexpected.CharValue.copy|copy(kotlin.Char){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.CharValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.CharValue.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.CharValue.toString|toString(){}[0]
     }
 
     final class FloatValue : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.FloatValue|null[0]
@@ -1851,7 +1952,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/Double = ...): io.github.kotlinmania.serdecore.de/Unexpected.FloatValue // io.github.kotlinmania.serdecore.de/Unexpected.FloatValue.copy|copy(kotlin.Double){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.FloatValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.FloatValue.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.FloatValue.toString|toString(){}[0]
     }
 
     final class Other : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Other|null[0]
@@ -1864,7 +1964,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/String = ...): io.github.kotlinmania.serdecore.de/Unexpected.Other // io.github.kotlinmania.serdecore.de/Unexpected.Other.copy|copy(kotlin.String){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Other.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Other.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Other.toString|toString(){}[0]
     }
 
     final class Signed : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Signed|null[0]
@@ -1877,7 +1976,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/Long = ...): io.github.kotlinmania.serdecore.de/Unexpected.Signed // io.github.kotlinmania.serdecore.de/Unexpected.Signed.copy|copy(kotlin.Long){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Signed.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Signed.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Signed.toString|toString(){}[0]
     }
 
     final class Str : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Str|null[0]
@@ -1890,7 +1988,6 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/String = ...): io.github.kotlinmania.serdecore.de/Unexpected.Str // io.github.kotlinmania.serdecore.de/Unexpected.Str.copy|copy(kotlin.String){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Str.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Str.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Str.toString|toString(){}[0]
     }
 
     final class Unsigned : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Unsigned|null[0]
@@ -1903,67 +2000,56 @@ sealed class io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlin
         final fun copy(kotlin/ULong = ...): io.github.kotlinmania.serdecore.de/Unexpected.Unsigned // io.github.kotlinmania.serdecore.de/Unexpected.Unsigned.copy|copy(kotlin.ULong){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Unsigned.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Unsigned.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Unsigned.toString|toString(){}[0]
     }
 
     final object Enum : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Enum|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Enum.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Enum.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Enum.toString|toString(){}[0]
     }
 
     final object Map : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Map|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Map.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Map.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Map.toString|toString(){}[0]
     }
 
     final object NewtypeStruct : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeStruct|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeStruct.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeStruct.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeStruct.toString|toString(){}[0]
     }
 
     final object NewtypeVariant : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeVariant|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeVariant.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeVariant.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.NewtypeVariant.toString|toString(){}[0]
     }
 
     final object Option : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Option|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Option.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Option.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Option.toString|toString(){}[0]
     }
 
     final object Seq : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.Seq|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.Seq.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.Seq.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.Seq.toString|toString(){}[0]
     }
 
     final object StructVariant : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.StructVariant|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.StructVariant.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.StructVariant.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.StructVariant.toString|toString(){}[0]
     }
 
     final object TupleVariant : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.TupleVariant|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.TupleVariant.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.TupleVariant.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.TupleVariant.toString|toString(){}[0]
     }
 
     final object UnitValue : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.UnitValue|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.UnitValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.UnitValue.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.UnitValue.toString|toString(){}[0]
     }
 
     final object UnitVariant : io.github.kotlinmania.serdecore.de/Unexpected { // io.github.kotlinmania.serdecore.de/Unexpected.UnitVariant|null[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // io.github.kotlinmania.serdecore.de/Unexpected.UnitVariant.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // io.github.kotlinmania.serdecore.de/Unexpected.UnitVariant.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.kotlinmania.serdecore.de/Unexpected.UnitVariant.toString|toString(){}[0]
     }
 }
 
@@ -1982,6 +2068,13 @@ sealed class org.rustlang.alloc.borrow/Utf8Cow { // org.rustlang.alloc.borrow/Ut
     final object Companion { // org.rustlang.alloc.borrow/Utf8Cow.Companion|null[0]
         final fun fromUtf8Lossy(org.rustlang.core.slice/SharedByteSlice): org.rustlang.alloc.borrow/Utf8Cow // org.rustlang.alloc.borrow/Utf8Cow.Companion.fromUtf8Lossy|fromUtf8Lossy(org.rustlang.core.slice.SharedByteSlice){}[0]
     }
+}
+
+final object io.github.kotlinmania.serde/SerdeDecoding { // io.github.kotlinmania.serde/SerdeDecoding|null[0]
+    final fun boolean(io.github.kotlinmania.serde/SerdeDecodeInput): io.github.kotlinmania.serde/SerdeBooleanOutcome // io.github.kotlinmania.serde/SerdeDecoding.boolean|boolean(io.github.kotlinmania.serde.SerdeDecodeInput){}[0]
+    final fun signed(io.github.kotlinmania.serde/SerdeDecodeInput): io.github.kotlinmania.serde/SerdeLongOutcome // io.github.kotlinmania.serde/SerdeDecoding.signed|signed(io.github.kotlinmania.serde.SerdeDecodeInput){}[0]
+    final fun text(io.github.kotlinmania.serde/SerdeDecodeInput): io.github.kotlinmania.serde/SerdeStringOutcome // io.github.kotlinmania.serde/SerdeDecoding.text|text(io.github.kotlinmania.serde.SerdeDecodeInput){}[0]
+    final fun unit(io.github.kotlinmania.serde/SerdeDecodeInput): io.github.kotlinmania.serde/SerdeUnitOutcome // io.github.kotlinmania.serde/SerdeDecoding.unit|unit(io.github.kotlinmania.serde.SerdeDecodeInput){}[0]
 }
 
 final object io.github.kotlinmania.serdecore.de/BooleanDeserialize : io.github.kotlinmania.serdecore.de/Deserialize<kotlin/Boolean> { // io.github.kotlinmania.serdecore.de/BooleanDeserialize|null[0]
@@ -2313,6 +2406,7 @@ final fun <#A: kotlin/Any?> io.github.kotlinmania.serdecore.priv.generated.sizeh
 final fun io.github.kotlinmania.serde/__requireSerdeNotSerdeCore() // io.github.kotlinmania.serde/__requireSerdeNotSerdeCore|__requireSerdeNotSerdeCore(){}[0]
 final fun io.github.kotlinmania.serdecore.priv.generated.sizehint/cautious(io.github.kotlinmania.serdecore.priv.generated.sizehint/__rtkOption<kotlin/ULong>, kotlin/ULong): kotlin/ULong // io.github.kotlinmania.serdecore.priv.generated.sizehint/cautious|cautious(io.github.kotlinmania.serdecore.priv.generated.sizehint.__rtkOption<kotlin.ULong>;kotlin.ULong){}[0]
 final fun io.github.kotlinmania.serdecore.priv.generated.string/from_utf8_lossy(org.rustlang.core.slice/SharedByteSlice): org.rustlang.alloc.borrow/Utf8Cow // io.github.kotlinmania.serdecore.priv.generated.string/from_utf8_lossy|from_utf8_lossy(org.rustlang.core.slice.SharedByteSlice){}[0]
+final fun io.github.kotlinmania.serdecore.priv/cautious(kotlin/ULong?, kotlin/ULong): kotlin/ULong // io.github.kotlinmania.serdecore.priv/cautious|cautious(kotlin.ULong?;kotlin.ULong){}[0]
 final fun io.github.kotlinmania.serdecore.priv/cautiousContentCapacity(kotlin/Int?): kotlin/Int // io.github.kotlinmania.serdecore.priv/cautiousContentCapacity|cautiousContentCapacity(kotlin.Int?){}[0]
 final fun io.github.kotlinmania.serdecore.priv/cautiousContentMapCapacity(kotlin/Int?): kotlin/Int // io.github.kotlinmania.serdecore.priv/cautiousContentMapCapacity|cautiousContentMapCapacity(kotlin.Int?){}[0]
 final fun io.github.kotlinmania.serdecore.priv/fromBounds(io.github.kotlinmania.serdecore.priv/IteratorWithSizeHint<*>): kotlin/ULong? // io.github.kotlinmania.serdecore.priv/fromBounds|fromBounds(io.github.kotlinmania.serdecore.priv.IteratorWithSizeHint<*>){}[0]
@@ -2320,6 +2414,7 @@ final fun io.github.kotlinmania.serdecore.priv/fromUtf8Lossy(kotlin/ByteArray): 
 final fun io.github.kotlinmania.serdecore.priv/fromUtf8LossyNoAlloc(kotlin/ByteArray): kotlin/String // io.github.kotlinmania.serdecore.priv/fromUtf8LossyNoAlloc|fromUtf8LossyNoAlloc(kotlin.ByteArray){}[0]
 final fun io.github.kotlinmania.serdecore.priv/newContentBuffer(kotlin/Int?): kotlin.collections/ArrayList<io.github.kotlinmania.serdecore.priv/Content> // io.github.kotlinmania.serdecore.priv/newContentBuffer|newContentBuffer(kotlin.Int?){}[0]
 final fun io.github.kotlinmania.serdecore.priv/newContentMapBuffer(kotlin/Int?): kotlin.collections/ArrayList<io.github.kotlinmania.serdecore.priv/ContentMapEntry> // io.github.kotlinmania.serdecore.priv/newContentMapBuffer|newContentMapBuffer(kotlin.Int?){}[0]
+final inline fun <#A: kotlin/Any?> (io.github.kotlinmania.serdecore.de/SeqElement<#A>).io.github.kotlinmania.serdecore.de/unwrapOrElse(kotlin/Function0<#A>): #A // io.github.kotlinmania.serdecore.de/unwrapOrElse|unwrapOrElse@io.github.kotlinmania.serdecore.de.SeqElement<0:0>(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> io.github.kotlinmania.serde/serdeCatching(kotlin/Function0<#A>): io.github.kotlinmania.serde/SerdeResult<#A> // io.github.kotlinmania.serde/serdeCatching|serdeCatching(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> io.github.kotlinmania.serde/serdeIfInteger128(kotlin/Function0<#A>): #A // io.github.kotlinmania.serde/serdeIfInteger128|serdeIfInteger128(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: reified kotlin/Any?> io.github.kotlinmania.serdecore.priv/cautious(kotlin/Int?): kotlin/Int // io.github.kotlinmania.serdecore.priv/cautious|cautious(kotlin.Int?){0§<kotlin.Any?>}[0]

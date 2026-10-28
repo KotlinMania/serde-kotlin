@@ -28,7 +28,7 @@ consumer of this file.
 
 ## Production proof
 
-`check.py` verifies the installed body against the raw hash, then links both
+`check.sh` verifies the installed body against the raw hash, then links both
 oracles to the complete newly built production serde-core Native KLIB. Its
 compiler inputs contain no separate generated Seed body. The seed oracle is the
 generator's unchanged 28-observation harness with only the canonical production
@@ -63,7 +63,7 @@ observations, and untested platforms remain outside the proof. Kotlin list growt
 retains the prerequisite's explicit non-layout-based policy.
 
 After production Native compilation, reproduce the focused comparison with:
-`python3 verification/seed-adoption-01/check.py --out tmp/seed-adoption-01/production-new`.
+`./verification/seed-adoption-01/check.sh --out build/seed-adoption-01/production-new`.
 
 Final production validation passed: **93 core tests + 21 root tests**, zero
 failures/errors/skips and no exclusions in these two Native Gradle tasks.

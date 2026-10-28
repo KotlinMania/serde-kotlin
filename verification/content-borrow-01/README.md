@@ -6,4 +6,4 @@ Native validation compiles the actual local serde crate and calls its ContentVis
 
 No public signatures, dependency/configuration, target, kernel, FFI or foreign edits were changed. This is a consumer repair, counted as zero new whole files and zero new adoptions. ByteArray mutation is technically possible in Kotlin; the immutable-owner obligation is explicit. The earlier non-Apple list-growth adapter is unchanged and remains an allocation portability adapter, not exact Rust allocation/ABI equivalence.
 
-Reproduce after compiling the production Native KLIB: `python3 verification/content-borrow-01/check.py --out tmp/content-borrow-01/oracle-new`.
+Reproduce after compiling the production Native KLIB: `./verification/content-borrow-01/check.sh --out build/content-borrow-01/oracle-new`.

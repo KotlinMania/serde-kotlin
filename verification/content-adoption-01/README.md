@@ -57,7 +57,7 @@ all-target validation. Pre-existing ABI dump edits were preserved untouched.
 
 ## Validation
 
-`check_native.py --out tmp/content-adoption-01/native-05 --content-regressions`
+`check_native.sh --out build/content-adoption-01/native-05 --content-regressions`
 compiles the complete current core and root production source sets with Kotlin
 Native 2.4.21 for `macos_arm64`, warnings as errors and offline compiler mode.
 It uses already-resolved Gradle-cache KLIB files recorded in the previous direct
