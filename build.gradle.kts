@@ -178,7 +178,79 @@ val intellijCoroutinesVersion =
 // Swift Export & Native Binary Configuration (gradle.properties)
 // ----------------------------------------------------------------------------
 // Drives `swiftExport {}`, `binaries.framework {}`, and `binaries.sharedLib {}`
-// from gradle.properties so one build.gradle.kts serves every project.
+// from gradle.properties so one byte-for-byte identical build.gradle.kts
+// serves every KotlinMania project.
+//
+// Kotlin 2.4.x (2.4.21) vs. Kotlin 2.5.0 (`Kotlin/swift-export-sample`) Findings:
+//
+// 1. DSL Entry Point & Integrations:
+//    - In KGP 2.4.21, Swift Export is configured via `kotlin { swiftExport {} }`
+//      (`org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.SwiftExportExtension`,
+//      which implements `SwiftExportedModuleMetadata`) and automatically registers
+//      `:embedSwiftExportForXcode` (plus `:generateSPMPackage` / `:buildSPMPackage`).
+//    - In KGP 2.5.0+, `swiftExport {}` is deprecated in favor of:
+//        kotlin {
+//            export {
+//                swift {
+//                    moduleName = "..."
+//                    rootPackage = "..."
+//                    xcodeIntegration { reconfigureDependencies() }
+//                    swiftPackageIntegration {
+//                        reconfigureDependencies()
+//                        outputDirectory = layout.projectDirectory.dir("SwiftPackage")
+//                    }
+//                }
+//            }
+//        }
+//      where `xcodeIntegration {}` registers `:embedSwiftExportForXcode` and
+//      `swiftPackageIntegration {}` registers `:exportDebugSwiftPackage` /
+//      `:exportReleaseSwiftPackage`.
+//
+// 2. Package Collapsing (`rootPackage` vs. `flattenPackage` vs. `"packageRoot"`):
+//    - Inside `swift-export-embeddable` (`SwiftModuleConfig.kt`), the internal
+//      constant is `SwiftModuleConfig.ROOT_PACKAGE = "packageRoot"` and the
+//      constructor parameter is `rootPackage: String?` (parsed into
+//      `targetPackageFqName: FqName?` via `rootPackageToFqn`).
+//    - In KGP 2.4.21, `SwiftExportedModuleMetadata` names this Gradle property
+//      `flattenPackage: Property<String>`, and `SwiftExportAction.kt` forwards it
+//      as `SwiftModuleConfig(rootPackage = flattenPackage, ...)`.
+//    - In KGP 2.5.0, the Gradle DSL property was renamed from `flattenPackage`
+//      to `rootPackage`.
+//    - We alias `SwiftExportedModuleMetadata.rootPackage` to `flattenPackage`
+//      below and read `project.swiftExport.rootPackage` (falling back to
+//      `project.swiftExport.flattenPackage`, then `project.namespace`) so both
+//      `build.gradle.kts` and `gradle.properties` use the 2.5.0 `rootPackage`
+//      terminology today.
+//
+// 3. Why `:macosArm64DebugSwiftExport` Logs `No name for 'packageRoot' and will be ignored`:
+//    - In KGP 2.4.21's `SetupSwiftExportDSL.kt` (`collectModules`), every klib on
+//      the Swift Export classpath is classified into one of two buckets:
+//      (a) Explicitly exported dependencies (`swiftExport { export(dep) { ... } }`)
+//          -> `createFullyExportedSwiftExportedModule(moduleName, flattenPackage, file)`
+//          (`shouldBeFullyExported = true`).
+//      (b) Remaining transitive/implementation dependencies
+//          -> `createTransitiveSwiftExportedModule(moduleName, file)` with
+//          `flattenPackage = null` and `shouldBeFullyExported = false` (exporting
+//          only declarations referenced by the root module's public signatures).
+//    - In `swift-export-embeddable` (`PatchConfigAndLogIssuesKt.patchConfigAndLogIssues`),
+//      the standalone exporter loops over all `KlibInputModule`s and logs
+//      `Warning: No name for 'packageRoot' and will be ignored` whenever
+//      `module.config.targetPackageFqName == null` (`flattenPackage == null`),
+//      even when `shouldBeFullyExported == false`.
+//    - Therefore, any `commonMain` dependency not listed in `project.swiftExport.exports`
+//      (including an unused placeholder bundle in `libs.versions.toml`) causes KGP
+//      to pass a transitive module with `flattenPackage = null` and emit that warning.
+//      Keeping `project.dependencies.commonMainBundle` empty on zero-dependency
+//      crates (like `libc-kotlin`) avoids registering phantom transitive modules.
+//
+// 4. Dependency Visibility (`EXPOSED` vs. `HIDDEN`):
+//    - KGP 2.5.0 introduces `SwiftExportVisibility.EXPOSED` (export whole dependency
+//      module) and `SwiftExportVisibility.HIDDEN` (suppress dependency module; types
+//      referenced in public signatures become empty Swift stubs).
+//    - Our `project.swiftExport.exports` (`<dep>|<ModuleName>|<rootPackage>[|<EXPOSED|HIDDEN>]`),
+//      `project.swiftExport.exportApiBundle`, and `project.swiftExport.hidden`
+//      properties capture these exact semantics in `gradle.properties` now so that
+//      migrating to KGP 2.5.0 requires updating only this block in `build.gradle.kts`.
 // ============================================================================
 val swiftExportModuleName = optionalTrimmedProperty("project.swiftExport.moduleName") ?: frameworkName
 val swiftExportRootPackage =
@@ -186,6 +258,7 @@ val swiftExportRootPackage =
         ?: optionalTrimmedProperty("project.swiftExport.flattenPackage")
         ?: projectNamespace
 
+// Alias 2.5.0's `rootPackage` property onto 2.4.21's `SwiftExportedModuleMetadata.flattenPackage`.
 val org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.SwiftExportedModuleMetadata.rootPackage: org.gradle.api.provider.Property<String>
     get() = flattenPackage
 val swiftExportEnableCoroutinesSupport =
@@ -644,6 +717,8 @@ kotlin {
     val frameworkBundleId = projectNamespace
 
     // Local helper: attach this target's framework to the XCFramework.
+    // Controlled by `project.apple.framework.static` (defaults to `false` so
+    // Apple targets emit dynamic `.framework` slices inside the `.xcframework`).
     fun KotlinNativeTarget.addToXcf(static: Boolean = appleFrameworkStatic) {
         binaries.framework {
             baseName = frameworkName
@@ -653,7 +728,9 @@ kotlin {
         }
     }
 
-    // Local helper: emit dynamic shared libraries (.dylib / .so / .dll) for native targets.
+    // Local helper: emit dynamic shared libraries (`.dylib` on macOS, `.so` on
+    // Linux/Android NDK, `.dll` on MinGW) alongside static klibs/frameworks.
+    // Controlled by `project.native.sharedLib` (defaults to `true`).
     fun KotlinNativeTarget.addSharedLib() {
         if (!nativeSharedLibEnabled) return
         binaries.sharedLib {
@@ -771,6 +848,14 @@ kotlin {
     }
 
     // Swift Export bridge — driven by `project.swiftExport.*` in gradle.properties.
+    //
+    // In KGP 2.4.21, `swiftExport {}` is backed by `SwiftExportExtension` and
+    // `rootPackage` is aliased to `SwiftExportedModuleMetadata.flattenPackage`
+    // (which `SwiftExportAction` forwards as `SwiftModuleConfig.rootPackage`).
+    // When upgrading to KGP 2.5.0+, replace `swiftExport { ... }` with
+    // `export { swift { ...; xcodeIntegration { ... }; swiftPackageIntegration { ... } } }`
+    // using the exact same `swiftExportModuleName`, `swiftExportRootPackage`, and
+    // `swiftExportModuleExports` values parsed above.
     swiftExport {
         moduleName = swiftExportModuleName
         rootPackage = swiftExportRootPackage
