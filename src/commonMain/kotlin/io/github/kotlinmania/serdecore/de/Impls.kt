@@ -1543,17 +1543,17 @@ private fun parseIpAddress(value: String): IpAddress =
         .getOrThrow()
 
 private fun parseSocketAddressV4(value: String): SocketAddressV4 {
-    val colon = value.lastIndexOf(':')
-    if (colon <= 0 || colon == value.lastIndex) throw SerdeException(SerdeError.custom("invalid IPv4 socket address"))
-    val port = parsePort(value.substring(colon + 1), "invalid IPv4 socket address")
+    val colon = value.indexOf(':')
+    if (colon <= 0 || colon == value.lastIndex) throw SerdeException(SerdeError.custom("invalid IPv4 socket address syntax"))
+    val port = parsePort(value.substring(colon + 1), "invalid IPv4 socket address syntax")
     return SocketAddressV4(parseIpv4(value.substring(0, colon)), port)
 }
 
 private fun parseSocketAddressV6(value: String): SocketAddressV6 {
-    if (!value.startsWith("[")) throw SerdeException(SerdeError.custom("invalid IPv6 socket address"))
+    if (!value.startsWith("[")) throw SerdeException(SerdeError.custom("invalid IPv6 socket address syntax"))
     val end = value.indexOf("]:")
-    if (end <= 1 || end + 2 >= value.length) throw SerdeException(SerdeError.custom("invalid IPv6 socket address"))
-    val port = parsePort(value.substring(end + 2), "invalid IPv6 socket address")
+    if (end <= 1 || end + 2 >= value.length) throw SerdeException(SerdeError.custom("invalid IPv6 socket address syntax"))
+    val port = parsePort(value.substring(end + 2), "invalid IPv6 socket address syntax")
     return SocketAddressV6(parseIpv6(value.substring(1, end)), port)
 }
 
@@ -1566,8 +1566,19 @@ private fun parsePort(
     value: String,
     message: String,
 ): UShort {
-    val port = value.toIntOrNull() ?: throw SerdeException(SerdeError.custom(message))
-    if (port !in 0..UShort.MAX_VALUE.toInt()) throw SerdeException(SerdeError.custom(message))
+    val first = value.firstOrNull()
+    if (first == null || first !in '0'..'9') throw SerdeException(SerdeError.custom(message))
+    var port = first - '0'
+    val maximum = UShort.MAX_VALUE.toInt()
+    for (index in 1 until value.length) {
+        val character = value[index]
+        if (character !in '0'..'9') throw SerdeException(SerdeError.custom(message))
+        val multiplied = port * 10
+        if (multiplied > maximum) throw SerdeException(SerdeError.custom(message))
+        val sum = multiplied + (character - '0')
+        if (sum > maximum) throw SerdeException(SerdeError.custom(message))
+        port = sum
+    }
     return port.toUShort()
 }
 
