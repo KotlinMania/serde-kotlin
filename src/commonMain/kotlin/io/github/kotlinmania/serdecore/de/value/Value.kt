@@ -1629,17 +1629,11 @@ class MapDeserializer<K, V> internal constructor(
         return seed.deserialize(value.intoDeserializer())
     }
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            val next = nextPair()
-            if (next == null) {
-                SeqElement.None
-            } else {
-                val (key, value) = next
-                val pairDeserializer = PairDeserializer(key, value)
-                SeqElement.Some(seed.deserialize(pairDeserializer).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        val next = nextPair() ?: return SerdeResult.success(SeqElement.None)
+        val (key, value) = next
+        return seed.deserialize(PairDeserializer(key, value)).map { SeqElement.Some(it) }
+    }
 
     override fun <K1, V1> nextEntrySeed(
         keySeed: DeserializeSeed<K1>,
@@ -1771,16 +1765,17 @@ class MapDeserializer<K, V> internal constructor(
         where K : IntoDeserializer, V : IntoDeserializer {
         override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> = deserializeSeq(visitor)
 
-        override fun <R> deserializeSeq(visitor: Visitor<R>): SerdeResult<R> =
-            serdeCatching {
-                val pairVisitor = PairVisitor(key, value)
-                val pair = visitor.visitSeq(pairVisitor).getOrThrow()
+        override fun <R> deserializeSeq(visitor: Visitor<R>): SerdeResult<R> {
+            val pairVisitor = PairVisitor(key, value)
+            return visitor.visitSeq(pairVisitor).flatMap { pair ->
                 if (pairVisitor.hasRemaining()) {
-                    val remaining = pairVisitor.sizeHint() ?: 0
-                    throw SerdeException(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
+                    val remaining = checkNotNull(pairVisitor.sizeHint())
+                    SerdeResult.failure(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
+                } else {
+                    SerdeResult.success(pair)
                 }
-                pair
             }
+        }
 
         override fun <R> deserializeTuple(
             len: Int,
@@ -1875,22 +1870,19 @@ class MapDeserializer<K, V> internal constructor(
         private var key: K? = key
         private var value: V? = value
 
-        override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-            serdeCatching {
-                val k = key
-                if (k != null) {
-                    key = null
-                    SeqElement.Some(seed.deserialize(k.intoDeserializer()).getOrThrow())
-                } else {
-                    val v = value
-                    if (v != null) {
-                        value = null
-                        SeqElement.Some(seed.deserialize(v.intoDeserializer()).getOrThrow())
-                    } else {
-                        SeqElement.None
-                    }
-                }
+        override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+            val k = key
+            if (k != null) {
+                key = null
+                return seed.deserialize(k.intoDeserializer()).map { SeqElement.Some(it) }
             }
+            val v = value
+            if (v != null) {
+                value = null
+                return seed.deserialize(v.intoDeserializer()).map { SeqElement.Some(it) }
+            }
+            return SerdeResult.success(SeqElement.None)
+        }
 
         fun hasRemaining(): Boolean = key != null || value != null
 
