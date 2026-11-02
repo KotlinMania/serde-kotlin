@@ -1601,7 +1601,7 @@ private data object IpAddressVisitor : Visitor<IpAddress> {
     override fun <A> visitEnum(access: A): SerdeResult<IpAddress>
         where A : EnumAccess =
         serdeCatching {
-            val seed = SeedFromDeserialize(fieldIdentifierDeserialize("`V4` or `V6`", listOf("V4", "V6")))
+            val seed = SeedFromDeserialize(variantIdentifierDeserialize("`V4` or `V6`", listOf("V4", "V6")))
             val (field, variant) = access.variantSeed(seed).getOrThrow()
             when (field) {
                 "V4" -> IpAddress.V4(variant.newtypeVariant(SeedFromDeserialize(Ipv4AddressDeserialize)).getOrThrow())
@@ -1651,7 +1651,7 @@ private data object SocketAddressVisitor : Visitor<SocketAddress> {
     override fun <A> visitEnum(access: A): SerdeResult<SocketAddress>
         where A : EnumAccess =
         serdeCatching {
-            val seed = SeedFromDeserialize(fieldIdentifierDeserialize("`V4` or `V6`", listOf("V4", "V6")))
+            val seed = SeedFromDeserialize(variantIdentifierDeserialize("`V4` or `V6`", listOf("V4", "V6")))
             val (field, variant) = access.variantSeed(seed).getOrThrow()
             when (field) {
                 "V4" -> SocketAddress.V4(variant.newtypeVariant(SeedFromDeserialize(SocketAddressV4Deserialize)).getOrThrow())
