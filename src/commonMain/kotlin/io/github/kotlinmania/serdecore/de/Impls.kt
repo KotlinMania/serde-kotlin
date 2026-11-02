@@ -804,18 +804,24 @@ fun <K, V> mutableMapDeserialize(
                     override fun expecting(): String = "a map"
 
                     override fun <A> visitMap(access: A): SerdeResult<MutableMap<K, V>>
-                        where A : MapAccess =
-                        serdeCatching {
-                            val hint = access.sizeHint() ?: 0
-                            val values = LinkedHashMap<K, V>(hint)
-                            val keySeed = SeedFromDeserialize(keyDeserialize)
-                            val valueSeed = SeedFromDeserialize(valueDeserialize)
-                            while (true) {
-                                val entry = access.nextEntrySeed(keySeed, valueSeed).getOrThrow() ?: break
-                                values[entry.first] = entry.second
+                        where A : MapAccess {
+                        val hint = access.sizeHint() ?: 0
+                        val values = LinkedHashMap<K, V>(hint)
+                        val keySeed = SeedFromDeserialize(keyDeserialize)
+                        val valueSeed = SeedFromDeserialize(valueDeserialize)
+                        while (true) {
+                            when (val result = access.nextEntrySeed(keySeed, valueSeed)) {
+                                is SerdeResult.Failure -> {
+                                    return result
+                                }
+
+                                is SerdeResult.Success -> {
+                                    val entry = result.value ?: return SerdeResult.success(values)
+                                    values[entry.first] = entry.second
+                                }
                             }
-                            values
                         }
+                    }
                 },
             )
     }
