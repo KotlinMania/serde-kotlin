@@ -1346,6 +1346,7 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
     SeqAccess,
     IntoDeserializer {
     private var count: Int = 0
+    private var exhausted: Boolean = false
 
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
         serdeCatching {
@@ -1356,8 +1357,17 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
 
     fun end(): SerdeResult<Unit> =
         serdeCatching {
-            val remaining = iter.asSequence().count()
+            var remaining = 0
+            if (!exhausted) {
+                while (iter.hasNext()) {
+                    iter.next()
+                    remaining += 1
+                }
+                exhausted = true
+            }
             if (remaining != 0) {
+                // First argument is the number of elements in the data, second
+                // argument is the number of elements expected by the Deserialize.
                 throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
             }
         }
@@ -1445,16 +1455,17 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
 
     override fun <R> nextElementSeed(seed: DeserializeSeed<R>): SerdeResult<SeqElement<R>> =
         serdeCatching {
-            val next = if (iter.hasNext()) iter.next() else null
-            if (next == null) {
+            if (exhausted || !iter.hasNext()) {
+                exhausted = true
                 SeqElement.None
             } else {
+                val next = iter.next()
                 count += 1
                 SeqElement.Some(seed.deserialize(next.intoDeserializer()).getOrThrow())
             }
         }
 
-    override fun sizeHint(): Int? = len?.let { (it - count).coerceAtLeast(0) }
+    override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
 
     override fun intoDeserializer(): Deserializer = this
 }
