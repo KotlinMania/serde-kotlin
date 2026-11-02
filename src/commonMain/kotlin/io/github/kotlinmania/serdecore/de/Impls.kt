@@ -1476,12 +1476,24 @@ sealed class SocketAddress : Serialize {
 
 private fun parseIpv4(value: String): Ipv4Address {
     val parts = value.split(".")
-    if (parts.size != 4) throw SerdeException(SerdeError.custom("invalid IPv4 address"))
+    if (parts.size != 4) throw SerdeException(SerdeError.custom("invalid IPv4 address syntax"))
     return Ipv4Address(
         parts.map { part ->
-            if (part.isEmpty()) throw SerdeException(SerdeError.custom("invalid IPv4 address"))
-            val n = part.toIntOrNull() ?: throw SerdeException(SerdeError.custom("invalid IPv4 address"))
-            if (n !in 0..255) throw SerdeException(SerdeError.custom("invalid IPv4 address"))
+            // Disallow octal number in IP string.
+            // https://tools.ietf.org/html/rfc6943#section-3.1.1
+            if (
+                part.isEmpty() ||
+                part.length > 3 ||
+                part.any { it !in '0'..'9' } ||
+                (part.length > 1 && part[0] == '0')
+            ) {
+                throw SerdeException(SerdeError.custom("invalid IPv4 address syntax"))
+            }
+            var n = 0
+            for (digit in part) {
+                n = n * 10 + (digit - '0')
+            }
+            if (n > 255) throw SerdeException(SerdeError.custom("invalid IPv4 address syntax"))
             n.toUByte()
         },
     )

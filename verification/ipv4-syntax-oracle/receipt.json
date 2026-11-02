@@ -1,0 +1,297 @@
+{
+  "baseline": "9ccc543",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "9ccc543",
+    "a34f78d",
+    "0ab54d7",
+    "9551a45",
+    "89aa3ca",
+    "0ba0d3f",
+    "a8f39bf",
+    "b94fab6",
+    "adfcae0",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "recordedAtUTC": "2026-11-02T23:46:28.286209+00:00",
+  "translatorReuse": {
+    "input": "tmp/serde/serde_core/src/de/impls.rs",
+    "sha256": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "matchesPriorSuccessfulTranslation": true,
+    "output": "build/rust-kotlin-string-in-place/ImplsReview.kt",
+    "outputSha256": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "macroSourceIndependentlyReviewed": [
+      "variant_identifier",
+      "deserialize_enum",
+      "IpAddr",
+      "SocketAddr"
+    ],
+    "newTranslatorProcessStarted": false,
+    "comparison": "Generated IPv4 deserialize lines 6111-6117 and FromStrVisitor lines 7105-7120 delegate to Rust FromStr. Actual installed Rust core net/parser.rs reviewed for bounded IPv4 decimal parsing; no generated std parser output claimed."
+  },
+  "installedRustStdlib": {
+    "path": "/opt/homebrew/Cellar/rust/1.99.0_1/lib/rustlib/src/rust/library/core/src/net/parser.rs",
+    "sha256": "e6f6b332a3cf5860c5e193f3496435ed0f1971e6ce0932df15ecd16688b61c3e",
+    "rustcVersion": "rustc 1.99.0 (b940084d7 2026-09-28) (Homebrew)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.2\n",
+    "reviewed": "read_char, read_radix_max_digits, read_ipv4_addr, Ipv4Addr FromStr"
+  },
+  "productionScope": "Only parseIpv4 private helper and its direct error string; canonical models, binary network path, IPv6, port parsers, previous visitors/containers/allocation unchanged.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "callerImpact": {
+    "direct": "Ipv4AddressDeserialize human-readable, parseIpAddress, parseSocketAddressV4",
+    "indirect": "generic socket parser uses SocketV4 parser",
+    "checked": "Generic IP and SocketV4 valid localhost and invalid host acceptance only",
+    "remaining": "Wrapper diagnostic normalization, IPv6/port behavior and broader downstream compatibility unverified"
+  },
+  "rustOracle": {
+    "testGroups": 9,
+    "passed": 9,
+    "failed": 0,
+    "validOctetPositionCombinations": 1024,
+    "command": "cargo test --offline --manifest-path verification/ipv4-syntax-oracle/Cargo.toml --target-dir build/rust-kotlin-ipv4-syntax/rust-target"
+  },
+  "red": {
+    "suite": {
+      "name": "Ipv4SyntaxParityTest[jvm]",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "8",
+      "errors": "0",
+      "timestamp": "2026-11-02T23:43:02.236Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.041"
+    },
+    "failures": [
+      {
+        "case": "rejectsSignedOctets[jvm]",
+        "message": "java.lang.AssertionError: +1.2.3.4 expected:<invalid IPv4 address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsNonAsciiDigits[jvm]",
+        "message": "java.lang.AssertionError: \u0661.2.3.4 expected:<invalid IPv4 address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsMalformedShapes[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<invalid IPv4 address[ syntax]> but was:<invalid IPv4 address[]>"
+      },
+      {
+        "case": "socketV4CallerRejectsInvalidHost[jvm]",
+        "message": "java.lang.AssertionError: +1.2.3.4:80"
+      },
+      {
+        "case": "genericIpCallerRejectsInvalidIpv4[jvm]",
+        "message": "java.lang.AssertionError: +1.2.3.4"
+      },
+      {
+        "case": "ownedStringsUseSameRules[jvm]",
+        "message": "java.lang.AssertionError: expected:<invalid IPv4 address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsMultiDigitZeroPrefixes[jvm]",
+        "message": "java.lang.AssertionError: 00.2.3.4 expected:<invalid IPv4 address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsOverflowAndWidth[jvm]",
+        "message": "org.junit.ComparisonFailure: 256.2.3.4 expected:<invalid IPv4 address[ syntax]> but was:<invalid IPv4 address[]>"
+      }
+    ]
+  },
+  "finalCommand": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 558,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "Ipv4SyntaxParityTest[jvm]",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:44:16.316Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.045"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:44:16.558Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:44:16.541Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:44:16.528Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:44:16.532Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 326,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.Ipv4SyntaxParityTest",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:46:12.511Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:46:12.520Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:46:12.513Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:46:12.508Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:46:12.510Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "limits": [
+    "Separate IP/socket diagnostic normalization remains",
+    "IPv6, dotted IPv4 tails and ports not repaired",
+    "Generic allocation/hashing/ownership/platform limitations unchanged",
+    "Nullable-key, other exception and generic/usize binding limits remain",
+    "Broader downstream integration untested",
+    "No security or full-networking-parity claim"
+  ],
+  "hashes": {
+    "/opt/homebrew/Cellar/rust/1.99.0_1/lib/rustlib/src/rust/library/core/src/net/parser.rs": "e6f6b332a3cf5860c5e193f3496435ed0f1971e6ce0932df15ecd16688b61c3e",
+    "build/rust-kotlin-ipv4-syntax/attribution.log": "c4730e3d894a0c6bd00a4b713b3eb1887ec0f1ce52e648395f9d774bd18ffbfa",
+    "build/rust-kotlin-ipv4-syntax/caller-impact.txt": "8ccc6521ac553bec150dbd3b82f3c04391c921360ed016edb1aeddf8dd543a8f",
+    "build/rust-kotlin-ipv4-syntax/final-check.log": "2cb156571ba1b79b5b3daf365fd439c3bed1b3cab661c1220bda9b400a69b1c4",
+    "build/rust-kotlin-ipv4-syntax/final-source-sha256.txt": "cf7686b39afa603bf4955a83929b15721955ad401aa7fe029facdb78bdcc7864",
+    "build/rust-kotlin-ipv4-syntax/final-validation.json": "cb16d65273d75b174c44ea2a864b8ecd84fe42c9776ac7caf58ca1a940b97d6a",
+    "build/rust-kotlin-ipv4-syntax/new-test-before-fix.sha256": "c2e896b4e2338a838429e3a8ee3ac25faf6ca5344a8bee0075a11f97af1b19ee",
+    "build/rust-kotlin-ipv4-syntax/production-change.json": "fdf6e8e28297d7524d5a0487d295a84db25bd276b7143a3fbb200795839197e7",
+    "build/rust-kotlin-ipv4-syntax/red-jvm.log": "175447fba6098681dcb0aeda58aeee463e96767d518124478a4316875274efaf",
+    "build/rust-kotlin-ipv4-syntax/red-suite.xml": "7ac8c0b626a77d72a66d127b9bfdd24207b5acec99f24e2ba38ca869b7233398",
+    "build/rust-kotlin-ipv4-syntax/red-validation.json": "4500bdaab338095fc259e8716f5fe1edfaf502df4301bedac269a97bd0a46e53",
+    "build/rust-kotlin-ipv4-syntax/rust-oracle.log": "26fc45fa316a64b3a1da9b99827b50a2766611f659bfadbbe1a6a0b13e5ff0cd",
+    "build/rust-kotlin-ipv4-syntax/stdlib-source.json": "140468d4fac6ff757581eefc24f783a1a4bd60c5c6ef787b529fd30183ed6361",
+    "build/rust-kotlin-ipv4-syntax/translator-reuse.json": "e72b8ca5f08ab2d0d06185e635181dc89e0246fa34c20bc3c0eeec48369226d9",
+    "build/rust-kotlin-ipv4-syntax/verify_final.py": "5314b55a6ffba396fdede2f0abc1f6b72bdd439c73e6f27826cc821ad6cf8173",
+    "build/rust-kotlin-ipv4-syntax/write_receipt.py": "a88e5eeb0c4c663a11e5c3afb1174a6dac3109e905a6d8e63786ba95da37766c",
+    "build/rust-kotlin-string-in-place/ImplsReview.kt": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.value.Ipv4SyntaxParityTest.xml": "6d59963a926f122f25e9b01452ecacbb9250edb14c9b578bd59bd1bc4c09c594",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.value.Ipv4SyntaxParityTest.xml": "c5b34a7ea2d75ae7078c0de1fdcb1ab6bb284cc2527c4fce97933e458720a08c",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Impls.kt": "54def6b4fb82e0259275b2972ebd5e9656aaba618262e0050ac4175b76b1508d",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MapAccess.kt": "5b5e89218c6eca66cad31beedd5d6cc9f4b98bcff9c44c9175b93ac88144fbfc",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/value/Value.kt": "e396b6da2ff81de009d41ded842f1d5e6773ffdc9068510cbb01aafb11222378",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/NetworkVariantParityTest.kt": "d275d3f60d37f0c51df34e5ecd648dee75e14873f998355578e20a40bb7660f5",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/Ipv4SyntaxParityTest.kt": "0ab4e70c7e2c35319968d8d27b5826c09aa2a8bb5117ae5ec2d7ee37fd1fa266",
+    "tmp/serde/serde_core/src/de/impls.rs": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "verification/inplace-panic-characterization/receipt.json": "22c38b06c2ba559cf87149d05e646c834ab991a2f25c66d5f0290ad528161b57",
+    "verification/ipv4-syntax-oracle/Cargo.lock": "4b477e790cab1ff777198355fa5cbc021ca1ee3fbb1ab44e137a35c2bbd57940",
+    "verification/ipv4-syntax-oracle/Cargo.toml": "42ca3e94bb8d3cdd43193d3bc5b66b620ebad6cf237ac17cc4f7afdfafad2e2c",
+    "verification/ipv4-syntax-oracle/README.md": "5b6981b909d63c4d251186faf16148410ecaf8d7b823a9a1dbb21e0966c009e9",
+    "verification/ipv4-syntax-oracle/src/lib.rs": "ef78f7f72ba2d8fe0ad1af250f12b314977dc37556b50eb5654c7702625e298e",
+    "verification/map-decode-boundary-oracle/receipt.json": "e98a9b2e52a21bf93330d76e905e42fa7c9fad5a1ca57707a1f53ba0b20ee185",
+    "verification/result-visitor-boundary-oracle/receipt.json": "295b837457f267ed0ec7e11a2d55f518641159a2b03392e1ba068dbe5a48dd26",
+    "verification/set-decode-boundary-oracle/receipt.json": "3181d0b0c798d698bb530d4934f5fdd234ff7dc055ac4c4d7dd8ac5e266922fd",
+    "verification/visitor-end-boundary-oracle/receipt.json": "3a855c1b6ee7c1d4369b4a56d6563202b737ed72f7fff8fbde1a339b1b70af9c"
+  }
+}
