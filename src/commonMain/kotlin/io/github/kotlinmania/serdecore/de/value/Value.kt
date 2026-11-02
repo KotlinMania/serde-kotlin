@@ -1613,17 +1613,12 @@ class MapDeserializer<K, V> internal constructor(
         return split(next)
     }
 
-    override fun <T> nextKeySeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
-        serdeCatching {
-            val next = nextPair()
-            if (next == null) {
-                null
-            } else {
-                val (key, value) = next
-                pendingValue = value
-                seed.deserialize(key.intoDeserializer()).getOrThrow()
-            }
-        }
+    override fun <T> nextKeySeed(seed: DeserializeSeed<T>): SerdeResult<T?> {
+        val next = nextPair() ?: return SerdeResult.success(null)
+        val (key, value) = next
+        pendingValue = value
+        return seed.deserialize(key.intoDeserializer())
+    }
 
     override fun <T> nextValueSeed(seed: DeserializeSeed<T>): SerdeResult<T> {
         val value = pendingValue
@@ -1649,18 +1644,13 @@ class MapDeserializer<K, V> internal constructor(
     override fun <K1, V1> nextEntrySeed(
         keySeed: DeserializeSeed<K1>,
         valueSeed: DeserializeSeed<V1>,
-    ): SerdeResult<Pair<K1, V1>?> =
-        serdeCatching {
-            val next = nextPair()
-            if (next == null) {
-                null
-            } else {
-                val (rawKey, rawValue) = next
-                val key = keySeed.deserialize(rawKey.intoDeserializer()).getOrThrow()
-                val value = valueSeed.deserialize(rawValue.intoDeserializer()).getOrThrow()
-                key to value
-            }
+    ): SerdeResult<Pair<K1, V1>?> {
+        val next = nextPair() ?: return SerdeResult.success(null)
+        val (rawKey, rawValue) = next
+        return keySeed.deserialize(rawKey.intoDeserializer()).flatMap { key ->
+            valueSeed.deserialize(rawValue.intoDeserializer()).map { value -> key to value }
         }
+    }
 
     override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
 
