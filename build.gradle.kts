@@ -1305,7 +1305,13 @@ kotlin {
             implementation(kotlin("test"))
             commonTestDependencyBundle?.let { bundle ->
                 bundle.get().forEach { dep ->
-                    implementation(dep) {
+                    val coordinate =
+                        listOfNotNull(
+                            dep.module.group,
+                            dep.module.name,
+                            dep.versionConstraint.requiredVersion.takeIf { it.isNotEmpty() },
+                        ).joinToString(":")
+                    implementation(coordinate) {
                         exclude(group = project.group.toString(), module = publishProjectName)
                     }
                 }
