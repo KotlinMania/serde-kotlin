@@ -1366,9 +1366,9 @@ private class ResultVisitor<T, E>(
         serdeCatching {
             val fieldSeed =
                 SeedFromDeserialize(
-                    fieldIdentifierDeserialize(
+                    variantIdentifierDeserialize(
                         expectingMessage = "`Ok` or `Err`",
-                        fields = listOf("Ok", "Err"),
+                        variants = listOf("Ok", "Err"),
                     ),
                 )
             val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
@@ -1798,9 +1798,9 @@ private class BoundVisitor<T>(
         serdeCatching {
             val fieldSeed =
                 SeedFromDeserialize(
-                    fieldIdentifierDeserialize(
+                    variantIdentifierDeserialize(
                         expectingMessage = "`Unbounded`, `Included` or `Excluded`",
-                        fields = listOf("Unbounded", "Included", "Excluded"),
+                        variants = listOf("Unbounded", "Included", "Excluded"),
                     ),
                 )
             val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
@@ -1817,6 +1817,42 @@ private class BoundVisitor<T>(
 }
 
 // //////////////////////////////////////////////////////////////////////////////
+
+private fun variantIdentifierDeserialize(
+    expectingMessage: String,
+    variants: List<String>,
+): Deserialize<String> =
+    object : Deserialize<String> {
+        override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<String> =
+            deserializer.deserializeIdentifier(
+                object : Visitor<String> {
+                    override fun expecting(): String = expectingMessage
+
+                    override fun visitU64(v: ULong): SerdeResult<String> =
+                        if (v < variants.size.toULong()) {
+                            SerdeResult.success(variants[v.toInt()])
+                        } else {
+                            SerdeResult.failure(SerdeError.invalidValue(Unexpected.Unsigned(v), this))
+                        }
+
+                    override fun visitStr(v: String): SerdeResult<String> =
+                        if (v in variants) SerdeResult.success(v) else SerdeResult.failure(SerdeError.unknownVariant(v, variants))
+
+                    override fun visitBytes(v: ByteArray): SerdeResult<String> {
+                        for (variant in variants) {
+                            if (v.contentEquals(variant.encodeToByteArray())) return SerdeResult.success(variant)
+                        }
+                        val name =
+                            try {
+                                v.decodeToString(throwOnInvalidSequence = true)
+                            } catch (_: CharacterCodingException) {
+                                return SerdeResult.failure(SerdeError.invalidValue(Unexpected.Bytes(v), this))
+                            }
+                        return SerdeResult.failure(SerdeError.unknownVariant(name, variants))
+                    }
+                },
+            )
+    }
 
 private fun fieldIdentifierDeserialize(
     expectingMessage: String,
