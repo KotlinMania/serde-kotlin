@@ -1603,13 +1603,16 @@ class MapDeserializer<K, V> internal constructor(
     where K : IntoDeserializer, V : IntoDeserializer {
     private var pendingValue: V? = null
     private var count: Int = 0
+    private var exhausted: Boolean = false
 
     private fun nextPair(): Pair<K, V>? {
-        val next = if (iter.hasNext()) iter.next() else null
-        if (next != null) {
-            count += 1
+        if (exhausted || !iter.hasNext()) {
+            exhausted = true
+            return null
         }
-        return next?.let(::split)
+        val next = iter.next()
+        count += 1
+        return split(next)
     }
 
     override fun <T> nextKeySeed(seed: DeserializeSeed<T>): SerdeResult<T?> =
@@ -1660,7 +1663,7 @@ class MapDeserializer<K, V> internal constructor(
             }
         }
 
-    override fun sizeHint(): Int? = len?.let { (it - count).coerceAtLeast(0) }
+    override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
 
     override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> =
         serdeCatching {
@@ -1683,8 +1686,17 @@ class MapDeserializer<K, V> internal constructor(
 
     fun end(): SerdeResult<Unit> =
         serdeCatching {
-            val remaining = iter.asSequence().count()
+            var remaining = 0
+            if (!exhausted) {
+                while (iter.hasNext()) {
+                    iter.next()
+                    remaining += 1
+                }
+                exhausted = true
+            }
             if (remaining != 0) {
+                // First argument is the number of elements in the data, second
+                // argument is the number of elements expected by the Deserialize.
                 throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
             }
         }
