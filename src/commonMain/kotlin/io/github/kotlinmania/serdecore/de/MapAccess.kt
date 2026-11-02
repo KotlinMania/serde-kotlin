@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * Provides a `Visitor` access to each entry of a map in the input.
@@ -42,12 +41,11 @@ interface MapAccess {
         keySeed: DeserializeSeed<K>,
         valueSeed: DeserializeSeed<V>,
     ): SerdeResult<Pair<K, V>?> =
-        serdeCatching {
-            val key = nextKeySeed(keySeed).getOrThrow()
+        nextKeySeed(keySeed).flatMap { key ->
             if (key == null) {
-                null
+                SerdeResult.success(null)
             } else {
-                key to nextValueSeed(valueSeed).getOrThrow()
+                nextValueSeed(valueSeed).map { value -> key to value }
             }
         }
 
