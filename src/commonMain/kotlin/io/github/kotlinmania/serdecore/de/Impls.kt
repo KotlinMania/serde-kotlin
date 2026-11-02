@@ -1368,22 +1368,30 @@ private class ResultVisitor<T, E>(
     override fun expecting(): String = "enum Result"
 
     override fun <A> visitEnum(access: A): SerdeResult<ResultValue<T, E>>
-        where A : EnumAccess =
-        serdeCatching {
-            val fieldSeed =
-                SeedFromDeserialize(
-                    variantIdentifierDeserialize(
-                        expectingMessage = "`Ok` or `Err`",
-                        variants = listOf("Ok", "Err"),
-                    ),
-                )
-            val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
+        where A : EnumAccess {
+        val fieldSeed =
+            SeedFromDeserialize(
+                variantIdentifierDeserialize(
+                    expectingMessage = "`Ok` or `Err`",
+                    variants = listOf("Ok", "Err"),
+                ),
+            )
+        return access.variantSeed(fieldSeed).flatMap { (field, variant) ->
             when (field) {
-                "Ok" -> ResultValue.Ok(variant.newtypeVariant(SeedFromDeserialize(okDeserialize)).getOrThrow())
-                "Err" -> ResultValue.Err(variant.newtypeVariant(SeedFromDeserialize(errDeserialize)).getOrThrow())
-                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Ok", "Err")))
+                "Ok" -> {
+                    variant.newtypeVariant(SeedFromDeserialize(okDeserialize)).map { ResultValue.Ok(it) }
+                }
+
+                "Err" -> {
+                    variant.newtypeVariant(SeedFromDeserialize(errDeserialize)).map { ResultValue.Err(it) }
+                }
+
+                else -> {
+                    SerdeResult.failure(SerdeError.unknownVariant(field, listOf("Ok", "Err")))
+                }
             }
         }
+    }
 }
 
 // //////////////////////////////////////////////////////////////////////////////
