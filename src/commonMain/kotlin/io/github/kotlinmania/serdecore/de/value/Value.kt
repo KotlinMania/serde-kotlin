@@ -1349,28 +1349,25 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
     private var exhausted: Boolean = false
 
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val v = visitor.visitSeq(this).getOrThrow()
-            end().getOrThrow()
-            v
-        }
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
 
-    fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            var remaining = 0
-            if (!exhausted) {
-                while (iter.hasNext()) {
-                    iter.next()
-                    remaining += 1
-                }
-                exhausted = true
+    fun end(): SerdeResult<Unit> {
+        var remaining = 0
+        if (!exhausted) {
+            while (iter.hasNext()) {
+                iter.next()
+                remaining += 1
             }
-            if (remaining != 0) {
-                // First argument is the number of elements in the data, second
-                // argument is the number of elements expected by the Deserialize.
-                throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
-            }
+            exhausted = true
         }
+        return if (remaining != 0) {
+            // First argument is the number of elements in the data, second
+            // argument is the number of elements expected by the Deserialize.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
+        } else {
+            SerdeResult.success(Unit)
+        }
+    }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
@@ -1649,40 +1646,33 @@ class MapDeserializer<K, V> internal constructor(
     override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
 
     override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> =
-        serdeCatching {
-            val value = visitor.visitMap(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitMap(this).flatMap { value -> end().map { value } }
 
     override fun <R> deserializeSeq(visitor: Visitor<R>): SerdeResult<R> =
-        serdeCatching {
-            val value = visitor.visitSeq(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
 
     override fun <R> deserializeTuple(
         len: Int,
         visitor: Visitor<R>,
     ): SerdeResult<R> = deserializeSeq(visitor)
 
-    fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            var remaining = 0
-            if (!exhausted) {
-                while (iter.hasNext()) {
-                    iter.next()
-                    remaining += 1
-                }
-                exhausted = true
+    fun end(): SerdeResult<Unit> {
+        var remaining = 0
+        if (!exhausted) {
+            while (iter.hasNext()) {
+                iter.next()
+                remaining += 1
             }
-            if (remaining != 0) {
-                // First argument is the number of elements in the data, second
-                // argument is the number of elements expected by the Deserialize.
-                throw SerdeException(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
-            }
+            exhausted = true
         }
+        return if (remaining != 0) {
+            // First argument is the number of elements in the data, second
+            // argument is the number of elements expected by the Deserialize.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
+        } else {
+            SerdeResult.success(Unit)
+        }
+    }
 
     override fun <R> deserializeBool(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
 
