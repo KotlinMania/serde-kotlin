@@ -1,0 +1,8 @@
+[package]
+name = "serde-string-in-place-byte-parity-oracle"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde_core = { path = "../../tmp/serde/serde_core" }

@@ -11,6 +11,7 @@ import io.github.kotlinmania.serdecore.priv.fromUtf8LossyNoAlloc
 import io.github.kotlinmania.serdecore.ser.Serialize
 import io.github.kotlinmania.serdecore.ser.Serializer
 import io.github.kotlinmania.serdecore.ser.serializeNetwork
+import kotlin.text.CharacterCodingException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
@@ -530,12 +531,16 @@ private class StringInPlaceVisitor(
         return SerdeResult.success(Unit)
     }
 
-    override fun visitBytes(v: ByteArray): SerdeResult<Unit> =
-        serdeCatching {
-            place(v.decodeToString(throwOnInvalidSequence = true))
-        }.recoverCatching {
-            throw SerdeException(SerdeError.invalidValue(Unexpected.Bytes(v), this))
-        }
+    override fun visitBytes(v: ByteArray): SerdeResult<Unit> {
+        val decoded =
+            try {
+                v.decodeToString(throwOnInvalidSequence = true)
+            } catch (_: CharacterCodingException) {
+                return SerdeResult.failure(SerdeError.invalidValue(Unexpected.Bytes(v), this))
+            }
+        place(decoded)
+        return SerdeResult.success(Unit)
+    }
 
     override fun visitByteBuf(v: ByteArray): SerdeResult<Unit> = visitBytes(v)
 }
