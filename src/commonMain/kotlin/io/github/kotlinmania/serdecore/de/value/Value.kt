@@ -1627,13 +1627,14 @@ class MapDeserializer<K, V> internal constructor(
             }
         }
 
-    override fun <T> nextValueSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
-        serdeCatching {
-            val value = pendingValue
-            pendingValue = null
-            require(value != null) { "MapAccess.nextValue called before nextKey" }
-            seed.deserialize(value.intoDeserializer()).getOrThrow()
-        }
+    override fun <T> nextValueSeed(seed: DeserializeSeed<T>): SerdeResult<T> {
+        val value = pendingValue
+        pendingValue = null
+        // Panic because this indicates a bug in the program rather than an
+        // expected failure.
+        check(value != null) { "MapAccess::next_value called before next_key" }
+        return seed.deserialize(value.intoDeserializer())
+    }
 
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {

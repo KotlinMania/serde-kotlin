@@ -1,0 +1,348 @@
+{
+  "baseline": "3b93c15",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "26fb96e",
+    "7c6c87a",
+    "c276793",
+    "edbf297",
+    "090453b",
+    "7af36b9",
+    "3b93c15"
+  ],
+  "translatorReuse": {
+    "originalInput": "tmp/serde/serde_core/src/de/value.rs",
+    "sourceSha256": "fb6fef6d23d95d516c6e1d6b5cefd8b98ba3881214a82a8a7e0a8ffbb0a12083",
+    "existingGeneratedOutput": "build/rust-kotlin-seq-fuse/ValueReview.kt",
+    "generatedOutputSha256": "5e6f39dffc260f1009382a8ecab19adc141f962788bf297a92c7d9bac092d63b",
+    "priorSuccessfulOutputReused": true,
+    "newTranslatorProcessStarted": false,
+    "boundary": "clear pending value; expect before seed invocation; return seed result directly"
+  },
+  "red": {
+    "suite": {
+      "name": "MapValueBoundaryParityTest[jvm]",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "5",
+      "errors": "0",
+      "timestamp": "2026-11-02T21:56:29.453Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.036"
+    },
+    "failures": [
+      {
+        "case": "secondValueIsProgrammingPanic[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(MapAccess.nextValue called before nextKey)>."
+      },
+      {
+        "case": "seedPanicPropagatesAndConsumesValue[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(seed panic)>."
+      },
+      {
+        "case": "conversionPanicPropagatesAndConsumesValue[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(value conversion panic)>."
+      },
+      {
+        "case": "entryAccessDoesNotPopulateValueSlot[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(MapAccess.nextValue called before nextKey)>."
+      },
+      {
+        "case": "valueBeforeKeyIsProgrammingPanic[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(MapAccess.nextValue called before nextKey)>."
+      }
+    ]
+  },
+  "final": {
+    "jvmTest": {
+      "tests": 455,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "MapValueBoundaryParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:57:38.199Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.031"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:57:38.420Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:57:38.418Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:57:38.411Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:57:38.416Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 223,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapValueBoundaryParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:59:30.666Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:59:30.666Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:59:30.665Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:59:30.662Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T21:59:30.664Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2591,
+    "ktlintCommonTestSourceSetCheck": 242,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "rust": {
+    "tests": 8,
+    "failures": 0,
+    "exit": 0,
+    "initialAndAlignedInputsPass": true,
+    "fixtureAdjustment": "Only no-key iterator input changed from empty to one entry to match Kotlin; exact rustfmt-normalized comparison proves all other source/assertions unchanged."
+  },
+  "commands": {
+    "red": "./gradlew jvmTest --tests '*MapValueBoundaryParityTest*' --console=plain",
+    "final": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+    "rust": "cargo test --offline --manifest-path verification/map-value-boundary-oracle/Cargo.toml --target-dir build/rust-kotlin-map-value-boundary/rust-target"
+  },
+  "exitCodes": {
+    "red": 1,
+    "final": 1,
+    "rust": 0
+  },
+  "integrity": {
+    "productionChange": "One exact nextValueSeed method boundary; public signature unchanged; pending slot cleared before check/conversion/seed",
+    "newSuite": "byte-identical since red",
+    "existingSourcesAndTestsUnchanged": [
+      "src/commonMain/kotlin/io/github/kotlinmania/serde/SerdeResult.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/MapDeserializerFuseParityTest.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/SeqDeserializerFuseParityTest.kt",
+      "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/NetworkVariantParityTest.kt"
+    ]
+  },
+  "selectNextSomeReadOnlyAudit": {
+    "commit": "ceba470",
+    "receiptSha256": "37180354164a31033e7d259d0bc6c29eca339d9b63b223125e9af056ec46ef40",
+    "recordedHashesVerified": 24,
+    "mismatches": [],
+    "callerReview": {
+      "search": {
+        "command": [
+          "rg",
+          "--no-ignore",
+          "--hidden",
+          "-n",
+          "-g",
+          "*.kt",
+          "-g",
+          "*.java",
+          "-g",
+          "*.swift",
+          "-g",
+          "!**/tmp/**",
+          "-g",
+          "!**/build/**",
+          "-g",
+          "!**/.build/**",
+          "-g",
+          "!**/.git/**",
+          "-g",
+          "!**/.gradle/**",
+          "-g",
+          "!**/.kotlin/**",
+          "-g",
+          "!**/node_modules/**",
+          "-g",
+          "!**/.venv/**",
+          "\\b(selectNextSome|SelectNextSome|StreamSelectNextSomeKt)\\b|import[^\\n]*io\\.github\\.kotlinmania\\.futures\\.\\*",
+          "<all workspace *-kotlin repositories>"
+        ],
+        "exit": 0,
+        "stderr": "",
+        "scope": "Kotlin/Java/Swift, including ignored/hidden sources outside excluded upstream/build/dependency caches; bare constructor/method names include aliases and fully qualified references; root wildcard imports"
+      },
+      "existingCallSites": 5,
+      "file": "src/commonTest/kotlin/io/github/kotlinmania/futures/StreamSelectNextSomeTest.kt",
+      "lines": [
+        16,
+        23,
+        38,
+        46,
+        71
+      ],
+      "type": "FuturesUnordered<Int> implements canonical FusedStream<T>",
+      "adaptations": 0,
+      "existingAssertions": "byte-identical",
+      "externalAffectedOwnersFound": false
+    },
+    "apiImpact": "Constructor/internal factory require FusedStream; extension receiver narrowed from Stream to FusedStream. Current javap descriptors confirm FusedStream. Consumers require rebuild/possible declared-type adaptation; downstream compatibility unverified.",
+    "futuresWorkingTree": ""
+  },
+  "limits": [
+    "Direct nextValueSeed boundary only; surrounding serdeCatching may still convert exceptions",
+    "Kotlin typed-error object identity is a binding control, not a Rust identity claim",
+    "Nullable decoded-key/entry presence, size-hint/usize, error generality and move/borrow/Drop limitations remain",
+    "Prior Futures FusedStream/shared-helper/Into/From/clone/platform limits retained",
+    "No downstream/Swift/other-platform/publication or whole-library panic-parity claim"
+  ],
+  "hashes": {
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/value/Value.kt": "cc9a317f59ebd6e0b3faffb72d16cbe755bfea8fb26a5e27ca8d4e9bc666ad97",
+    "src/commonMain/kotlin/io/github/kotlinmania/serde/SerdeResult.kt": "e155012e9ebd2c2fcb9baafa8012826b7f817aef54e07eead657e77e58cde654",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/MapValueBoundaryParityTest.kt": "1c2b684a77cb7c54fc619f48df22172fd386c04d88a09dcf542c9b1030d1a5be",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/MapDeserializerFuseParityTest.kt": "74951cc0dd77705632cc713713118ad784bf2e4aae09f7ce7d78d4a71c8f804a",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/SeqDeserializerFuseParityTest.kt": "42cdd49f814eafcbbf761ba04afc112d56e12814b10b239aff8c04cf4b11c121",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/NetworkVariantParityTest.kt": "d275d3f60d37f0c51df34e5ecd648dee75e14873f998355578e20a40bb7660f5",
+    "tmp/serde/serde_core/src/de/value.rs": "fb6fef6d23d95d516c6e1d6b5cefd8b98ba3881214a82a8a7e0a8ffbb0a12083",
+    "verification/map-value-boundary-oracle/src/lib.rs": "04bfe32a7612ed346bc89a1cf561aca7298dfaa85f4ac05b48f22fac70024a46",
+    "verification/map-value-boundary-oracle/Cargo.toml": "d136d4cd1e1f5fd914a110605f62e2a912aed72503a50f3cae88043dd124d005",
+    "verification/map-value-boundary-oracle/Cargo.lock": "6d4b5ca5f0c53c59d831c000f3b2f15b24cfccfdb4204d6acd454035c5da002f",
+    "build/rust-kotlin-seq-fuse/ValueReview.kt": "5e6f39dffc260f1009382a8ecab19adc141f962788bf297a92c7d9bac092d63b",
+    "build/rust-kotlin-map-value-boundary/translator-reuse.json": "1b24d51791b986e7e1feaa815c931a7942f994b3c0655079f084e1766b028975",
+    "build/rust-kotlin-map-value-boundary/red-jvm.log": "e2adeba04896fdb40350287a18e044c24791be528f60930a60921e7960b0d819",
+    "build/rust-kotlin-map-value-boundary/red-test-sha256.txt": "62058bd14a65b7f5b3332b27a43c7ae5034e400a57a8fdc88c1eecd1d0746802",
+    "build/rust-kotlin-map-value-boundary/initial-rust-fixture.rs.txt": "567d66d756842f05ff6cb08bbfa5f87b4c1bda01093543b93d0e3a618a537ad5",
+    "build/rust-kotlin-map-value-boundary/initial-rust-oracle.log": "97465a707dbccc6a4ab560592f2dea159a9b2a0a6e0b0fe3647563770535000b",
+    "build/rust-kotlin-map-value-boundary/rust-oracle.log": "1876d663cc71b8c57fb6ae727902aba46e81bb3eb69170f711c83d881d19c9c3",
+    "build/rust-kotlin-map-value-boundary/final-check.log": "363043b45bf49f47b07f6174c4b46ff00775c2b841b93289af4e33aa66885fac",
+    "build/rust-kotlin-map-value-boundary/verify_final.py": "ce81ab7a948c012c47921b1461b858c89d3a357968573bbf92008ba70842adf6"
+  },
+  "newSuites": {
+    "jvmTest": {
+      "attributes": {
+        "name": "MapValueBoundaryParityTest[jvm]",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:57:38.199Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.031"
+      },
+      "sha256": "837cd8365e41f489a06eb57fc54579c18888846bbf9b28f9c18e6f540d5d2d2d"
+    },
+    "macosArm64Test": {
+      "attributes": {
+        "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapValueBoundaryParityTest",
+        "tests": "8",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-02T21:59:30.666Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      },
+      "sha256": "dd1bd8981cd8091e754b1202939ec4f5f4f1edff119e6c2effb45dabc78722a5"
+    }
+  }
+}
