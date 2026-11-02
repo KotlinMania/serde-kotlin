@@ -2,11 +2,8 @@
 package io.github.kotlinmania.serdecore.de.value
 
 import io.github.kotlinmania.serde.SerdeError
-
-import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serdecore.de.*
-import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * Building blocks for deserializing basic values using the `IntoDeserializer` interface.
@@ -1998,12 +1995,11 @@ class MapAccessDeserializer<A : MapAccess>(
     override fun intoDeserializer(): Deserializer = this
 
     override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
-        serdeCatching {
-            val key = map.nextKeySeed(seed).getOrThrow()
+        map.nextKeySeed(seed).flatMap { key ->
             if (key != null) {
-                key to mapAsEnum(map)
+                SerdeResult.success(key to mapAsEnum(map))
             } else {
-                throw SerdeException(
+                SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.Map,
                         object : Expected {
