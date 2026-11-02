@@ -18,6 +18,7 @@ import io.github.kotlinmania.serdecore.de.MapAccess
 import io.github.kotlinmania.serdecore.de.SeqAccess
 import io.github.kotlinmania.serdecore.de.SeqElement
 import io.github.kotlinmania.serdecore.de.Unexpected
+import io.github.kotlinmania.serdecore.de.UnitDeserialize
 import io.github.kotlinmania.serdecore.de.VariantAccess
 import io.github.kotlinmania.serdecore.de.Visitor
 import io.github.kotlinmania.serdecore.de.unwrapOrElse
@@ -164,7 +165,7 @@ internal class CowBytesVisitor : Visitor<ByteArray> {
 
     override fun visitString(v: String): SerdeResult<ByteArray> = SerdeResult.success(v.encodeToByteArray())
 
-    override fun visitBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
+    override fun visitBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v.copyOf())
 
     override fun visitBorrowedBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
 
@@ -1450,7 +1451,7 @@ private class VariantDeserializer(
     override fun unitVariant(): SerdeResult<Unit> =
         when (val v = value) {
             null -> SerdeResult.success(Unit)
-            else -> IgnoredAny.deserialize(ContentDeserializer.new(v)).map { }
+            else -> UnitDeserialize.deserialize(ContentDeserializer.new(v))
         }
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
@@ -1854,8 +1855,7 @@ internal class FlatMapDeserializer(
     ): SerdeResult<V> =
         serdeCatching {
             for (index in 0 until buffer.size) {
-                val entry = buffer.get(index)
-                val found = flatMapTakeEntry(entry, variants)
+                val found = flatMapTakeEntry(buffer, index, variants)
                 if (found != null) {
                     val key = found.key
                     val value = found.value
@@ -1994,13 +1994,11 @@ private class FlatStructAccess(
     override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> =
         serdeCatching {
             while (currentIndex < buffer.size) {
-                val index = currentIndex
-                val entry = buffer.get(currentIndex++)
-                val found = flatMapTakeEntry(entry, fields)
+                val index = currentIndex++
+                val found = flatMapTakeEntry(buffer, index, fields)
                 if (found != null) {
                     val key = found.key
                     val value = found.value
-                    buffer.setNull(index)
                     pendingContent = value
                     return@serdeCatching seed.deserialize(ContentDeserializer.new(key)).getOrThrow()
                 }
@@ -2021,12 +2019,14 @@ private class FlatStructAccess(
  * field name matches any of the recognized ones.
  */
 private fun flatMapTakeEntry(
-    entry: ContentMapEntry?,
+    buffer: FlatMapBuffer,
+    index: Int,
     recognized: List<String>,
 ): ContentMapEntry? {
     // Entries in the FlatMapDeserializer buffer are nulled out as they get
     // claimed for deserialization. We only use an entry if it is still present
     // and if the field is one recognized by the current data structure.
+    val entry = buffer.get(index)
     val isRecognized =
         if (entry == null) {
             false
@@ -2035,7 +2035,12 @@ private fun flatMapTakeEntry(
             name != null && recognized.contains(name)
         }
 
-    return if (isRecognized) entry else null
+    return if (isRecognized) {
+        buffer.setNull(index)
+        entry
+    } else {
+        null
+    }
 }
 
 internal class AdjacentlyTaggedEnumVariantSeed<F>(
@@ -2799,7 +2804,7 @@ private class VariantRefDeserializer(
     override fun unitVariant(): SerdeResult<Unit> =
         when (val v = value) {
             null -> SerdeResult.success(Unit)
-            else -> IgnoredAny.deserialize(ContentRefDeserializer.new(v)).map { }
+            else -> UnitDeserialize.deserialize(ContentRefDeserializer.new(v))
         }
 
     override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =

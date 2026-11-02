@@ -616,18 +616,20 @@ private class SerializeMap(
 
     override fun <T> serializeKey(key: T): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            this.key = key.serialize(ContentSerializer()).getOrThrow()
-        }.map { }
+        key.serialize(ContentSerializer()).map { contentKey ->
+            this.key = contentKey
+        }
 
     override fun <T> serializeValue(value: T): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
+        run {
             val storedKey = checkNotNull(key) { "serializeValue called before serializeKey" }
             key = null
-            val contentValue = value.serialize(ContentSerializer()).getOrThrow()
-            entries.add(storedKey to contentValue)
-        }.map { }
+            value.serialize(ContentSerializer()).map { contentValue ->
+                entries.add(storedKey to contentValue)
+                Unit
+            }
+        }
 
     override fun <K, V> serializeEntry(
         key: K,
@@ -635,11 +637,12 @@ private class SerializeMap(
     ): SerdeResult<Unit>
         where K : Serialize,
               V : Serialize =
-        serdeCatching {
-            val contentKey = key.serialize(ContentSerializer()).getOrThrow()
-            val contentValue = value.serialize(ContentSerializer()).getOrThrow()
-            entries.add(contentKey to contentValue)
-        }.map { }
+        key.serialize(ContentSerializer()).flatMap { contentKey ->
+            value.serialize(ContentSerializer()).map { contentValue ->
+                entries.add(contentKey to contentValue)
+                Unit
+            }
+        }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Map(entries))
 }
@@ -743,8 +746,8 @@ private class SerializeStructVariantAsMapValue<Ok, M>(
         }
 }
 
-internal class FlatMapSerializer<MOk, E, M>(
-    private val map: M,
+internal class FlatMapSerializer<MOk, M>(
+    val map: M,
 ) : Serializer<Unit>
     where M : SerializeMap<MOk> {
     private fun badType(what: Unsupported): SerdeError = SerdeError.custom("can only flatten structs and maps (got $what)")
@@ -790,10 +793,7 @@ internal class FlatMapSerializer<MOk, E, M>(
         name: String,
         variantIndex: UInt,
         variant: String,
-    ): SerdeResult<Unit> =
-        serdeCatching {
-            map.serializeEntry(Content.String(variant), Content.Unit).getOrThrow()
-        }.map { }
+    ): SerdeResult<Unit> = map.serializeEntry(Content.String(variant), Content.Unit)
 
     override fun <T> serializeNewtypeStruct(
         name: String,
@@ -807,10 +807,7 @@ internal class FlatMapSerializer<MOk, E, M>(
         variant: String,
         value: T,
     ): SerdeResult<Unit>
-        where T : Serialize =
-        serdeCatching {
-            map.serializeEntry(Content.String(variant), value).getOrThrow()
-        }.map { }
+        where T : Serialize = map.serializeEntry(Content.String(variant), value)
 
     override fun serializeSeq(len: Int?): SerdeResult<io.github.kotlinmania.serdecore.ser.SerializeSeq<Unit>> =
         SerdeResult.failure(badType(Unsupported.Sequence))
@@ -828,8 +825,7 @@ internal class FlatMapSerializer<MOk, E, M>(
         variant: String,
         len: Int,
     ): SerdeResult<SerializeTupleVariant<Unit>> =
-        serdeCatching {
-            map.serializeKey(Content.String(variant)).getOrThrow()
+        map.serializeKey(Content.String(variant)).map {
             FlatMapSerializeTupleVariantAsMapValue(map = map, len = len)
         }
 
@@ -852,8 +848,7 @@ internal class FlatMapSerializer<MOk, E, M>(
         variant: String,
         len: Int,
     ): SerdeResult<SerializeStructVariant<Unit>> =
-        serdeCatching {
-            map.serializeKey(Content.String(variant)).getOrThrow()
+        map.serializeKey(Content.String(variant)).map {
             FlatMapSerializeStructVariantAsMapValue(map = map, name = variant)
         }
 }
@@ -905,14 +900,11 @@ private class FlatMapSerializeTupleVariantAsMapValue<MOk, M>(
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            fields.add(value.serialize(ContentSerializer()).getOrThrow())
-        }.map { }
+        value.serialize(ContentSerializer()).map { contentValue ->
+            fields += contentValue
+        }
 
-    override fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            map.serializeValue(Content.Seq(fields)).getOrThrow()
-        }.map { }
+    override fun end(): SerdeResult<Unit> = map.serializeValue(Content.Seq(fields))
 }
 
 private class FlatMapSerializeStructVariantAsMapValue<MOk, M>(
@@ -934,14 +926,11 @@ private class FlatMapSerializeStructVariantAsMapValue<MOk, M>(
         value: T,
     ): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            fields.add(key to value.serialize(ContentSerializer()).getOrThrow())
-        }.map { }
+        value.serialize(ContentSerializer()).map { contentValue ->
+            fields += key to contentValue
+        }
 
-    override fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            map.serializeValue(Content.Struct(name, fields)).getOrThrow()
-        }.map { }
+    override fun end(): SerdeResult<Unit> = map.serializeValue(Content.Struct(name, fields))
 }
 
 internal data class AdjacentlyTaggedEnumVariant(
