@@ -2164,12 +2164,7 @@ private object Private {
     class MapAsEnum<A : MapAccess>(
         private val map: A,
     ) : VariantAccess {
-        override fun unitVariant(): SerdeResult<Unit> =
-            map.nextValueSeed(
-                object : DeserializeSeed<Unit> {
-                    override fun <D> deserialize(deserializer: D): SerdeResult<Unit> where D : Deserializer = SerdeResult.success(Unit)
-                },
-            )
+        override fun unitVariant(): SerdeResult<Unit> = map.nextValue(UnitDeserialize)
 
         override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> = map.nextValueSeed(seed)
 
