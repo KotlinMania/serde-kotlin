@@ -102,12 +102,21 @@ class MutablePlaceTest {
         ), mutablePlaceObservations())
     }
 
-    @Test fun existingValueSequenceStillHasItsOwnExceptionConversion() {
-        val values = mutableListOf(PlaceItem(1))
-        val result = mutableListDeserialize(PlaceItemCodec(mutableListOf())).deserializeInPlace(
-            listOf((-2).intoDeserializer()).intoDeserializer(), mutablePlace({ values }, { error("list replaced") }),
-        )
-        assertEquals("sentinel", assertIs<SerdeResult.Failure>(result).error.message)
+    @Test
+    fun existingValueSequencePropagatesExceptionAndRetainsMutation() {
+        val originalElement = PlaceItem(1)
+        var values = mutableListOf(originalElement)
+        val originalList = values
+        val failure =
+            assertFailsWith<IllegalStateException> {
+                mutableListDeserialize(PlaceItemCodec(mutableListOf())).deserializeInPlace(
+                    listOf((-2).intoDeserializer()).intoDeserializer(),
+                    mutablePlace({ values }, { values = it }),
+                )
+            }
+        assertEquals("sentinel", failure.message)
+        assertSame(originalList, values)
+        assertSame(originalElement, values.single())
         assertEquals(800, values.single().value)
     }
 }
