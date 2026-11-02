@@ -1453,17 +1453,15 @@ class SeqDeserializer<T : IntoDeserializer> internal constructor(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <R> nextElementSeed(seed: DeserializeSeed<R>): SerdeResult<SeqElement<R>> =
-        serdeCatching {
-            if (exhausted || !iter.hasNext()) {
-                exhausted = true
-                SeqElement.None
-            } else {
-                val next = iter.next()
-                count += 1
-                SeqElement.Some(seed.deserialize(next.intoDeserializer()).getOrThrow())
-            }
+    override fun <R> nextElementSeed(seed: DeserializeSeed<R>): SerdeResult<SeqElement<R>> {
+        if (exhausted || !iter.hasNext()) {
+            exhausted = true
+            return SerdeResult.success(SeqElement.None)
         }
+        val next = iter.next()
+        count += 1
+        return seed.deserialize(next.intoDeserializer()).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
 
