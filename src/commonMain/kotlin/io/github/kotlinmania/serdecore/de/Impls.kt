@@ -688,19 +688,25 @@ fun <T> mutableListDeserialize(elementDeserialize: Deserialize<T>): Deserialize<
                     override fun expecting(): String = "a sequence"
 
                     override fun <A> visitSeq(access: A): SerdeResult<MutableList<T>>
-                        where A : SeqAccess =
-                        serdeCatching {
-                            val hint = access.sizeHint() ?: 0
-                            val values = ArrayList<T>(hint)
-                            val seed = SeedFromDeserialize(elementDeserialize)
-                            while (true) {
-                                when (val next = access.nextElementSeed(seed).getOrThrow()) {
-                                    is SeqElement.Some -> values.add(next.value)
-                                    SeqElement.None -> break
+                        where A : SeqAccess {
+                        val hint = access.sizeHint() ?: 0
+                        val values = ArrayList<T>(hint)
+                        val seed = SeedFromDeserialize(elementDeserialize)
+                        while (true) {
+                            when (val result = access.nextElementSeed(seed)) {
+                                is SerdeResult.Failure -> {
+                                    return result
+                                }
+
+                                is SerdeResult.Success -> {
+                                    when (val next = result.value) {
+                                        is SeqElement.Some -> values.add(next.value)
+                                        SeqElement.None -> return SerdeResult.success(values)
+                                    }
                                 }
                             }
-                            values
                         }
+                    }
                 },
             )
 
