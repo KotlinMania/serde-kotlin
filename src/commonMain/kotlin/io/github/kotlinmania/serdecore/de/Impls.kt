@@ -1571,29 +1571,53 @@ private fun parseIpv6(value: String): Ipv6Address {
 }
 
 private fun parseIpAddress(value: String): IpAddress =
-    serdeCatching { IpAddress.V4(parseIpv4(value)) as IpAddress }
-        .recoverCatching { IpAddress.V6(parseIpv6(value)) as IpAddress }
-        .getOrThrow()
+    try {
+        IpAddress.V4(parseIpv4(value))
+    } catch (_: SerdeException) {
+        try {
+            IpAddress.V6(parseIpv6(value))
+        } catch (_: SerdeException) {
+            throw SerdeException(SerdeError.custom("invalid IP address syntax"))
+        }
+    }
 
 private fun parseSocketAddressV4(value: String): SocketAddressV4 {
     val colon = value.indexOf(':')
     if (colon <= 0 || colon == value.lastIndex) throw SerdeException(SerdeError.custom("invalid IPv4 socket address syntax"))
+    val ip =
+        try {
+            parseIpv4(value.substring(0, colon))
+        } catch (_: SerdeException) {
+            throw SerdeException(SerdeError.custom("invalid IPv4 socket address syntax"))
+        }
     val port = parsePort(value.substring(colon + 1), "invalid IPv4 socket address syntax")
-    return SocketAddressV4(parseIpv4(value.substring(0, colon)), port)
+    return SocketAddressV4(ip, port)
 }
 
 private fun parseSocketAddressV6(value: String): SocketAddressV6 {
     if (!value.startsWith("[")) throw SerdeException(SerdeError.custom("invalid IPv6 socket address syntax"))
     val end = value.indexOf("]:")
     if (end <= 1 || end + 2 >= value.length) throw SerdeException(SerdeError.custom("invalid IPv6 socket address syntax"))
+    val ip =
+        try {
+            parseIpv6(value.substring(1, end))
+        } catch (_: SerdeException) {
+            throw SerdeException(SerdeError.custom("invalid IPv6 socket address syntax"))
+        }
     val port = parsePort(value.substring(end + 2), "invalid IPv6 socket address syntax")
-    return SocketAddressV6(parseIpv6(value.substring(1, end)), port)
+    return SocketAddressV6(ip, port)
 }
 
 private fun parseSocketAddress(value: String): SocketAddress =
-    serdeCatching { SocketAddress.V4(parseSocketAddressV4(value)) as SocketAddress }
-        .recoverCatching { SocketAddress.V6(parseSocketAddressV6(value)) as SocketAddress }
-        .getOrThrow()
+    try {
+        SocketAddress.V4(parseSocketAddressV4(value))
+    } catch (_: SerdeException) {
+        try {
+            SocketAddress.V6(parseSocketAddressV6(value))
+        } catch (_: SerdeException) {
+            throw SerdeException(SerdeError.custom("invalid socket address syntax"))
+        }
+    }
 
 private fun parsePort(
     value: String,
