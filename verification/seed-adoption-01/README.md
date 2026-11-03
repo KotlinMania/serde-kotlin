@@ -1,7 +1,7 @@
 # Whole-file generated Seed production adoption
 
 The complete verified `core/private/seed.rs` translation now replaces the old
-production `serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/Seed.kt`.
+production `serde_core/src/common/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/Seed.kt`.
 The mutable-list in-place consumer in `de/Impls.kt` passes
 `InPlaceSeed(slot, elementDeserialize)` directly to `SeqAccess.nextElementSeed`.
 The temporary anonymous-codec bridge from the prerequisite commit is removed.

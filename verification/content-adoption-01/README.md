@@ -11,11 +11,11 @@ it is no longer the representation used by those capture/replay paths.
 - Raw output: `../rust-kotlin/verification/foundation-batch-04/content-01/generated/generated.kt`.
 - Raw SHA-256: `b2ba1c9cd56f95e112763f26fffccf6848fed96c0a88a41e61d5a81726560b75`.
 - Rust source SHA-256: `5fdfb2bb95ecc80375507acb813a4c640496385e56fc99ab448f6b19e01fcc01`.
-- Installed at `serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/generated/content/Content.kt`.
+- Installed at `serde_core/src/common/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/generated/content/Content.kt`.
   Only the source header and package prefix are added; the entire generated body
   is unchanged. `provenance.json` records this boundary.
 - Same-module access is in
-  `serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/contentaccess/GeneratedContentAccess.kt`.
+  `serde_core/src/common/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/contentaccess/GeneratedContentAccess.kt`.
   It exposes the generated internal fields to the separate root module without
   changing generated declarations.
 - Production consumers are core `priv/ContentVisitor.kt`, root `priv/De.kt`, and

@@ -6,7 +6,7 @@
 #   ./swift-test.sh --build   # build only (generates SPM package + static archive)
 #   ./swift-test.sh --test    # test only (assumes build already ran)
 #
-# After running --build, you can open swift-test-harness/Package.swift in Xcode
+# After running --build, you can open src/swift/swift-test-harness/Package.swift in Xcode
 # and use the full IDE experience (test navigator, breakpoints, etc.).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -23,7 +23,7 @@ export DEPLOYMENT_TARGET_SETTING_NAME=MACOSX_DEPLOYMENT_TARGET
 
 if [ "$ACTION" = "--test" ]; then
     echo "Running swift test (assuming build artifacts exist)..."
-    cd "$REPO_ROOT/swift-test-harness"
+    cd "$REPO_ROOT/src/swift/swift-test-harness"
     exec swift test
 fi
 
@@ -36,10 +36,10 @@ if [ "$ACTION" = "--build" ]; then
     echo "Static archive at: build/swift-test/libSerde.a"
     echo ""
     echo "To open in Xcode:"
-    echo "  open swift-test-harness/Package.swift"
+    echo "  open src/swift/swift-test-harness/Package.swift"
     exit 0
 fi
 
 echo "Running swift test..."
-cd "$REPO_ROOT/swift-test-harness"
+cd "$REPO_ROOT/src/swift/swift-test-harness"
 exec swift test

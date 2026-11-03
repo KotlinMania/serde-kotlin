@@ -18,3 +18,9 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
+// Project-owned helpers use the parsers and archive libraries bundled with Gradle.
+dependencies {
+    implementation(fileTree(requireNotNull(gradle.gradleHomeDir).resolve("lib")) {
+        include("tomlj-*.jar", "antlr4-runtime-*.jar", "commons-compress-*.jar", "commons-io-*.jar", "commons-codec-*.jar", "commons-lang3-*.jar")
+    })
+}

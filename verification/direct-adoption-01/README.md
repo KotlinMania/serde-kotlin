@@ -2,14 +2,14 @@
 
 The approved integration installs two complete generated files without changing their raw bodies:
 
-| Rust input | Kotlin destination under serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/ | Raw SHA-256 |
+| Rust input | Kotlin destination under serde_core/src/common/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/ | Raw SHA-256 |
 | --- | --- | --- |
 | tmp/serde/serde/src/core/private/string.rs | generated/string/String.kt | 6303a9cd9c96dfac8099b3feddab6b3ee76ff36ccbff9eb143dd7404e038876e |
 | tmp/serde/serde/src/core/private/size_hint.rs | generated/sizehint/SizeHint.kt | e46f3a76ac6712e5a24e977ba07e247ef63a51e9c6d736707c9ca56d221f7106 |
 
 String.kt retains `fromUtf8Lossy(ByteArray): String`, delegating to the generated Cow function and materializing text. The generated function preserves Borrowed/Owned and the selected storage/range. `fromUtf8LossyNoAlloc` remains byte-for-byte unchanged, including its three-replacement-character fallback. The three existing kernel sources from commit 300f797 are read in place; none are copied or edited. The source filter is retained explicitly at JVM/Android compilation because Android otherwise flattens nested source directories.
 
-SizeHint.kt delegates exact iterator bounds and the unsigned explicit-size overload to the generated implementation. NumTraits 0.2.15 is an implementation dependency. All five concrete allocation sites are migrated: ContentVisitor sequence/map in serde_core/priv/ContentVisitor.kt, and ContentVisitor sequence/map plus TaggedContentVisitor map in the root src/commonMain/kotlin/io/github/kotlinmania/serde/priv/De.kt. Int hints are checked nonnegative before widening; allocation capacities are checked before narrowing back to Int.
+SizeHint.kt delegates exact iterator bounds and the unsigned explicit-size overload to the generated implementation. NumTraits 0.2.15 is an implementation dependency. All five concrete allocation sites are migrated: ContentVisitor sequence/map in serde_core/priv/ContentVisitor.kt, and ContentVisitor sequence/map plus TaggedContentVisitor map in the root src/common/commonMain/kotlin/io/github/kotlinmania/serde/priv/De.kt. Int hints are checked nonnegative before widening; allocation capacities are checked before narrowing back to Int.
 
 ## Exact layout and compatibility
 
