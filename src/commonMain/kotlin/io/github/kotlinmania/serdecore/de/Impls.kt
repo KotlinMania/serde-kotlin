@@ -1499,37 +1499,70 @@ private fun parseIpv4(value: String): Ipv4Address {
     )
 }
 
-private fun parseIpv6(value: String): Ipv6Address {
-    if (value.isEmpty()) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
-    val doubleColon = value.indexOf("::")
-    if (doubleColon != value.lastIndexOf("::")) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
-
-    fun parseSide(side: String): List<UShort> =
-        if (side.isEmpty()) {
-            emptyList()
-        } else {
-            side.split(":").map { segment ->
-                if (segment.isEmpty() || segment.length > 4) {
-                    throw SerdeException(SerdeError.custom("invalid IPv6 address"))
-                }
-                segment.toIntOrNull(16)?.let {
-                    if (it in 0..UShort.MAX_VALUE.toInt()) it.toUShort() else null
-                } ?: throw SerdeException(SerdeError.custom("invalid IPv6 address"))
+private fun parseIpv6HexGroup(segment: String): UShort {
+    if (segment.isEmpty() || segment.length > 4) throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
+    var value = 0
+    for (character in segment) {
+        val digit =
+            when (character) {
+                in '0'..'9' -> character - '0'
+                in 'a'..'f' -> character - 'a' + 10
+                in 'A'..'F' -> character - 'A' + 10
+                else -> throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
             }
-        }
+        value = value * 16 + digit
+    }
+    return value.toUShort()
+}
 
+private fun parseIpv6Groups(
+    side: String,
+    limit: Int,
+    allowIpv4Tail: Boolean,
+): List<UShort> {
+    if (side.isEmpty()) return emptyList()
+    val segments = side.split(":")
+    val groups = ArrayList<UShort>(limit)
+    for ((index, segment) in segments.withIndex()) {
+        if (segment.contains('.')) {
+            // Try to read a trailing embedded IPv4 address. There must be
+            // at least two groups left.
+            if (!allowIpv4Tail || index != segments.lastIndex || groups.size + 2 > limit) {
+                throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
+            }
+            val octets =
+                try {
+                    parseIpv4(segment).octets
+                } catch (_: SerdeException) {
+                    throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
+                }
+            groups.add(((octets[0].toInt() shl 8) or octets[1].toInt()).toUShort())
+            groups.add(((octets[2].toInt() shl 8) or octets[3].toInt()).toUShort())
+        } else {
+            if (groups.size == limit) throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
+            groups.add(parseIpv6HexGroup(segment))
+        }
+    }
+    return groups
+}
+
+private fun parseIpv6(value: String): Ipv6Address {
+    if (value.isEmpty()) throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
+    val doubleColon = value.indexOf("::")
+    if (doubleColon != value.lastIndexOf("::")) throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
     val groups =
         if (doubleColon >= 0) {
-            val left = parseSide(value.substring(0, doubleColon))
-            val right = parseSide(value.substring(doubleColon + 2))
+            // IPv4 part is not allowed before `::`.
+            val left = parseIpv6Groups(value.substring(0, doubleColon), 8, false)
+            if (left.size >= 8) throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
+            // `::` must contain at least one group of zeros.
+            val right = parseIpv6Groups(value.substring(doubleColon + 2), 7 - left.size, true)
             val zeros = 8 - left.size - right.size
-            if (zeros < 1) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
             left + List(zeros) { 0.toUShort() } + right
         } else {
-            parseSide(value)
+            parseIpv6Groups(value, 8, true)
         }
-    if (groups.size != 8) throw SerdeException(SerdeError.custom("invalid IPv6 address"))
-
+    if (groups.size != 8) throw SerdeException(SerdeError.custom("invalid IPv6 address syntax"))
     return Ipv6Address(
         groups.flatMap { segment ->
             listOf(((segment.toInt() ushr 8) and 0xff).toUByte(), (segment.toInt() and 0xff).toUByte())
