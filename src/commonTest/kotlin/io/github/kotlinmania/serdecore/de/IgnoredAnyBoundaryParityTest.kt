@@ -25,21 +25,30 @@ class IgnoredAnyBoundaryParityTest {
         }
     }
 
+    private class State {
+        var calls = 0
+        var delivered = 0
+    }
+
     private inner class Sequence(
         private val mode: Int,
         private val target: String,
         private val trace: MutableList<String>,
+        private val length: Int = 2,
+        private val state: State = State(),
     ) : SeqAccess {
         private var index = 0
 
         override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
             val current = index++
+            state.calls += 1
             val stage = "seq:$current"
             trace.add(stage)
             return probe(mode, stage, target).flatMap {
-                if (current == 2) {
+                if (current >= length) {
                     SerdeResult.success(SeqElement.None)
                 } else {
+                    state.delivered += 1
                     seed.deserialize(Scalar(10 * (current + 1), trace)).map { SeqElement.Some(it) }
                 }
             }
@@ -179,5 +188,58 @@ class IgnoredAnyBoundaryParityTest {
     fun enumPanics() {
         check("enum", 2, "variant", "panic:probe panic", listOf("variant"))
         check("enum", 2, "payload", "panic:probe panic", listOf("variant", "discard:99", "payload"))
+    }
+
+    private fun checkDrain(
+        length: Int,
+        mode: Int,
+        at: Int,
+        outcome: String,
+        calls: Int,
+        delivered: Int,
+        events: List<String>,
+    ) {
+        val state = State()
+        val trace = mutableListOf<String>()
+        val actual =
+            try {
+                when (val result = IgnoredAny.visitSeq(Sequence(mode, "seq:$at", trace, length, state))) {
+                    is SerdeResult.Success -> "ok"
+                    is SerdeResult.Failure -> "error:${result.error}"
+                }
+            } catch (exception: IllegalStateException) {
+                "panic:${exception.message}"
+            }
+        assertEquals(outcome, actual)
+        assertEquals(calls, state.calls)
+        assertEquals(delivered, state.delivered)
+        assertEquals(events, trace)
+    }
+
+    @Test
+    fun zeroElementsStopAfterOneRead() {
+        checkDrain(0, 0, 0, "ok", 1, 0, listOf("seq:0"))
+    }
+
+    @Test
+    fun oneElementStopsAfterTwoReads() {
+        checkDrain(1, 0, 0, "ok", 2, 1, listOf("seq:0", "discard:10", "seq:1"))
+    }
+
+    @Test
+    fun threeElementsStopAfterFourReads() {
+        checkDrain(3, 0, 0, "ok", 4, 3, listOf("seq:0", "discard:10", "seq:1", "discard:20", "seq:2", "discard:30", "seq:3"))
+    }
+
+    @Test
+    fun oddLengthFailureTiming() {
+        checkDrain(1, 1, 0, "error:probe error", 1, 0, listOf("seq:0"))
+        checkDrain(1, 2, 0, "panic:probe panic", 1, 0, listOf("seq:0"))
+        checkDrain(1, 1, 1, "error:probe error", 2, 1, listOf("seq:0", "discard:10", "seq:1"))
+        checkDrain(1, 2, 1, "panic:probe panic", 2, 1, listOf("seq:0", "discard:10", "seq:1"))
+        checkDrain(3, 1, 2, "error:probe error", 3, 2, listOf("seq:0", "discard:10", "seq:1", "discard:20", "seq:2"))
+        checkDrain(3, 2, 2, "panic:probe panic", 3, 2, listOf("seq:0", "discard:10", "seq:1", "discard:20", "seq:2"))
+        checkDrain(3, 1, 3, "error:probe error", 4, 3, listOf("seq:0", "discard:10", "seq:1", "discard:20", "seq:2", "discard:30", "seq:3"))
+        checkDrain(3, 2, 3, "panic:probe panic", 4, 3, listOf("seq:0", "discard:10", "seq:1", "discard:20", "seq:2", "discard:30", "seq:3"))
     }
 }

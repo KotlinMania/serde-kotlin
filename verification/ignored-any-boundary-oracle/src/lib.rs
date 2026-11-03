@@ -5,8 +5,9 @@ mod tests {
         VariantAccess, Visitor,
     };
     use std::{
-        cell::RefCell,
+        cell::{Cell, RefCell},
         panic::{catch_unwind, AssertUnwindSafe},
+        rc::Rc,
     };
     thread_local! {static TRACE:RefCell<Vec<String>>=const{RefCell::new(Vec::new())};}
     fn trace(s: String) {
@@ -38,6 +39,9 @@ mod tests {
         index: usize,
         mode: u8,
         target: &'a str,
+        length: usize,
+        calls: Rc<Cell<usize>>,
+        delivered: Rc<Cell<usize>>,
     }
     impl<'de> SeqAccess<'de> for Sequence<'_> {
         type Error = Error;
@@ -47,12 +51,14 @@ mod tests {
         ) -> Result<Option<T::Value>, Error> {
             let i = self.index;
             self.index += 1;
+            self.calls.set(self.calls.get() + 1);
             let stage = format!("seq:{i}");
             trace(stage.clone());
             probe(self.mode, &stage, self.target)?;
-            if i == 2 {
+            if i >= self.length {
                 Ok(None)
             } else {
+                self.delivered.set(self.delivered.get() + 1);
                 seed.deserialize(Scalar(10 * (i as i32 + 1))).map(Some)
             }
         }
@@ -142,6 +148,9 @@ mod tests {
                 index: 0,
                 mode,
                 target,
+                length: 2,
+                calls: Rc::new(Cell::new(0)),
+                delivered: Rc::new(Cell::new(0)),
             }),
             "map" => IgnoredAny.visit_map(Map {
                 index: 0,
@@ -321,6 +330,154 @@ mod tests {
             "payload",
             "panic:probe panic",
             &["variant", "discard:99", "payload"],
+        );
+    }
+
+    fn check_drain(
+        length: usize,
+        mode: u8,
+        at: usize,
+        outcome: &str,
+        expected_calls: usize,
+        expected_delivered: usize,
+        events: &[&str],
+    ) {
+        TRACE.with(|t| t.borrow_mut().clear());
+        let calls = Rc::new(Cell::new(0));
+        let delivered = Rc::new(Cell::new(0));
+        let target = format!("seq:{at}");
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            IgnoredAny.visit_seq(Sequence {
+                index: 0,
+                mode,
+                target: &target,
+                length,
+                calls: calls.clone(),
+                delivered: delivered.clone(),
+            })
+        }));
+        let actual = match result {
+            Ok(Ok(_)) => "ok".into(),
+            Ok(Err(e)) => format!("error:{e}"),
+            Err(e) => {
+                let message = if let Some(s) = e.downcast_ref::<&str>() {
+                    s.to_string()
+                } else {
+                    e.downcast_ref::<String>().unwrap().clone()
+                };
+                format!("panic:{message}")
+            }
+        };
+        assert_eq!(actual, outcome);
+        assert_eq!(calls.get(), expected_calls);
+        assert_eq!(delivered.get(), expected_delivered);
+        TRACE.with(|t| assert_eq!(*t.borrow(), events));
+    }
+    #[test]
+    #[allow(non_snake_case)]
+    fn zeroElementsStopAfterOneRead() {
+        check_drain(0, 0, 0, "ok", 1, 0, &["seq:0"]);
+    }
+    #[test]
+    #[allow(non_snake_case)]
+    fn oneElementStopsAfterTwoReads() {
+        check_drain(1, 0, 0, "ok", 2, 1, &["seq:0", "discard:10", "seq:1"]);
+    }
+    #[test]
+    #[allow(non_snake_case)]
+    fn threeElementsStopAfterFourReads() {
+        check_drain(
+            3,
+            0,
+            0,
+            "ok",
+            4,
+            3,
+            &[
+                "seq:0",
+                "discard:10",
+                "seq:1",
+                "discard:20",
+                "seq:2",
+                "discard:30",
+                "seq:3",
+            ],
+        );
+    }
+    #[test]
+    #[allow(non_snake_case)]
+    fn oddLengthFailureTiming() {
+        check_drain(1, 1, 0, "error:probe error", 1, 0, &["seq:0"]);
+        check_drain(1, 2, 0, "panic:probe panic", 1, 0, &["seq:0"]);
+        check_drain(
+            1,
+            1,
+            1,
+            "error:probe error",
+            2,
+            1,
+            &["seq:0", "discard:10", "seq:1"],
+        );
+        check_drain(
+            1,
+            2,
+            1,
+            "panic:probe panic",
+            2,
+            1,
+            &["seq:0", "discard:10", "seq:1"],
+        );
+        check_drain(
+            3,
+            1,
+            2,
+            "error:probe error",
+            3,
+            2,
+            &["seq:0", "discard:10", "seq:1", "discard:20", "seq:2"],
+        );
+        check_drain(
+            3,
+            2,
+            2,
+            "panic:probe panic",
+            3,
+            2,
+            &["seq:0", "discard:10", "seq:1", "discard:20", "seq:2"],
+        );
+        check_drain(
+            3,
+            1,
+            3,
+            "error:probe error",
+            4,
+            3,
+            &[
+                "seq:0",
+                "discard:10",
+                "seq:1",
+                "discard:20",
+                "seq:2",
+                "discard:30",
+                "seq:3",
+            ],
+        );
+        check_drain(
+            3,
+            2,
+            3,
+            "panic:probe panic",
+            4,
+            3,
+            &[
+                "seq:0",
+                "discard:10",
+                "seq:1",
+                "discard:20",
+                "seq:2",
+                "discard:30",
+                "seq:3",
+            ],
         );
     }
 }
