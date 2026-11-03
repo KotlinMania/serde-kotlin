@@ -919,19 +919,35 @@ fun <T0, T1> pairDeserialize(
                 object : Visitor<Pair<T0, T1>> {
                     override fun expecting(): String = "a tuple of size 2"
 
-                    override fun <A> visitSeq(access: A): SerdeResult<Pair<T0, T1>>
-                        where A : SeqAccess =
-                        serdeCatching {
-                            val first =
-                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow().unwrapOrElse {
-                                    throw SerdeException(SerdeError.invalidLength(0, this))
+                    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Pair<T0, T1>> {
+                        val first =
+                            when (val result = access.nextElementSeed(SeedFromDeserialize(firstDeserialize))) {
+                                is SerdeResult.Failure -> {
+                                    return result
                                 }
-                            val second =
-                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow().unwrapOrElse {
-                                    throw SerdeException(SerdeError.invalidLength(1, this))
+
+                                is SerdeResult.Success -> {
+                                    when (val element = result.value) {
+                                        SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(0, this))
+                                        is SeqElement.Some -> element.value
+                                    }
                                 }
-                            first to second
-                        }
+                            }
+                        val second =
+                            when (val result = access.nextElementSeed(SeedFromDeserialize(secondDeserialize))) {
+                                is SerdeResult.Failure -> {
+                                    return result
+                                }
+
+                                is SerdeResult.Success -> {
+                                    when (val element = result.value) {
+                                        SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(1, this))
+                                        is SeqElement.Some -> element.value
+                                    }
+                                }
+                            }
+                        return SerdeResult.success(first to second)
+                    }
                 },
             )
 
@@ -984,23 +1000,48 @@ fun <T0, T1, T2> tripleDeserialize(
                 object : Visitor<Triple<T0, T1, T2>> {
                     override fun expecting(): String = "a tuple of size 3"
 
-                    override fun <A> visitSeq(access: A): SerdeResult<Triple<T0, T1, T2>>
-                        where A : SeqAccess =
-                        serdeCatching {
-                            val first =
-                                access.nextElementSeed(SeedFromDeserialize(firstDeserialize)).getOrThrow().unwrapOrElse {
-                                    throw SerdeException(SerdeError.invalidLength(0, this))
+                    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Triple<T0, T1, T2>> {
+                        val first =
+                            when (val result = access.nextElementSeed(SeedFromDeserialize(firstDeserialize))) {
+                                is SerdeResult.Failure -> {
+                                    return result
                                 }
-                            val second =
-                                access.nextElementSeed(SeedFromDeserialize(secondDeserialize)).getOrThrow().unwrapOrElse {
-                                    throw SerdeException(SerdeError.invalidLength(1, this))
+
+                                is SerdeResult.Success -> {
+                                    when (val element = result.value) {
+                                        SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(0, this))
+                                        is SeqElement.Some -> element.value
+                                    }
                                 }
-                            val third =
-                                access.nextElementSeed(SeedFromDeserialize(thirdDeserialize)).getOrThrow().unwrapOrElse {
-                                    throw SerdeException(SerdeError.invalidLength(2, this))
+                            }
+                        val second =
+                            when (val result = access.nextElementSeed(SeedFromDeserialize(secondDeserialize))) {
+                                is SerdeResult.Failure -> {
+                                    return result
                                 }
-                            Triple(first, second, third)
-                        }
+
+                                is SerdeResult.Success -> {
+                                    when (val element = result.value) {
+                                        SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(1, this))
+                                        is SeqElement.Some -> element.value
+                                    }
+                                }
+                            }
+                        val third =
+                            when (val result = access.nextElementSeed(SeedFromDeserialize(thirdDeserialize))) {
+                                is SerdeResult.Failure -> {
+                                    return result
+                                }
+
+                                is SerdeResult.Success -> {
+                                    when (val element = result.value) {
+                                        SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(2, this))
+                                        is SeqElement.Some -> element.value
+                                    }
+                                }
+                            }
+                        return SerdeResult.success(Triple(first, second, third))
+                    }
                 },
             )
 
