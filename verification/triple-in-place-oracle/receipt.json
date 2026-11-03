@@ -1,0 +1,279 @@
+{
+  "baseline": "9f2bd35",
+  "recordedAtUTC": "2026-11-03T01:13:29.563365+00:00",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "9f2bd35",
+    "1030be3",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "graphPriority": {
+    "directSerdeReverseDependents": 56
+  },
+  "translatorEvidence": {
+    "input": "tmp/serde/serde_core/src/de/impls.rs",
+    "sha256": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "matchesPriorSuccessfulTranslation": true,
+    "output": "build/rust-kotlin-string-in-place/ImplsReview.kt",
+    "outputSha256": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "macroSourceIndependentlyReviewed": [
+      "tuple_impl_body! in-place visitor",
+      "tuple_impls! arity 3"
+    ],
+    "newTranslatorProcessStarted": false,
+    "comparison": "Generated triple in-place visitor ImplsReview.kt:4274-4298 compared with actual tuple_impl_body! and three-field instantiation; adapt field values to existing canonical caller slots, no generator fix.",
+    "allocationLimit": "Existing Kotlin capacity policy unchanged; no Rust generic element-layout/cautious-capacity equivalence claimed."
+  },
+  "sourceComparison": "Rust tuple_impl_body! in-place visitor de/impls.rs:1433-1465; existing generated triple visitor ImplsReview.kt:4274-4298; manual canonical mutable-slot adaptation, not generator repair.",
+  "productionScope": "Only existing triple codec MutablePlace overload specialized. Existing pair code and ordinary triple decode/setter behavior byte-preserved; no dependencies or public signatures changed.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "red": {
+    "suite": {
+      "name": "TripleInPlaceParityTest[jvm]",
+      "tests": "13",
+      "skipped": "0",
+      "failures": "10",
+      "errors": "0",
+      "timestamp": "2026-11-03T01:10:18.921Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.044"
+    },
+    "failures": [
+      {
+        "case": "success[jvm]",
+        "message": "java.lang.AssertionError: expected same:<io.github.kotlinmania.serdecore.de.TripleInPlaceParityTest$Item@38cee291> was not:<io.github.kotlinmania.serdecore.de.TripleInPlaceParityTest$Item@4b45a2f5>"
+      },
+      {
+        "case": "missingSecond[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 2, 3)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "missingThird[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 20, 3)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "thirdError[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 20, 700)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "thirdPanic[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 20, 800)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "firstError[jvm]",
+        "message": "java.lang.AssertionError: expected:<(700, 2, 3)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "firstPanic[jvm]",
+        "message": "java.lang.AssertionError: expected:<(800, 2, 3)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "secondError[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 700, 3)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "secondPanic[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 800, 3)> but was:<(1, 2, 3)>"
+      },
+      {
+        "case": "primitivePartial[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 20, 3)> but was:<(1, 2, 3)>"
+      }
+    ]
+  },
+  "rustOracle": {
+    "actualUpstreamTupleImplInvoked": true,
+    "passed": 13,
+    "failed": 0,
+    "command": "cargo test --offline --manifest-path verification/triple-in-place-oracle/Cargo.toml --target-dir build/rust-kotlin-triple-in-place/rust-target"
+  },
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 628,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "TripleInPlaceParityTest[jvm]",
+          "tests": "13",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:11:17.163Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.038"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:11:17.414Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:11:17.392Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:11:17.366Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:11:17.369Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 396,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.TripleInPlaceParityTest",
+          "tests": "13",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:13:12.480Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:13:12.494Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:13:12.486Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:13:12.480Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:13:12.482Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "formattingCorrection": "Before production, the same kotlin.test.assertIs was imported and its error extraction named. Red source and exact replacements retained; no fixture behavior or assertions changed. Final checks cover actual final source.",
+  "limitations": [
+    "Immutable Kotlin Triple (like Pair) reconstructed on field replacement; Rust outer address/borrow/Drop/allocator observations not represented. Mutable element identity is checked.",
+    "Exclusive caller-slot access required; reentrant getter/setter callbacks, Send/Sync and other platform behavior unverified.",
+    "No change to ordinary tuple decoding, setter overload, pair code, other tuple arities or allocation policy.",
+    "No downstream builds or source/binary compatibility campaign. Static gates remain failing with baseline findings."
+  ],
+  "noRemoteOrConfigurationActions": true,
+  "hashes": {
+    "build/rust-kotlin-string-in-place/ImplsReview.kt": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "build/rust-kotlin-triple-in-place/attribution.log": "d5a5e1d5d4aac8a357002640665fd1101549af22c3b0ce35337edb62821c72c5",
+    "build/rust-kotlin-triple-in-place/final-check.log": "5fa952de044f99096996a29574a69aaa6e1df61c8b9e782efb239fb7abb2b920",
+    "build/rust-kotlin-triple-in-place/final-validation.json": "95d9eb21e062d29223995daa45f9b74ba69781b948f7765e254be68e13c8cdcd",
+    "build/rust-kotlin-triple-in-place/finalize.py": "7eeb17abe64982bc252f353d71323ac9698222425c8b018493d85f0361f288c0",
+    "build/rust-kotlin-triple-in-place/new-test-before-fix.sha256": "d232a4f477b75052858425a2024b23fa4b9854498c5c2da2ce565e6575ab684d",
+    "build/rust-kotlin-triple-in-place/oracle.log": "edabbad6b7b75f1752678c79ddb1d6982bfc2478baa0a9e3843eaf6189ff9e77",
+    "build/rust-kotlin-triple-in-place/production-change.json": "4a425eb819500233e3a3c31986f242da1fe5fef3a89fba655f8e14ee42a26dd0",
+    "build/rust-kotlin-triple-in-place/red-jvm.log": "1113feffb08060239f1294c8d2918fac65f7415c8310814b9bc4a558ae96f440",
+    "build/rust-kotlin-triple-in-place/red-suite.xml": "42ec3b521a2c4ce76ee6e6b1c8df0e066079b3cffddc61c045b96fd30b965d6d",
+    "build/rust-kotlin-triple-in-place/red-test-source.kt": "8551736b6da9cd304acdda473bf9bc4ff47d12f16ac08105fd8e78f7e193bced",
+    "build/rust-kotlin-triple-in-place/test-layout-change.json": "8f0c0b1c3d515354ae707013ba0abdb88be9c2dc9f08ae862cddd6ea2f7807cc",
+    "build/rust-kotlin-triple-in-place/translator-reuse.json": "7eece9d11ece5b683d52ad52c519e0c7e1c619bc30fc122aa690d9beaaaa14a0",
+    "build/rust-kotlin-triple-in-place/verify_final.py": "68554ce854f2e531e907a31ee4821d068bddbb3045e7372d48f82311b87b5a2b",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.PairInPlaceParityTest.xml": "b835f11a684f3b83d5698d2fc074f3a4dbe001c838a33a69d72d018e760e6e5c",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.PairInPlaceParityTest.xml": "609dc1efe95b91ca115083c4969c5a685b69bb4cf3891122ad626d8d73ba442f",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Deserialize.kt": "96001cb9ce14ccee0d41696a68039a6f5651965211b98964ffe9b9e287d99a67",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Impls.kt": "7c9dad99667a6add10faad151236432d91b771337f9edb8cf14d386fc2f3fdf9",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MutablePlace.kt": "5ee303d2b1ba3b7841153c901e915b203335b41eaf5b69604fd87d665d53c74a",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/Seed.kt": "7795659d930fb9ca127c39a8d9d5a0f4e4a820fa42bd76434cb842b2e6d6b461",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/TripleInPlaceParityTest.kt": "91d13180f7a74ee9f22e15f125085300304826ae4129b572ba00bcc85c0fa1fb",
+    "tmp/serde/serde_core/src/de/impls.rs": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "verification/triple-in-place-oracle/Cargo.lock": "56e3291e72cce211d82bce2cdb8deb4b744f3b5c85a020c9d6828a07f9000d71",
+    "verification/triple-in-place-oracle/Cargo.toml": "c3dacb90a5cee2e8f13ea404c416b68106f520b4135ddf56dc19b71206486b3e",
+    "verification/triple-in-place-oracle/README.md": "ce36d4ed7f95dc21822d1e6f8f31501fd759b004762de21f7b45633c14331436",
+    "verification/triple-in-place-oracle/src/lib.rs": "4b1b3aec32cd72d01ceb2e1520f952320fb42222942590caef327bc66deda899"
+  }
+}

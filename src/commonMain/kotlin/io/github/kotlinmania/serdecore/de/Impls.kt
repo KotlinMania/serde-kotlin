@@ -1003,6 +1003,54 @@ fun <T0, T1, T2> tripleDeserialize(
                         }
                 },
             )
+
+        override fun <D : Deserializer> deserializeInPlace(
+            deserializer: D,
+            place: MutablePlace<Triple<T0, T1, T2>>,
+        ): SerdeResult<Unit> =
+            deserializer.deserializeTuple(
+                3,
+                object : Visitor<Unit> {
+                    override fun expecting(): String = "a tuple of size 3"
+
+                    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Unit> {
+                        // As with Pair, keep the caller slot exclusively accessible.
+                        // Field replacement reconstructs the immutable outer Triple;
+                        // mutable elements retain identity, not a Rust tuple address.
+                        val first = mutablePlace({ place.value.first }, { place.value = Triple(it, place.value.second, place.value.third) })
+                        when (val result = access.nextElementSeed(InPlaceSeed(first, firstDeserialize))) {
+                            is SerdeResult.Failure -> {
+                                return result
+                            }
+
+                            is SerdeResult.Success -> {
+                                if (result.value == SeqElement.None) return SerdeResult.failure(SerdeError.invalidLength(0, this))
+                            }
+                        }
+                        val second = mutablePlace({ place.value.second }, { place.value = Triple(place.value.first, it, place.value.third) })
+                        when (val result = access.nextElementSeed(InPlaceSeed(second, secondDeserialize))) {
+                            is SerdeResult.Failure -> {
+                                return result
+                            }
+
+                            is SerdeResult.Success -> {
+                                if (result.value == SeqElement.None) return SerdeResult.failure(SerdeError.invalidLength(1, this))
+                            }
+                        }
+                        val third = mutablePlace({ place.value.third }, { place.value = Triple(place.value.first, place.value.second, it) })
+                        when (val result = access.nextElementSeed(InPlaceSeed(third, thirdDeserialize))) {
+                            is SerdeResult.Failure -> {
+                                return result
+                            }
+
+                            is SerdeResult.Success -> {
+                                if (result.value == SeqElement.None) return SerdeResult.failure(SerdeError.invalidLength(2, this))
+                            }
+                        }
+                        return SerdeResult.success(Unit)
+                    }
+                },
+            )
     }
 
 // //////////////////////////////////////////////////////////////////////////////
