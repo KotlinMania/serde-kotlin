@@ -251,27 +251,41 @@ interface Serializer<Ok>
      * ```
      */
     fun <T> collectSeq(iter: Iterable<T>): SerdeResult<Ok>
-        where T : Serialize =
-        serdeCatching {
-            val serializer = serializeSeq(iteratorLenHint(iter)).getOrThrow()
-            for (item in iter) {
-                serializer.serializeElement(item).getOrThrow()
+        where T : Serialize {
+        val iterator = iter.iterator()
+        val serializer =
+            when (val result = serializeSeq(iteratorLenHint(iter))) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
             }
-            serializer.end().getOrThrow()
+        while (iterator.hasNext()) {
+            when (val result = serializer.serializeElement(iterator.next())) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> Unit
+            }
         }
+        return serializer.end()
+    }
 
     /**
      * Collect a lazy sequence as a sequence.
      */
     fun <T> collectSeq(iter: Sequence<T>): SerdeResult<Ok>
-        where T : Serialize =
-        serdeCatching {
-            val serializer = serializeSeq(iteratorLenHint(iter)).getOrThrow()
-            for (item in iter) {
-                serializer.serializeElement(item).getOrThrow()
+        where T : Serialize {
+        val iterator = iter.iterator()
+        val serializer =
+            when (val result = serializeSeq(iteratorLenHint(iter))) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
             }
-            serializer.end().getOrThrow()
+        while (iterator.hasNext()) {
+            when (val result = serializer.serializeElement(iterator.next())) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> Unit
+            }
         }
+        return serializer.end()
+    }
 
     /**
      * Collect an iterator as a map.
