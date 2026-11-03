@@ -934,6 +934,41 @@ fun <T0, T1> pairDeserialize(
                         }
                 },
             )
+
+        override fun <D : Deserializer> deserializeInPlace(
+            deserializer: D,
+            place: MutablePlace<Pair<T0, T1>>,
+        ): SerdeResult<Unit> =
+            deserializer.deserializeTuple(
+                2,
+                object : Visitor<Unit> {
+                    override fun expecting(): String = "a tuple of size 2"
+
+                    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Unit> {
+                        // Keep the caller slot exclusively accessible during this visit.
+                        // Kotlin Pair fields are immutable: field replacement writes a new
+                        // outer Pair, while mutable elements retain their existing identity.
+                        val first = mutablePlace({ place.value.first }, { place.value = it to place.value.second })
+                        return access.nextElementSeed(InPlaceSeed(first, firstDeserialize)).flatMap { firstResult ->
+                            when (firstResult) {
+                                SeqElement.None -> {
+                                    SerdeResult.failure(SerdeError.invalidLength(0, this))
+                                }
+
+                                is SeqElement.Some -> {
+                                    val second = mutablePlace({ place.value.second }, { place.value = place.value.first to it })
+                                    access.nextElementSeed(InPlaceSeed(second, secondDeserialize)).flatMap { secondResult ->
+                                        when (secondResult) {
+                                            SeqElement.None -> SerdeResult.failure(SerdeError.invalidLength(1, this))
+                                            is SeqElement.Some -> SerdeResult.success(Unit)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            )
     }
 
 fun <T0, T1, T2> tripleDeserialize(

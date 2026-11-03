@@ -1,0 +1,268 @@
+{
+  "baseline": "1030be3",
+  "recordedAtUTC": "2026-11-03T01:07:58.826723+00:00",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "1030be3",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "graphPriority": {
+    "directSerdeReverseDependents": 56
+  },
+  "translatorEvidence": {
+    "input": "tmp/serde/serde_core/src/de/impls.rs",
+    "sha256": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "matchesPriorSuccessfulTranslation": true,
+    "output": "build/rust-kotlin-string-in-place/ImplsReview.kt",
+    "outputSha256": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "macroSourceIndependentlyReviewed": [
+      "variant_identifier",
+      "deserialize_enum",
+      "IpAddr",
+      "SocketAddr"
+    ],
+    "newTranslatorProcessStarted": false,
+    "comparison": "Existing generated tuple macros reviewed alongside exact Rust tuple_impl_body! lines 1433-1465; manual canonical MutablePlace/InPlaceSeed adaptation, not a generator repair.",
+    "allocationLimit": "Existing Kotlin capacity policy unchanged; no Rust generic element-layout/cautious-capacity equivalence claimed."
+  },
+  "sourceComparison": "Rust tuple_impl_body! in-place visitor de/impls.rs:1433-1465; existing generated pair visitor ImplsReview.kt:4217-4237; manual canonical mutable-slot adaptation, not generator repair.",
+  "productionScope": "Only existing pair codec MutablePlace overload specialized. Existing ordinary decode/setter behavior byte-preserved; no dependencies or public signatures changed.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "red": {
+    "suite": {
+      "name": "PairInPlaceParityTest[jvm]",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "6",
+      "errors": "0",
+      "timestamp": "2026-11-03T01:02:14.182Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.035"
+    },
+    "failures": [
+      {
+        "case": "success[jvm]",
+        "message": "java.lang.AssertionError: expected same:<io.github.kotlinmania.serdecore.de.PairInPlaceParityTest$Item@791f145a> was not:<io.github.kotlinmania.serdecore.de.PairInPlaceParityTest$Item@38cee291>"
+      },
+      {
+        "case": "missingSecond[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 2)> but was:<(1, 2)>"
+      },
+      {
+        "case": "firstError[jvm]",
+        "message": "java.lang.AssertionError: expected:<(700, 2)> but was:<(1, 2)>"
+      },
+      {
+        "case": "firstPanic[jvm]",
+        "message": "java.lang.AssertionError: expected:<(800, 2)> but was:<(1, 2)>"
+      },
+      {
+        "case": "secondError[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 700)> but was:<(1, 2)>"
+      },
+      {
+        "case": "secondPanic[jvm]",
+        "message": "java.lang.AssertionError: expected:<(10, 800)> but was:<(1, 2)>"
+      }
+    ]
+  },
+  "rustOracle": {
+    "actualUpstreamTupleImplInvoked": true,
+    "passed": 9,
+    "failed": 0,
+    "command": "cargo test --offline --manifest-path verification/pair-in-place-oracle/Cargo.toml --target-dir build/rust-kotlin-pair-in-place/rust-target"
+  },
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 615,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "PairInPlaceParityTest[jvm]",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:05:50.400Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.003"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:05:50.451Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:05:50.430Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:05:50.404Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:05:50.407Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 383,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.PairInPlaceParityTest",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:07:41.209Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:07:41.220Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:07:41.215Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:07:41.210Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:07:41.211Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "formattingCorrection": "First full run had passing pair suites plus 16 new ktlint findings. Original log/source/suite receipts retained; new test normalization confirms only whitespace/optional commas changed. Final checks ran after corrections.",
+  "limitations": [
+    "Immutable Kotlin Pair reconstructed on field replacement; Rust outer address/borrow/Drop/allocator observations not represented. Mutable element identity is checked.",
+    "Exclusive caller-slot access required; reentrant getter/setter callbacks, Send/Sync and other platform behavior unverified.",
+    "No change to ordinary tuple decoding, setter overload, triples/other tuple arities or allocation policy.",
+    "No downstream builds or source/binary compatibility campaign. Static gates remain failing with baseline findings."
+  ],
+  "noRemoteOrConfigurationActions": true,
+  "hashes": {
+    "build/rust-kotlin-pair-in-place/attribution.log": "1db8a9512ba2c7529f429bd4c1b41ad1590286af787c1dd5451ef2797a19bfb3",
+    "build/rust-kotlin-pair-in-place/final-check.log": "0c73d6940ce7a0265c993e0c9d40b0a85979d079936f149a524bb19fbe366036",
+    "build/rust-kotlin-pair-in-place/final-validation.json": "c04cf5246f43fb14c6826bf4b8d34c1897935fe1f58b13c92893f5f11d3db475",
+    "build/rust-kotlin-pair-in-place/finalize.py": "6863043d49567058c2f0419c510c4e9aa80006ad7dd489315bed117e1b01a62e",
+    "build/rust-kotlin-pair-in-place/first-final-check.log": "68d64cc494ae0a6128afa6da72e0bebec432fbc6f24044d06fc0606e0c1ee40a",
+    "build/rust-kotlin-pair-in-place/first-jvmTest-suite.xml": "3be643979d15b44e3fed8970cd583ce8d8069110e8ed7c6d7db641e6bee5e2c2",
+    "build/rust-kotlin-pair-in-place/first-macosArm64Test-suite.xml": "e4621830d5ca142bbe336f66caab6a6d632c95a98925d21af8b332a6be73fcc9",
+    "build/rust-kotlin-pair-in-place/first-production-source.kt": "70162bd2f1e10e6aabf5084875b91ead1206c543e7b696734d8265768cec13bc",
+    "build/rust-kotlin-pair-in-place/new-test-before-fix.sha256": "f0638fd0d573efc7385a0ce27c642002621a57679396c83f5fa3e0fc44aea850",
+    "build/rust-kotlin-pair-in-place/oracle.log": "f8eb22c4dcee79a9c1767b62e311f422f9bb6092dcf48c8647f4f51fff29b2ab",
+    "build/rust-kotlin-pair-in-place/production-change.json": "04f6a4d00f8a9db0dc4d01b10b1e3b6ae5bb8f4aacf58d9be3956930bf9072f3",
+    "build/rust-kotlin-pair-in-place/red-jvm.log": "c6ae8fe9e7cfa126a147a659bd02fec047c88bbe4f21b8466c4bc081b7c0e47d",
+    "build/rust-kotlin-pair-in-place/red-suite.xml": "76a0038f4c132956a8f70d4450437c314eb35beb2609f7f096a1d9ed006ea0f5",
+    "build/rust-kotlin-pair-in-place/red-test-source.kt": "570a30f03ae95b2061fe508294bc01a08fd7d0bf4c564a9b748c0910434dfdf3",
+    "build/rust-kotlin-pair-in-place/test-layout-change.json": "2c86cba5bfdd291463b666727bb821b40f4cb54757af4851743c1088101f9444",
+    "build/rust-kotlin-pair-in-place/translator-reuse.json": "091b27e086d52039d0283f424f9c1e71d2508a16082dd690cda69aa8dac203fd",
+    "build/rust-kotlin-pair-in-place/verify_final.py": "aa6af1293bbcd57349aa5bb7d29c27e71b3c20c14a142ce8de6b1910fb99bcac",
+    "build/rust-kotlin-string-in-place/ImplsReview.kt": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.PairInPlaceParityTest.xml": "8d16c9776a7c8e435ae02f17f2adfadb85b3d762aca590a607455edf65c87119",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.PairInPlaceParityTest.xml": "66bc5b9a7076058b603cfea461040614f7b4bca1b8cdd82d9efc7ecca1fe8f64",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Deserialize.kt": "96001cb9ce14ccee0d41696a68039a6f5651965211b98964ffe9b9e287d99a67",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Impls.kt": "9ccd94b0210afea7bbb6dc38e05d2a837f1ad387faab17b0114216f472f9bb5f",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MutablePlace.kt": "5ee303d2b1ba3b7841153c901e915b203335b41eaf5b69604fd87d665d53c74a",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/Seed.kt": "7795659d930fb9ca127c39a8d9d5a0f4e4a820fa42bd76434cb842b2e6d6b461",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/PairInPlaceParityTest.kt": "4cb1897ca04753d942381b4b73980479e685f23d767eb012fa2f2dd3a8b39dbb",
+    "tmp/serde/serde_core/src/de/impls.rs": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "verification/pair-in-place-oracle/Cargo.lock": "6b20fc180c6fae2011194bd0e2478986c8cb9a775bddd0a0b537637ef8bfb142",
+    "verification/pair-in-place-oracle/Cargo.toml": "6b0e6dfe5a3d2ae0cbf53ed74ba3421c533c7eb0265f03990d177c7dc90efd53",
+    "verification/pair-in-place-oracle/README.md": "9b33fa76b0bedbbb000b4f5749a7ae2d1c3bd2308148db9e9db6a8bcd1bbbd96",
+    "verification/pair-in-place-oracle/src/lib.rs": "f1929c228834cab4698a5007fa9d550de89fbd07b785f3a0d2ce97b2d2a43f63"
+  }
+}
