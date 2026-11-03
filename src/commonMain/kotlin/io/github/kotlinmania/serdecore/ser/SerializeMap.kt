@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * Returned from `Serializer.serializeMap`.
@@ -30,10 +29,7 @@ interface SerializeMap<Ok>
     ): SerdeResult<Unit>
         where K : Serialize,
               V : Serialize =
-        serdeCatching {
-            serializeKey(key).getOrThrow()
-            serializeValue(value).getOrThrow()
-        }
+        serializeKey(key).flatMap { serializeValue(value) }
 
     /**
      * Finish serializing a map.

@@ -4,7 +4,6 @@ package io.github.kotlinmania.serdecore.ser
 import io.github.kotlinmania.serde.SerdeError
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * A **data format** that can serialize any data structure supported by Serde.
@@ -304,28 +303,44 @@ interface Serializer<Ok>
      */
     fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): SerdeResult<Ok>
         where K : Serialize,
-              V : Serialize =
-        serdeCatching {
-            val serializer = serializeMap(iteratorLenHint(iter)).getOrThrow()
-            for ((key, value) in iter) {
-                serializer.serializeEntry(key, value).getOrThrow()
+              V : Serialize {
+        val iterator = iter.iterator()
+        val serializer =
+            when (val result = serializeMap(iteratorLenHint(iter))) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
             }
-            serializer.end().getOrThrow()
+        while (iterator.hasNext()) {
+            val (key, value) = iterator.next()
+            when (val result = serializer.serializeEntry(key, value)) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> Unit
+            }
         }
+        return serializer.end()
+    }
 
     /**
      * Collect a lazy sequence as a map.
      */
     fun <K, V> collectMap(iter: Sequence<Pair<K, V>>): SerdeResult<Ok>
         where K : Serialize,
-              V : Serialize =
-        serdeCatching {
-            val serializer = serializeMap(iteratorLenHint(iter)).getOrThrow()
-            for ((key, value) in iter) {
-                serializer.serializeEntry(key, value).getOrThrow()
+              V : Serialize {
+        val iterator = iter.iterator()
+        val serializer =
+            when (val result = serializeMap(iteratorLenHint(iter))) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
             }
-            serializer.end().getOrThrow()
+        while (iterator.hasNext()) {
+            val (key, value) = iterator.next()
+            when (val result = serializer.serializeEntry(key, value)) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> Unit
+            }
         }
+        return serializer.end()
+    }
 
     /**
      * Serialize a string produced by an implementation of `toString`.
