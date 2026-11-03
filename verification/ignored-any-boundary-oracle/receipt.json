@@ -1,0 +1,350 @@
+{
+  "baseline": "edc20ba",
+  "recordedAtUTC": "2026-11-03T01:31:17.494196+00:00",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "edc20ba",
+    "7fb7e2b",
+    "9f2bd35",
+    "1030be3",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "graphPriority": {
+    "directSerdeReverseDependents": 56
+  },
+  "translatorEvidence": {
+    "command": [
+      "/Volumes/stuff/Projects/kotlinmania/rust-kotlin/build/bin/nativeMacos/releaseExecutable/rust-kotlin.kexe",
+      "translate",
+      "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde_core/src/de/ignored_any.rs",
+      "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/rust-kotlin-ignored-any-boundary/IgnoredAnyReview.kt"
+    ],
+    "exit": 0,
+    "stdout": "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde_core/src/de/ignored_any.rs -> /Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/rust-kotlin-ignored-any-boundary/IgnoredAnyReview.kt; 5 items translated\n",
+    "stderr": "",
+    "timedOut": false,
+    "sourceSha256": "6480f2b2a83dc4764d01b2eec7309729eef2492eede2e5ee98d23a60b05198eb",
+    "cliSha256": "027d237f2844e0291cf2b9e06ab4bd73e828abccce02db65db992fb3478396c4",
+    "outputExists": true,
+    "guardBypassed": false,
+    "outputSha256": "e65765cbbafe49b80a04e8f37e353734189de345eda63c7c62dda5411a6a06f6"
+  },
+  "sourceComparison": "Actual ignored_any.rs streaming visitors compared with fresh IgnoredAnyReview.kt:233-252. Generated sequence double-read recorded separately and not adopted; manual canonical single-read adaptation, not a generator repair.",
+  "productionScope": "Only IgnoredAny sequence/map/enum bodies plus relocating unused serdeCatching import into its documentation example. Tuple ordinary/in-place code, dependencies and public signatures unchanged.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "red": {
+    "suite": {
+      "name": "IgnoredAnyBoundaryParityTest[jvm]",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "3",
+      "errors": "0",
+      "timestamp": "2026-11-03T01:26:43.188Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.031"
+    },
+    "failures": [
+      {
+        "case": "enumPanics[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<[panic]:probe panic> but was:<[error]:probe panic>"
+      },
+      {
+        "case": "mapPanics[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<[panic]:probe panic> but was:<[error]:probe panic>"
+      },
+      {
+        "case": "seqPanics[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<[panic]:probe panic> but was:<[error]:probe panic>"
+      }
+    ]
+  },
+  "rustOracle": {
+    "actualUpstreamIgnoredAnyVisitorsInvoked": true,
+    "groups": 9,
+    "scenarios": 17,
+    "passed": 9,
+    "failed": 0,
+    "command": "cargo test --offline --manifest-path verification/ignored-any-boundary-oracle/Cargo.toml --target-dir build/rust-kotlin-ignored-any-boundary/rust-target"
+  },
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 646,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "IgnoredAnyBoundaryParityTest[jvm]",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:28:15.250Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.027"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:28:15.519Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:28:15.498Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.003"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:28:15.465Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:28:15.476Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 414,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.IgnoredAnyBoundaryParityTest",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:30:07.539Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:30:07.559Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:30:07.555Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:30:07.548Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T01:30:07.551Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 48,
+    "authoredDetekt": []
+  },
+  "staticDelta": {
+    "baseline": "edc20ba",
+    "detektBefore": 50,
+    "detektAfter": 48,
+    "removedFindings": [
+      "e: /Volumes/stuff/Projects/kotlinmania/serde-kotlin/src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/IgnoredAny.kt:107:88 This empty block of code can be removed. [EmptyWhileBlock]",
+      "e: /Volumes/stuff/Projects/kotlinmania/serde-kotlin/src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/IgnoredAny.kt:115:87 This empty block of code can be removed. [EmptyWhileBlock]"
+    ],
+    "baselineLog": "build/rust-kotlin-tuple-decode-boundary/final-check.log",
+    "baselineLogSha256": "eee217d59509a045911498c78b6981223553f70767f15b6029736d91a3968c87",
+    "ktlintBefore": 6567,
+    "ktlintAfter": 6567,
+    "explanation": "The two existing empty while bodies are replaced by explicit result-handling loops as part of the behavioral repair; no lint-only source changes or suppressions."
+  },
+  "newTestSourceUnchangedSinceRed": true,
+  "generatedOutputLimit": "Fresh CLI success is emission only; output not compiled. Sequence loop duplicates nextElement expression; exact structural evidence/proposed generator fix in GENERATOR_ISSUE.md, no generator changes.",
+  "limitations": [
+    "Shared MapAccess nullable-key ambiguity remains; IgnoredAny singleton keys are non-null.",
+    "No full unknown-field policy/arbitrary nested-value/platform/downstream equivalence claim.",
+    "Rust ownership, borrowing, Drop and Send/Sync remain unverified. Immutable outer Pair/Triple identity limits unchanged.",
+    "Generated output double-evaluation defect documented, not fixed or compiled. Existing static gates remain failing."
+  ],
+  "noRemoteOrConfigurationActions": true,
+  "preservedInPlaceSuites": {
+    "jvmTest": [
+      {
+        "name": "TupleDecodeBoundaryParityTest[jvm]",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T01:28:15.472Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.002"
+      },
+      {
+        "name": "PairInPlaceParityTest[jvm]",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T01:28:15.461Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.003"
+      },
+      {
+        "name": "TripleInPlaceParityTest[jvm]",
+        "tests": "13",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T01:28:15.468Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.003"
+      }
+    ],
+    "macosArm64Test": [
+      {
+        "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.TupleDecodeBoundaryParityTest",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T01:30:07.550Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      },
+      {
+        "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.PairInPlaceParityTest",
+        "tests": "9",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T01:30:07.548Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.0"
+      },
+      {
+        "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.TripleInPlaceParityTest",
+        "tests": "13",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-11-03T01:30:07.549Z",
+        "hostname": "EmberHarmony.local",
+        "time": "0.001"
+      }
+    ]
+  },
+  "hashes": {
+    "build/rust-kotlin-ignored-any-boundary/IgnoredAnyReview.kt": "e65765cbbafe49b80a04e8f37e353734189de345eda63c7c62dda5411a6a06f6",
+    "build/rust-kotlin-ignored-any-boundary/attribution.log": "f359c8036c684a22ef641a2a8ff9e99c9a85ac4fb3991a38ee4016252138edf5",
+    "build/rust-kotlin-ignored-any-boundary/cases.json": "9b379a998cfe4b9949bbe842ecd2e3e575de1f7b3dc45c4358c43bc9c6fc4f03",
+    "build/rust-kotlin-ignored-any-boundary/final-check.log": "d395cc13a06a6bfa1128f216b4ed8b8325e4e1be12d4c9d62ea87d2c4ada8481",
+    "build/rust-kotlin-ignored-any-boundary/final-validation.json": "7830f5515aff044d68c569b1527f3a63727f3f24df70c08efbc85eae0adf437d",
+    "build/rust-kotlin-ignored-any-boundary/finalize.py": "e11721463d2b88676bf9e93f7fc7d8420c6f2f3760e361ca4eadbc3518e38936",
+    "build/rust-kotlin-ignored-any-boundary/new-test-before-fix.sha256": "f6bd353db9b22c62d725efef4ec24df714bb80f37f5e5af8eb67402b06a079fa",
+    "build/rust-kotlin-ignored-any-boundary/oracle.log": "b2a53724e055af592845aa4a7d56dbb485e82660f8ecbabffd050a211d334a9e",
+    "build/rust-kotlin-ignored-any-boundary/production-change.json": "464a2ca089e327a05c10ece37701b8895bb3056c509fbd299c89cbe69417890a",
+    "build/rust-kotlin-ignored-any-boundary/red-jvm.log": "18b83d601d8e9fc7b741ff4663afbaa0435c547f5fbf037065e1423059fb11f5",
+    "build/rust-kotlin-ignored-any-boundary/red-suite.xml": "bebb9864dbf812386fef02268870a59ae36aeb685cf83e290b53a64b8e1a410a",
+    "build/rust-kotlin-ignored-any-boundary/red-test-source.kt": "615ee945ec8f498db3a2b328b5ed8fb752a20f73de583a98352aa7cd8e8bbcc3",
+    "build/rust-kotlin-ignored-any-boundary/static-delta.json": "2a3277b3931d2c2c587f7a0c6ae8d1091439fc57c4f34f04fafe78d30b3e6b57",
+    "build/rust-kotlin-ignored-any-boundary/translator-attempt.json": "f66619b25fc73e821695ba6057335f8f01d035ebf9e192dbfc1c902125ffd503",
+    "build/rust-kotlin-ignored-any-boundary/verify_final.py": "18ccc6a922230698c7c5db9fa691ebb43b90666f4646a1135b03cf3c24da2be3",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.IgnoredAnyBoundaryParityTest.xml": "92ef772fed1539db598c269b95219658cbb704ea663ff1c3c57f1917e933b3f5",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.PairInPlaceParityTest.xml": "5ab088b5e8dc4da06c5ff36506e7e9975c1abf9ee6c6bd9caaa6088e676cba62",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.TripleInPlaceParityTest.xml": "3113a66cce4c065c6adad8dc7d74b7e5c93f2a8e7d605ec6ce5e556074f6261d",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.TupleDecodeBoundaryParityTest.xml": "4573321a5a65a3fce6e1b8b12596404b1bb52d7f4fbee898e4f846fb471beb7d",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.IgnoredAnyBoundaryParityTest.xml": "f5f23990c2c14374be2df19db096db255d8bca928bcbe9a973b9ad045639e74d",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.PairInPlaceParityTest.xml": "b2af3022de4453aa307a67a3728ca1454725951205ac96a9d9bd5f96180b2351",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.TripleInPlaceParityTest.xml": "445b15557884a635cf2a203a8c92d121e975b785e3ae844ae02f138cd299f827",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.TupleDecodeBoundaryParityTest.xml": "d53da3ddc971577a30f19cd0c35a86e6a7d54924a34876a7066c6da7718661c0",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Deserialize.kt": "96001cb9ce14ccee0d41696a68039a6f5651965211b98964ffe9b9e287d99a67",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/IgnoredAny.kt": "885e1a680d3272848aa79e95bdd2c6aacf14e62e914408c1a1636b30975ef48a",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MutablePlace.kt": "5ee303d2b1ba3b7841153c901e915b203335b41eaf5b69604fd87d665d53c74a",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/Seed.kt": "7795659d930fb9ca127c39a8d9d5a0f4e4a820fa42bd76434cb842b2e6d6b461",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/IgnoredAnyBoundaryParityTest.kt": "615ee945ec8f498db3a2b328b5ed8fb752a20f73de583a98352aa7cd8e8bbcc3",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/PairInPlaceParityTest.kt": "4cb1897ca04753d942381b4b73980479e685f23d767eb012fa2f2dd3a8b39dbb",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/TripleInPlaceParityTest.kt": "91d13180f7a74ee9f22e15f125085300304826ae4129b572ba00bcc85c0fa1fb",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/TupleDecodeBoundaryParityTest.kt": "56abb5fc3d88b9aa9af50c7524a36a99738ab1ad05d12fd39cefdbb58570b518",
+    "tmp/serde/serde_core/src/de/ignored_any.rs": "6480f2b2a83dc4764d01b2eec7309729eef2492eede2e5ee98d23a60b05198eb",
+    "verification/ignored-any-boundary-oracle/Cargo.lock": "b31e1692b3fffa6943d5d5992036b3ab4ffbddbc722a551c61ba8d86987dd136",
+    "verification/ignored-any-boundary-oracle/Cargo.toml": "3ca31a37ecb6ac75574c45de193f9db7df66cb6531a6a040eaabd13e0b525517",
+    "verification/ignored-any-boundary-oracle/GENERATOR_ISSUE.md": "000fade8818e3c1f2e6e73d77e31df3b944382505a210a54b7d07d1804767565",
+    "verification/ignored-any-boundary-oracle/README.md": "3c52dc3476363be4ef076f18b456f95731cd3e191e41a2ea98f5ca0069b9d687",
+    "verification/ignored-any-boundary-oracle/src/lib.rs": "b35df5cc2a259c8c6b44f57773829b6a2dd2733324ffe8c2a07f825e0e645446"
+  }
+}

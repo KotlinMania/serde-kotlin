@@ -4,7 +4,6 @@ package io.github.kotlinmania.serdecore.de
 import io.github.kotlinmania.serde.SerdeError
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.serdeCatching
 
 /**
  * An efficient way of discarding data from a deserializer.
@@ -13,6 +12,7 @@ import io.github.kotlinmania.serde.serdeCatching
  * not store any information about the data that gets deserialized.
  *
  * ```kotlin
+ * import io.github.kotlinmania.serde.serdeCatching
  * import io.github.kotlinmania.serdecore.de.Deserialize
  * import io.github.kotlinmania.serdecore.de.DeserializeSeed
  * import io.github.kotlinmania.serdecore.de.Deserializer
@@ -101,33 +101,43 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
 
     override fun visitUnit(): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
-    override fun <A> visitSeq(access: A): SerdeResult<IgnoredAny>
-        where A : SeqAccess =
-        serdeCatching {
-            while (access.nextElementSeed(IgnoredAny).getOrThrow() is SeqElement.Some) {
-            }
-            IgnoredAny
-        }
+    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<IgnoredAny> {
+        while (true) {
+            when (val result = access.nextElementSeed(IgnoredAny)) {
+                is SerdeResult.Failure -> {
+                    return result
+                }
 
-    override fun <A> visitMap(access: A): SerdeResult<IgnoredAny>
-        where A : MapAccess =
-        serdeCatching {
-            while (access.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
+                is SerdeResult.Success -> {
+                    when (result.value) {
+                        is SeqElement.Some -> Unit
+                        SeqElement.None -> return SerdeResult.success(IgnoredAny)
+                    }
+                }
             }
-            IgnoredAny
         }
+    }
+
+    override fun <A : MapAccess> visitMap(access: A): SerdeResult<IgnoredAny> {
+        while (true) {
+            when (val result = access.nextEntrySeed(IgnoredAny, IgnoredAny)) {
+                is SerdeResult.Failure -> {
+                    return result
+                }
+
+                is SerdeResult.Success -> {
+                    if (result.value == null) return SerdeResult.success(IgnoredAny)
+                }
+            }
+        }
+    }
 
     override fun visitBytes(v: ByteArray): SerdeResult<IgnoredAny> = SerdeResult.success(IgnoredAny)
 
     override fun <A> visitEnum(access: A): SerdeResult<IgnoredAny>
         where A : EnumAccess =
-        serdeCatching {
-            access
-                .variantSeed(IgnoredAny)
-                .getOrThrow()
-                .second
-                .newtypeVariant(IgnoredAny)
-                .getOrThrow()
+        access.variantSeed(IgnoredAny).flatMap { (_, variant) ->
+            variant.newtypeVariant(IgnoredAny)
         }
 
     override fun <D> deserialize(deserializer: D): SerdeResult<IgnoredAny>
