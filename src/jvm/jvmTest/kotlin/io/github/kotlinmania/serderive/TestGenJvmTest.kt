@@ -1133,7 +1133,7 @@ private class RustFixtureTransformer {
                             else -> content
                         },
                 )
-            is Item.Fn -> item.copy(block = item.block?.let(::transformBlock))
+            is Item.Fn -> item.copy(block = transformBlock(item.block))
             is Item.Struct,
             is Item.Enum,
             is Item.Union,

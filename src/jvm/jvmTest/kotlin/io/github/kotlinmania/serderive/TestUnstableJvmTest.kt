@@ -1,4 +1,3 @@
-// port-lint: tests test_suite/tests/unstable/mod.rs
 package io.github.kotlinmania.serderive
 
 import kotlin.test.Test

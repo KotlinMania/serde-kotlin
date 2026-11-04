@@ -17,7 +17,7 @@ import io.github.kotlinmania.syn.PathSegment
 import io.github.kotlinmania.syn.PathSegmentList
 import io.github.kotlinmania.syn.ReturnType
 import io.github.kotlinmania.syn.SynType
-import io.github.kotlinmania.syn.TraitBoundModifier
+import io.github.kotlinmania.syn.TraitBoundModifiers
 import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.TypeParamBoundList
 import io.github.kotlinmania.syn.WherePredicate
@@ -43,7 +43,6 @@ internal fun withoutDefaults(generics: Generics): Generics {
                         param.ident,
                         param.colonToken,
                         param.bounds,
-                        eqToken = null,
                         default = null,
                     ),
                 ) { Comma.default() }
@@ -151,7 +150,7 @@ internal fun withBound(
         fun visitType(ty: SynType) {
             when (ty) {
                 is SynType.Array -> visitType(ty.elem)
-                is SynType.BareFn -> {
+                is SynType.FnPtr -> {
                     for (arg in ty.inputs.toList()) {
                         visitType(arg.ty)
                     }
@@ -207,7 +206,7 @@ internal fun withBound(
                 }
                 is PathArguments.Parenthesized -> {
                     for (argument in arguments.inputs.toList()) {
-                        visitType(argument)
+                        visitType(argument.ty)
                     }
                     visitReturnType(arguments.output)
                 }
@@ -267,8 +266,9 @@ internal fun withBound(
         boundsList.pushValue(
             TypeParamBound.Trait(
                 parenToken = null,
-                modifier = TraitBoundModifier.None,
                 lifetimes = null,
+                modifiers = TraitBoundModifiers(),
+                maybe = null,
                 path = traitBound.deepCopy(),
             ),
         )
@@ -310,8 +310,9 @@ internal fun withSelfBound(
     boundsList.pushValue(
         TypeParamBound.Trait(
             parenToken = null,
-            modifier = TraitBoundModifier.None,
             lifetimes = null,
+            modifiers = TraitBoundModifiers(),
+            maybe = null,
             path = bound.deepCopy(),
         ),
     )

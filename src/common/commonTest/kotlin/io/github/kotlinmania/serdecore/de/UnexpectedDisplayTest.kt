@@ -1,4 +1,3 @@
-// port-lint: source serde_core/src/de/mod.rs, Display for Unexpected
 package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError

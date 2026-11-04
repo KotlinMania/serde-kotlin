@@ -10,9 +10,9 @@ ktlint = "14.2.0"
 ktlintEngine = "1.8.0"
 kotlinxBenchmark = "0.5.0"
 vanniktech = "0.37.0"
-syn = "0.4.0"
-quote = "0.2.5"
-procMacro2 = "0.1.7"
+syn = "0.5.0"
+quote = "0.3.1"
+procMacro2 = "0.1.8"
 numTraits = "0.2.15"
 kmIo = "0.2.0"
 libc = "0.1.11"
@@ -21,6 +21,7 @@ multi-release-toolchain = "17"
 dokka = "2.2.0"
 animalsniffer = "2.0.1"
 kover = "0.9.9"
+androidxTestRunner = "1.7.0"
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -54,6 +55,7 @@ num-traits-kotlin = { module = "io.github.kotlinmania:num-traits-kotlin", versio
 km-io = { module = "io.github.kotlinmania:km-io", version.ref = "kmIo" }
 libc-kotlin = { module = "io.github.kotlinmania:libc-kotlin", version.ref = "libc" }
 serde-test-kotlin = { module = "io.github.kotlinmania:serde-test-kotlin", version.ref = "serdeTest" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
 [bundles]
 serde-commonMain = [
