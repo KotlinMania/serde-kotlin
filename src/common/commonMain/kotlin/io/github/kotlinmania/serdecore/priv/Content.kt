@@ -7,7 +7,10 @@ package io.github.kotlinmania.serdecore.priv
 // Not public API. Use serde-value instead.
 //
 // Obsoleted by format-specific buffer types (https://github.com/serde-rs/serde/pull/2912).
-data class ContentMapEntry(val key: Content, val value: Content)
+data class ContentMapEntry(
+    val key: Content,
+    val value: Content,
+)
 
 sealed interface Content {
     data class Bool(
@@ -88,7 +91,7 @@ sealed interface Content {
     data class ByteBuf(
         val value: ByteArray,
     ) : Content {
-        override fun equals(other: Any?): Boolean = this === other || other is ByteBuf && value.contentEquals(other.value)
+        override fun equals(other: Any?): Boolean = this === other || (other is ByteBuf && value.contentEquals(other.value))
 
         override fun hashCode(): Int = value.contentHashCode()
     }
@@ -97,7 +100,7 @@ sealed interface Content {
     data class Bytes(
         val value: ByteArray,
     ) : Content {
-        override fun equals(other: Any?): Boolean = this === other || other is Bytes && value.contentEquals(other.value)
+        override fun equals(other: Any?): Boolean = this === other || (other is Bytes && value.contentEquals(other.value))
 
         override fun hashCode(): Int = value.contentHashCode()
     }

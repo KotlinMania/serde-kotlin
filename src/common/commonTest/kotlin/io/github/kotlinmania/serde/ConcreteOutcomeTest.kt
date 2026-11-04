@@ -40,9 +40,10 @@ class ConcreteOutcomeTest {
     @Test
     fun concreteDecodingPreservesOriginalDiagnostic() {
         val error = SerdeError.custom("source diagnostic")
-        val decoder = object : Deserializer by StrDeserializer.new("unused") {
-            override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = SerdeResult.failure(error)
-        }
+        val decoder =
+            object : Deserializer by StrDeserializer.new("unused") {
+                override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = SerdeResult.failure(error)
+            }
         val outcome = SerdeDecoding.text(SerdeDecodeInput.fromDeserializer(decoder))
         assertTrue(outcome.isFailure)
         assertNull(outcome.value)

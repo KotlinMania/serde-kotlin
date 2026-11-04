@@ -938,5 +938,5 @@ private fun buildAdjacentlyTaggedFixtureSource(): String {
                 r#"invalid value: byte array, expected "t" or "c""#,
             );
         }
-    """.trimIndent() + "\n"
+        """.trimIndent() + "\n"
 }

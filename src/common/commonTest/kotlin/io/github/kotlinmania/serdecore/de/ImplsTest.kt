@@ -5,14 +5,14 @@ import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serdecore.de.value.I32Deserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
-import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 public class ImplsTest {
     @Test

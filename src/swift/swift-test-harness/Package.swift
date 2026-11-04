@@ -1,5 +1,14 @@
 // swift-tools-version: 6.0
+import Foundation
 import PackageDescription
+
+let swiftExportConfiguration: String = {
+    let raw =
+        ProcessInfo.processInfo.environment["SWIFT_EXPORT_CONFIGURATION"]
+        ?? ProcessInfo.processInfo.environment["CONFIGURATION"]
+        ?? "Debug"
+    return raw.lowercased() == "release" ? "Release" : "Debug"
+}()
 
 let package = Package(
     name: "SwiftTestHarness",
@@ -7,19 +16,29 @@ let package = Package(
         .macOS(.v15),
     ],
     dependencies: [
-        .package(name: "Serde", path: "../../../build/SPMPackage/macosArm64/Debug")
+        .package(name: "Serde", path: "../../../build/SPMPackage/macosArm64/\(swiftExportConfiguration)"),
     ],
     targets: [
         .testTarget(
             name: "SwiftTestHarnessTests",
             dependencies: [
-                .product(name: "SerdeLibrary", package: "Serde")
+                .product(name: "SerdeLibrary", package: "Serde"),
             ],
             linkerSettings: [
-                .unsafeFlags([
-                    "-L", "../../../build/swift-test",
-                    "-lSerde",
-                ]),
+                .unsafeFlags(
+                    [
+                        "-L", "../../../build/swift-test/Debug",
+                        "-lSerde",
+                    ],
+                    .when(configuration: .debug)
+                ),
+                .unsafeFlags(
+                    [
+                        "-L", "../../../build/swift-test/Release",
+                        "-lSerde",
+                    ],
+                    .when(configuration: .release)
+                ),
             ]
         ),
     ],

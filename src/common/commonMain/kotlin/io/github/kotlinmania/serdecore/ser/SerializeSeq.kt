@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeSeq`.
  */
-interface SerializeSeq<Ok>
-    {
+interface SerializeSeq<Ok> {
     /**
      * Serialize a sequence element.
      */

@@ -108,12 +108,17 @@ class TestSerJvmTest {
 
     @Test
     fun testArray() {
+        fun element(value: Int): Serialize =
+            object : Serialize {
+                override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> = value.serialize(serializer)
+            }
+
         assertKotlinSerTokens(listOf(Token.Tuple(0), Token.TupleEnd)) {
-            emptyArray<Int>().serialize(it)
+            emptyArray<Serialize>().serialize(it)
         }
         assertKotlinSerTokens(
             listOf(Token.Tuple(3), Token.I32(1), Token.I32(2), Token.I32(3), Token.TupleEnd),
-        ) { arrayOf(1, 2, 3).serialize(it) }
+        ) { arrayOf(element(1), element(2), element(3)).serialize(it) }
     }
 
     @Test
@@ -446,7 +451,9 @@ private fun assertKotlinSerTokens(
     tokens: List<Token>,
     serialize: (Serializer<Unit>) -> SerdeResult<Unit>,
 ) {
-    val serializer = io.github.kotlinmania.serdetest.Serializer.new(tokens)
+    val serializer =
+        io.github.kotlinmania.serdetest.Serializer
+            .new(tokens)
     when (val result = serialize(serializer)) {
         is SerdeResult.Success -> Unit
         is SerdeResult.Failure -> error("value failed to serialize: ${result.error}")
@@ -459,7 +466,9 @@ private fun assertKotlinSerTokensError(
     error: String,
     serialize: (Serializer<Unit>) -> SerdeResult<Unit>,
 ) {
-    val serializer = io.github.kotlinmania.serdetest.Serializer.new(tokens)
+    val serializer =
+        io.github.kotlinmania.serdetest.Serializer
+            .new(tokens)
     when (val result = serialize(serializer)) {
         is SerdeResult.Success -> error("value serialized successfully")
         is SerdeResult.Failure -> assertEquals(error, result.error.message)
@@ -494,4 +503,3 @@ private data class I32Value(
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = value.serialize(serializer)
 }
-

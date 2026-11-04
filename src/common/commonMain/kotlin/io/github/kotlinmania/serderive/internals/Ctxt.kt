@@ -10,49 +10,49 @@ import io.github.kotlinmania.syn.SynError
 import io.github.kotlinmania.syn.SynResult
 import io.github.kotlinmania.syn.Variant
 
-public class Ctxt {
-    private var errors: MutableList<SynError>? = mutableListOf()
+internal class Ctxt {
+    private var errors: List<SynError>? = emptyList()
 
     public fun errorSpannedBy(obj: ToTokens, msg: String) {
-        checkNotNull(errors).add(SynError.newSpanned(obj.toTokenStream(), msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(obj.toTokenStream(), msg))
     }
 
     public fun errorSpannedBy(tokens: TokenStream, msg: String) {
-        checkNotNull(errors).add(SynError.newSpanned(tokens, msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(tokens, msg))
     }
 
     public fun errorSpannedBy(path: Path, msg: String) {
         val out = TokenStream.new()
         path.toTokens(out)
-        checkNotNull(errors).add(SynError.newSpanned(out, msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(out, msg))
     }
 
     public fun errorSpannedBy(field: Field, msg: String) {
         val out = TokenStream.new()
         field.toTokens(out)
-        checkNotNull(errors).add(SynError.newSpanned(out, msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(out, msg))
     }
 
     public fun errorSpannedBy(variant: Variant, msg: String) {
         val out = TokenStream.new()
         variant.toTokens(out)
-        checkNotNull(errors).add(SynError.newSpanned(out, msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(out, msg))
     }
 
     public fun errorSpannedBy(ident: io.github.kotlinmania.procmacro2.Ident, msg: String) {
         val ts = TokenStream.new()
         ts.append(ident)
-        checkNotNull(errors).add(SynError.newSpanned(ts, msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(ts, msg))
     }
 
     public fun errorSpannedBy(synType: io.github.kotlinmania.syn.SynType, msg: String) {
         val out = TokenStream.new()
         synType.toTokens(out)
-        checkNotNull(errors).add(SynError.newSpanned(out, msg))
+        errors = checkNotNull(errors) + listOf(SynError.newSpanned(out, msg))
     }
 
     public fun synError(err: SynError) {
-        checkNotNull(errors).add(err)
+        errors = checkNotNull(errors) + listOf(err)
     }
 
     public fun check(): SynResult<Unit> {

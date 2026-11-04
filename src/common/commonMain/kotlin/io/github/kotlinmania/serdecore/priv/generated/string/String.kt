@@ -5,8 +5,9 @@ package io.github.kotlinmania.serdecore.priv.generated.string
 // Native borrowed bytes/Cow retain storage. The caller must keep the selected input range immutable while a borrowed result is live.
 // Rust use resolved through explicit library bindings.
 // Rust #[doc(hidden)]: omitted from source API documentation.
-fun `from_utf8_lossy`(`bytes`: io.github.kotlinmania.serdecore.priv.SharedByteSlice): io.github.kotlinmania.serdecore.priv.Utf8Cow = io.github.kotlinmania.serdecore.priv.Utf8Cow.fromUtf8Lossy(`bytes`)
-
+fun `from_utf8_lossy`(`bytes`: io.github.kotlinmania.serdecore.priv.SharedByteSlice): io.github.kotlinmania.serdecore.priv.Utf8Cow =
+    io.github.kotlinmania.serdecore.priv.Utf8Cow
+        .fromUtf8Lossy(`bytes`)
 
 // The generated code calls this like:
 //

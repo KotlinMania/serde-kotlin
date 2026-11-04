@@ -2,10 +2,10 @@
 package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serdecore.priv.SharedByteSlice
 import io.github.kotlinmania.serdecore.priv.contentaccess.scalarText
 import io.github.kotlinmania.serdecore.priv.contentaccess.validScalar
-import io.github.kotlinmania.serde.SerdeResult
 
 /**
  * This interface represents a visitor that walks through a deserializer.
@@ -87,11 +87,12 @@ interface Visitor<Value> : Expected {
     fun visitChar(v: Char): SerdeResult<Value> = visitStr(v.toString())
 
     /** Receives one complete Unicode scalar. Legacy character visitors still receive BMP scalars. */
-    fun visitCharCodePoint(codePoint: Int): SerdeResult<Value> = when {
-        !validScalar(codePoint) -> SerdeResult.failure(SerdeError("Invalid Unicode scalar: $codePoint"))
-        codePoint <= 0xffff -> visitChar(codePoint.toChar())
-        else -> visitStr(scalarText(codePoint))
-    }
+    fun visitCharCodePoint(codePoint: Int): SerdeResult<Value> =
+        when {
+            !validScalar(codePoint) -> SerdeResult.failure(SerdeError("Invalid Unicode scalar: $codePoint"))
+            codePoint <= 0xffff -> visitChar(codePoint.toChar())
+            else -> visitStr(scalarText(codePoint))
+        }
 
     /**
      * The input contains a string.

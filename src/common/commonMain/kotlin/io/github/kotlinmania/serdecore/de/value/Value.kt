@@ -46,7 +46,6 @@ class ValueError private constructor(
     }
 }
 
-
 // //////////////////////////////////////////////////////////////////////////////
 
 fun Unit.intoDeserializer(): UnitDeserializer = UnitDeserializer.new()
@@ -1619,7 +1618,7 @@ class MapDeserializer<K, V> internal constructor(
         pendingValue = null
         // Panic because this indicates a bug in the program rather than an
         // expected failure.
-        check(value != null) { "MapAccess::next_value called before next_key" }
+        checkNotNull(value) { "MapAccess::next_value called before next_key" }
         return seed.deserialize(value.intoDeserializer())
     }
 
@@ -2002,9 +2001,7 @@ class MapAccessDeserializer<A : MapAccess>(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.Map,
-                        object : Expected {
-                            override fun expecting(): String = "enum"
-                        },
+                        Expected { "enum" },
                     ),
                 )
             }
@@ -2124,9 +2121,7 @@ private object Private {
             SerdeResult.failure(
                 SerdeError.invalidType(
                     Unexpected.UnitVariant,
-                    object : Expected {
-                        override fun expecting(): String = "newtype variant"
-                    },
+                    Expected { "newtype variant" },
                 ),
             )
 
@@ -2137,9 +2132,7 @@ private object Private {
             SerdeResult.failure(
                 SerdeError.invalidType(
                     Unexpected.UnitVariant,
-                    object : Expected {
-                        override fun expecting(): String = "tuple variant"
-                    },
+                    Expected { "tuple variant" },
                 ),
             )
 
@@ -2150,9 +2143,7 @@ private object Private {
             SerdeResult.failure(
                 SerdeError.invalidType(
                     Unexpected.UnitVariant,
-                    object : Expected {
-                        override fun expecting(): String = "struct variant"
-                    },
+                    Expected { "struct variant" },
                 ),
             )
     }

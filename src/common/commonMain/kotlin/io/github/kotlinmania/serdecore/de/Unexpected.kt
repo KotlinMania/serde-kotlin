@@ -1,8 +1,6 @@
 // port-lint: source de/mod.rs
 package io.github.kotlinmania.serdecore.de
 
-import io.github.kotlinmania.serde.SerdeError
-
 /**
  * `Unexpected` represents an unexpected invocation of any one of the `Visitor` interface methods.
  *
@@ -70,7 +68,7 @@ sealed class Unexpected {
     data class Bytes(
         val value: ByteArray,
     ) : Unexpected() {
-        override fun equals(other: Any?): Boolean = this === other || other is Bytes && value.contentEquals(other.value)
+        override fun equals(other: Any?): Boolean = this === other || (other is Bytes && value.contentEquals(other.value))
 
         override fun hashCode(): Int = value.contentHashCode()
     }

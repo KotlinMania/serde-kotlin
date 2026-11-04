@@ -1,8 +1,6 @@
 // port-lint: source de/mod.rs
 package io.github.kotlinmania.serdecore.de
 
-import io.github.kotlinmania.serde.SerdeError
-
 /**
  * `Expected` represents an explanation of what data a `Visitor` was expecting to receive.
  *

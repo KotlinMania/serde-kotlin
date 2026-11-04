@@ -3,7 +3,9 @@ package io.github.kotlinmania.serdecore.de
 /** The next value in a sequence, or the absence of further values. */
 sealed class SeqElement<out T> {
     /** A value in the sequence, which may itself be null. */
-    data class Some<out T>(val value: T) : SeqElement<T>()
+    data class Some<out T>(
+        val value: T,
+    ) : SeqElement<T>()
 
     /** There are no more remaining items. */
     data object None : SeqElement<Nothing>()

@@ -403,6 +403,18 @@ class FlatMapSerializerTest {
 
     @Test
     fun flattenOptionUnitUnitStructAndNewtypeWrapper() {
+        fun wrappedSecond(value: IntVal): NewtypeWrapper<Serialize> =
+            NewtypeWrapper(
+                object : Serialize {
+                    override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> =
+                        serdeCatching {
+                            val st = serializer.serializeStruct("Inner2", 1).getOrThrow()
+                            st.serializeField("inner2", value).getOrThrow()
+                            st.end().getOrThrow()
+                        }
+                },
+            )
+
         fun container(
             first: SecondFlat?,
             second: IntVal?,
@@ -415,18 +427,7 @@ class FlatMapSerializerTest {
                         UnitVal.serialize(FlatMapSerializer(map)).getOrThrow()
                         UnitStructVal.serialize(FlatMapSerializer(map)).getOrThrow()
                         OptionVal(
-                            second?.let {
-                                NewtypeWrapper(
-                                    object : Serialize {
-                                        override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> =
-                                            serdeCatching {
-                                                val st = serializer.serializeStruct("Inner2", 1).getOrThrow()
-                                                st.serializeField("inner2", it).getOrThrow()
-                                                st.end().getOrThrow()
-                                            }
-                                    },
-                                )
-                            },
+                            second?.let(::wrappedSecond),
                         ).serialize(FlatMapSerializer(map)).getOrThrow()
                         map.end().getOrThrow()
                     }
@@ -594,6 +595,12 @@ class FlatMapSerializerTest {
 
     @Test
     fun flattenTupleVariantBuffersNestedCompoundFieldsViaContentSeq() {
+        val stringField =
+            object : Serialize {
+                override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> =
+                    listOf("x", "y").serialize(serializer)
+            }
+
         val nestedTupleVariant =
             object : Serialize {
                 override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
@@ -602,10 +609,7 @@ class FlatMapSerializerTest {
                         tv.serializeField(SecondFlat(7u)).getOrThrow()
                         tv
                             .serializeField(
-                                object : Serialize {
-                                    override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> =
-                                        listOf("x", "y").serialize(serializer)
-                                },
+                                stringField,
                             ).getOrThrow()
                         tv.serializeField(OptionVal(IntVal(9))).getOrThrow()
                         tv.end().getOrThrow()
@@ -696,6 +700,12 @@ class FlatMapSerializerTest {
         assertEquals("rejected value for k", splitValueFailure.error.message)
         assertFalse(failingSplitMapValue.ended)
 
+        val failingTupleField =
+            object : Serialize {
+                override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> =
+                    SerdeResult.failure(SerdeError.custom("boom in tuple variant field"))
+            }
+
         val failingTupleElement =
             object : Serialize {
                 override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
@@ -704,10 +714,7 @@ class FlatMapSerializerTest {
                         tv.serializeField(UIntVal(1u)).getOrThrow()
                         tv
                             .serializeField(
-                                object : Serialize {
-                                    override fun <R> serialize(serializer: Serializer<R>): SerdeResult<R> =
-                                        SerdeResult.failure(SerdeError.custom("boom in tuple variant field"))
-                                },
+                                failingTupleField,
                             ).getOrThrow()
                         tv.end().getOrThrow()
                     }

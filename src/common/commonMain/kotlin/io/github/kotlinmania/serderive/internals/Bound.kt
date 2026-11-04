@@ -1,13 +1,13 @@
 // port-lint: source bound.rs
 package io.github.kotlinmania.serderive.internals
 
-import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.procmacro2.Ident
-import io.github.kotlinmania.syn.Generics
-import io.github.kotlinmania.syn.GenericParam
-import io.github.kotlinmania.syn.GenericParamList
+import io.github.kotlinmania.procmacro2.Span
 import io.github.kotlinmania.syn.GenericArgument
 import io.github.kotlinmania.syn.GenericArgumentList
+import io.github.kotlinmania.syn.GenericParam
+import io.github.kotlinmania.syn.GenericParamList
+import io.github.kotlinmania.syn.Generics
 import io.github.kotlinmania.syn.Lifetime
 import io.github.kotlinmania.syn.LifetimeList
 import io.github.kotlinmania.syn.Macro
@@ -15,47 +15,47 @@ import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathArguments
 import io.github.kotlinmania.syn.PathSegment
 import io.github.kotlinmania.syn.PathSegmentList
-import io.github.kotlinmania.syn.QSelf
 import io.github.kotlinmania.syn.ReturnType
 import io.github.kotlinmania.syn.SynType
+import io.github.kotlinmania.syn.TraitBoundModifier
 import io.github.kotlinmania.syn.TypeParamBound
 import io.github.kotlinmania.syn.TypeParamBoundList
-import io.github.kotlinmania.syn.TraitBoundModifier
 import io.github.kotlinmania.syn.WherePredicate
-import io.github.kotlinmania.syn.BareFnArg
 import io.github.kotlinmania.syn.WherePredicateList
 import io.github.kotlinmania.syn.token.Colon
 import io.github.kotlinmania.syn.token.Comma
-import io.github.kotlinmania.syn.token.Lt
 import io.github.kotlinmania.syn.token.Gt
-import io.github.kotlinmania.syn.token.PathSep
+import io.github.kotlinmania.syn.token.Lt
 import io.github.kotlinmania.syn.token.Plus
 
 private fun WherePredicateList.pushPredicate(predicate: WherePredicate) {
     push(predicate) { Comma.default() }
 }
 
-public fun withoutDefaults(generics: Generics): Generics {
+internal fun withoutDefaults(generics: Generics): Generics {
     val newParams = GenericParamList()
     for (param in generics.params.toList()) {
         when (param) {
-            is GenericParam.TypeParam -> newParams.push(GenericParam.TypeParam(
-                param.attrs,
-                param.ident,
-                param.colonToken,
-                param.bounds,
-                eqToken = null,
-                default = null
-            )) { Comma.default() }
+            is GenericParam.TypeParam ->
+                newParams.push(
+                    GenericParam.TypeParam(
+                        param.attrs,
+                        param.ident,
+                        param.colonToken,
+                        param.bounds,
+                        eqToken = null,
+                        default = null,
+                    ),
+                ) { Comma.default() }
             else -> newParams.push(param) { Comma.default() }
         }
     }
     return generics.copy(params = newParams)
 }
 
-public fun withWherePredicates(
+internal fun withWherePredicates(
     generics: Generics,
-    predicates: List<WherePredicate>
+    predicates: List<WherePredicate>,
 ): Generics {
     val mutGenerics = generics.copy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
@@ -66,10 +66,10 @@ public fun withWherePredicates(
     return mutGenerics
 }
 
-public fun withWherePredicatesFromFields(
+internal fun withWherePredicatesFromFields(
     cont: Container,
     generics: Generics,
-    fromField: (AttrField) -> List<WherePredicate>?
+    fromField: (AttrField) -> List<WherePredicate>?,
 ): Generics {
     val mutGenerics = generics.copy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
@@ -83,15 +83,16 @@ public fun withWherePredicatesFromFields(
     return mutGenerics
 }
 
-public fun withWherePredicatesFromVariants(
+internal fun withWherePredicatesFromVariants(
     cont: Container,
     generics: Generics,
-    fromVariant: (AttrVariant) -> List<WherePredicate>?
+    fromVariant: (AttrVariant) -> List<WherePredicate>?,
 ): Generics {
-    val variants = when (val data = cont.data) {
-        is Data.Enum -> data.variants
-        is Data.Struct -> return generics.copy()
-    }
+    val variants =
+        when (val data = cont.data) {
+            is Data.Enum -> data.variants
+            is Data.Struct -> return generics.copy()
+        }
     val mutGenerics = generics.copy()
     val dstPredicates = mutGenerics.makeWhereClause().predicates
 
@@ -104,21 +105,24 @@ public fun withWherePredicatesFromVariants(
     return mutGenerics
 }
 
-public fun withBound(
+internal fun withBound(
     cont: Container,
     generics: Generics,
     filter: (Field, Variant?) -> Boolean,
-    bound: Path
+    bound: Path,
 ): Generics {
     class FindTyParams(
         val allTypeParams: Set<Ident>,
         val relevantTypeParams: MutableSet<Ident>,
-        val associatedTypeUsage: MutableList<SynType.Path>
+        val associatedTypeUsage: MutableList<SynType.Path>,
     ) {
         fun visitField(field: io.github.kotlinmania.syn.Field) {
             val ty = ungroup(field.ty)
             if (ty is SynType.Path) {
-                val firstSegment = ty.path.segments.toList().firstOrNull()
+                val firstSegment =
+                    ty.path.segments
+                        .toList()
+                        .firstOrNull()
                 if (firstSegment != null) {
                     if (allTypeParams.contains(firstSegment.ident)) {
                         associatedTypeUsage.add(ty)
@@ -229,11 +233,12 @@ public fun withBound(
 
     val allTypeParams = generics.typeParams().map { it.ident }.toSet()
 
-    val visitor = FindTyParams(
-        allTypeParams,
-        mutableSetOf(),
-        mutableListOf()
-    )
+    val visitor =
+        FindTyParams(
+            allTypeParams,
+            mutableSetOf(),
+            mutableListOf(),
+        )
 
     when (val data = cont.data) {
         is Data.Enum -> {
@@ -257,21 +262,21 @@ public fun withBound(
     val relevantTypeParams = visitor.relevantTypeParams
     val associatedTypeUsage = visitor.associatedTypeUsage
 
-    fun makeWhereBoundedType(boundedTy: SynType.Path, bound: Path): WherePredicate {
+    fun makeWhereBoundedType(boundedTy: SynType.Path, traitBound: Path): WherePredicate {
         val boundsList = TypeParamBoundList()
         boundsList.pushValue(
             TypeParamBound.Trait(
                 parenToken = null,
                 modifier = TraitBoundModifier.None,
                 lifetimes = null,
-                path = bound.deepCopy(),
-            )
+                path = traitBound.deepCopy(),
+            ),
         )
         return WherePredicate.TypePredicate(
             lifetimes = null,
             boundedTy = boundedTy,
             colonToken = Colon.default(),
-            bounds = boundsList
+            bounds = boundsList,
         )
     }
 
@@ -282,10 +287,11 @@ public fun withBound(
         if (!relevantTypeParams.contains(id)) {
             continue
         }
-        val boundedTy = SynType.Path(
-            qself = null,
-            path = Path.from(id)
-        )
+        val boundedTy =
+            SynType.Path(
+                qself = null,
+                path = Path.from(id),
+            )
         dstPredicates.pushPredicate(makeWhereBoundedType(boundedTy, bound))
     }
     for (boundedTy in associatedTypeUsage) {
@@ -294,10 +300,10 @@ public fun withBound(
     return dstGenerics
 }
 
-public fun withSelfBound(
+internal fun withSelfBound(
     cont: Container,
     generics: Generics,
-    bound: Path
+    bound: Path,
 ): Generics {
     val mutGenerics = generics.copy()
     val boundsList = TypeParamBoundList()
@@ -307,27 +313,28 @@ public fun withSelfBound(
             modifier = TraitBoundModifier.None,
             lifetimes = null,
             path = bound.deepCopy(),
-        )
+        ),
     )
     mutGenerics.makeWhereClause().predicates.pushPredicate(
         WherePredicate.TypePredicate(
             lifetimes = null,
             boundedTy = typeOfItem(cont),
             colonToken = Colon.default(),
-            bounds = boundsList
-        )
+            bounds = boundsList,
+        ),
     )
     return mutGenerics
 }
 
-public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
+internal fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
     val bound = Lifetime.new(lifetime, Span.callSite())
-    val def = GenericParam.LifetimeParam(
-        attrs = mutableListOf(),
-        lifetime = bound.deepCopy(),
-        colonToken = null,
-        bounds = LifetimeList()
-    )
+    val def =
+        GenericParam.LifetimeParam(
+            attrs = mutableListOf(),
+            lifetime = bound.deepCopy(),
+            colonToken = null,
+            bounds = LifetimeList(),
+        )
 
     val params = mutableListOf<GenericParam>(def)
     for (param in generics.params.toList()) {
@@ -351,41 +358,49 @@ public fun withLifetimeBound(generics: Generics, lifetime: String): Generics {
 }
 
 private fun typeOfItem(cont: Container): SynType {
-    val segment = PathSegment(
-        ident = cont.ident,
-        arguments = PathArguments.AngleBracketed(
-            colon2Token = null,
-            ltToken = Lt.default(),
-            args = run {
-                val argList = GenericArgumentList()
-                for (param in cont.generics.params.toList()) {
-                    when (param) {
-                        is GenericParam.TypeParam -> {
-                            argList.push(GenericArgument.TypeArg(SynType.Path(
-                                qself = null,
-                                path = Path.from(param.ident)
-                            ))) { Comma.default() }
-                        }
-                        is GenericParam.LifetimeParam -> {
-                            argList.push(GenericArgument.LifetimeArg(param.lifetime.deepCopy())) { Comma.default() }
-                        }
-                        is GenericParam.ConstParam -> {
-                            throw Exception("Serde does not support const generics yet")
-                        }
-                    }
-                }
-                argList
-            },
-            gtToken = Gt.default()
+    val segment =
+        PathSegment(
+            ident = cont.ident,
+            arguments =
+                PathArguments.AngleBracketed(
+                    colon2Token = null,
+                    ltToken = Lt.default(),
+                    args =
+                        run {
+                            val argList = GenericArgumentList()
+                            for (param in cont.generics.params.toList()) {
+                                when (param) {
+                                    is GenericParam.TypeParam -> {
+                                        argList.push(
+                                            GenericArgument.TypeArg(
+                                                SynType.Path(
+                                                    qself = null,
+                                                    path = Path.from(param.ident),
+                                                ),
+                                            ),
+                                        ) { Comma.default() }
+                                    }
+                                    is GenericParam.LifetimeParam -> {
+                                        argList.push(GenericArgument.LifetimeArg(param.lifetime.deepCopy())) { Comma.default() }
+                                    }
+                                    is GenericParam.ConstParam -> {
+                                        throw Exception("Serde does not support const generics yet")
+                                    }
+                                }
+                            }
+                            argList
+                        },
+                    gtToken = Gt.default(),
+                ),
         )
-    )
     val segList = PathSegmentList()
     segList.pushValue(segment)
     return SynType.Path(
         qself = null,
-        path = Path(
-            leadingColon = null,
-            segments = segList
-        )
+        path =
+            Path(
+                leadingColon = null,
+                segments = segList,
+            ),
     )
 }

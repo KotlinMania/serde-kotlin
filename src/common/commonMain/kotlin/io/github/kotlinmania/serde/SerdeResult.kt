@@ -228,4 +228,5 @@ class SerdeError(
 @PublishedApi
 internal class SerdeException(
     override val error: SerdeError,
-) : IllegalStateException(error.message), SerdeDiagnosticCarrier
+) : IllegalStateException(error.message),
+    SerdeDiagnosticCarrier

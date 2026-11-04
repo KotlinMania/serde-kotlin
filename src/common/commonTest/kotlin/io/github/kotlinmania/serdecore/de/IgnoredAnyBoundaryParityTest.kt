@@ -49,7 +49,7 @@ class IgnoredAnyBoundaryParityTest {
                     SerdeResult.success(SeqElement.None)
                 } else {
                     state.delivered += 1
-                    seed.deserialize(Scalar(10 * (current + 1), trace)).map { SeqElement.Some(it) }
+                    seed.deserialize(Scalar(10 * (current + 1), trace)).map { decoded -> SeqElement.Some(decoded) }
                 }
             }
         }

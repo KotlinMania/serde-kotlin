@@ -1,10 +1,6 @@
 // port-lint: source de.rs
 package io.github.kotlinmania.serde.priv
 
-import io.github.kotlinmania.serdecore.priv.generated.content.Content
-import io.github.kotlinmania.serdecore.priv.contentaccess.*
-import io.github.kotlinmania.serdecore.priv.SharedByteSlice
-
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
@@ -25,6 +21,9 @@ import io.github.kotlinmania.serdecore.de.unwrapOrElse
 import io.github.kotlinmania.serdecore.de.value.BytesDeserializer
 import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
+import io.github.kotlinmania.serdecore.priv.SharedByteSlice
+import io.github.kotlinmania.serdecore.priv.contentaccess.*
+import io.github.kotlinmania.serdecore.priv.generated.content.Content
 
 /**
  * If the missing field is of type `T?` then treat is as `null`, otherwise it is an error.
@@ -413,10 +412,12 @@ internal class TagOrContentVisitor(
 
     override fun visitBorrowedByteSlice(v: SharedByteSlice): SerdeResult<TagOrContent> {
         val tagBytes = name.encodeToByteArray()
-        return if (v.size == tagBytes.size && tagBytes.indices.all { v[it] == tagBytes[it] }) SerdeResult.success(TagOrContent.Tag)
-        else ContentVisitor.new().visitBorrowedByteSlice(v).map { TagOrContent.ContentValue(it) }
+        return if (v.size == tagBytes.size && tagBytes.indices.all { v[it] == tagBytes[it] }) {
+            SerdeResult.success(TagOrContent.Tag)
+        } else {
+            ContentVisitor.new().visitBorrowedByteSlice(v).map { TagOrContent.ContentValue(it) }
+        }
     }
-
 
     override fun visitStr(v: String): SerdeResult<TagOrContent> =
         if (v == name) {
@@ -906,17 +907,13 @@ internal class ContentDeserializer(
                                 ?: SerdeError
                                     .invalidValue(
                                         Unexpected.Map,
-                                        object : Expected {
-                                            override fun expecting(): String = "map with a single key"
-                                        },
+                                        Expected { "map with a single key" },
                                     ).raise()
                         if (iter.hasNext()) {
                             SerdeError
                                 .invalidValue(
                                     Unexpected.Map,
-                                    object : Expected {
-                                        override fun expecting(): String = "map with a single key"
-                                    },
+                                    Expected { "map with a single key" },
                                 ).raise()
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
@@ -929,9 +926,7 @@ internal class ContentDeserializer(
                         SerdeError
                             .invalidType(
                                 contentUnexpected(content),
-                                object : Expected {
-                                    override fun expecting(): String = "string or map"
-                                },
+                                Expected { "string or map" },
                             ).raise()
                 }
 
@@ -1084,9 +1079,7 @@ private class SeqDeserializer(
 
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
-            if (remainingHint != null) {
-                remainingHint = maxOf(0, remainingHint!! - 1)
-            }
+            remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
             val next = if (iter.hasNext()) iter.next() else null
             if (next == null) {
                 SeqElement.None
@@ -1137,9 +1130,7 @@ private class MapDeserializer(
     private fun nextPair(): ContentMapEntry? =
         if (iter.hasNext()) {
             count += 1
-            if (remainingHint != null) {
-                remainingHint = maxOf(0, remainingHint!! - 1)
-            }
+            remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
             iter.next()
         } else {
             null
@@ -1460,9 +1451,7 @@ private class VariantDeserializer(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.UnitVariant,
-                        object : Expected {
-                            override fun expecting(): String = "newtype variant"
-                        },
+                        Expected { "newtype variant" },
                     ),
                 )
             else -> seed.deserialize(ContentDeserializer.new(v))
@@ -1478,18 +1467,14 @@ private class VariantDeserializer(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.UnitVariant,
-                        object : Expected {
-                            override fun expecting(): String = "tuple variant"
-                        },
+                        Expected { "tuple variant" },
                     ),
                 )
             else ->
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         contentUnexpected(v),
-                        object : Expected {
-                            override fun expecting(): String = "tuple variant"
-                        },
+                        Expected { "tuple variant" },
                     ),
                 )
         }
@@ -1505,18 +1490,14 @@ private class VariantDeserializer(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.UnitVariant,
-                        object : Expected {
-                            override fun expecting(): String = "struct variant"
-                        },
+                        Expected { "struct variant" },
                     ),
                 )
             else ->
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         contentUnexpected(v),
-                        object : Expected {
-                            override fun expecting(): String = "struct variant"
-                        },
+                        Expected { "struct variant" },
                     ),
                 )
         }
@@ -2288,17 +2269,13 @@ internal class ContentRefDeserializer(
                                 ?: SerdeError
                                     .invalidValue(
                                         Unexpected.Map,
-                                        object : Expected {
-                                            override fun expecting(): String = "map with a single key"
-                                        },
+                                        Expected { "map with a single key" },
                                     ).raise()
                         if (iter.hasNext()) {
                             SerdeError
                                 .invalidValue(
                                     Unexpected.Map,
-                                    object : Expected {
-                                        override fun expecting(): String = "map with a single key"
-                                    },
+                                    Expected { "map with a single key" },
                                 ).raise()
                         }
                         // Enums are encoded in JSON as objects with a single key-value pair.
@@ -2311,9 +2288,7 @@ internal class ContentRefDeserializer(
                         SerdeError
                             .invalidType(
                                 contentUnexpected(content),
-                                object : Expected {
-                                    override fun expecting(): String = "string or map"
-                                },
+                                Expected { "string or map" },
                             ).raise()
                 }
 
@@ -2466,9 +2441,7 @@ private class SeqRefDeserializer(
 
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
         serdeCatching {
-            if (remainingHint != null) {
-                remainingHint = maxOf(0, remainingHint!! - 1)
-            }
+            remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
             val next = if (iter.hasNext()) iter.next() else null
             if (next == null) {
                 SeqElement.None
@@ -2508,9 +2481,7 @@ private class MapRefDeserializer(
     private fun nextPair(): ContentMapEntry? =
         if (iter.hasNext()) {
             count += 1
-            if (remainingHint != null) {
-                remainingHint = maxOf(0, remainingHint!! - 1)
-            }
+            remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
             iter.next()
         } else {
             null
@@ -2813,9 +2784,7 @@ private class VariantRefDeserializer(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.UnitVariant,
-                        object : Expected {
-                            override fun expecting(): String = "newtype variant"
-                        },
+                        Expected { "newtype variant" },
                     ),
                 )
             else -> seed.deserialize(ContentRefDeserializer.new(v))
@@ -2831,18 +2800,14 @@ private class VariantRefDeserializer(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.UnitVariant,
-                        object : Expected {
-                            override fun expecting(): String = "tuple variant"
-                        },
+                        Expected { "tuple variant" },
                     ),
                 )
             else ->
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         contentUnexpected(v),
-                        object : Expected {
-                            override fun expecting(): String = "tuple variant"
-                        },
+                        Expected { "tuple variant" },
                     ),
                 )
         }
@@ -2858,18 +2823,14 @@ private class VariantRefDeserializer(
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         Unexpected.UnitVariant,
-                        object : Expected {
-                            override fun expecting(): String = "struct variant"
-                        },
+                        Expected { "struct variant" },
                     ),
                 )
             else ->
                 SerdeResult.failure(
                     SerdeError.invalidType(
                         contentUnexpected(v),
-                        object : Expected {
-                            override fun expecting(): String = "struct variant"
-                        },
+                        Expected { "struct variant" },
                     ),
                 )
         }

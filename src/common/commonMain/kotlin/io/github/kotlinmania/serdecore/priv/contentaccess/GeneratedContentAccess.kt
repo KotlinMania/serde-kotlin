@@ -1,12 +1,12 @@
 package io.github.kotlinmania.serdecore.priv.contentaccess
 
-import io.github.kotlinmania.serdecore.priv.Content as LegacyContent
-import io.github.kotlinmania.serdecore.priv.generated.content.Content
-import io.github.kotlinmania.serdecore.priv.generated.content.__rtkChar
-import io.github.kotlinmania.serdecore.priv.generatedContentCapacity
-import io.github.kotlinmania.serdecore.de.UnexpectedScalarChar
 import io.github.kotlinmania.serdecore.de.Unexpected
+import io.github.kotlinmania.serdecore.de.UnexpectedScalarChar
 import io.github.kotlinmania.serdecore.priv.SharedByteSlice
+import io.github.kotlinmania.serdecore.priv.generated.content.Content
+import io.github.kotlinmania.serdecore.priv.generated.content.RtkChar
+import io.github.kotlinmania.serdecore.priv.generatedContentCapacity
+import io.github.kotlinmania.serdecore.priv.Content as LegacyContent
 
 /** Access to the complete generated declaration across the core/root module boundary. */
 fun newBoolContent(value: Boolean): Content.Bool = Content.Bool(value)
@@ -32,9 +32,9 @@ val Content.F32.value: Float get() = __rtkField0
 fun newF64Content(value: Double): Content.F64 = Content.F64(value)
 val Content.F64.value: Double get() = __rtkField0
 
-fun newCharContent(codePoint: Int): Content.Char = Content.Char(__rtkChar(codePoint))
+fun newCharContent(codePoint: Int): Content.Char = Content.Char(RtkChar(codePoint))
 val Content.Char.value: Int get() = __rtkField0.codePoint
-fun scalarText(codePoint: Int): String = __rtkChar(codePoint).scalarString()
+fun scalarText(codePoint: Int): String = RtkChar(codePoint).scalarString()
 fun validScalar(codePoint: Int): Boolean = codePoint in 0..0x10ffff && codePoint !in 0xd800..0xdfff
 private fun validText(value: String): String = value.encodeToByteArray(throwOnInvalidSequence = true).let { value }
 fun newStringContent(value: String): Content.String = Content.String(StringBuilder(validText(value)))
@@ -52,40 +52,46 @@ val Content.Some.value: Content get() = __rtkField0
 fun newNewtypeContent(value: Content): Content.Newtype = Content.Newtype(value)
 val Content.Newtype.value: Content get() = __rtkField0
 fun newSeqContent(value: List<Content>): Content.Seq = Content.Seq(value.toMutableList())
+
 /** Transfers a capture buffer; the caller must stop mutating it after this call. */
 fun takeSeqContent(value: MutableList<Content>): Content.Seq = Content.Seq(value)
 val Content.Seq.value: List<Content> get() = __rtkField0
-class ContentMapEntry(val key: Content, val value: Content)
+class ContentMapEntry(
+    val key: Content,
+    val value: Content,
+)
 fun newMapContent(value: List<ContentMapEntry>): Content.Map = Content.Map(value.map { it.key to it.value }.toMutableList())
+
 /** Transfers a capture buffer without replacing its selected allocation policy. */
 fun takeMapContent(value: MutableList<Pair<Content, Content>>): Content.Map = Content.Map(value)
 val Content.Map.value: List<ContentMapEntry> get() = __rtkField0.map { ContentMapEntry(it.first, it.second) }
 
 /** Legacy values are copied into owned storage; borrowed arrays retain their selected storage. */
-fun LegacyContent.toGeneratedContent(): Content = when (this) {
-    is LegacyContent.Bool -> newBoolContent(value)
-    is LegacyContent.U8 -> newU8Content(value)
-    is LegacyContent.U16 -> newU16Content(value)
-    is LegacyContent.U32 -> newU32Content(value)
-    is LegacyContent.U64 -> newU64Content(value)
-    is LegacyContent.I8 -> newI8Content(value)
-    is LegacyContent.I16 -> newI16Content(value)
-    is LegacyContent.I32 -> newI32Content(value)
-    is LegacyContent.I64 -> newI64Content(value)
-    is LegacyContent.F32 -> newF32Content(value)
-    is LegacyContent.F64 -> newF64Content(value)
-    is LegacyContent.Char -> newCharContent(value.code)
-    is LegacyContent.StringValue -> newStringContent(value)
-    is LegacyContent.Str -> newStrContent(value)
-    is LegacyContent.ByteBuf -> newByteBufContent(value)
-    is LegacyContent.Bytes -> newBytesContent(value)
-    LegacyContent.None -> Content.None
-    LegacyContent.Unit -> Content.Unit
-    is LegacyContent.Some -> newSomeContent(value.toGeneratedContent())
-    is LegacyContent.Newtype -> newNewtypeContent(value.toGeneratedContent())
-    is LegacyContent.Seq -> newSeqContent(value.map { it.toGeneratedContent() })
-    is LegacyContent.Map -> newMapContent(value.map { ContentMapEntry(it.key.toGeneratedContent(), it.value.toGeneratedContent()) })
-}
+fun LegacyContent.toGeneratedContent(): Content =
+    when (this) {
+        is LegacyContent.Bool -> newBoolContent(value)
+        is LegacyContent.U8 -> newU8Content(value)
+        is LegacyContent.U16 -> newU16Content(value)
+        is LegacyContent.U32 -> newU32Content(value)
+        is LegacyContent.U64 -> newU64Content(value)
+        is LegacyContent.I8 -> newI8Content(value)
+        is LegacyContent.I16 -> newI16Content(value)
+        is LegacyContent.I32 -> newI32Content(value)
+        is LegacyContent.I64 -> newI64Content(value)
+        is LegacyContent.F32 -> newF32Content(value)
+        is LegacyContent.F64 -> newF64Content(value)
+        is LegacyContent.Char -> newCharContent(value.code)
+        is LegacyContent.StringValue -> newStringContent(value)
+        is LegacyContent.Str -> newStrContent(value)
+        is LegacyContent.ByteBuf -> newByteBufContent(value)
+        is LegacyContent.Bytes -> newBytesContent(value)
+        LegacyContent.None -> Content.None
+        LegacyContent.Unit -> Content.Unit
+        is LegacyContent.Some -> newSomeContent(value.toGeneratedContent())
+        is LegacyContent.Newtype -> newNewtypeContent(value.toGeneratedContent())
+        is LegacyContent.Seq -> newSeqContent(value.map { it.toGeneratedContent() })
+        is LegacyContent.Map -> newMapContent(value.map { ContentMapEntry(it.key.toGeneratedContent(), it.value.toGeneratedContent()) })
+    }
 
 fun unexpectedChar(codePoint: Int): Unexpected = if (codePoint <= 0xffff) Unexpected.CharValue(codePoint.toChar()) else UnexpectedScalarChar(codePoint)
 fun newContentBuffer(hint: Int?): MutableList<Content> = generatedContentCapacity(hint, false)

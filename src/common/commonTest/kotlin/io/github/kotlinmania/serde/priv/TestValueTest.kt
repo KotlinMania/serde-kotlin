@@ -41,8 +41,8 @@ private data object EVisitor : Visitor<E> {
     override fun <A> visitEnum(access: A): SerdeResult<E>
         where A : EnumAccess =
         serdeCatching {
-            val (variant, access) = access.variantSeed(EVariantSeed).getOrThrow()
-            access.unitVariant().getOrThrow()
+            val (variant, variantAccess) = access.variantSeed(EVariantSeed).getOrThrow()
+            variantAccess.unitVariant().getOrThrow()
             variant
         }
 }
@@ -148,10 +148,10 @@ private data object PotentialKindVisitor : Visitor<PotentialKind> {
     override fun <A> visitEnum(access: A): SerdeResult<PotentialKind>
         where A : EnumAccess =
         serdeCatching {
-            val (variant, access) = access.variantSeed(PotentialKindVariantSeed).getOrThrow()
+            val (variant, variantAccess) = access.variantSeed(PotentialKindVariantSeed).getOrThrow()
             when (variant) {
                 PotentialKindVariant.Airebo ->
-                    PotentialKind.Airebo(access.newtypeVariantSeed(AireboDeserializeSeed).getOrThrow())
+                    PotentialKind.Airebo(variantAccess.newtypeVariantSeed(AireboDeserializeSeed).getOrThrow())
             }
         }
 }

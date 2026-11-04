@@ -68,9 +68,15 @@ object Utf8ByteOperations {
 }
 
 /** A borrowed or owned UTF-8 string; accessing its bytes does not copy them. */
-sealed class Utf8Cow private constructor(val bytes: SharedByteSlice) {
-    class Borrowed internal constructor(bytes: SharedByteSlice) : Utf8Cow(bytes)
-    class Owned internal constructor(bytes: SharedByteSlice) : Utf8Cow(bytes)
+sealed class Utf8Cow private constructor(
+    val bytes: SharedByteSlice,
+) {
+    class Borrowed internal constructor(
+        bytes: SharedByteSlice,
+    ) : Utf8Cow(bytes)
+    class Owned internal constructor(
+        bytes: SharedByteSlice,
+    ) : Utf8Cow(bytes)
 
     val isBorrowed: Boolean get() = this is Borrowed
 
@@ -106,7 +112,10 @@ sealed class Utf8Cow private constructor(val bytes: SharedByteSlice) {
             return Owned(SharedByteSlice.borrow(owned))
         }
 
-        private class Chunk(val validEnd: Int, val end: Int)
+        private class Chunk(
+            val validEnd: Int,
+            val end: Int,
+        )
 
         // Chunk boundaries follow the UTF-8 chunk iterator's consumed prefix.
         private fun nextChunk(input: SharedByteSlice, start: Int): Chunk {
@@ -123,13 +132,14 @@ sealed class Utf8Cow private constructor(val bytes: SharedByteSlice) {
                         }
                         3L -> {
                             val second = safeGet(input, index).toInt() and 0xff
-                            val validSecond = when (byte) {
-                                0xe0 -> second in 0xa0..0xbf
-                                in 0xe1..0xec -> second in 0x80..0xbf
-                                0xed -> second in 0x80..0x9f
-                                in 0xee..0xef -> second in 0x80..0xbf
-                                else -> false
-                            }
+                            val validSecond =
+                                when (byte) {
+                                    0xe0 -> second in 0xa0..0xbf
+                                    in 0xe1..0xec -> second in 0x80..0xbf
+                                    0xed -> second in 0x80..0x9f
+                                    in 0xee..0xef -> second in 0x80..0xbf
+                                    else -> false
+                                }
                             if (!validSecond) break
                             index += 1
                             if (!Utf8ByteOperations.isContinuationByte(safeGet(input, index))) break
@@ -137,12 +147,13 @@ sealed class Utf8Cow private constructor(val bytes: SharedByteSlice) {
                         }
                         4L -> {
                             val second = safeGet(input, index).toInt() and 0xff
-                            val validSecond = when (byte) {
-                                0xf0 -> second in 0x90..0xbf
-                                in 0xf1..0xf3 -> second in 0x80..0xbf
-                                0xf4 -> second in 0x80..0x8f
-                                else -> false
-                            }
+                            val validSecond =
+                                when (byte) {
+                                    0xf0 -> second in 0x90..0xbf
+                                    in 0xf1..0xf3 -> second in 0x80..0xbf
+                                    0xf4 -> second in 0x80..0x8f
+                                    else -> false
+                                }
                             if (!validSecond) break
                             index += 1
                             if (!Utf8ByteOperations.isContinuationByte(safeGet(input, index))) break

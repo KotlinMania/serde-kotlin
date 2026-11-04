@@ -7,17 +7,24 @@ import io.github.kotlinmania.quote.toTokens
 import io.github.kotlinmania.syn.token.Brace
 import io.github.kotlinmania.syn.token.Comma
 
-public sealed class Fragment {
-    public data class Expr(val expr: TokenStream) : Fragment()
-    public data class Block(val block: TokenStream) : Fragment()
+internal sealed class Fragment {
+    data class Expr(
+        val expr: TokenStream,
+    ) : Fragment()
+    data class Block(
+        val block: TokenStream,
+    ) : Fragment()
 
-    public fun asRef(): TokenStream = when (this) {
-        is Expr -> expr
-        is Block -> block
-    }
+    public fun asRef(): TokenStream =
+        when (this) {
+            is Expr -> expr
+            is Block -> block
+        }
 }
 
-public class Expr(public val fragment: Fragment) : ToTokens {
+internal class Expr(
+    public val fragment: Fragment,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         when (val frag = fragment) {
             is Fragment.Expr -> frag.expr.toTokens(tokens)
@@ -30,7 +37,9 @@ public class Expr(public val fragment: Fragment) : ToTokens {
     }
 }
 
-public class Stmts(public val fragment: Fragment) : ToTokens {
+internal class Stmts(
+    public val fragment: Fragment,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         when (val frag = fragment) {
             is Fragment.Expr -> frag.expr.toTokens(tokens)
@@ -39,7 +48,9 @@ public class Stmts(public val fragment: Fragment) : ToTokens {
     }
 }
 
-public class Match(public val fragment: Fragment) : ToTokens {
+internal class Match(
+    public val fragment: Fragment,
+) : ToTokens {
     override fun toTokens(tokens: TokenStream) {
         when (val frag = fragment) {
             is Fragment.Expr -> {

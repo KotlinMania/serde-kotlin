@@ -67,3 +67,5 @@ serde-commonTest = [
   "libc-kotlin",
   "serde-test-kotlin",
 ]
+
+serde-commonMainApi = ["proc-macro2-kotlin"]

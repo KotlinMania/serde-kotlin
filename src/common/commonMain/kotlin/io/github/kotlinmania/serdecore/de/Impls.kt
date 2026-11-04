@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError
-
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
@@ -734,22 +733,24 @@ private class MutableListInPlaceVisitor<T>(
             val slot = mutablePlace({ values[index] }, { values[index] = it })
             when (val result = access.nextElementSeed(InPlaceSeed(slot, elementDeserialize))) {
                 is SerdeResult.Failure -> return result
-                is SerdeResult.Success -> when (result.value) {
-                    is SeqElement.Some -> Unit
-                    SeqElement.None -> {
-                        values.subList(index, values.size).clear()
-                        return SerdeResult.success(Unit)
+                is SerdeResult.Success ->
+                    when (result.value) {
+                        is SeqElement.Some -> Unit
+                        SeqElement.None -> {
+                            values.subList(index, values.size).clear()
+                            return SerdeResult.success(Unit)
+                        }
                     }
-                }
             }
         }
         while (true) {
             when (val result = access.nextElement(elementDeserialize)) {
                 is SerdeResult.Failure -> return result
-                is SerdeResult.Success -> when (val next = result.value) {
-                    is SeqElement.Some -> values.add(next.value)
-                    SeqElement.None -> return SerdeResult.success(Unit)
-                }
+                is SerdeResult.Success ->
+                    when (val next = result.value) {
+                        is SeqElement.Some -> values.add(next.value)
+                        SeqElement.None -> return SerdeResult.success(Unit)
+                    }
             }
         }
     }

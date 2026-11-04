@@ -15,26 +15,29 @@ private fun tokensFromRust(text: String): TokenStream =
 
 private fun renderImplParam(param: GenericParam): String =
     when (param) {
-        is GenericParam.LifetimeParam -> buildString {
-            append(param.lifetime)
-            if (!param.bounds.isEmpty()) {
-                append(": ")
-                append(param.bounds.generatedString())
+        is GenericParam.LifetimeParam ->
+            buildString {
+                append(param.lifetime)
+                if (!param.bounds.isEmpty()) {
+                    append(": ")
+                    append(param.bounds.generatedString())
+                }
             }
-        }
-        is GenericParam.TypeParam -> buildString {
-            append(param.ident)
-            if (!param.bounds.isEmpty()) {
-                append(": ")
-                append(param.bounds.generatedString())
+        is GenericParam.TypeParam ->
+            buildString {
+                append(param.ident)
+                if (!param.bounds.isEmpty()) {
+                    append(": ")
+                    append(param.bounds.generatedString())
+                }
             }
-        }
-        is GenericParam.ConstParam -> buildString {
-            append("const ")
-            append(param.ident)
-            append(": ")
-            append(param.ty.generatedString())
-        }
+        is GenericParam.ConstParam ->
+            buildString {
+                append("const ")
+                append(param.ident)
+                append(": ")
+                append(param.ty.generatedString())
+            }
     }
 
 private fun renderTypeParam(param: GenericParam): String =

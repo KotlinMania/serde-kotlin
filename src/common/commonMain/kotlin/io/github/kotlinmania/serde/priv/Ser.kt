@@ -299,7 +299,7 @@ internal sealed interface Content : Serialize {
     data class Bytes(
         val value: ByteArray,
     ) : Content {
-        override fun equals(other: Any?): Boolean = this === other || other is Bytes && value.contentEquals(other.value)
+        override fun equals(other: Any?): Boolean = this === other || (other is Bytes && value.contentEquals(other.value))
 
         override fun hashCode(): Int = value.contentHashCode()
     }

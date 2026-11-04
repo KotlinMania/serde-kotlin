@@ -51,10 +51,11 @@ internal fun rustContentSizes(target: String): Pair<ULong, ULong> =
     verifiedRustContentSizes(target)
         ?: throw IllegalStateException("Missing verified Rust Content layout for target $target")
 
-private fun verifiedRustContentSizes(target: String): Pair<ULong, ULong>? = when (target) {
-    "aarch64-apple-darwin" -> Pair(32uL, 64uL)
-    else -> null
-}
+private fun verifiedRustContentSizes(target: String): Pair<ULong, ULong>? =
+    when (target) {
+        "aarch64-apple-darwin" -> Pair(32uL, 64uL)
+        else -> null
+    }
 
 internal fun <T> generatedContentCapacity(hint: Int?, pairs: Boolean): ArrayList<T> {
     val sizes = verifiedRustContentSizes(rustContentLayoutTarget())

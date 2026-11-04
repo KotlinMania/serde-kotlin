@@ -13,42 +13,54 @@ class MutablePlaceTest {
         I32Deserialize.deserializeInPlace(I32Deserializer.new(9), place).getOrThrow()
         assertEquals(9, value)
         val error = SerdeError.custom("rejected")
-        val failed = object : Deserialize<Int> {
-            override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int> = SerdeResult.failure(error)
-        }
+        val failed =
+            object : Deserialize<Int> {
+                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int> = SerdeResult.failure(error)
+            }
         assertSame(error, assertIs<SerdeResult.Failure>(failed.deserializeInPlace(I32Deserializer.new(0), place)).error)
         assertEquals(9, value)
     }
 
     @Test fun placeAndDefaultSetterPropagateExceptions() {
         val panic = IllegalStateException("sentinel")
-        val throwing = object : Deserialize<Int> {
-            override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int> = throw panic
-        }
+        val throwing =
+            object : Deserialize<Int> {
+                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int> = throw panic
+            }
         var value = 4
-        assertSame(panic, assertFailsWith<IllegalStateException> {
-            throwing.deserializeInPlace(I32Deserializer.new(0), mutablePlace({ value }, { value = it }))
-        })
-        assertSame(panic, assertFailsWith<IllegalStateException> {
-            throwing.deserializeInPlace(I32Deserializer.new(0)) { value = it }
-        })
+        assertSame(
+            panic,
+            assertFailsWith<IllegalStateException> {
+                throwing.deserializeInPlace(I32Deserializer.new(0), mutablePlace({ value }, { value = it }))
+            },
+        )
+        assertSame(
+            panic,
+            assertFailsWith<IllegalStateException> {
+                throwing.deserializeInPlace(I32Deserializer.new(0)) { value = it }
+            },
+        )
         assertEquals(4, value)
-        assertSame(panic, assertFailsWith<IllegalStateException> {
-            I32Deserialize.deserializeInPlace(I32Deserializer.new(0), mutablePlace({ value }, { throw panic }))
-        })
+        assertSame(
+            panic,
+            assertFailsWith<IllegalStateException> {
+                I32Deserialize.deserializeInPlace(I32Deserializer.new(0), mutablePlace({ value }, { throw panic }))
+            },
+        )
     }
 
     @Test fun defaultPlaceDispatchesToTheExistingSetterOverrideOnce() {
         var calls = 0
         var value = 4
-        val codec = object : Deserialize<Int> {
-            override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int> = error("wrong dispatch")
-            override fun <D : Deserializer> deserializeInPlace(deserializer: D, place: (Int) -> Unit): SerdeResult<Unit> {
-                calls += 1
-                place(42)
-                return SerdeResult.success(Unit)
+        val codec =
+            object : Deserialize<Int> {
+                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int> = error("wrong dispatch")
+                override fun <D : Deserializer> deserializeInPlace(deserializer: D, place: (Int) -> Unit): SerdeResult<Unit> {
+                    calls += 1
+                    place(42)
+                    return SerdeResult.success(Unit)
+                }
             }
-        }
         codec.deserializeInPlace(I32Deserializer.new(0), mutablePlace({ value }, { value = it })).getOrThrow()
         assertEquals(1, calls)
         assertEquals(42, value)
@@ -58,10 +70,13 @@ class MutablePlaceTest {
         val trace = mutableListOf<String>()
         val first = PlaceItem(1)
         val original = mutableListOf(first, PlaceItem(2))
-        var values = original
-        mutableListDeserialize(PlaceItemCodec(trace)).deserializeInPlace(
-            DirectPlaceSequence(listOf(10, 20, 30)), mutablePlace({ values }, { values = it }),
-        ).getOrThrow()
+        val callerSlot = arrayOf(original)
+        mutableListDeserialize(PlaceItemCodec(trace))
+            .deserializeInPlace(
+                DirectPlaceSequence(listOf(10, 20, 30)),
+                mutablePlace({ callerSlot[0] }, { callerSlot[0] = it }),
+            ).getOrThrow()
+        val values = callerSlot[0]
         assertSame(original, values)
         assertSame(first, values[0])
         assertEquals(listOf(10, 20, 30), values.map { it.value })
@@ -70,10 +85,13 @@ class MutablePlaceTest {
 
     @Test fun oldListSetterStillReplacesTheList() {
         val original = mutableListOf(1, 2)
-        var values = original
-        mutableListDeserialize(I32Deserialize).deserializeInPlace(
-            listOf(9.intoDeserializer()).intoDeserializer(),
-        ) { values = it }.getOrThrow()
+        val callerSlot = arrayOf(original)
+        mutableListDeserialize(I32Deserialize)
+            .deserializeInPlace(
+                listOf(9.intoDeserializer()).intoDeserializer(),
+            ) { callerSlot[0] = it }
+            .getOrThrow()
+        val values = callerSlot[0]
         assertNotSame(original, values)
         assertEquals(listOf(1, 2), original)
         assertEquals(listOf(9), values)
@@ -81,39 +99,44 @@ class MutablePlaceTest {
 
     @Test fun nullableCallerSlotCanBeReplacedWithNull() {
         var value: Int? = 4
-        val codec = object : Deserialize<Int?> {
-            override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int?> = SerdeResult.success(null)
-        }
+        val codec =
+            object : Deserialize<Int?> {
+                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<Int?> = SerdeResult.success(null)
+            }
         codec.deserializeInPlace(I32Deserializer.new(0), mutablePlace({ value }, { value = it })).getOrThrow()
         assertNull(value)
     }
 
     @Test fun vectorMutationAndDispatchObservations() {
-        assertEquals(listOf(
-            "empty|state=|trace=|result=ok",
-            "truncate|state=10|trace=in:1:10|result=ok",
-            "equal|state=10,20|trace=in:1:10;in:2:20|result=ok",
-            "append|state=10,20,30|trace=in:1:10;new:20;new:30|result=ok",
-            "empty-append|state=10,20|trace=new:10;new:20|result=ok",
-            "error-existing|state=10,700,3|trace=in:1:10;in:2:-1|result=error:rejected",
-            "error-append|state=10|trace=in:1:10;new:-1|result=error:rejected",
-            "panic-existing|state=10,800,3|trace=in:1:10;in:2:-2|result=panic",
-            "panic-append|state=10|trace=in:1:10;new:-2|result=panic",
-        ), mutablePlaceObservations())
+        assertEquals(
+            listOf(
+                "empty|state=|trace=|result=ok",
+                "truncate|state=10|trace=in:1:10|result=ok",
+                "equal|state=10,20|trace=in:1:10;in:2:20|result=ok",
+                "append|state=10,20,30|trace=in:1:10;new:20;new:30|result=ok",
+                "empty-append|state=10,20|trace=new:10;new:20|result=ok",
+                "error-existing|state=10,700,3|trace=in:1:10;in:2:-1|result=error:rejected",
+                "error-append|state=10|trace=in:1:10;new:-1|result=error:rejected",
+                "panic-existing|state=10,800,3|trace=in:1:10;in:2:-2|result=panic",
+                "panic-append|state=10|trace=in:1:10;new:-2|result=panic",
+            ),
+            mutablePlaceObservations(),
+        )
     }
 
     @Test
     fun existingValueSequencePropagatesExceptionAndRetainsMutation() {
         val originalElement = PlaceItem(1)
-        var values = mutableListOf(originalElement)
-        val originalList = values
+        val callerSlot = arrayOf(mutableListOf(originalElement))
+        val originalList = callerSlot[0]
         val failure =
             assertFailsWith<IllegalStateException> {
                 mutableListDeserialize(PlaceItemCodec(mutableListOf())).deserializeInPlace(
                     listOf((-2).intoDeserializer()).intoDeserializer(),
-                    mutablePlace({ values }, { values = it }),
+                    mutablePlace({ callerSlot[0] }, { callerSlot[0] = it }),
                 )
             }
+        val values = callerSlot[0]
         assertEquals("sentinel", failure.message)
         assertSame(originalList, values)
         assertSame(originalElement, values.single())
@@ -121,9 +144,13 @@ class MutablePlaceTest {
     }
 }
 
-private class PlaceItem(var value: Int)
+private class PlaceItem(
+    var value: Int,
+)
 
-private class PlaceItemCodec(private val trace: MutableList<String>) : Deserialize<PlaceItem> {
+private class PlaceItemCodec(
+    private val trace: MutableList<String>,
+) : Deserialize<PlaceItem> {
     override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<PlaceItem> =
         I32Deserialize.deserialize(deserializer).flatMap { n ->
             trace.add("new:$n")
@@ -137,7 +164,12 @@ private class PlaceItemCodec(private val trace: MutableList<String>) : Deseriali
     override fun <D : Deserializer> deserializeInPlace(deserializer: D, place: MutablePlace<PlaceItem>): SerdeResult<Unit> =
         I32Deserialize.deserialize(deserializer).flatMap { n ->
             trace.add("in:${place.value.value}:$n")
-            place.value.value = when (n) { -1 -> 700; -2 -> 800; else -> n }
+            place.value.value =
+                when (n) {
+                    -1 -> 700
+                    -2 -> 800
+                    else -> n
+                }
             when (n) {
                 -1 -> SerdeResult.failure(SerdeError.custom("rejected"))
                 -2 -> throw IllegalStateException("sentinel")
@@ -147,39 +179,53 @@ private class PlaceItemCodec(private val trace: MutableList<String>) : Deseriali
 }
 
 /** A format driver that forwards errors/exceptions; only the production Vec consumer is under test. */
-private class DirectPlaceSequence(private val values: List<Int>) : Deserializer by I32Deserializer.new(0) {
-    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = visitor.visitSeq(object : SeqAccess {
-        private var index = 0
-        override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-            if (index == values.size) SerdeResult.success(SeqElement.None)
-            else seed.deserialize(I32Deserializer.new(values[index++])).map { SeqElement.Some(it) }
-        override fun sizeHint(): Int = values.size - index
-    })
+private class DirectPlaceSequence(
+    private val values: List<Int>,
+) : Deserializer by I32Deserializer.new(0) {
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> =
+        visitor.visitSeq(
+            object : SeqAccess {
+                private var index = 0
+                override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
+                    if (index == values.size) {
+                        SerdeResult.success(SeqElement.None)
+                    } else {
+                        seed.deserialize(I32Deserializer.new(values[index++])).map { SeqElement.Some(it) }
+                    }
+                override fun sizeHint(): Int = values.size - index
+            },
+        )
 }
 
-fun mutablePlaceObservations(): List<String> = listOf(
-    Triple("empty", emptyList(), emptyList()),
-    Triple("truncate", listOf(1, 2, 3), listOf(10)),
-    Triple("equal", listOf(1, 2), listOf(10, 20)),
-    Triple("append", listOf(1), listOf(10, 20, 30)),
-    Triple("empty-append", emptyList(), listOf(10, 20)),
-    Triple("error-existing", listOf(1, 2, 3), listOf(10, -1, 30)),
-    Triple("error-append", listOf(1), listOf(10, -1)),
-    Triple("panic-existing", listOf(1, 2, 3), listOf(10, -2, 30)),
-    Triple("panic-append", listOf(1), listOf(10, -2)),
-).map { (label, before, input) ->
-    val trace = mutableListOf<String>()
-    val values = before.map { PlaceItem(it) }.toMutableList()
-    val result = try {
-        when (val r = mutableListDeserialize(PlaceItemCodec(trace)).deserializeInPlace(
-            DirectPlaceSequence(input), mutablePlace({ values }, { error("list replaced") }),
-        )) {
-            is SerdeResult.Success -> "ok"
-            is SerdeResult.Failure -> "error:${r.error.message}"
-        }
-    } catch (e: IllegalStateException) {
-        check(e.message == "sentinel")
-        "panic"
+fun mutablePlaceObservations(): List<String> =
+    listOf(
+        Triple("empty", emptyList(), emptyList()),
+        Triple("truncate", listOf(1, 2, 3), listOf(10)),
+        Triple("equal", listOf(1, 2), listOf(10, 20)),
+        Triple("append", listOf(1), listOf(10, 20, 30)),
+        Triple("empty-append", emptyList(), listOf(10, 20)),
+        Triple("error-existing", listOf(1, 2, 3), listOf(10, -1, 30)),
+        Triple("error-append", listOf(1), listOf(10, -1)),
+        Triple("panic-existing", listOf(1, 2, 3), listOf(10, -2, 30)),
+        Triple("panic-append", listOf(1), listOf(10, -2)),
+    ).map { (label, before, input) ->
+        val trace = mutableListOf<String>()
+        val values = before.map { PlaceItem(it) }.toMutableList()
+        val result =
+            try {
+                when (
+                    val r =
+                        mutableListDeserialize(PlaceItemCodec(trace)).deserializeInPlace(
+                            DirectPlaceSequence(input),
+                            mutablePlace({ values }, { error("list replaced") }),
+                        )
+                ) {
+                    is SerdeResult.Success -> "ok"
+                    is SerdeResult.Failure -> "error:${r.error.message}"
+                }
+            } catch (e: IllegalStateException) {
+                check(e.message == "sentinel")
+                "panic"
+            }
+        "$label|state=${values.joinToString(",") { it.value.toString() }}|trace=${trace.joinToString(";")}|result=$result"
     }
-    "$label|state=${values.joinToString(",") { it.value.toString() }}|trace=${trace.joinToString(";")}|result=$result"
-}

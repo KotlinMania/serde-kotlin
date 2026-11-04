@@ -102,13 +102,14 @@ class NullableSequenceTest {
     fun exhaustedSequenceDoesNotInvokeSeedAndFailureIsPreserved() {
         val error = SerdeError.custom("element rejected")
         var calls = 0
-        val seed = object : DeserializeSeed<UInt?> {
-            override fun <D> deserialize(deserializer: D): SerdeResult<UInt?>
+        val seed =
+            object : DeserializeSeed<UInt?> {
+                override fun <D> deserialize(deserializer: D): SerdeResult<UInt?>
                 where D : Deserializer {
-                calls += 1
-                return SerdeResult.failure(error)
+                    calls += 1
+                    return SerdeResult.failure(error)
+                }
             }
-        }
         val access = values(null)
         assertSame(error, assertIs<SerdeResult.Failure>(access.nextElementSeed(seed)).error)
         assertEquals(SeqElement.None, access.nextElementSeed(seed).getOrThrow())
@@ -124,11 +125,12 @@ class NullableSequenceTest {
 
     @Test
     fun mapAsSequencePreservesNullableSeedResults() {
-        val nullablePair = object : Deserialize<Unit?> {
-            override fun <D> deserialize(deserializer: D): SerdeResult<Unit?>
+        val nullablePair =
+            object : Deserialize<Unit?> {
+                override fun <D> deserialize(deserializer: D): SerdeResult<Unit?>
                 where D : Deserializer =
-                pairDeserialize(nullableU32, nullableU32).deserialize(deserializer).map { null }
-        }
+                    pairDeserialize(nullableU32, nullableU32).deserialize(deserializer).map { null }
+            }
         val input = mapOf(OptionalU32(null) to OptionalU32(7u)).intoDeserializer()
         val actual = mutableListDeserialize(nullablePair).deserialize(input).getOrThrow()
         assertEquals(listOf<Unit?>(null), actual)
@@ -144,7 +146,9 @@ class NullableSequenceTest {
     private fun values(vararg values: UInt?): SeqDeserializer<OptionalU32> = values.map(::OptionalU32).intoDeserializer()
 }
 
-private class OptionalU32(private val value: UInt?) : IntoDeserializer {
+private class OptionalU32(
+    private val value: UInt?,
+) : IntoDeserializer {
     override fun intoDeserializer(): Deserializer =
         object : Deserializer by UnitDeserializer.new() {
             override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =

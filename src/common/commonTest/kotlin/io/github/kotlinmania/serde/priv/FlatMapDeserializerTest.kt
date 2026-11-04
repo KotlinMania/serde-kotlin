@@ -16,7 +16,6 @@ import io.github.kotlinmania.serdecore.de.SeqElement
 import io.github.kotlinmania.serdecore.de.StringDeserialize
 import io.github.kotlinmania.serdecore.de.U32Deserialize
 import io.github.kotlinmania.serdecore.de.UnitDeserialize
-import io.github.kotlinmania.serdecore.de.VariantAccess
 import io.github.kotlinmania.serdecore.de.Visitor
 import io.github.kotlinmania.serdecore.de.mapDeserialize
 import io.github.kotlinmania.serdecore.de.nullableDeserialize
@@ -455,17 +454,20 @@ private data class NewtypeEnumWrapper(
     val inner: ExternallyTaggedDeEnum,
 ) {
     companion object : Deserialize<NewtypeEnumWrapper> {
+        private val visitor =
+            object : Visitor<NewtypeEnumWrapper> {
+                override fun expecting(): String = "newtype NewtypeEnumWrapper"
+
+                override fun <InnerD> visitNewtypeStruct(deserializer: InnerD): SerdeResult<NewtypeEnumWrapper>
+                        where InnerD : Deserializer =
+                    ExternallyTaggedDeEnum.deserialize(deserializer).map(::NewtypeEnumWrapper)
+            }
+
         override fun <D> deserialize(deserializer: D): SerdeResult<NewtypeEnumWrapper>
             where D : Deserializer =
             deserializer.deserializeNewtypeStruct(
                 "NewtypeEnumWrapper",
-                object : Visitor<NewtypeEnumWrapper> {
-                    override fun expecting(): String = "newtype NewtypeEnumWrapper"
-
-                    override fun <InnerD> visitNewtypeStruct(deserializer: InnerD): SerdeResult<NewtypeEnumWrapper>
-                        where InnerD : Deserializer =
-                        ExternallyTaggedDeEnum.deserialize(deserializer).map(::NewtypeEnumWrapper)
-                },
+                visitor,
             )
     }
 }

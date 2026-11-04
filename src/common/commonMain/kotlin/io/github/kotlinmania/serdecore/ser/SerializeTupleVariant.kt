@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeTupleVariant`.
  */
-interface SerializeTupleVariant<Ok>
-    {
+interface SerializeTupleVariant<Ok> {
     /**
      * Serialize a tuple variant field.
      */

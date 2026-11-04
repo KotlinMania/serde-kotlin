@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeError
-
 import io.github.kotlinmania.serde.SerdeResult
 
 /**
@@ -15,8 +14,7 @@ import io.github.kotlinmania.serde.SerdeResult
  * Implementations of `Serialize` map themselves into this data model by invoking exactly one of the
  * `Serializer` methods.
  */
-interface Serializer<Ok>
-    {
+interface Serializer<Ok> {
     /**
      * Serialize a `Boolean` value.
      */

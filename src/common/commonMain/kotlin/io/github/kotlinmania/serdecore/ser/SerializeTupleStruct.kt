@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeTupleStruct`.
  */
-interface SerializeTupleStruct<Ok>
-    {
+interface SerializeTupleStruct<Ok> {
     /**
      * Serialize a tuple class field.
      */

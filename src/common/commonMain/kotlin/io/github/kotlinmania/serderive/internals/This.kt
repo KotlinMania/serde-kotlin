@@ -3,11 +3,10 @@ package io.github.kotlinmania.serderive.internals
 
 import io.github.kotlinmania.syn.Path
 import io.github.kotlinmania.syn.PathArguments
-import io.github.kotlinmania.syn.PathSegment
 import io.github.kotlinmania.syn.copy
 import io.github.kotlinmania.syn.token.PathSep
 
-public fun thisType(cont: Container): Path {
+internal fun thisType(cont: Container): Path {
     val remote = cont.attrs.remote()
     if (remote != null) {
         val thisPath = remote.deepCopy()
@@ -23,7 +22,7 @@ public fun thisType(cont: Container): Path {
     }
 }
 
-public fun thisValue(cont: Container): Path {
+internal fun thisValue(cont: Container): Path {
     val remote = cont.attrs.remote()
     if (remote != null) {
         val thisPath = remote.deepCopy()

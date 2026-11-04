@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeStructVariant`.
  */
-interface SerializeStructVariant<Ok>
-    {
+interface SerializeStructVariant<Ok> {
     /**
      * Serialize a class variant field.
      */

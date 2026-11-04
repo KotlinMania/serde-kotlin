@@ -8,13 +8,12 @@ import io.github.kotlinmania.syn.Data
 import io.github.kotlinmania.syn.DeriveInput
 import io.github.kotlinmania.syn.Meta
 
-public fun allowDeprecated(input: DeriveInput): TokenStream? {
-    return if (shouldAllowDeprecated(input)) {
+internal fun allowDeprecated(input: DeriveInput): TokenStream? =
+    if (shouldAllowDeprecated(input)) {
         quote(""" `#`[allow(deprecated)] """)
     } else {
         null
     }
-}
 
 private fun shouldAllowDeprecated(input: DeriveInput): Boolean {
     if (containsDeprecated(input.attrs)) {
@@ -46,7 +45,8 @@ private fun containsDeprecated(attrs: List<Attribute>): Boolean {
                     if (nestedMeta.path.isIdent("deprecated")) {
                         allowDeprecated = true
                     }
-                    io.github.kotlinmania.syn.SynResult.success(Unit)
+                    io.github.kotlinmania.syn.SynResult
+                        .success(Unit)
                 }
                 if (allowDeprecated) {
                     return true

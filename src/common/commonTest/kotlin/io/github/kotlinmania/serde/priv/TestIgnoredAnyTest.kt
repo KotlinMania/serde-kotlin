@@ -159,15 +159,15 @@ private data object TargetVisitor : Visitor<Target> {
     override fun <A> visitEnum(access: A): SerdeResult<Target>
         where A : EnumAccess =
         serdeCatching {
-            val (variant, access) = access.variantSeed(IgnoredAnyStringSeed).getOrThrow()
+            val (variant, variantAccess) = access.variantSeed(IgnoredAnyStringSeed).getOrThrow()
             when (variant) {
                 "Unit" -> {
-                    access.unitVariant().getOrThrow()
+                    variantAccess.unitVariant().getOrThrow()
                     Target.UnitVariant
                 }
-                "Newtype" -> Target.Newtype(access.newtypeVariantSeed(IgnoredAnyIntSeed).getOrThrow())
-                "Tuple" -> access.tupleVariant(2, IgnoredAnyTupleVisitor).getOrThrow()
-                "Struct" -> access.structVariant(listOf("a"), IgnoredAnyStructVisitor).getOrThrow()
+                "Newtype" -> Target.Newtype(variantAccess.newtypeVariantSeed(IgnoredAnyIntSeed).getOrThrow())
+                "Tuple" -> variantAccess.tupleVariant(2, IgnoredAnyTupleVisitor).getOrThrow()
+                "Struct" -> variantAccess.structVariant(listOf("a"), IgnoredAnyStructVisitor).getOrThrow()
                 else -> throw AssertionError("unexpected variant $variant")
             }
         }

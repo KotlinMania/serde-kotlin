@@ -2,8 +2,8 @@ package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serdecore.priv.contentaccess.validScalar
 import io.github.kotlinmania.serdecore.priv.SharedByteSlice
+import io.github.kotlinmania.serdecore.priv.contentaccess.validScalar
 
 private object CharCodePointVisitor : Visitor<Int> {
     override fun expecting(): String = "a Unicode scalar character"
@@ -11,14 +11,18 @@ private object CharCodePointVisitor : Visitor<Int> {
     override fun visitCharCodePoint(codePoint: Int): SerdeResult<Int> =
         if (validScalar(codePoint)) SerdeResult.success(codePoint) else SerdeResult.failure(SerdeError("Invalid Unicode scalar: $codePoint"))
     override fun visitStr(v: String): SerdeResult<Int> {
-        val codePoint = when {
-            v.length == 1 -> v[0].code
-            v.length == 2 && v[0].code in 0xd800..0xdbff && v[1].code in 0xdc00..0xdfff ->
-                0x10000 + ((v[0].code - 0xd800) shl 10) + v[1].code - 0xdc00
-            else -> -1
+        val codePoint =
+            when {
+                v.length == 1 -> v[0].code
+                v.length == 2 && v[0].code in 0xd800..0xdbff && v[1].code in 0xdc00..0xdfff ->
+                    0x10000 + ((v[0].code - 0xd800) shl 10) + v[1].code - 0xdc00
+                else -> -1
+            }
+        return if (validScalar(codePoint)) {
+            SerdeResult.success(codePoint)
+        } else {
+            SerdeResult.failure(SerdeError.invalidValue(Unexpected.Str(v), this))
         }
-        return if (validScalar(codePoint)) SerdeResult.success(codePoint)
-        else SerdeResult.failure(SerdeError.invalidValue(Unexpected.Str(v), this))
     }
 }
 

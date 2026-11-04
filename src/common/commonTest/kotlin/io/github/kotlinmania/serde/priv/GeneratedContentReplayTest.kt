@@ -5,9 +5,9 @@ import io.github.kotlinmania.serde.UntaggedContent
 import io.github.kotlinmania.serdecore.de.*
 import io.github.kotlinmania.serdecore.de.value.BorrowedByteSliceDeserializer
 import io.github.kotlinmania.serdecore.de.value.CharCodePointDeserializer
+import io.github.kotlinmania.serdecore.priv.SharedByteSlice
 import io.github.kotlinmania.serdecore.priv.contentaccess.*
 import io.github.kotlinmania.serdecore.priv.generated.content.Content
-import io.github.kotlinmania.serdecore.priv.SharedByteSlice
 import kotlin.test.*
 
 class GeneratedContentReplayTest {
@@ -16,8 +16,11 @@ class GeneratedContentReplayTest {
             val captured = UntaggedContent.read(CharCodePointDeserializer.new(cp)).getOrThrow()
             assertIs<SerdeResult.Failure>(captured.decode(I32Deserialize))
             repeat(2) { assertEquals(cp, captured.decode(CharCodePointDeserialize).getOrThrow()) }
-            if (cp > 0xffff) assertIs<SerdeResult.Failure>(captured.decode(CharDeserialize))
-            else assertEquals(cp.toChar(), captured.decode(CharDeserialize).getOrThrow())
+            if (cp > 0xffff) {
+                assertIs<SerdeResult.Failure>(captured.decode(CharDeserialize))
+            } else {
+                assertEquals(cp.toChar(), captured.decode(CharDeserialize).getOrThrow())
+            }
         }
     }
 
@@ -37,24 +40,28 @@ class GeneratedContentReplayTest {
 
     @Test fun legacyInputsRemainUsableAndAreCopiedAtTheOwnedBoundary() {
         val bytes = byteArrayOf(1, 2, 3)
-        val source = io.github.kotlinmania.serdecore.priv.Content.ByteBuf(bytes)
+        val source =
+            io.github.kotlinmania.serdecore.priv.Content
+                .ByteBuf(bytes)
         val d = ContentRefDeserializer.new(source)
         bytes[0] = 9
-        val observer = object : Visitor<ByteArray> {
-            override fun expecting(): String = "bytes"
-            override fun visitBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
-        }
+        val observer =
+            object : Visitor<ByteArray> {
+                override fun expecting(): String = "bytes"
+                override fun visitBytes(v: ByteArray): SerdeResult<ByteArray> = SerdeResult.success(v)
+            }
         assertContentEquals(byteArrayOf(1, 2, 3), d.deserializeAny(observer).getOrThrow())
     }
 
     @Test fun replayPreservesOwnedAndBorrowedVisitorDispatch() {
-        val observer = object : Visitor<String> {
-            override fun expecting(): String = "a captured value"
-            override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success("str:$v")
-            override fun visitString(v: String): SerdeResult<String> = SerdeResult.success("string:$v")
-            override fun visitBytes(v: ByteArray): SerdeResult<String> = SerdeResult.success("bytes:${v.size}")
-            override fun visitByteBuf(v: ByteArray): SerdeResult<String> = SerdeResult.success("buffer:${v.size}")
-        }
+        val observer =
+            object : Visitor<String> {
+                override fun expecting(): String = "a captured value"
+                override fun visitStr(v: String): SerdeResult<String> = SerdeResult.success("str:$v")
+                override fun visitString(v: String): SerdeResult<String> = SerdeResult.success("string:$v")
+                override fun visitBytes(v: ByteArray): SerdeResult<String> = SerdeResult.success("bytes:${v.size}")
+                override fun visitByteBuf(v: ByteArray): SerdeResult<String> = SerdeResult.success("buffer:${v.size}")
+            }
         val text = newStringContent("hello")
         val bytes = newByteBufContent(byteArrayOf(1, 2))
         assertEquals("string:hello", ContentDeserializer.new(text).deserializeAny(observer).getOrThrow())

@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serdecore.de
 
 import io.github.kotlinmania.serde.SerdeError
-
 import io.github.kotlinmania.serde.SerdeResult
 
 /**

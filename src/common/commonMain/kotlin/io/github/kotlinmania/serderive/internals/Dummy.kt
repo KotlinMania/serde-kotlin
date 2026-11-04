@@ -5,19 +5,26 @@ import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.syn.Path
 
-public fun wrapInConst(serdePath: Path?, code: TokenStream): TokenStream {
-    val useSerde = if (serdePath != null) {
-        quote("""
+internal fun wrapInConst(serdePath: Path?, code: TokenStream): TokenStream {
+    val useSerde =
+        if (serdePath != null) {
+            quote(
+                """
             use `#`serdePath as _serde;
-        """, mapOf("serdePath" to serdePath))
-    } else {
-        quote("""
+        """,
+                mapOf("serdePath" to serdePath),
+            )
+        } else {
+            quote(
+                """
             #[allow(unused_extern_crates, clippy::useless_attribute)]
             extern crate serde as _serde;
-        """)
-    }
+        """,
+            )
+        }
 
-    return quote("""
+    return quote(
+        """
         #[doc(hidden)]
         #[allow(
             non_upper_case_globals,
@@ -32,5 +39,7 @@ public fun wrapInConst(serdePath: Path?, code: TokenStream): TokenStream {
 
             `#`code
         };
-    """, mapOf("useSerde" to useSerde, "code" to code))
+    """,
+        mapOf("useSerde" to useSerde, "code" to code),
+    )
 }

@@ -1,8 +1,8 @@
 package io.github.kotlinmania.serdecore.priv
 
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serdecore.priv.generated.content.Content
 import io.github.kotlinmania.serdecore.priv.contentaccess.*
+import io.github.kotlinmania.serdecore.priv.generated.content.Content
 import kotlin.test.*
 
 class GeneratedContentCaptureTest {
@@ -25,9 +25,18 @@ class GeneratedContentCaptureTest {
         for ((start, end) in listOf(0 to 0, 0 to 5, 1 to 4, 5 to 5)) {
             val region = SharedByteSlice.borrow(bytes, start, end)
             val captured = ContentVisitor.new().visitBorrowedByteSlice(region).getOrThrow()
-            val nested = newSeqContent(listOf(newSomeContent(captured), newMapContent(listOf(
-                io.github.kotlinmania.serdecore.priv.contentaccess.ContentMapEntry(captured, newNewtypeContent(captured)),
-            ))))
+            val nested =
+                newSeqContent(
+                    listOf(
+                        newSomeContent(captured),
+                        newMapContent(
+                            listOf(
+                                io.github.kotlinmania.serdecore.priv.contentaccess
+                                    .ContentMapEntry(captured, newNewtypeContent(captured)),
+                            ),
+                        ),
+                    ),
+                )
             val clone = assertIs<Content.Seq>(contentClone(nested))
             val some = assertIs<Content.Bytes>(assertIs<Content.Some>(clone.value[0]).value)
             val entry = assertIs<Content.Map>(clone.value[1]).value.single()

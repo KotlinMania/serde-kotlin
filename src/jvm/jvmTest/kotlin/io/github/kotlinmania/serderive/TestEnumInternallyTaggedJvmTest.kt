@@ -1669,5 +1669,5 @@ private fun buildInternallyTaggedFixtureSource(): String {
                 "invalid type: unit value, expected variant identifier",
             );
         }
-    """.trimIndent() + "\n"
+        """.trimIndent() + "\n"
 }

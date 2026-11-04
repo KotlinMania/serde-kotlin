@@ -17,25 +17,30 @@ internal fun deserializeEnumAdjacently(
     variants: List<Variant>,
     cattrs: AttrContainer,
     tag: String,
-    content: String
+    content: String,
 ): Fragment {
     val thisType = params.thisType
     val thisValue = params.thisValue
-    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) = params.genericsWithDeLifetime()
+    val generics = params.genericsWithDeLifetime()
+    val deImplGenerics = generics.deImplGenerics
+    val deTyGenerics = generics.deTyGenerics
+    val tyGenerics = generics.tyGenerics
+    val whereClause = generics.whereClause
     val delife = params.borrowed.deLifetime()
 
     val (variantsStmt, variantVisitor) = prepareEnumVariantEnum(variants)
 
-    val variantArms = variants.mapIndexedNotNull { i, variant ->
-        if (variant.attrs.skipDeserializing()) return@mapIndexedNotNull null
-        val variantIndex = fieldI(i)
-        val block = Match(deserializeVariant(params, variant, cattrs))
-        quote(
-            "__Field::`#`variantIndex => `#`block",
-            "variantIndex" to variantIndex,
-            "block" to block,
-        )
-    }
+    val variantArms =
+        variants.mapIndexedNotNull { i, variant ->
+            if (variant.attrs.skipDeserializing()) return@mapIndexedNotNull null
+            val variantIndex = fieldI(i)
+            val block = Match(deserializeVariant(params, variant, cattrs))
+            quote(
+                "__Field::`#`variantIndex => `#`block",
+                "variantIndex" to variantIndex,
+                "block" to block,
+            )
+        }
 
     val rustName = params.typeName()
     val expecting = "adjacently tagged enum $rustName"
@@ -43,15 +48,21 @@ internal fun deserializeEnumAdjacently(
     val typeName = cattrs.name().deserializeName()
     val denyUnknownFields = cattrs.denyUnknownFields()
 
-    val fieldVisitorTy = if (denyUnknownFields) {
-        quote("_serde::`#`Private::de::TagOrContentFieldVisitor", "Private" to Private)
-    } else {
-        quote("_serde::`#`Private::de::TagContentOtherFieldVisitor", "Private" to Private)
-    }
+    val fieldVisitorTy =
+        if (denyUnknownFields) {
+            quote("_serde::`#`Private::de::TagOrContentFieldVisitor", "Private" to Private)
+        } else {
+            quote("_serde::`#`Private::de::TagContentOtherFieldVisitor", "Private" to Private)
+        }
 
-    var missingContent = quote("""
+    var missingContent =
+        quote(
+            """
         _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::missing_field(`#`content))
-    """, "Private" to Private, "content" to content)
+    """,
+            "Private" to Private,
+            "content" to content,
+        )
     var missingContentFallthrough = quote("")
     val missingContentArms = mutableListOf<TokenStream>()
     for ((i, variant) in variants.withIndex()) {
@@ -59,44 +70,49 @@ internal fun deserializeEnumAdjacently(
         val variantIndex = fieldI(i)
         val variantIdent = variant.ident
 
-        val arm = when (variant.style) {
-            Style.Unit -> quote(
-                "_serde::`#`Private::Ok(`#`thisValue::`#`variantIdent)",
-                "Private" to Private,
-                "thisValue" to thisValue,
-                "variantIdent" to variantIdent,
-            )
-            Style.Newtype -> {
-                if (variant.attrs.deserializeWith() == null) {
-                    val span = variant.original.span()
-                    val func = quoteSpanned(
-                        span,
-                        "_serde::`#`Private::de::missing_field",
-                        "Private" to Private,
-                    )
+        val arm =
+            when (variant.style) {
+                Style.Unit ->
                     quote(
-                        "`#`func(`#`content).map(`#`thisValue::`#`variantIdent)",
-                        "func" to func,
-                        "content" to content,
+                        "_serde::`#`Private::Ok(`#`thisValue::`#`variantIdent)",
+                        "Private" to Private,
                         "thisValue" to thisValue,
                         "variantIdent" to variantIdent,
                     )
-                } else {
-                    missingContentFallthrough = quote(
-                        "_ => `#`missingContent",
-                        "missingContent" to missingContent,
-                    )
+                Style.Newtype -> {
+                    if (variant.attrs.deserializeWith() == null) {
+                        val span = variant.original.span()
+                        val func =
+                            quoteSpanned(
+                                span,
+                                "_serde::`#`Private::de::missing_field",
+                                "Private" to Private,
+                            )
+                        quote(
+                            "`#`func(`#`content).map(`#`thisValue::`#`variantIdent)",
+                            "func" to func,
+                            "content" to content,
+                            "thisValue" to thisValue,
+                            "variantIdent" to variantIdent,
+                        )
+                    } else {
+                        missingContentFallthrough =
+                            quote(
+                                "_ => `#`missingContent",
+                                "missingContent" to missingContent,
+                            )
+                        continue
+                    }
+                }
+                else -> {
+                    missingContentFallthrough =
+                        quote(
+                            "_ => `#`missingContent",
+                            "missingContent" to missingContent,
+                        )
                     continue
                 }
             }
-            else -> {
-                missingContentFallthrough = quote(
-                    "_ => `#`missingContent",
-                    "missingContent" to missingContent,
-                )
-                continue
-            }
-        }
         missingContentArms.add(
             quote(
                 "__Field::`#`variantIndex => `#`arm,",
@@ -107,43 +123,57 @@ internal fun deserializeEnumAdjacently(
     }
 
     if (missingContentArms.isNotEmpty()) {
-        missingContent = quote("""
+        missingContent =
+            quote(
+                """
             match __field {
                 `#`(`#`missingContentArms)*
                 `#`missingContentFallthrough
             }
-        """, mapOf(
-            "missingContentArms" to missingContentArms,
-            "missingContentFallthrough" to missingContentFallthrough,
-        ))
+        """,
+                mapOf(
+                    "missingContentArms" to missingContentArms,
+                    "missingContentFallthrough" to missingContentFallthrough,
+                ),
+            )
     }
 
-    val nextKey = quote("""
+    val nextKey =
+        quote(
+            """
         _serde::de::MapAccess::next_key_seed(&mut __map, `#`fieldVisitorTy {
             tag: `#`tag,
             content: `#`content,
         })?
-    """, mapOf(
-        "fieldVisitorTy" to fieldVisitorTy,
-        "tag" to tag,
-        "content" to content,
-    ))
+    """,
+            mapOf(
+                "fieldVisitorTy" to fieldVisitorTy,
+                "tag" to tag,
+                "content" to content,
+            ),
+        )
 
-    val variantFromMap = quote("""
+    val variantFromMap =
+        quote(
+            """
         _serde::de::MapAccess::next_value_seed(&mut __map, _serde::`#`Private::de::AdjacentlyTaggedEnumVariantSeed::<__Field> {
             enum_name: `#`rustName,
             variants: VARIANTS,
             fields_enum: _serde::`#`Private::PhantomData
         })?
-    """, mapOf(
-        "Private" to Private,
-        "rustName" to rustName,
-    ))
+    """,
+            mapOf(
+                "Private" to Private,
+                "rustName" to rustName,
+            ),
+        )
 
-    val nextRelevantKey = if (denyUnknownFields) {
-        nextKey
-    } else {
-        quote("""
+    val nextRelevantKey =
+        if (denyUnknownFields) {
+            nextKey
+        } else {
+            quote(
+                """
             {
                 let mut __rk : _serde::`#`Private::Option<_serde::`#`Private::de::TagOrContentField> = _serde::`#`Private::None;
                 while let _serde::`#`Private::Some(__k) = `#`nextKey {
@@ -164,13 +194,17 @@ internal fun deserializeEnumAdjacently(
                 }
                 __rk
             }
-        """, mapOf(
-            "Private" to Private,
-            "nextKey" to nextKey,
-        ))
-    }
+        """,
+                mapOf(
+                    "Private" to Private,
+                    "nextKey" to nextKey,
+                ),
+            )
+        }
 
-    val visitRemainingKeys = quote("""
+    val visitRemainingKeys =
+        quote(
+            """
         match `#`nextRelevantKey {
             _serde::`#`Private::Some(_serde::`#`Private::de::TagOrContentField::Tag) => {
                 _serde::`#`Private::Err(<__A::Error as _serde::de::Error>::duplicate_field(`#`tag))
@@ -180,17 +214,21 @@ internal fun deserializeEnumAdjacently(
             }
             _serde::`#`Private::None => _serde::`#`Private::Ok(__ret),
         }
-    """, mapOf(
-        "nextRelevantKey" to nextRelevantKey,
-        "Private" to Private,
-        "tag" to tag,
-        "content" to content,
-    ))
+    """,
+            mapOf(
+                "nextRelevantKey" to nextRelevantKey,
+                "Private" to Private,
+                "tag" to tag,
+                "content" to content,
+            ),
+        )
 
-    val finishContentThenTag = if (variantArms.isEmpty()) {
-        quote("match `#`variantFromMap {}", "variantFromMap" to variantFromMap)
-    } else {
-        quote("""
+    val finishContentThenTag =
+        if (variantArms.isEmpty()) {
+            quote("match `#`variantFromMap {}", "variantFromMap" to variantFromMap)
+        } else {
+            quote(
+                """
             let __seed = __Seed {
                 variant: `#`variantFromMap,
                 marker: _serde::`#`Private::PhantomData,
@@ -199,14 +237,18 @@ internal fun deserializeEnumAdjacently(
             let __deserializer = _serde::`#`Private::de::ContentDeserializer::<__A::Error>::new(__content);
             let __ret = _serde::de::DeserializeSeed::deserialize(__seed, __deserializer)?;
             `#`visitRemainingKeys
-        """, mapOf(
-            "variantFromMap" to variantFromMap,
-            "Private" to Private,
-            "visitRemainingKeys" to visitRemainingKeys,
-        ))
-    }
+        """,
+                mapOf(
+                    "variantFromMap" to variantFromMap,
+                    "Private" to Private,
+                    "visitRemainingKeys" to visitRemainingKeys,
+                ),
+            )
+        }
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(
+        quote(
+            """
         `#`variantVisitor
 
         `#`variantsStmt
@@ -329,25 +371,28 @@ internal fun deserializeEnumAdjacently(
                 lifetime: _serde::`#`Private::PhantomData,
             },
         )
-    """, mapOf(
-        "variantVisitor" to variantVisitor,
-        "variantsStmt" to variantsStmt,
-        "deImplGenerics" to deImplGenerics,
-        "whereClause" to whereClause,
-        "Private" to Private,
-        "thisType" to thisType,
-        "tyGenerics" to tyGenerics,
-        "delife" to delife,
-        "deTyGenerics" to deTyGenerics,
-        "variantArms" to variantArms,
-        "expectingVal" to expectingVal,
-        "nextRelevantKey" to nextRelevantKey,
-        "variantFromMap" to variantFromMap,
-        "tag" to tag,
-        "visitRemainingKeys" to visitRemainingKeys,
-        "missingContent" to missingContent,
-        "finishContentThenTag" to finishContentThenTag,
-        "content" to content,
-        "typeName" to typeName,
-    )))
+    """,
+            mapOf(
+                "variantVisitor" to variantVisitor,
+                "variantsStmt" to variantsStmt,
+                "deImplGenerics" to deImplGenerics,
+                "whereClause" to whereClause,
+                "Private" to Private,
+                "thisType" to thisType,
+                "tyGenerics" to tyGenerics,
+                "delife" to delife,
+                "deTyGenerics" to deTyGenerics,
+                "variantArms" to variantArms,
+                "expectingVal" to expectingVal,
+                "nextRelevantKey" to nextRelevantKey,
+                "variantFromMap" to variantFromMap,
+                "tag" to tag,
+                "visitRemainingKeys" to visitRemainingKeys,
+                "missingContent" to missingContent,
+                "finishContentThenTag" to finishContentThenTag,
+                "content" to content,
+                "typeName" to typeName,
+            ),
+        ),
+    )
 }

@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeStruct`.
  */
-interface SerializeStruct<Ok>
-    {
+interface SerializeStruct<Ok> {
     /**
      * Serialize a class field.
      */

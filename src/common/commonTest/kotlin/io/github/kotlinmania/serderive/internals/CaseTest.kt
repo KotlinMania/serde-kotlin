@@ -5,24 +5,24 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CaseTest {
-
     @Test
     fun renameVariants() {
-        val cases = listOf(
-            VariantCase("Outcome", "outcome", "OUTCOME", "outcome", "outcome", "OUTCOME", "outcome", "OUTCOME"),
-            VariantCase(
-                "VeryTasty",
-                "verytasty",
-                "VERYTASTY",
-                "veryTasty",
-                "very_tasty",
-                "VERY_TASTY",
-                "very-tasty",
-                "VERY-TASTY",
-            ),
-            VariantCase("A", "a", "A", "a", "a", "A", "a", "A"),
-            VariantCase("Z42", "z42", "Z42", "z42", "z42", "Z42", "z42", "Z42"),
-        )
+        val cases =
+            listOf(
+                VariantCase("Outcome", "outcome", "OUTCOME", "outcome", "outcome", "OUTCOME", "outcome", "OUTCOME"),
+                VariantCase(
+                    "VeryTasty",
+                    "verytasty",
+                    "VERYTASTY",
+                    "veryTasty",
+                    "very_tasty",
+                    "VERY_TASTY",
+                    "very-tasty",
+                    "VERY-TASTY",
+                ),
+                VariantCase("A", "a", "A", "a", "a", "A", "a", "A"),
+                VariantCase("Z42", "z42", "Z42", "z42", "z42", "Z42", "z42", "Z42"),
+            )
         for (c in cases) {
             assertEquals(c.original, RenameRule.None.applyToVariant(c.original))
             assertEquals(c.lower, RenameRule.LowerCase.applyToVariant(c.original))
@@ -38,20 +38,21 @@ class CaseTest {
 
     @Test
     fun renameFields() {
-        val cases = listOf(
-            FieldCase("outcome", "OUTCOME", "Outcome", "outcome", "OUTCOME", "outcome", "OUTCOME"),
-            FieldCase(
-                "very_tasty",
-                "VERY_TASTY",
-                "VeryTasty",
-                "veryTasty",
-                "VERY_TASTY",
-                "very-tasty",
-                "VERY-TASTY",
-            ),
-            FieldCase("a", "A", "A", "a", "A", "a", "A"),
-            FieldCase("z42", "Z42", "Z42", "z42", "Z42", "z42", "Z42"),
-        )
+        val cases =
+            listOf(
+                FieldCase("outcome", "OUTCOME", "Outcome", "outcome", "OUTCOME", "outcome", "OUTCOME"),
+                FieldCase(
+                    "very_tasty",
+                    "VERY_TASTY",
+                    "VeryTasty",
+                    "veryTasty",
+                    "VERY_TASTY",
+                    "very-tasty",
+                    "VERY-TASTY",
+                ),
+                FieldCase("a", "A", "A", "a", "A", "a", "A"),
+                FieldCase("z42", "Z42", "Z42", "z42", "Z42", "z42", "Z42"),
+            )
         for (c in cases) {
             assertEquals(c.original, RenameRule.None.applyToField(c.original))
             assertEquals(c.upper, RenameRule.UpperCase.applyToField(c.original))

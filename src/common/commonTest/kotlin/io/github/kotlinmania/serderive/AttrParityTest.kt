@@ -57,13 +57,14 @@ class AttrParityTest {
 
     @Test
     fun deserializerBoundsAreSortedAndExcludeSkippedFields() {
-        val source = """
+        val source =
+            """
             struct Example<'z, 'a, 'ignored> {
                 z: &'z str,
                 a: &'a [u8],
                 #[serde(skip_deserializing)] ignored: &'ignored str,
             }
-        """.trimIndent()
+            """.trimIndent()
         val borrowed = Parameters(container(source)).borrowed
         val bounds = assertNotNull(borrowed.deLifetimeParam()).bounds
         assertEquals(listOf("'a", "'z"), bounds.toList().map { it.toString() })
@@ -74,17 +75,21 @@ class AttrParityTest {
         val lifetime = Lifetime.new("'a", Span.callSite())
         val borrowed = BorrowedLifetimes.Borrowed(setOf(lifetime))
         val parameter = assertNotNull(borrowed.deLifetimeParam())
-        parameter.bounds.toList().single().ident = Lifetime.new("'changed", Span.callSite()).ident
+        parameter.bounds
+            .toList()
+            .single()
+            .ident = Lifetime.new("'changed", Span.callSite()).ident
         assertEquals("'a", lifetime.toString())
     }
 
     @Test
     fun conflictingTagAttributesRetainEverySourceSpan() {
-        val cases = listOf(
-            """#[serde(untagged, tag = "kind")] enum Example { Variant }""" to listOf("untagged", "tag"),
-            """#[serde(untagged, content = "data")] enum Example { Variant }""" to listOf("untagged", "content"),
-            """#[serde(untagged, tag = "kind", content = "data")] enum Example { Variant }""" to listOf("untagged", "tag", "content"),
-        )
+        val cases =
+            listOf(
+                """#[serde(untagged, tag = "kind")] enum Example { Variant }""" to listOf("untagged", "tag"),
+                """#[serde(untagged, content = "data")] enum Example { Variant }""" to listOf("untagged", "content"),
+                """#[serde(untagged, tag = "kind", content = "data")] enum Example { Variant }""" to listOf("untagged", "tag", "content"),
+            )
         for ((source, expected) in cases) {
             assertEquals(expected, containerErrors(source).map { it.span().sourceText() }, source)
         }
@@ -101,7 +106,15 @@ class AttrParityTest {
     private fun container(source: String): Container {
         val cx = Ctxt()
         val result = assertNotNull(Container.fromAst(cx, input(source), Derive.Deserialize, Private.ident()))
-        assertEquals(null, cx.check().exceptionOrNull()?.toCompileError()?.toString(), source)
+        assertEquals(
+            null,
+            cx
+                .check()
+                .exceptionOrNull()
+                ?.toCompileError()
+                ?.toString(),
+            source,
+        )
         return result
     }
 

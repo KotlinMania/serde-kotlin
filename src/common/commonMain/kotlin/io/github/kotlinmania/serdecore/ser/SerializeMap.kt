@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeMap`.
  */
-interface SerializeMap<Ok>
-    {
+interface SerializeMap<Ok> {
     /**
      * Serialize a map key.
      */

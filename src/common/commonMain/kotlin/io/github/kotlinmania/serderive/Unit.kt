@@ -2,23 +2,27 @@
 package io.github.kotlinmania.serderive
 
 import io.github.kotlinmania.quote.quote
-import io.github.kotlinmania.serderive.internals.Fragment
 import io.github.kotlinmania.serderive.internals.AttrContainer
+import io.github.kotlinmania.serderive.internals.Fragment
 
 // Generates the deserialize body for a unit struct.
 internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragment {
     val thisType = params.thisType
     val thisValue = params.thisValue
     val typeName = cattrs.name().deserializeName()
-    val (deImplGenerics, deTyGenerics, tyGenerics, whereClause) =
-        params.genericsWithDeLifetime()
+    val generics = params.genericsWithDeLifetime()
+    val deImplGenerics = generics.deImplGenerics
+    val deTyGenerics = generics.deTyGenerics
+    val tyGenerics = generics.tyGenerics
+    val whereClause = generics.whereClause
     val delife = params.borrowed.deLifetime()
 
     var expecting = "unit struct ${params.typeName()}"
     expecting = cattrs.expecting() ?: expecting
 
-    val code = quote(
-        """
+    val code =
+        quote(
+            """
         `#`[doc(hidden)]
         struct __Visitor `#`deImplGenerics `#`whereClause {
             marker: _serde::`#`Private::PhantomData<`#`thisType `#`tyGenerics>,
@@ -51,17 +55,17 @@ internal fun deserializeUnit(params: Parameters, cattrs: AttrContainer): Fragmen
             },
         )
         """,
-        "deImplGenerics" to deImplGenerics,
-        "whereClause" to whereClause,
-        "Private" to Private,
-        "thisType" to thisType,
-        "tyGenerics" to tyGenerics,
-        "delife" to delife,
-        "deTyGenerics" to deTyGenerics,
-        "expecting" to expecting,
-        "thisValue" to thisValue,
-        "typeName" to typeName,
-    )
+            "deImplGenerics" to deImplGenerics,
+            "whereClause" to whereClause,
+            "Private" to Private,
+            "thisType" to thisType,
+            "tyGenerics" to tyGenerics,
+            "delife" to delife,
+            "deTyGenerics" to deTyGenerics,
+            "expecting" to expecting,
+            "thisValue" to thisValue,
+            "typeName" to typeName,
+        )
 
     return Fragment.Block(code)
 }

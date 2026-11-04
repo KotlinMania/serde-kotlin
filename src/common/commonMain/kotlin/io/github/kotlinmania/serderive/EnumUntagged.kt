@@ -1,8 +1,8 @@
 // port-lint: source de/enum_untagged.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.procmacro2.Ident
+import io.github.kotlinmania.procmacro2.TokenStream
 import io.github.kotlinmania.quote.quote
 import io.github.kotlinmania.quote.quoteSpanned
 import io.github.kotlinmania.serderive.internals.AttrContainer
@@ -18,11 +18,12 @@ internal fun deserializeEnumUntagged(
     params: Parameters,
     variants: List<Variant>,
     cattrs: AttrContainer,
-    firstAttempt: TokenStream?
+    firstAttempt: TokenStream?,
 ): Fragment {
-    val attempts = variants
-        .filter { !it.attrs.skipDeserializing() }
-        .map { variant -> Expr(deserializeVariant(params, variant, cattrs)) }
+    val attempts =
+        variants
+            .filter { !it.attrs.skipDeserializing() }
+            .map { variant -> Expr(deserializeVariant(params, variant, cattrs)) }
 
     // This message could be better by saving the errors from the failed
     // attempts. The heuristic used by TOML was to count the number of fields
@@ -33,7 +34,9 @@ internal fun deserializeEnumUntagged(
     val fallthroughMsg = "data did not match any variant of untagged enum ${params.typeName()}"
     val fallthroughMsgVal = cattrs.expecting() ?: fallthroughMsg
 
-    return Fragment.Block(quote("""
+    return Fragment.Block(
+        quote(
+            """
         let __content = _serde::de::DeserializeSeed::deserialize(_serde::`#`Private::de::ContentVisitor::new(), __deserializer)?;
         let __deserializer = _serde::`#`Private::de::ContentRefDeserializer::<__D::Error>::new(&__content);
 
@@ -46,26 +49,36 @@ internal fun deserializeEnumUntagged(
         )*
 
         _serde::`#`Private::Err(_serde::de::Error::custom(`#`fallthroughMsgVal))
-    """, mapOf(
-        "Private" to Private,
-        "firstAttempt" to firstAttempt,
-        "attempts" to attempts,
-        "fallthroughMsgVal" to fallthroughMsgVal,
-    )))
+    """,
+            mapOf(
+                "Private" to Private,
+                "firstAttempt" to firstAttempt,
+                "attempts" to attempts,
+                "fallthroughMsgVal" to fallthroughMsgVal,
+            ),
+        ),
+    )
 }
 
 // Also used by adjacently tagged enums
 internal fun deserializeVariant(
     params: Parameters,
     variant: Variant,
-    cattrs: AttrContainer
+    cattrs: AttrContainer,
 ): Fragment {
     val path = variant.attrs.deserializeWith()
     if (path != null) {
         val unwrapFn = unwrapToVariantClosure(params, variant, false)
-        return Fragment.Block(quote("""
+        return Fragment.Block(
+            quote(
+                """
             _serde::`#`Private::Result::map(`#`path(__deserializer), `#`unwrapFn)
-        """, "Private" to Private, "path" to path, "unwrapFn" to unwrapFn))
+        """,
+                "Private" to Private,
+                "path" to path,
+                "unwrapFn" to unwrapFn,
+            ),
+        )
     }
 
     val variantIdent = variant.ident
@@ -75,11 +88,14 @@ internal fun deserializeVariant(
             val thisValue = params.thisValue
             val typeName = params.typeName()
             val variantName = variant.ident.toString()
-            val default = variant.fields.firstOrNull()?.let { field ->
-                val defaultExpr = Expr(exprIsMissing(field, cattrs))
-                quote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
-            } ?: quote("")
-            Fragment.Expr(quote("""
+            val default =
+                variant.fields.firstOrNull()?.let { field ->
+                    val defaultExpr = Expr(exprIsMissing(field, cattrs))
+                    quote("(`#`defaultExpr)", "defaultExpr" to defaultExpr)
+                } ?: quote("")
+            Fragment.Expr(
+                quote(
+                    """
                 match _serde::Deserializer::deserialize_any(
                     __deserializer,
                     _serde::`#`Private::de::UntaggedUnitVisitor::new(`#`typeName, `#`variantName)
@@ -87,28 +103,33 @@ internal fun deserializeVariant(
                     _serde::`#`Private::Ok(()) => _serde::`#`Private::Ok(`#`thisValue::`#`variantIdent `#`default),
                     _serde::`#`Private::Err(__err) => _serde::`#`Private::Err(__err),
                 }
-            """, mapOf(
-                "Private" to Private,
-                "typeName" to typeName,
-                "variantName" to variantName,
-                "thisValue" to thisValue,
-                "variantIdent" to variantIdent,
-                "default" to default,
-            )))
+            """,
+                    mapOf(
+                        "Private" to Private,
+                        "typeName" to typeName,
+                        "variantName" to variantName,
+                        "thisValue" to thisValue,
+                        "variantIdent" to variantIdent,
+                        "default" to default,
+                    ),
+                ),
+            )
         }
         Style.Newtype -> deserializeNewtypeVariant(variantIdent, params, variant.fields[0])
-        Style.Tuple -> deserializeTuple(
-            params,
-            variant.fields,
-            cattrs,
-            TupleForm.Untagged(variantIdent)
-        )
-        Style.Struct -> deserializeStruct(
-            params,
-            variant.fields,
-            cattrs,
-            StructForm.Untagged(variantIdent)
-        )
+        Style.Tuple ->
+            deserializeTuple(
+                params,
+                variant.fields,
+                cattrs,
+                TupleForm.Untagged(variantIdent),
+            )
+        Style.Struct ->
+            deserializeStruct(
+                params,
+                variant.fields,
+                cattrs,
+                StructForm.Untagged(variantIdent),
+            )
     }
 }
 
@@ -117,31 +138,45 @@ internal fun deserializeVariant(
 internal fun deserializeNewtypeVariant(
     variantIdent: Ident,
     params: Parameters,
-    field: Field
+    field: Field,
 ): Fragment {
     val thisValue = params.thisValue
     val fieldTy = field.ty
     val fieldPath = field.attrs.deserializeWith()
     return if (fieldPath == null) {
         val span = field.original.span()
-        val func = quoteSpanned(
-            span,
-            "<`#`fieldTy as _serde::Deserialize>::deserialize",
-            "fieldTy" to fieldTy,
-        )
-        Fragment.Expr(quote("""
+        val func =
+            quoteSpanned(
+                span,
+                "<`#`fieldTy as _serde::Deserialize>::deserialize",
+                "fieldTy" to fieldTy,
+            )
+        Fragment.Expr(
+            quote(
+                """
             _serde::`#`Private::Result::map(`#`func(__deserializer), `#`thisValue::`#`variantIdent)
-        """, "Private" to Private, "func" to func, "thisValue" to thisValue, "variantIdent" to variantIdent))
+        """,
+                "Private" to Private,
+                "func" to func,
+                "thisValue" to thisValue,
+                "variantIdent" to variantIdent,
+            ),
+        )
     } else {
-        Fragment.Block(quote("""
+        Fragment.Block(
+            quote(
+                """
             let __value: _serde::`#`Private::Result<`#`fieldTy, _> = `#`fieldPath(__deserializer);
             _serde::`#`Private::Result::map(__value, `#`thisValue::`#`variantIdent)
-        """, mapOf(
-            "Private" to Private,
-            "fieldTy" to fieldTy,
-            "fieldPath" to fieldPath,
-            "thisValue" to thisValue,
-            "variantIdent" to variantIdent,
-        )))
+        """,
+                mapOf(
+                    "Private" to Private,
+                    "fieldTy" to fieldTy,
+                    "fieldPath" to fieldPath,
+                    "thisValue" to thisValue,
+                    "variantIdent" to variantIdent,
+                ),
+            ),
+        )
     }
 }

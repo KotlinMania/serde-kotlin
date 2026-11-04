@@ -2,7 +2,6 @@
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeError
-
 import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
@@ -24,63 +23,47 @@ import kotlin.time.Instant
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok> Boolean.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeBool(this)
+fun <Ok> Boolean.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeBool(this)
 
-fun <Ok> Byte.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeI8(this)
+fun <Ok> Byte.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeI8(this)
 
-fun <Ok> Short.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeI16(this)
+fun <Ok> Short.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeI16(this)
 
-fun <Ok> Int.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeI32(this)
+fun <Ok> Int.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeI32(this)
 
-fun <Ok> Long.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeI64(this)
+fun <Ok> Long.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeI64(this)
 
-fun <Ok> UByte.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeU8(this)
+fun <Ok> UByte.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU8(this)
 
-fun <Ok> UShort.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeU16(this)
+fun <Ok> UShort.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU16(this)
 
-fun <Ok> UInt.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeU32(this)
+fun <Ok> UInt.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU32(this)
 
-fun <Ok> ULong.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeU64(this)
+fun <Ok> ULong.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU64(this)
 
-fun <Ok> Float.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeF32(this)
+fun <Ok> Float.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeF32(this)
 
-fun <Ok> Double.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeF64(this)
+fun <Ok> Double.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeF64(this)
 
-fun <Ok> Char.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeChar(this)
+fun <Ok> Char.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeChar(this)
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok> String.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeStr(this)
+fun <Ok> String.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeStr(this)
 
 class FormatArguments(
     private val value: Any,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = serializer.collectStr(value)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.collectStr(value)
 }
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok> ByteArray.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeBytes(this)
+fun <Ok> ByteArray.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeBytes(this)
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok> Unit.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    = serializer.serializeUnit()
+fun <Ok> Unit.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeUnit()
 
 // //////////////////////////////////////////////////////////////////////////////
 
@@ -91,8 +74,7 @@ fun <Ok, T> T?.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
 // //////////////////////////////////////////////////////////////////////////////
 
 data object PhantomData : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        =
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
         serializer.serializeUnitStruct("PhantomData")
 }
 
@@ -100,7 +82,11 @@ data object PhantomData : Serialize {
 
 internal fun <Ok> serializeEmptyArray(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
-        serializer.serializeTuple(0).getOrThrow().end().getOrThrow()
+        serializer
+            .serializeTuple(0)
+            .getOrThrow()
+            .end()
+            .getOrThrow()
     }
 
 fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
@@ -194,8 +180,7 @@ fun <Ok, T, E> ResultValue<T, E>.serialize(serializer: Serializer<Ok>): SerdeRes
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok> Duration.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    =
+fun <Ok> Duration.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         if (this < Duration.ZERO || this == Duration.INFINITE) {
             throw SerdeException(SerdeError.custom("duration must be finite and non-negative"))
@@ -210,8 +195,7 @@ fun <Ok> Duration.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
 
 // //////////////////////////////////////////////////////////////////////////////
 
-fun <Ok> Instant.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-    =
+fun <Ok> Instant.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serdeCatching {
         if (epochSeconds < 0) {
             throw SerdeException(SerdeError.custom("SystemTime must be later than UNIX_EPOCH"))
@@ -380,50 +364,43 @@ private fun formatIpv6(octets: List<UByte>): String {
 data class Wrapping<T>(
     val value: T,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = asSerialize(value).serialize(serializer)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = asSerialize(value).serialize(serializer)
 }
 
 data class Saturating<T>(
     val value: T,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = asSerialize(value).serialize(serializer)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = asSerialize(value).serialize(serializer)
 }
 
 data class Reverse<T>(
     val value: T,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = asSerialize(value).serialize(serializer)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = asSerialize(value).serialize(serializer)
 }
 
 private data class ULongSerialize(
     private val value: ULong,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = serializer.serializeU64(value)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU64(value)
 }
 
 private data class UByteSerialize(
     private val value: UByte,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = serializer.serializeU8(value)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU8(value)
 }
 
 private data class UShortSerialize(
     private val value: UShort,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = serializer.serializeU16(value)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU16(value)
 }
 
 private data class UIntSerialize(
     private val value: UInt,
 ) : Serialize {
-    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
-        = serializer.serializeU32(value)
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeU32(value)
 }
 
 private class AnySerialize(

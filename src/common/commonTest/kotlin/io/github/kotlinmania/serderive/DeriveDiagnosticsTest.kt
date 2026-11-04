@@ -33,29 +33,32 @@ class DeriveDiagnosticsTest {
 
     @Test
     fun errorsAccumulateAcrossContainerVariantAndFieldAttributes() {
-        val source = """
+        val source =
+            """
             #[serde(container_problem)]
             enum Example {
                 #[serde(variant_problem)]
                 Variant { #[serde(field_problem)] value: u8 }
             }
-        """.trimIndent()
-        val expected = listOf(
-            "unknown serde container attribute `container_problem`",
-            "unknown serde variant attribute `variant_problem`",
-            "unknown serde field attribute `field_problem`",
-        )
+            """.trimIndent()
+        val expected =
+            listOf(
+                "unknown serde container attribute `container_problem`",
+                "unknown serde variant attribute `variant_problem`",
+                "unknown serde field attribute `field_problem`",
+            )
         assertEquals(expected, errors(source).map { it.message })
         assertEquals(expected, errors(source, deserialize = true).map { it.message })
     }
 
     @Test
     fun failedNestedRenameDoesNotCommitPartialValues() {
-        val source = """
+        val source =
+            """
             #[serde(rename(serialize = "partial", invalid = "ignored"))]
             #[serde(rename = "complete")]
             struct Example;
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(
             listOf("malformed rename attribute, expected `rename(serialize = ..., deserialize = ...)`"),
             errors(source).map { it.message },
@@ -162,7 +165,14 @@ class DeriveDiagnosticsTest {
         val container = assertNotNull(Container.fromAst(cx, input(source), Derive.Serialize, Private.ident()))
         val checked = cx.check()
         assertEquals(null, checked.exceptionOrNull()?.toCompileError()?.toString())
-        val path = assertNotNull(container.data.allFields().single().attrs.serializeWith())
+        val path =
+            assertNotNull(
+                container.data
+                    .allFields()
+                    .single()
+                    .attrs
+                    .serializeWith(),
+            )
         assertNotNull(path.qself)
     }
 
@@ -188,7 +198,15 @@ class DeriveDiagnosticsTest {
         val cx = Ctxt()
         val container = assertNotNull(Container.fromAst(cx, input(source), Derive.Deserialize, Private.ident()))
         assertTrue(cx.check().isSuccess)
-        assertEquals(listOf("VALUE", "oldName"), container.data.allFields().single().attrs.aliases().map { it.value })
+        assertEquals(
+            listOf("VALUE", "oldName"),
+            container.data
+                .allFields()
+                .single()
+                .attrs
+                .aliases()
+                .map { it.value },
+        )
     }
 
     @Test
@@ -213,6 +231,39 @@ class DeriveDiagnosticsTest {
     fun borrowedLifetimeDiagnosticNamesTheActualFieldAndLifetime() {
         val source = """struct Example<'a, 'b> { #[serde(borrow = "'b")] value: &'a str }"""
         assertEquals(listOf("field `value` does not have lifetime 'b"), errors(source).map { it.message })
+    }
+
+    @Test
+    fun customVariantSerializationDiagnosticsNameTheActualVariantAndField() {
+        for (attribute in listOf("skip_serializing", "skip_serializing_if = \"should_skip\"")) {
+            val source =
+                """
+                enum Example {
+                    #[serde(serialize_with = "serialize")]
+                    Named { #[serde($attribute)] value: u8 }
+                }
+                """.trimIndent()
+            val flag = attribute.substringBefore(" =")
+            assertEquals(
+                listOf("variant `Named` cannot have both #[serde(serialize_with)] and a field `value` marked with #[serde($flag)]"),
+                errors(source).map { it.message },
+            )
+        }
+    }
+
+    @Test
+    fun customVariantDeserializationDiagnosticNamesTheActualVariantAndField() {
+        val source =
+            """
+            enum Example {
+                #[serde(deserialize_with = "deserialize")]
+                Named { #[serde(skip_deserializing)] value: u8 }
+            }
+            """.trimIndent()
+        assertEquals(
+            listOf("variant `Named` cannot have both #[serde(deserialize_with)] and a field `value` marked with #[serde(skip_deserializing)]"),
+            errors(source, deserialize = true).map { it.message },
+        )
     }
 
     private fun errors(source: String, deserialize: Boolean = false): List<SynError> {

@@ -14,22 +14,23 @@ private fun pathSegmentListFrom(segments: List<PathSegment>): PathSegmentList {
     val list = PathSegmentList()
     for ((index, seg) in segments.withIndex()) {
         if (index > 0) {
-            list.pushPunct(io.github.kotlinmania.syn.token.PathSep.default())
+            list.pushPunct(
+                io.github.kotlinmania.syn.token.PathSep
+                    .default(),
+            )
         }
         list.pushValue(seg)
     }
     return list
 }
 
-private fun metaPeekEq(meta: ParseNestedMeta): Boolean {
-    return meta.input.peek(io.github.kotlinmania.syn.EqPeek)
-}
+private fun metaPeekEq(meta: ParseNestedMeta): Boolean = meta.input.peek(io.github.kotlinmania.syn.EqPeek)
 
 internal class Attr<T>(
     private val cx: Ctxt,
     private val name: Symbol,
     private var tokens: TokenStream = TokenStream.new(),
-    private var value: T? = null
+    private var value: T? = null,
 ) {
     fun set(obj: Path, value: T) {
         val tokens = obj.toTokenStream()
@@ -55,28 +56,22 @@ internal class Attr<T>(
         }
     }
 
-    fun get(): T? {
-        return this.value
-    }
+    fun get(): T? = this.value
 
-    fun getWithTokens(): Pair<TokenStream, T>? {
-        return this.value?.let { Pair(this.tokens, it) }
-    }
+    fun getWithTokens(): Pair<TokenStream, T>? = this.value?.let { Pair(this.tokens, it) }
 }
 
-internal class BoolAttr(val attr: Attr<Unit>) {
+internal class BoolAttr(
+    val attr: Attr<Unit>,
+) {
     fun setTrue(obj: Path) {
         attr.set(obj, Unit)
     }
 
-    fun get(): Boolean {
-        return attr.get() != null
-    }
+    fun get(): Boolean = attr.get() != null
 
     companion object {
-        fun none(cx: Ctxt, name: Symbol): BoolAttr {
-            return BoolAttr(Attr(cx, name))
-        }
+        fun none(cx: Ctxt, name: Symbol): BoolAttr = BoolAttr(Attr(cx, name))
     }
 }
 
@@ -84,7 +79,7 @@ internal class VecAttr<T>(
     private val cx: Ctxt,
     private val name: Symbol,
     private var firstDupTokens: TokenStream = TokenStream.new(),
-    private val values: MutableList<T> = mutableListOf()
+    private val values: MutableList<T> = mutableListOf(),
 ) {
     fun insert(obj: Path, value: T) {
         if (values.size == 1) {
@@ -104,34 +99,27 @@ internal class VecAttr<T>(
         }
     }
 
-    fun get(): List<T> {
-        return this.values
-    }
+    fun get(): List<T> = this.values
 
     companion object {
-        fun <T> none(cx: Ctxt, name: Symbol): VecAttr<T> {
-            return VecAttr(cx, name)
-        }
+        fun <T> none(cx: Ctxt, name: Symbol): VecAttr<T> = VecAttr(cx, name)
     }
 }
 
-private fun unraw(ident: Ident): Ident {
-    return Ident.new(ident.toString().removePrefix("r#"), ident.span())
-}
+private fun unraw(ident: Ident): Ident = Ident.new(ident.toString().removePrefix("r#"), ident.span())
 
-public class RenameAllRules(
+internal class RenameAllRules(
     public val serialize: RenameRule,
-    public val deserialize: RenameRule
+    public val deserialize: RenameRule,
 ) {
-    public fun or(otherRules: RenameAllRules): RenameAllRules {
-        return RenameAllRules(
+    public fun or(otherRules: RenameAllRules): RenameAllRules =
+        RenameAllRules(
             serialize = this.serialize.or(otherRules.serialize),
-            deserialize = this.deserialize.or(otherRules.deserialize)
+            deserialize = this.deserialize.or(otherRules.deserialize),
         )
-    }
 }
 
-public class AttrContainer(
+internal class AttrContainer(
     private val name: MultiName,
     private val transparent: Boolean,
     private val denyUnknownFields: Boolean,
@@ -149,7 +137,7 @@ public class AttrContainer(
     private val serdePath: Path?,
     private val isPacked: Boolean,
     private val expecting: String?,
-    private val nonExhaustive: Boolean
+    private val nonExhaustive: Boolean,
 ) {
     public fun name(): MultiName = name
     public fun transparent(): Boolean = transparent
@@ -210,149 +198,154 @@ public class AttrContainer(
                     continue
                 }
 
-                val parseResult = attr.parseNestedMeta { meta ->
-                    if (RENAME == meta.path) {
-                        val (ser, de) = getRenames(cx, RENAME, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        serName.setOpt(meta.path, ser?.let { Name.from(it) })
-                        deName.setOpt(meta.path, de?.let { Name.from(it) })
-                    } else if (RENAME_ALL == meta.path) {
-                        val oneName = metaPeekEq(meta)
-                        val (ser, de) = getRenames(cx, RENAME_ALL, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (ser != null) {
-                            try {
-                                renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
-                            } catch (e: ParseError) {
-                                cx.errorSpannedBy(ser, e.message ?: "")
-                            }
-                        }
-                        if (de != null) {
-                            try {
-                                renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value()))
-                            } catch (e: ParseError) {
-                                if (!oneName) cx.errorSpannedBy(de, e.message ?: "")
-                            }
-                        }
-                    } else if (RENAME_ALL_FIELDS == meta.path) {
-                        val oneName = metaPeekEq(meta)
-                        val (ser, de) = getRenames(cx, RENAME_ALL_FIELDS, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        when (item.data) {
-                            is SynData.Enum -> {
-                                if (ser != null) {
-                                    try {
-                                        renameAllFieldsSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
-                                    } catch (e: ParseError) {
-                                        cx.errorSpannedBy(ser, e.message ?: "")
-                                    }
-                                }
-                                if (de != null) {
-                                    try {
-                                        renameAllFieldsDeRule.set(meta.path, RenameRule.fromStr(de.value()))
-                                    } catch (e: ParseError) {
-                                        if (!oneName) cx.errorSpannedBy(de, e.message ?: "")
-                                    }
+                val parseResult =
+                    attr.parseNestedMeta { meta ->
+                        if (RENAME == meta.path) {
+                            val (ser, de) = getRenames(cx, RENAME, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serName.setOpt(meta.path, ser?.let { Name.from(it) })
+                            deName.setOpt(meta.path, de?.let { Name.from(it) })
+                        } else if (RENAME_ALL == meta.path) {
+                            val oneName = metaPeekEq(meta)
+                            val (ser, de) = getRenames(cx, RENAME_ALL, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (ser != null) {
+                                try {
+                                    renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
+                                } catch (e: ParseError) {
+                                    cx.errorSpannedBy(ser, e.message.orEmpty())
                                 }
                             }
-                            is SynData.Struct -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
-                            is SynData.Union -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
-                        }
-                    } else if (TRANSPARENT == meta.path) {
-                        transparent.setTrue(meta.path)
-                    } else if (DENY_UNKNOWN_FIELDS == meta.path) {
-                        denyUnknownFields.setTrue(meta.path)
-                    } else if (DEFAULT == meta.path) {
-                        if (metaPeekEq(meta)) {
-                            val path = parseLitIntoExprPath(cx, DEFAULT, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                            if (path != null) {
+                            if (de != null) {
+                                try {
+                                    renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value()))
+                                } catch (e: ParseError) {
+                                    if (!oneName) cx.errorSpannedBy(de, e.message.orEmpty())
+                                }
+                            }
+                        } else if (RENAME_ALL_FIELDS == meta.path) {
+                            val oneName = metaPeekEq(meta)
+                            val (ser, de) = getRenames(cx, RENAME_ALL_FIELDS, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            when (item.data) {
+                                is SynData.Enum -> {
+                                    if (ser != null) {
+                                        try {
+                                            renameAllFieldsSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
+                                        } catch (e: ParseError) {
+                                            cx.errorSpannedBy(ser, e.message.orEmpty())
+                                        }
+                                    }
+                                    if (de != null) {
+                                        try {
+                                            renameAllFieldsDeRule.set(meta.path, RenameRule.fromStr(de.value()))
+                                        } catch (e: ParseError) {
+                                            if (!oneName) cx.errorSpannedBy(de, e.message.orEmpty())
+                                        }
+                                    }
+                                }
+                                is SynData.Struct -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
+                                is SynData.Union -> cx.synError(meta.error("#[serde(rename_all_fields)] can only be used on enums"))
+                            }
+                        } else if (TRANSPARENT == meta.path) {
+                            transparent.setTrue(meta.path)
+                        } else if (DENY_UNKNOWN_FIELDS == meta.path) {
+                            denyUnknownFields.setTrue(meta.path)
+                        } else if (DEFAULT == meta.path) {
+                            if (metaPeekEq(meta)) {
+                                val path = parseLitIntoExprPath(cx, DEFAULT, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                                if (path != null) {
+                                    val itemData = item.data
+                                    if (itemData is SynData.Struct) {
+                                        if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
+                                            default.set(meta.path, Default.Path(path))
+                                        } else {
+                                            cx.synError(meta.error("#[serde(default = \"...\")] can only be used on structs that have fields"))
+                                        }
+                                    } else {
+                                        cx.synError(meta.error("#[serde(default = \"...\")] can only be used on structs"))
+                                    }
+                                }
+                            } else {
                                 val itemData = item.data
                                 if (itemData is SynData.Struct) {
                                     if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
-                                        default.set(meta.path, Default.Path(path))
+                                        default.set(meta.path, Default.Plain)
                                     } else {
-                                        cx.synError(meta.error("#[serde(default = \"...\")] can only be used on structs that have fields"))
+                                        cx.errorSpannedBy(itemData.fields, "#[serde(default)] can only be used on structs that have fields")
                                     }
                                 } else {
-                                    cx.synError(meta.error("#[serde(default = \"...\")] can only be used on structs"))
+                                    cx.synError(meta.error("#[serde(default)] can only be used on structs"))
                                 }
                             }
-                        } else {
-                            val itemData = item.data
-                            if (itemData is SynData.Struct) {
-                                if (itemData.fields is Fields.Named || itemData.fields is Fields.Unnamed) {
-                                    default.set(meta.path, Default.Plain)
-                                } else {
-                                    cx.errorSpannedBy(itemData.fields, "#[serde(default)] can only be used on structs that have fields")
-                                }
-                            } else {
-                                cx.synError(meta.error("#[serde(default)] can only be used on structs"))
-                            }
-                        }
-                    } else if (BOUND == meta.path) {
-                        val (ser, de) = getWherePredicates(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        serBound.setOpt(meta.path, ser)
-                        deBound.setOpt(meta.path, de)
-                    } else if (UNTAGGED == meta.path) {
-                        if (item.data is SynData.Enum) {
-                            untagged.setTrue(meta.path)
-                        } else {
-                            cx.synError(meta.error("#[serde(untagged)] can only be used on enums"))
-                        }
-                    } else if (TAG == meta.path) {
-                        val s = getLitStr(cx, TAG, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (s != null) {
-                            val itemData = item.data
-                            if (itemData is SynData.Enum) {
-                                internalTag.set(meta.path, s.value())
-                            } else if (itemData is SynData.Struct && itemData.fields is Fields.Named) {
-                                internalTag.set(meta.path, s.value())
-                            } else {
-                                cx.synError(meta.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
-                            }
-                        }
-                    } else if (CONTENT == meta.path) {
-                        val s = getLitStr(cx, CONTENT, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (s != null) {
+                        } else if (BOUND == meta.path) {
+                            val (ser, de) = getWherePredicates(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serBound.setOpt(meta.path, ser)
+                            deBound.setOpt(meta.path, de)
+                        } else if (UNTAGGED == meta.path) {
                             if (item.data is SynData.Enum) {
-                                content.set(meta.path, s.value())
+                                untagged.setTrue(meta.path)
                             } else {
-                                cx.synError(meta.error("#[serde(content = \"...\")] can only be used on enums"))
+                                cx.synError(meta.error("#[serde(untagged)] can only be used on enums"))
                             }
-                        }
-                    } else if (FROM == meta.path) {
-                        val fromTy = parseLitIntoTy(cx, FROM, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        typeFrom.setOpt(meta.path, fromTy)
-                    } else if (TRY_FROM == meta.path) {
-                        val tryFromTy = parseLitIntoTy(cx, TRY_FROM, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        typeTryFrom.setOpt(meta.path, tryFromTy)
-                    } else if (INTO == meta.path) {
-                        val intoTy = parseLitIntoTy(cx, INTO, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        typeInto.setOpt(meta.path, intoTy)
-                    } else if (REMOTE == meta.path) {
-                        val path = parseLitIntoPath(cx, REMOTE, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (path != null) {
-                            if (isPrimitivePath(path, "Self")) {
-                                remote.set(meta.path, Path.from(item.ident))
-                            } else {
-                                remote.set(meta.path, path)
+                        } else if (TAG == meta.path) {
+                            val s = getLitStr(cx, TAG, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (s != null) {
+                                val itemData = item.data
+                                if (itemData is SynData.Enum) {
+                                    internalTag.set(meta.path, s.value())
+                                } else if (itemData is SynData.Struct && itemData.fields is Fields.Named) {
+                                    internalTag.set(meta.path, s.value())
+                                } else {
+                                    cx.synError(meta.error("#[serde(tag = \"...\")] can only be used on enums and structs with named fields"))
+                                }
                             }
+                        } else if (CONTENT == meta.path) {
+                            val s = getLitStr(cx, CONTENT, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (s != null) {
+                                if (item.data is SynData.Enum) {
+                                    content.set(meta.path, s.value())
+                                } else {
+                                    cx.synError(meta.error("#[serde(content = \"...\")] can only be used on enums"))
+                                }
+                            }
+                        } else if (FROM == meta.path) {
+                            val fromTy = parseLitIntoTy(cx, FROM, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            typeFrom.setOpt(meta.path, fromTy)
+                        } else if (TRY_FROM == meta.path) {
+                            val tryFromTy = parseLitIntoTy(cx, TRY_FROM, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            typeTryFrom.setOpt(meta.path, tryFromTy)
+                        } else if (INTO == meta.path) {
+                            val intoTy = parseLitIntoTy(cx, INTO, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            typeInto.setOpt(meta.path, intoTy)
+                        } else if (REMOTE == meta.path) {
+                            val path = parseLitIntoPath(cx, REMOTE, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                if (isPrimitivePath(path, "Self")) {
+                                    remote.set(meta.path, Path.from(item.ident))
+                                } else {
+                                    remote.set(meta.path, path)
+                                }
+                            }
+                        } else if (FIELD_IDENTIFIER == meta.path) {
+                            fieldIdentifier.setTrue(meta.path)
+                        } else if (VARIANT_IDENTIFIER == meta.path) {
+                            variantIdentifier.setTrue(meta.path)
+                        } else if (CRATE == meta.path) {
+                            val path = parseLitIntoPath(cx, CRATE, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serdePath.setOpt(meta.path, path)
+                        } else if (EXPECTING == meta.path) {
+                            val s = getLitStr(cx, EXPECTING, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (s != null) {
+                                expecting.set(meta.path, s.value())
+                            }
+                        } else {
+                            val pathStr =
+                                meta.path
+                                    .toTokenStream()
+                                    .toString()
+                                    .replace(" ", "")
+                            return@parseNestedMeta SynResult.failure(meta.error("unknown serde container attribute `$pathStr`"))
                         }
-                    } else if (FIELD_IDENTIFIER == meta.path) {
-                        fieldIdentifier.setTrue(meta.path)
-                    } else if (VARIANT_IDENTIFIER == meta.path) {
-                        variantIdentifier.setTrue(meta.path)
-                    } else if (CRATE == meta.path) {
-                        val path = parseLitIntoPath(cx, CRATE, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        serdePath.setOpt(meta.path, path)
-                    } else if (EXPECTING == meta.path) {
-                        val s = getLitStr(cx, EXPECTING, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (s != null) {
-                            expecting.set(meta.path, s.value())
-                        }
-                    } else {
-                        val pathStr = meta.path.toTokenStream().toString().replace(" ", "")
-                        return@parseNestedMeta SynResult.failure(meta.error("unknown serde container attribute `$pathStr`"))
+                        SynResult.success(Unit)
                     }
-                    SynResult.success(Unit)
-                }
                 if (parseResult.isFailure) {
                     cx.synError(parseResult.exceptionOrNull()!!)
                 }
@@ -377,14 +370,16 @@ public class AttrContainer(
                 transparent = transparent.get(),
                 denyUnknownFields = denyUnknownFields.get(),
                 default = default.get() ?: Default.None,
-                renameAllRules = RenameAllRules(
-                    serialize = renameAllSerRule.get() ?: RenameRule.None,
-                    deserialize = renameAllDeRule.get() ?: RenameRule.None
-                ),
-                renameAllFieldsRules = RenameAllRules(
-                    serialize = renameAllFieldsSerRule.get() ?: RenameRule.None,
-                    deserialize = renameAllFieldsDeRule.get() ?: RenameRule.None
-                ),
+                renameAllRules =
+                    RenameAllRules(
+                        serialize = renameAllSerRule.get() ?: RenameRule.None,
+                        deserialize = renameAllDeRule.get() ?: RenameRule.None,
+                    ),
+                renameAllFieldsRules =
+                    RenameAllRules(
+                        serialize = renameAllFieldsSerRule.get() ?: RenameRule.None,
+                        deserialize = renameAllFieldsDeRule.get() ?: RenameRule.None,
+                    ),
                 serBound = serBound.get(),
                 deBound = deBound.get(),
                 tag = decideTag(cx, item, untagged, internalTag, content),
@@ -396,7 +391,7 @@ public class AttrContainer(
                 serdePath = serdePath.get(),
                 isPacked = isPacked,
                 expecting = expecting.get(),
-                nonExhaustive = nonExhaustive
+                nonExhaustive = nonExhaustive,
             )
         }
     }
@@ -409,7 +404,7 @@ private fun decideTag(
     item: DeriveInput,
     untagged: BoolAttr,
     internalTag: Attr<String>,
-    content: Attr<String>
+    content: Attr<String>,
 ): TagType {
     val untaggedTokens = untagged.attr.getWithTokens()
     val internalTagTokens = internalTag.getWithTokens()
@@ -471,7 +466,7 @@ private fun decideIdentifier(
     cx: Ctxt,
     item: DeriveInput,
     fieldIdentifier: BoolAttr,
-    variantIdentifier: BoolAttr
+    variantIdentifier: BoolAttr,
 ): Identifier {
     val fieldTokens = fieldIdentifier.attr.getWithTokens()
     val variantTokens = variantIdentifier.attr.getWithTokens()
@@ -514,7 +509,7 @@ private fun decideIdentifier(
     return Identifier.No
 }
 
-public class AttrVariant(
+internal class AttrVariant(
     private val name: MultiName,
     private val renameAllRules: RenameAllRules,
     private val serBound: List<WherePredicate>?,
@@ -525,7 +520,7 @@ public class AttrVariant(
     private val serializeWith: io.github.kotlinmania.syn.Expr.Path?,
     private val deserializeWith: io.github.kotlinmania.syn.Expr.Path?,
     private val borrow: BorrowAttribute?,
-    private val untagged: Boolean
+    private val untagged: Boolean,
 ) {
     public fun name(): MultiName = name
     public fun renameAllRules(): RenameAllRules = renameAllRules
@@ -577,90 +572,102 @@ public class AttrVariant(
                     continue
                 }
 
-                val parseResult = attr.parseNestedMeta { meta ->
-                    if (RENAME == meta.path) {
-                        val (ser, de) = getMultipleRenames(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        serName.setOpt(meta.path, ser?.let { Name.from(it) })
-                        for (deValue in de) {
-                            deName.setIfNone(Name.from(deValue))
-                            deAliases.insert(meta.path, Name.from(deValue))
-                        }
-                    } else if (ALIAS == meta.path) {
-                        val s = getLitStr(cx, ALIAS, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (s != null) {
-                            deAliases.insert(meta.path, Name.from(s))
-                        }
-                    } else if (RENAME_ALL == meta.path) {
-                        val oneName = metaPeekEq(meta)
-                        val (ser, de) = getRenames(cx, RENAME_ALL, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (ser != null) {
-                            try {
-                                renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
-                            } catch (e: ParseError) {
-                                cx.errorSpannedBy(ser, e.message ?: "")
+                val parseResult =
+                    attr.parseNestedMeta { meta ->
+                        if (RENAME == meta.path) {
+                            val (ser, de) = getMultipleRenames(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serName.setOpt(meta.path, ser?.let { Name.from(it) })
+                            for (deValue in de) {
+                                deName.setIfNone(Name.from(deValue))
+                                deAliases.insert(meta.path, Name.from(deValue))
                             }
-                        }
-                        if (de != null) {
-                            try {
-                                renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value()))
-                            } catch (e: ParseError) {
-                                if (!oneName) cx.errorSpannedBy(de, e.message ?: "")
+                        } else if (ALIAS == meta.path) {
+                            val s = getLitStr(cx, ALIAS, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (s != null) {
+                                deAliases.insert(meta.path, Name.from(s))
                             }
-                        }
-                    } else if (SKIP == meta.path) {
-                        skipSerializing.setTrue(meta.path)
-                        skipDeserializing.setTrue(meta.path)
-                    } else if (SKIP_DESERIALIZING == meta.path) {
-                        skipDeserializing.setTrue(meta.path)
-                    } else if (SKIP_SERIALIZING == meta.path) {
-                        skipSerializing.setTrue(meta.path)
-                    } else if (OTHER == meta.path) {
-                        other.setTrue(meta.path)
-                    } else if (BOUND == meta.path) {
-                        val (ser, de) = getWherePredicates(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        serBound.setOpt(meta.path, ser)
-                        deBound.setOpt(meta.path, de)
-                    } else if (WITH == meta.path) {
-                        val path = parseLitIntoExprPath(cx, WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (path != null) {
-                            var serPath = path.deepCopy()
-                            val serSegs = serPath.path.segments.toList().toMutableList()
-                            serSegs.add(PathSegment(Ident.new("serialize", serPath.span()), PathArguments.None))
-                            serPath = serPath.copy(path = Path(serPath.path.leadingColon, pathSegmentListFrom(serSegs)))
-                            serializeWith.set(meta.path, serPath)
+                        } else if (RENAME_ALL == meta.path) {
+                            val oneName = metaPeekEq(meta)
+                            val (ser, de) = getRenames(cx, RENAME_ALL, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (ser != null) {
+                                try {
+                                    renameAllSerRule.set(meta.path, RenameRule.fromStr(ser.value()))
+                                } catch (e: ParseError) {
+                                    cx.errorSpannedBy(ser, e.message.orEmpty())
+                                }
+                            }
+                            if (de != null) {
+                                try {
+                                    renameAllDeRule.set(meta.path, RenameRule.fromStr(de.value()))
+                                } catch (e: ParseError) {
+                                    if (!oneName) cx.errorSpannedBy(de, e.message.orEmpty())
+                                }
+                            }
+                        } else if (SKIP == meta.path) {
+                            skipSerializing.setTrue(meta.path)
+                            skipDeserializing.setTrue(meta.path)
+                        } else if (SKIP_DESERIALIZING == meta.path) {
+                            skipDeserializing.setTrue(meta.path)
+                        } else if (SKIP_SERIALIZING == meta.path) {
+                            skipSerializing.setTrue(meta.path)
+                        } else if (OTHER == meta.path) {
+                            other.setTrue(meta.path)
+                        } else if (BOUND == meta.path) {
+                            val (ser, de) = getWherePredicates(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serBound.setOpt(meta.path, ser)
+                            deBound.setOpt(meta.path, de)
+                        } else if (WITH == meta.path) {
+                            val path = parseLitIntoExprPath(cx, WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                var serPath = path.deepCopy()
+                                val serSegs =
+                                    serPath.path.segments
+                                        .toList()
+                                        .toMutableList()
+                                serSegs.add(PathSegment(Ident.new("serialize", serPath.span()), PathArguments.None))
+                                serPath = serPath.copy(path = Path(serPath.path.leadingColon, pathSegmentListFrom(serSegs)))
+                                serializeWith.set(meta.path, serPath)
 
-                            var dePath = path.deepCopy()
-                            val deSegs = dePath.path.segments.toList().toMutableList()
-                            deSegs.add(PathSegment(Ident.new("deserialize", dePath.span()), PathArguments.None))
-                            dePath = dePath.copy(path = Path(dePath.path.leadingColon, pathSegmentListFrom(deSegs)))
-                            deserializeWith.set(meta.path, dePath)
-                        }
-                    } else if (SERIALIZE_WITH == meta.path) {
-                        val path = parseLitIntoExprPath(cx, SERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        serializeWith.setOpt(meta.path, path)
-                    } else if (DESERIALIZE_WITH == meta.path) {
-                        val path = parseLitIntoExprPath(cx, DESERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        deserializeWith.setOpt(meta.path, path)
-                    } else if (BORROW == meta.path) {
-                        val borrowAttribute = if (metaPeekEq(meta)) {
-                            val lifetimes = parseLitIntoLifetimes(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                            BorrowAttribute(meta.path.deepCopy(), lifetimes.toSet())
+                                var dePath = path.deepCopy()
+                                val deSegs =
+                                    dePath.path.segments
+                                        .toList()
+                                        .toMutableList()
+                                deSegs.add(PathSegment(Ident.new("deserialize", dePath.span()), PathArguments.None))
+                                dePath = dePath.copy(path = Path(dePath.path.leadingColon, pathSegmentListFrom(deSegs)))
+                                deserializeWith.set(meta.path, dePath)
+                            }
+                        } else if (SERIALIZE_WITH == meta.path) {
+                            val path = parseLitIntoExprPath(cx, SERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serializeWith.setOpt(meta.path, path)
+                        } else if (DESERIALIZE_WITH == meta.path) {
+                            val path = parseLitIntoExprPath(cx, DESERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            deserializeWith.setOpt(meta.path, path)
+                        } else if (BORROW == meta.path) {
+                            val borrowAttribute =
+                                if (metaPeekEq(meta)) {
+                                    val lifetimes = parseLitIntoLifetimes(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                                    BorrowAttribute(meta.path.deepCopy(), lifetimes.toSet())
+                                } else {
+                                    BorrowAttribute(meta.path.deepCopy(), null)
+                                }
+                            if (variant.fields is Fields.Unnamed && (variant.fields as Fields.Unnamed).fields.unnamed.size == 1) {
+                                borrow.set(meta.path, borrowAttribute)
+                            } else {
+                                cx.errorSpannedBy(variant, "#[serde(borrow)] may only be used on newtype variants")
+                            }
+                        } else if (UNTAGGED == meta.path) {
+                            untagged.setTrue(meta.path)
                         } else {
-                            BorrowAttribute(meta.path.deepCopy(), null)
+                            val pathStr =
+                                meta.path
+                                    .toTokenStream()
+                                    .toString()
+                                    .replace(" ", "")
+                            return@parseNestedMeta SynResult.failure(meta.error("unknown serde variant attribute `$pathStr`"))
                         }
-                        if (variant.fields is Fields.Unnamed && (variant.fields as Fields.Unnamed).fields.unnamed.size == 1) {
-                            borrow.set(meta.path, borrowAttribute)
-                        } else {
-                            cx.errorSpannedBy(variant, "#[serde(borrow)] may only be used on newtype variants")
-                        }
-                    } else if (UNTAGGED == meta.path) {
-                        untagged.setTrue(meta.path)
-                    } else {
-                        val pathStr = meta.path.toTokenStream().toString().replace(" ", "")
-                        return@parseNestedMeta SynResult.failure(meta.error("unknown serde variant attribute `$pathStr`"))
+                        SynResult.success(Unit)
                     }
-                    SynResult.success(Unit)
-                }
                 if (parseResult.isFailure) {
                     cx.synError(parseResult.exceptionOrNull()!!)
                 }
@@ -668,10 +675,11 @@ public class AttrVariant(
 
             return AttrVariant(
                 name = MultiName.fromAttrs(Name.from(unraw(variant.ident)), serName, deName, deAliases),
-                renameAllRules = RenameAllRules(
-                    serialize = renameAllSerRule.get() ?: RenameRule.None,
-                    deserialize = renameAllDeRule.get() ?: RenameRule.None
-                ),
+                renameAllRules =
+                    RenameAllRules(
+                        serialize = renameAllSerRule.get() ?: RenameRule.None,
+                        deserialize = renameAllDeRule.get() ?: RenameRule.None,
+                    ),
                 serBound = serBound.get(),
                 deBound = deBound.get(),
                 skipDeserializing = skipDeserializing.get(),
@@ -680,7 +688,7 @@ public class AttrVariant(
                 serializeWith = serializeWith.get(),
                 deserializeWith = deserializeWith.get(),
                 borrow = borrow.get(),
-                untagged = untagged.get()
+                untagged = untagged.get(),
             )
         }
     }
@@ -688,7 +696,7 @@ public class AttrVariant(
     // APPEND_HERE
 }
 
-public class AttrField(
+internal class AttrField(
     private val name: MultiName,
     private val skipSerializing: Boolean,
     private val skipDeserializing: Boolean,
@@ -701,7 +709,7 @@ public class AttrField(
     private val borrowedLifetimes: Set<Lifetime>,
     private val getter: io.github.kotlinmania.syn.Expr.Path?,
     private val flatten: Boolean,
-    private var transparent: Boolean
+    private var transparent: Boolean,
 ) {
     public fun name(): MultiName = name
     public fun skipSerializing(): Boolean = skipSerializing
@@ -733,294 +741,303 @@ public class AttrField(
     }
 
     public companion object {
-    public fun fromAst(
-        cx: Ctxt,
-        index: Int,
-        field: io.github.kotlinmania.syn.Field,
-        attrs: AttrVariant?,
-        containerDefault: Default,
-        private: Ident
-    ): AttrField {
-        val serName = Attr<Name>(cx, RENAME)
-        val deName = Attr<Name>(cx, RENAME)
-        val deAliases = VecAttr.none<Name>(cx, RENAME)
-        val skipSerializing = BoolAttr.none(cx, SKIP_SERIALIZING)
-        val skipDeserializing = BoolAttr.none(cx, SKIP_DESERIALIZING)
-        val skipSerializingIf = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SKIP_SERIALIZING_IF)
-        val default = Attr<Default>(cx, DEFAULT)
-        val serializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SERIALIZE_WITH)
-        val deserializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, DESERIALIZE_WITH)
-        val serBound = Attr<List<WherePredicate>>(cx, BOUND)
-        val deBound = Attr<List<WherePredicate>>(cx, BOUND)
-        val borrowedLifetimes = Attr<Set<Lifetime>>(cx, BORROW)
-        val getter = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, GETTER)
-        val flatten = BoolAttr.none(cx, FLATTEN)
+        public fun fromAst(
+            cx: Ctxt,
+            index: Int,
+            field: io.github.kotlinmania.syn.Field,
+            attrs: AttrVariant?,
+            containerDefault: Default,
+            private: Ident,
+        ): AttrField {
+            val serName = Attr<Name>(cx, RENAME)
+            val deName = Attr<Name>(cx, RENAME)
+            val deAliases = VecAttr.none<Name>(cx, RENAME)
+            val skipSerializing = BoolAttr.none(cx, SKIP_SERIALIZING)
+            val skipDeserializing = BoolAttr.none(cx, SKIP_DESERIALIZING)
+            val skipSerializingIf = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SKIP_SERIALIZING_IF)
+            val default = Attr<Default>(cx, DEFAULT)
+            val serializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, SERIALIZE_WITH)
+            val deserializeWith = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, DESERIALIZE_WITH)
+            val serBound = Attr<List<WherePredicate>>(cx, BOUND)
+            val deBound = Attr<List<WherePredicate>>(cx, BOUND)
+            val borrowedLifetimes = Attr<Set<Lifetime>>(cx, BORROW)
+            val getter = Attr<io.github.kotlinmania.syn.Expr.Path>(cx, GETTER)
+            val flatten = BoolAttr.none(cx, FLATTEN)
 
-        val identName = field.ident?.let { Name.from(unraw(it)) } ?: Name(index.toString(), Span.callSite())
+            val identName = field.ident?.let { Name.from(unraw(it)) } ?: Name(index.toString(), Span.callSite())
 
-        val borrowAttribute = attrs?.borrow()
-        if (borrowAttribute != null) {
-            val borrowableResult = borrowableLifetimes(cx, identName.value, field)
-            if (borrowableResult != null) {
-                if (borrowAttribute.lifetimes != null) {
-                    for (lifetime in borrowAttribute.lifetimes) {
-                        if (!borrowableResult.contains(lifetime)) {
-                            val msg = "field `$identName` does not have lifetime $lifetime"
-                            cx.errorSpannedBy(field, msg)
+            val borrowAttribute = attrs?.borrow()
+            if (borrowAttribute != null) {
+                val borrowableResult = borrowableLifetimes(cx, identName.value, field)
+                if (borrowableResult != null) {
+                    if (borrowAttribute.lifetimes != null) {
+                        for (lifetime in borrowAttribute.lifetimes) {
+                            if (!borrowableResult.contains(lifetime)) {
+                                val msg = "field `$identName` does not have lifetime $lifetime"
+                                cx.errorSpannedBy(field, msg)
+                            }
                         }
+                        borrowedLifetimes.set(borrowAttribute.path, borrowAttribute.lifetimes)
+                    } else {
+                        borrowedLifetimes.set(borrowAttribute.path, borrowableResult)
                     }
-                    borrowedLifetimes.set(borrowAttribute.path, borrowAttribute.lifetimes)
-                } else {
-                    borrowedLifetimes.set(borrowAttribute.path, borrowableResult)
                 }
             }
-        }
 
-        for (attr in field.attrs) {
-            if (SERDE != attr.path()) {
-                continue
-            }
+            for (attr in field.attrs) {
+                if (SERDE != attr.path()) {
+                    continue
+                }
 
-            val metaVal = attr.meta
-            if (metaVal is Meta.List && metaVal.tokens.isEmpty()) {
-                continue
-            }
+                val metaVal = attr.meta
+                if (metaVal is Meta.List && metaVal.tokens.isEmpty()) {
+                    continue
+                }
 
-            val parseResult = attr.parseNestedMeta { meta ->
-                if (RENAME == meta.path) {
-                    val (ser, de) = getMultipleRenames(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    serName.setOpt(meta.path, ser?.let { Name.from(it) })
-                    for (deValue in de) {
-                        deName.setIfNone(Name.from(deValue))
-                        deAliases.insert(meta.path, Name.from(deValue))
-                    }
-                } else if (ALIAS == meta.path) {
-                    val s = getLitStr(cx, ALIAS, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    if (s != null) {
-                        deAliases.insert(meta.path, Name.from(s))
-                    }
-                } else if (DEFAULT == meta.path) {
-                    if (metaPeekEq(meta)) {
-                        val path = parseLitIntoExprPath(cx, DEFAULT, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        if (path != null) {
-                            default.set(meta.path, Default.Path(path))
-                        }
-                    } else {
-                        default.set(meta.path, Default.Plain)
-                    }
-                } else if (SKIP_SERIALIZING == meta.path) {
-                    skipSerializing.setTrue(meta.path)
-                } else if (SKIP_DESERIALIZING == meta.path) {
-                    skipDeserializing.setTrue(meta.path)
-                } else if (SKIP == meta.path) {
-                    skipSerializing.setTrue(meta.path)
-                    skipDeserializing.setTrue(meta.path)
-                } else if (SKIP_SERIALIZING_IF == meta.path) {
-                    val path = parseLitIntoExprPath(cx, SKIP_SERIALIZING_IF, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    if (path != null) {
-                        skipSerializingIf.set(meta.path, path)
-                    }
-                } else if (SERIALIZE_WITH == meta.path) {
-                    val path = parseLitIntoExprPath(cx, SERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    if (path != null) {
-                        serializeWith.set(meta.path, path)
-                    }
-                } else if (DESERIALIZE_WITH == meta.path) {
-                    val path = parseLitIntoExprPath(cx, DESERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    if (path != null) {
-                        deserializeWith.set(meta.path, path)
-                    }
-                } else if (WITH == meta.path) {
-                    val path = parseLitIntoExprPath(cx, WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    if (path != null) {
-                        var serPath = path.deepCopy()
-                        val serSegs = serPath.path.segments.toList().toMutableList()
-                        serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
-                        serPath = serPath.copy(path = Path(serPath.path.leadingColon, pathSegmentListFrom(serSegs)))
-                        serializeWith.set(meta.path, serPath)
+                val parseResult =
+                    attr.parseNestedMeta { meta ->
+                        if (RENAME == meta.path) {
+                            val (ser, de) = getMultipleRenames(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serName.setOpt(meta.path, ser?.let { Name.from(it) })
+                            for (deValue in de) {
+                                deName.setIfNone(Name.from(deValue))
+                                deAliases.insert(meta.path, Name.from(deValue))
+                            }
+                        } else if (ALIAS == meta.path) {
+                            val s = getLitStr(cx, ALIAS, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (s != null) {
+                                deAliases.insert(meta.path, Name.from(s))
+                            }
+                        } else if (DEFAULT == meta.path) {
+                            if (metaPeekEq(meta)) {
+                                val path = parseLitIntoExprPath(cx, DEFAULT, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                                if (path != null) {
+                                    default.set(meta.path, Default.Path(path))
+                                }
+                            } else {
+                                default.set(meta.path, Default.Plain)
+                            }
+                        } else if (SKIP_SERIALIZING == meta.path) {
+                            skipSerializing.setTrue(meta.path)
+                        } else if (SKIP_DESERIALIZING == meta.path) {
+                            skipDeserializing.setTrue(meta.path)
+                        } else if (SKIP == meta.path) {
+                            skipSerializing.setTrue(meta.path)
+                            skipDeserializing.setTrue(meta.path)
+                        } else if (SKIP_SERIALIZING_IF == meta.path) {
+                            val path = parseLitIntoExprPath(cx, SKIP_SERIALIZING_IF, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                skipSerializingIf.set(meta.path, path)
+                            }
+                        } else if (SERIALIZE_WITH == meta.path) {
+                            val path = parseLitIntoExprPath(cx, SERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                serializeWith.set(meta.path, path)
+                            }
+                        } else if (DESERIALIZE_WITH == meta.path) {
+                            val path = parseLitIntoExprPath(cx, DESERIALIZE_WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                deserializeWith.set(meta.path, path)
+                            }
+                        } else if (WITH == meta.path) {
+                            val path = parseLitIntoExprPath(cx, WITH, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                var serPath = path.deepCopy()
+                                val serSegs =
+                                    serPath.path.segments
+                                        .toList()
+                                        .toMutableList()
+                                serSegs.add(PathSegment(Ident.new("serialize", serPath.span())))
+                                serPath = serPath.copy(path = Path(serPath.path.leadingColon, pathSegmentListFrom(serSegs)))
+                                serializeWith.set(meta.path, serPath)
 
-                        var dePath = path.deepCopy()
-                        val deSegs = dePath.path.segments.toList().toMutableList()
-                        deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
-                        dePath = dePath.copy(path = Path(dePath.path.leadingColon, pathSegmentListFrom(deSegs)))
-                        deserializeWith.set(meta.path, dePath)
-                    }
-                } else if (BOUND == meta.path) {
-                    val (ser, de) = getWherePredicates(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    serBound.setOpt(meta.path, ser)
-                    deBound.setOpt(meta.path, de)
-                } else if (BORROW == meta.path) {
-                    if (metaPeekEq(meta)) {
-                        val lifetimes = parseLitIntoLifetimes(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                        val borrowable = borrowableLifetimes(cx, identName.value, field)
-                        if (borrowable != null) {
-                            for (lifetime in lifetimes) {
-                                if (!borrowable.contains(lifetime)) {
-                                    val msg = "field `$identName` does not have lifetime $lifetime"
-                                    cx.errorSpannedBy(field, msg)
+                                var dePath = path.deepCopy()
+                                val deSegs =
+                                    dePath.path.segments
+                                        .toList()
+                                        .toMutableList()
+                                deSegs.add(PathSegment(Ident.new("deserialize", dePath.span())))
+                                dePath = dePath.copy(path = Path(dePath.path.leadingColon, pathSegmentListFrom(deSegs)))
+                                deserializeWith.set(meta.path, dePath)
+                            }
+                        } else if (BOUND == meta.path) {
+                            val (ser, de) = getWherePredicates(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            serBound.setOpt(meta.path, ser)
+                            deBound.setOpt(meta.path, de)
+                        } else if (BORROW == meta.path) {
+                            if (metaPeekEq(meta)) {
+                                val lifetimes = parseLitIntoLifetimes(cx, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                                val borrowable = borrowableLifetimes(cx, identName.value, field)
+                                if (borrowable != null) {
+                                    for (lifetime in lifetimes) {
+                                        if (!borrowable.contains(lifetime)) {
+                                            val msg = "field `$identName` does not have lifetime $lifetime"
+                                            cx.errorSpannedBy(field, msg)
+                                        }
+                                    }
+                                    borrowedLifetimes.set(meta.path, lifetimes.toSet())
+                                }
+                            } else {
+                                val borrowable = borrowableLifetimes(cx, identName.value, field)
+                                if (borrowable != null) {
+                                    borrowedLifetimes.set(meta.path, borrowable)
                                 }
                             }
-                            borrowedLifetimes.set(meta.path, lifetimes.toSet())
+                        } else if (GETTER == meta.path) {
+                            val path = parseLitIntoExprPath(cx, GETTER, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                            if (path != null) {
+                                getter.set(meta.path, path)
+                            }
+                        } else if (FLATTEN == meta.path) {
+                            flatten.setTrue(meta.path)
+                        } else {
+                            val pathStr =
+                                meta.path
+                                    .toTokenStream()
+                                    .toString()
+                                    .replace(" ", "")
+                            return@parseNestedMeta SynResult.failure(meta.error("unknown serde field attribute `$pathStr`"))
                         }
-                    } else {
-                        val borrowable = borrowableLifetimes(cx, identName.value, field)
-                        if (borrowable != null) {
-                            borrowedLifetimes.set(meta.path, borrowable)
-                        }
+                        SynResult.success(Unit)
                     }
-                } else if (GETTER == meta.path) {
-                    val path = parseLitIntoExprPath(cx, GETTER, meta).getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                    if (path != null) {
-                        getter.set(meta.path, path)
-                    }
-                } else if (FLATTEN == meta.path) {
-                    flatten.setTrue(meta.path)
-                } else {
-                    val pathStr = meta.path.toTokenStream().toString().replace(" ", "")
-                    return@parseNestedMeta SynResult.failure(meta.error("unknown serde field attribute `$pathStr`"))
+                if (parseResult.isFailure) {
+                    cx.synError(parseResult.exceptionOrNull()!!)
                 }
-                SynResult.success(Unit)
             }
-            if (parseResult.isFailure) {
-                cx.synError(parseResult.exceptionOrNull()!!)
+
+            if (containerDefault is Default.None && skipDeserializing.get()) {
+                default.setIfNone(Default.Plain)
             }
-        }
 
-        if (containerDefault is Default.None && skipDeserializing.get()) {
-            default.setIfNone(Default.Plain)
-        }
+            val resolvedBorrowedLifetimes = borrowedLifetimes.get().orEmpty()
+            val finalDeserializeWith = deserializeWith.get()
 
-        val resolvedBorrowedLifetimes = borrowedLifetimes.get() ?: emptySet()
-        val finalDeserializeWith = deserializeWith.get()
-
-        val borrowableIsStr = isCow(field.ty, ::isStr)
-        val borrowableIsSliceU8 = isCow(field.ty, ::isSliceU8)
+            val borrowableIsStr = isCow(field.ty, ::isStr)
+            val borrowableIsSliceU8 = isCow(field.ty, ::isSliceU8)
         
-        val actualDeserializeWith = if (finalDeserializeWith == null && resolvedBorrowedLifetimes.isNotEmpty()) {
-            if (borrowableIsStr) {
-                val span = Span.callSite()
-                val segments = mutableListOf(
-                    PathSegment(Ident.new("_serde", span)),
-                    PathSegment(private.copy()),
-                    PathSegment(Ident.new("de", span)),
-                    PathSegment(Ident.new("borrow_cow_str", span))
-                )
-                io.github.kotlinmania.syn.Expr.Path(
-                    attrs = mutableListOf(),
-                    qself = null,
-                    path = Path(leadingColon = null, segments = pathSegmentListFrom(segments))
-                )
-            } else if (borrowableIsSliceU8) {
-                val span = Span.callSite()
-                val segments = mutableListOf(
-                    PathSegment(Ident.new("_serde", span)),
-                    PathSegment(private.copy()),
-                    PathSegment(Ident.new("de", span)),
-                    PathSegment(Ident.new("borrow_cow_bytes", span))
-                )
-                io.github.kotlinmania.syn.Expr.Path(
-                    attrs = mutableListOf(),
-                    qself = null,
-                    path = Path(leadingColon = null, segments = pathSegmentListFrom(segments))
-                )
-            } else {
-                null
+            val actualDeserializeWith =
+                if (finalDeserializeWith == null && resolvedBorrowedLifetimes.isNotEmpty()) {
+                    if (borrowableIsStr) {
+                        val span = Span.callSite()
+                        val segments =
+                            mutableListOf(
+                                PathSegment(Ident.new("_serde", span)),
+                                PathSegment(private.copy()),
+                                PathSegment(Ident.new("de", span)),
+                                PathSegment(Ident.new("borrow_cow_str", span)),
+                            )
+                        io.github.kotlinmania.syn.Expr.Path(
+                            attrs = mutableListOf(),
+                            qself = null,
+                            path = Path(leadingColon = null, segments = pathSegmentListFrom(segments)),
+                        )
+                    } else if (borrowableIsSliceU8) {
+                        val span = Span.callSite()
+                        val segments =
+                            mutableListOf(
+                                PathSegment(Ident.new("_serde", span)),
+                                PathSegment(private.copy()),
+                                PathSegment(Ident.new("de", span)),
+                                PathSegment(Ident.new("borrow_cow_bytes", span)),
+                            )
+                        io.github.kotlinmania.syn.Expr.Path(
+                            attrs = mutableListOf(),
+                            qself = null,
+                            path = Path(leadingColon = null, segments = pathSegmentListFrom(segments)),
+                        )
+                    } else {
+                        null
+                    }
+                } else {
+                    finalDeserializeWith
+                }
+
+            var finalBorrowedLifetimes = resolvedBorrowedLifetimes
+            if (resolvedBorrowedLifetimes.isEmpty() && isImplicitlyBorrowed(field.ty)) {
+                val collectedLifetimes = mutableSetOf<Lifetime>()
+                collectLifetimes(field.ty, collectedLifetimes)
+                finalBorrowedLifetimes = finalBorrowedLifetimes + collectedLifetimes
             }
-        } else {
-            finalDeserializeWith
-        }
 
-        var finalBorrowedLifetimes = resolvedBorrowedLifetimes
-        if (resolvedBorrowedLifetimes.isEmpty() && isImplicitlyBorrowed(field.ty)) {
-            val collectedLifetimes = mutableSetOf<Lifetime>()
-            collectLifetimes(field.ty, collectedLifetimes)
-            finalBorrowedLifetimes = finalBorrowedLifetimes + collectedLifetimes
+            return AttrField(
+                name = MultiName.fromAttrs(identName, serName, deName, deAliases),
+                skipSerializing = skipSerializing.get(),
+                skipDeserializing = skipDeserializing.get(),
+                skipSerializingIf = skipSerializingIf.get(),
+                default = default.get() ?: Default.None,
+                serializeWith = serializeWith.get(),
+                deserializeWith = actualDeserializeWith,
+                serBound = serBound.get(),
+                deBound = deBound.get(),
+                borrowedLifetimes = finalBorrowedLifetimes.sorted().toCollection(linkedSetOf()),
+                getter = getter.get(),
+                flatten = flatten.get(),
+                transparent = false,
+            )
         }
-
-        return AttrField(
-            name = MultiName.fromAttrs(identName, serName, deName, deAliases),
-            skipSerializing = skipSerializing.get(),
-            skipDeserializing = skipDeserializing.get(),
-            skipSerializingIf = skipSerializingIf.get(),
-            default = default.get() ?: Default.None,
-            serializeWith = serializeWith.get(),
-            deserializeWith = actualDeserializeWith,
-            serBound = serBound.get(),
-            deBound = deBound.get(),
-            borrowedLifetimes = finalBorrowedLifetimes.sorted().toCollection(linkedSetOf()),
-            getter = getter.get(),
-            flatten = flatten.get(),
-            transparent = false
-        )
     }
-}
 }
 
 private fun isCow(ty: SynType, elem: (SynType) -> Boolean): Boolean {
-    val path = when (val ungrouped = ungroup(ty)) {
-        is SynType.Path -> ungrouped.path
-        else -> return false
-    }
+    val path =
+        when (val ungrouped = ungroup(ty)) {
+            is SynType.Path -> ungrouped.path
+            else -> return false
+        }
     val segList = path.segments
     if (segList.isEmpty()) return false
     val seg: io.github.kotlinmania.syn.PathSegment = segList.last()!!
-    val args = when (val arguments = seg.arguments) {
-        is PathArguments.AngleBracketed -> arguments.args.toList()
-        else -> return false
-    }
+    val args =
+        when (val arguments = seg.arguments) {
+            is PathArguments.AngleBracketed -> arguments.args.toList()
+            else -> return false
+        }
     return seg.ident.toString() == "Cow" && args.size == 2 &&
-            args[0] is GenericArgument.LifetimeArg &&
-            args[1] is GenericArgument.TypeArg && elem((args[1] as GenericArgument.TypeArg).type)
+        args[0] is GenericArgument.LifetimeArg &&
+        args[1] is GenericArgument.TypeArg && elem((args[1] as GenericArgument.TypeArg).type)
 }
 
 private fun isOption(ty: SynType, elem: (SynType) -> Boolean): Boolean {
-    val path = when (val ungrouped = ungroup(ty)) {
-        is SynType.Path -> ungrouped.path
-        else -> return false
-    }
+    val path =
+        when (val ungrouped = ungroup(ty)) {
+            is SynType.Path -> ungrouped.path
+            else -> return false
+        }
     val segList = path.segments
     if (segList.isEmpty()) return false
     val seg: io.github.kotlinmania.syn.PathSegment = segList.last()!!
-    val args = when (val arguments = seg.arguments) {
-        is PathArguments.AngleBracketed -> arguments.args.toList()
-        else -> return false
-    }
+    val args =
+        when (val arguments = seg.arguments) {
+            is PathArguments.AngleBracketed -> arguments.args.toList()
+            else -> return false
+        }
     return seg.ident.toString() == "Option" && args.size == 1 &&
-            args[0] is GenericArgument.TypeArg && elem((args[0] as GenericArgument.TypeArg).type)
+        args[0] is GenericArgument.TypeArg && elem((args[0] as GenericArgument.TypeArg).type)
 }
 
-private fun isReference(ty: SynType, elem: (SynType) -> Boolean): Boolean {
-    return when (val ungrouped = ungroup(ty)) {
+private fun isReference(ty: SynType, elem: (SynType) -> Boolean): Boolean =
+    when (val ungrouped = ungroup(ty)) {
         is SynType.Reference -> ungrouped.mutability == null && elem(ungrouped.elem)
         else -> false
     }
-}
 
-private fun isStr(ty: SynType): Boolean {
-    return isPrimitiveType(ty, "str")
-}
+private fun isStr(ty: SynType): Boolean = isPrimitiveType(ty, "str")
 
-private fun isSliceU8(ty: SynType): Boolean {
-    return when (val ungrouped = ungroup(ty)) {
+private fun isSliceU8(ty: SynType): Boolean =
+    when (val ungrouped = ungroup(ty)) {
         is SynType.Slice -> isPrimitiveType(ungrouped.elem, "u8")
         else -> false
     }
-}
 
-private fun isImplicitlyBorrowedReference(ty: SynType): Boolean {
-    return isReference(ty, ::isStr) || isReference(ty, ::isSliceU8)
-}
+private fun isImplicitlyBorrowedReference(ty: SynType): Boolean = isReference(ty, ::isStr) || isReference(ty, ::isSliceU8)
 
-private fun isImplicitlyBorrowed(ty: SynType): Boolean {
-    return isImplicitlyBorrowedReference(ty) || isOption(ty, ::isImplicitlyBorrowedReference)
-}
+private fun isImplicitlyBorrowed(ty: SynType): Boolean = isImplicitlyBorrowedReference(ty) || isOption(ty, ::isImplicitlyBorrowedReference)
 
-private fun isPrimitiveType(ty: SynType, primitive: String): Boolean {
-    return when (val ungrouped = ungroup(ty)) {
+private fun isPrimitiveType(ty: SynType, primitive: String): Boolean =
+    when (val ungrouped = ungroup(ty)) {
         is SynType.Path -> ungrouped.qself == null && isPrimitivePath(ungrouped.path, primitive)
         else -> false
     }
-}
 
 // Helper functions for parsing literal strings from attribute metadata.
 
@@ -1063,12 +1080,14 @@ private fun parseLitIntoPath(
     attrName: Symbol,
     meta: ParseNestedMeta,
 ): SynResult<Path?> {
-    val string = getLitStr(cx, attrName, meta).getOrElse { return SynResult.failure(it) }
-        ?: return SynResult.success(null)
-    val path = string.parse(PathParse::parse).getOrElse {
-        cx.errorSpannedBy(string, "failed to parse path: ${string.token()}")
-        return SynResult.success(null)
-    }
+    val string =
+        getLitStr(cx, attrName, meta).getOrElse { return SynResult.failure(it) }
+            ?: return SynResult.success(null)
+    val path =
+        string.parse(PathParse::parse).getOrElse {
+            cx.errorSpannedBy(string, "failed to parse path: ${string.token()}")
+            return SynResult.success(null)
+        }
     return SynResult.success(path)
 }
 
@@ -1077,8 +1096,9 @@ private fun parseLitIntoExprPath(
     attrName: Symbol,
     meta: ParseNestedMeta,
 ): SynResult<SynExpr.Path?> {
-    val string = getLitStr(cx, attrName, meta).getOrElse { return SynResult.failure(it) }
-        ?: return SynResult.success(null)
+    val string =
+        getLitStr(cx, attrName, meta).getOrElse { return SynResult.failure(it) }
+            ?: return SynResult.success(null)
     val path = string.parse(ExprParse::parse).getOrNull() as? SynExpr.Path
     if (path == null) {
         cx.errorSpannedBy(string, "failed to parse path: ${string.token()}")
@@ -1091,12 +1111,14 @@ private fun parseLitIntoTy(
     attrName: Symbol,
     meta: ParseNestedMeta,
 ): SynResult<SynType?> {
-    val string = getLitStr(cx, attrName, meta).getOrElse { return SynResult.failure(it) }
-        ?: return SynResult.success(null)
-    val ty = string.parse(SynType::parse).getOrElse {
-        cx.errorSpannedBy(string, "failed to parse type: $attrName = ${string.token()}")
-        return SynResult.success(null)
-    }
+    val string =
+        getLitStr(cx, attrName, meta).getOrElse { return SynResult.failure(it) }
+            ?: return SynResult.success(null)
+    val ty =
+        string.parse(SynType::parse).getOrElse {
+            cx.errorSpannedBy(string, "failed to parse type: $attrName = ${string.token()}")
+            return SynResult.success(null)
+        }
     return SynResult.success(ty)
 }
 
@@ -1106,8 +1128,9 @@ private fun parseLitIntoWhere(
     metaItemName: Symbol,
     meta: ParseNestedMeta,
 ): SynResult<List<WherePredicate>> {
-    val string = getLitStr2(cx, attrName, metaItemName, meta).getOrElse { return SynResult.failure(it) }
-        ?: return SynResult.success(emptyList())
+    val string =
+        getLitStr2(cx, attrName, metaItemName, meta).getOrElse { return SynResult.failure(it) }
+            ?: return SynResult.success(emptyList())
     val whereParser = parser@{ input: ParseStream ->
         val predicates = mutableListOf<WherePredicate>()
         while (!input.isEmpty()) {
@@ -1118,10 +1141,11 @@ private fun parseLitIntoWhere(
         }
         SynResult.success(predicates.toList())
     }
-    val predicates = string.parseWith(whereParser).getOrElse {
-        cx.errorSpannedBy(string, it.toString())
-        emptyList()
-    }
+    val predicates =
+        string.parseWith(whereParser).getOrElse {
+            cx.errorSpannedBy(string, it.toString())
+            emptyList()
+        }
     return SynResult.success(predicates)
 }
 
@@ -1129,13 +1153,14 @@ private fun getWherePredicates(
     cx: Ctxt,
     meta: ParseNestedMeta,
 ): SynResult<Pair<List<WherePredicate>?, List<WherePredicate>?>> {
-    val (ser, de) = getSerAndDe(
-        cx,
-        BOUND,
-        meta,
-        clone = { predicates: List<WherePredicate> -> predicates.map { it.deepCopy() } },
-        f = ::parseLitIntoWhere,
-    ).getOrElse { return SynResult.failure(it) }
+    val (ser, de) =
+        getSerAndDe(
+            cx,
+            BOUND,
+            meta,
+            clone = { predicates: List<WherePredicate> -> predicates.map { it.deepCopy() } },
+            f = ::parseLitIntoWhere,
+        ).getOrElse { return SynResult.failure(it) }
     return SynResult.success(Pair(ser.atMostOne(), de.atMostOne()))
 }
 
@@ -1144,8 +1169,9 @@ private fun getRenames(
     attrName: Symbol,
     meta: ParseNestedMeta,
 ): SynResult<Pair<LitStr?, LitStr?>> {
-    val (ser, de) = getSerAndDe(cx, attrName, meta, LitStr::clone, ::getLitStr2)
-        .getOrElse { return SynResult.failure(it) }
+    val (ser, de) =
+        getSerAndDe(cx, attrName, meta, LitStr::clone, ::getLitStr2)
+            .getOrElse { return SynResult.failure(it) }
     return SynResult.success(Pair(ser.atMostOne(), de.atMostOne()))
 }
 
@@ -1153,8 +1179,9 @@ private fun getMultipleRenames(
     cx: Ctxt,
     meta: ParseNestedMeta,
 ): SynResult<Pair<LitStr?, List<LitStr>>> {
-    val (ser, de) = getSerAndDe(cx, RENAME, meta, LitStr::clone, ::getLitStr2)
-        .getOrElse { return SynResult.failure(it) }
+    val (ser, de) =
+        getSerAndDe(cx, RENAME, meta, LitStr::clone, ::getLitStr2)
+            .getOrElse { return SynResult.failure(it) }
     return SynResult.success(Pair(ser.atMostOne(), de.get()))
 }
 
@@ -1175,45 +1202,48 @@ private fun <T> getSerAndDe(
             deMeta.insert(meta.path, both)
         }
     } else if (lookahead.peek(ParenPeek)) {
-        meta.parseNestedMeta { subMeta ->
-            if (subMeta.path.eq(SERIALIZE)) {
-                val v = f(cx, attrName, SERIALIZE, subMeta)
-                    .getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                if (v != null) {
-                    serMeta.insert(subMeta.path, v)
+        meta
+            .parseNestedMeta { subMeta ->
+                if (subMeta.path.eq(SERIALIZE)) {
+                    val v =
+                        f(cx, attrName, SERIALIZE, subMeta)
+                            .getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                    if (v != null) {
+                        serMeta.insert(subMeta.path, v)
+                    }
+                } else if (subMeta.path.eq(DESERIALIZE)) {
+                    val v =
+                        f(cx, attrName, DESERIALIZE, subMeta)
+                            .getOrElse { return@parseNestedMeta SynResult.failure(it) }
+                    if (v != null) {
+                        deMeta.insert(subMeta.path, v)
+                    }
+                } else {
+                    return@parseNestedMeta SynResult.failure(
+                        subMeta.error("malformed $attrName attribute, expected `$attrName(serialize = ..., deserialize = ...)`"),
+                    )
                 }
-            } else if (subMeta.path.eq(DESERIALIZE)) {
-                val v = f(cx, attrName, DESERIALIZE, subMeta)
-                    .getOrElse { return@parseNestedMeta SynResult.failure(it) }
-                if (v != null) {
-                    deMeta.insert(subMeta.path, v)
-                }
-            } else {
-                return@parseNestedMeta SynResult.failure(
-                    subMeta.error("malformed $attrName attribute, expected `$attrName(serialize = ..., deserialize = ...)`"),
-                )
-            }
-            SynResult.success(Unit)
-        }.getOrElse { return SynResult.failure(it) }
+                SynResult.success(Unit)
+            }.getOrElse { return SynResult.failure(it) }
     } else {
         return SynResult.failure(lookahead.error())
     }
     return SynResult.success(Pair(serMeta, deMeta))
 }
 
-private fun isPrimitivePath(path: Path, primitive: String): Boolean {
-    return path.leadingColon == null &&
-            path.segments.size == 1 &&
-            path.segments[0].ident.toString() == primitive &&
-            path.segments[0].arguments is PathArguments.None
-}
+private fun isPrimitivePath(path: Path, primitive: String): Boolean =
+    path.leadingColon == null &&
+        path.segments.size == 1 &&
+        path.segments[0].ident.toString() == primitive &&
+        path.segments[0].arguments is PathArguments.None
 
 private fun parseLitIntoLifetimes(
     cx: Ctxt,
     meta: ParseNestedMeta,
 ): SynResult<Set<Lifetime>> {
-    val string = getLitStr(cx, BORROW, meta).getOrElse { return SynResult.failure(it) }
-        ?: return SynResult.success(emptySet())
+    val string =
+        getLitStr(cx, BORROW, meta).getOrElse { return SynResult.failure(it) }
+            ?: return SynResult.success(emptySet())
     val lifetimesParser = parser@{ input: ParseStream ->
         val set = mutableSetOf<Lifetime>()
         while (!input.isEmpty()) {
@@ -1226,10 +1256,11 @@ private fun parseLitIntoLifetimes(
         }
         SynResult.success(set.sorted().toCollection(linkedSetOf()))
     }
-    val lifetimes = string.parseWith(lifetimesParser).getOrElse {
-        cx.errorSpannedBy(string, "failed to parse borrowed lifetimes: ${string.token()}")
-        return SynResult.success(emptySet())
-    }
+    val lifetimes =
+        string.parseWith(lifetimesParser).getOrElse {
+            cx.errorSpannedBy(string, "failed to parse borrowed lifetimes: ${string.token()}")
+            return SynResult.success(emptySet())
+        }
     if (lifetimes.isEmpty()) {
         cx.errorSpannedBy(string, "at least one lifetime must be borrowed")
     }
@@ -1239,7 +1270,7 @@ private fun parseLitIntoLifetimes(
 private fun borrowableLifetimes(
     cx: Ctxt,
     name: String,
-    field: io.github.kotlinmania.syn.Field
+    field: io.github.kotlinmania.syn.Field,
 ): Set<Lifetime>? {
     val lifetimes = mutableSetOf<Lifetime>()
     collectLifetimes(field.ty, lifetimes)
@@ -1305,28 +1336,36 @@ private fun collectLifetimesFromTokens(tokens: TokenStream, out: MutableSet<Life
     }
 }
 
-public class BorrowAttribute(
+internal class BorrowAttribute(
     public val path: Path,
-    public val lifetimes: Set<Lifetime>?
+    public val lifetimes: Set<Lifetime>?,
 )
 
-public enum class Identifier {
+internal enum class Identifier {
     No,
     Field,
-    Variant;
+    Variant,
+    ;
 
     public fun isSome(): Boolean = this != No
 }
 
-public sealed class TagType {
-    public object External : TagType()
-    public class Internal(public val tag: String) : TagType()
-    public class Adjacent(public val tag: String, public val content: String) : TagType()
-    public object None : TagType()
+internal sealed class TagType {
+    object External : TagType()
+    class Internal(
+        public val tag: String,
+    ) : TagType()
+    class Adjacent(
+        public val tag: String,
+        public val content: String,
+    ) : TagType()
+    object None : TagType()
 }
 
-public sealed class Default {
-    public object None : Default()
-    public object Plain : Default()
-    public class Path(public val path: io.github.kotlinmania.syn.Expr.Path) : Default()
+internal sealed class Default {
+    object None : Default()
+    object Plain : Default()
+    class Path(
+        public val path: io.github.kotlinmania.syn.Expr.Path,
+    ) : Default()
 }

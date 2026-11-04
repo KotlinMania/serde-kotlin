@@ -7,7 +7,9 @@ import io.github.kotlinmania.serdecore.de.Deserializer
 import io.github.kotlinmania.serdecore.priv.generated.content.Content
 
 /** Captured Serde input that can be tried against multiple untagged variants. */
-public class UntaggedContent private constructor(private val content: Content) {
+public class UntaggedContent private constructor(
+    private val content: Content,
+) {
     /** Starts an independent decoding attempt over the captured value. */
     public fun <T> decode(decoder: Deserialize<T>): SerdeResult<T> =
         decoder.deserialize(ContentRefDeserializer.new(content))

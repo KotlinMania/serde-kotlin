@@ -1,11 +1,6 @@
 // port-lint: source serde/src/private/de.rs
 package io.github.kotlinmania.serdecore.priv
 
-import io.github.kotlinmania.serdecore.priv.generated.content.Content
-import io.github.kotlinmania.serdecore.priv.contentaccess.*
-import io.github.kotlinmania.serdecore.priv.contentaccess.ContentMapEntry
-import io.github.kotlinmania.serdecore.priv.contentaccess.newContentBuffer
-
 import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serde.serdeCatching
@@ -17,6 +12,10 @@ import io.github.kotlinmania.serdecore.de.SeqAccess
 import io.github.kotlinmania.serdecore.de.SeqElement
 import io.github.kotlinmania.serdecore.de.Unexpected
 import io.github.kotlinmania.serdecore.de.Visitor
+import io.github.kotlinmania.serdecore.priv.contentaccess.*
+import io.github.kotlinmania.serdecore.priv.contentaccess.ContentMapEntry
+import io.github.kotlinmania.serdecore.priv.contentaccess.newContentBuffer
+import io.github.kotlinmania.serdecore.priv.generated.content.Content
 
 internal fun contentAsStr(content: Content): String? =
     when (content) {
@@ -88,7 +87,9 @@ internal fun contentUnexpected(content: Content): Unexpected =
         is Content.Map -> Unexpected.Map
     }
 
-internal class ContentVisitor : Visitor<Content>, DeserializeSeed<Content> {
+internal class ContentVisitor :
+    Visitor<Content>,
+    DeserializeSeed<Content> {
     companion object {
         fun new(): ContentVisitor = ContentVisitor()
     }

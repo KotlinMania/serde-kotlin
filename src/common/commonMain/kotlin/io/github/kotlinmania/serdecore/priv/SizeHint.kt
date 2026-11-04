@@ -1,10 +1,10 @@
 // port-lint: source private/size_hint.rs
 package io.github.kotlinmania.serdecore.priv
 
-import io.github.kotlinmania.serdecore.priv.generated.sizehint.__rtkBound0 as GeneratedSizeHintBound
-import io.github.kotlinmania.serdecore.priv.generated.sizehint.__rtkOption as GeneratedSizeHintOption
-import io.github.kotlinmania.serdecore.priv.generated.sizehint.from_bounds as generatedFromBounds
+import io.github.kotlinmania.serdecore.priv.generated.sizehint.RtkBound0 as GeneratedSizeHintBound
+import io.github.kotlinmania.serdecore.priv.generated.sizehint.RtkOption as GeneratedSizeHintOption
 import io.github.kotlinmania.serdecore.priv.generated.sizehint.cautious as generatedCautious
+import io.github.kotlinmania.serdecore.priv.generated.sizehint.from_bounds as generatedFromBounds
 
 interface IteratorWithSizeHint<out T> : Iterator<T> {
     fun sizeHint(): Pair<ULong, ULong?>

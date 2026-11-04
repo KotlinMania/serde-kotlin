@@ -6,8 +6,7 @@ import io.github.kotlinmania.serde.SerdeResult
 /**
  * Returned from `Serializer.serializeTuple`.
  */
-interface SerializeTuple<Ok>
-    {
+interface SerializeTuple<Ok> {
     /**
      * Serialize a tuple element.
      */

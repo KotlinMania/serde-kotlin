@@ -18,7 +18,7 @@ import io.github.kotlinmania.syn.token.Gt
 import io.github.kotlinmania.syn.token.Lt
 import io.github.kotlinmania.syn.token.PathSep
 
-public fun replaceReceiver(input: DeriveInput): DeriveInput {
+internal fun replaceReceiver(input: DeriveInput): DeriveInput {
     val output = input.clone()
     val ident = output.ident
     val tyGenerics = output.generics.splitForImpl().typeGenerics
@@ -39,8 +39,9 @@ private fun parseSelfTy(tokens: TokenStream): SynType.Path {
     return SynType.Path(null, result.getOrThrow())
 }
 
-private class ReplaceReceiver(private val selfTy: SynType.Path) : VisitMut() {
-
+private class ReplaceReceiver(
+    private val selfTy: SynType.Path,
+) : VisitMut() {
     private fun selfTy(span: Span): SynType.Path {
         val tokens = TokenStream.new()
         selfTy.toTokens(tokens)
@@ -52,7 +53,13 @@ private class ReplaceReceiver(private val selfTy: SynType.Path) : VisitMut() {
 
     private fun selfToQself(qselfRef: QSelf?, path: Path): Pair<QSelf?, Path> {
         if (path.leadingColon != null) return qselfRef to path
-        if (path.segments.first()?.ident?.toString() != "Self") return qselfRef to path
+        if (path.segments
+                .first()
+                ?.ident
+                ?.toString() != "Self"
+        ) {
+            return qselfRef to path
+        }
 
         val segments = path.segments.toList()
         if (segments.size == 1) {
@@ -60,20 +67,27 @@ private class ReplaceReceiver(private val selfTy: SynType.Path) : VisitMut() {
         }
 
         val span = segments[0].ident.span()
-        val newQself = QSelf(
-            ltToken = Lt.default(),
-            ty = selfTy(span),
-            position = 0,
-            asToken = null,
-            gtToken = Gt.default(),
-        )
+        val newQself =
+            QSelf(
+                ltToken = Lt.default(),
+                ty = selfTy(span),
+                position = 0,
+                asToken = null,
+                gtToken = Gt.default(),
+            )
 
         val newSegments = pathSegments(segments.drop(1))
         return newQself to Path(PathSep.default(), newSegments)
     }
 
     private fun selfToExprPath(path: Path): Path {
-        val selfTyPath = selfTy(path.segments.first()?.ident?.span() ?: Span.callSite())
+        val selfTyPath =
+            selfTy(
+                path.segments
+                    .first()
+                    ?.ident
+                    ?.span() ?: Span.callSite(),
+            )
         val variantSegments = path.segments.toList()
         val receiverSegments = selfTyPath.path.segments.toList()
         val newSegments = pathSegments(receiverSegments + variantSegments.drop(1))
@@ -82,7 +96,11 @@ private class ReplaceReceiver(private val selfTy: SynType.Path) : VisitMut() {
 
     override fun visitType(t: SynType) {
         if (t is SynType.Path && t.qself == null && t.path.isIdent("Self")) {
-                val span = t.path.segments.first()?.ident?.span() ?: Span.callSite()
+            val span =
+                t.path.segments
+                    .first()
+                    ?.ident
+                    ?.span() ?: Span.callSite()
             val replacement = selfTy(span)
             t.qself = replacement.qself
             t.path = replacement.path
