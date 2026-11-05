@@ -1236,16 +1236,14 @@ private class MapDeserializer(
             }
         }
 
-    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> =
-        serdeCatching {
-            val v =
-                value
-                    // Throw because this indicates a bug in the program rather than an expected
-                    // failure.
-                    ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
-            value = null
-            seed.deserialize(ContentDeserializer.new(v)).getOrThrow()
-        }
+    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> {
+        val pending = value
+        value = null
+        // Throw because this indicates a bug in the program rather than an expected
+        // failure.
+        val v = pending ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
+        return seed.deserialize(ContentDeserializer.new(v))
+    }
 
     override fun <K, V> nextEntrySeed(
         keySeed: DeserializeSeed<K>,
@@ -2587,16 +2585,14 @@ private class MapRefDeserializer(
             }
         }
 
-    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> =
-        serdeCatching {
-            val v =
-                value
-                    // Throw because this indicates a bug in the program rather than an expected
-                    // failure.
-                    ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
-            value = null
-            seed.deserialize(ContentRefDeserializer.new(v)).getOrThrow()
-        }
+    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> {
+        val pending = value
+        value = null
+        // Throw because this indicates a bug in the program rather than an expected
+        // failure.
+        val v = pending ?: throw IllegalStateException("MapAccess.nextValue called before nextKey")
+        return seed.deserialize(ContentRefDeserializer.new(v))
+    }
 
     override fun <K, V> nextEntrySeed(
         keySeed: DeserializeSeed<K>,
