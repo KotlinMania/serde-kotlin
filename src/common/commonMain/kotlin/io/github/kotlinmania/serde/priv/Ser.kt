@@ -188,8 +188,6 @@ private class TaggedSerializer<Ok, S>(
             map.serializeKey(Content.String(variant)).getOrThrow()
             SerializeStructVariantAsMapValue(map = map, name = variant, len = len)
         }
-
-    override fun collectStr(value: Any): SerdeResult<Ok> = SerdeResult.failure(badType(Unsupported.String))
 }
 
 private enum class Unsupported {
@@ -203,7 +201,6 @@ private enum class Unsupported {
     Sequence,
     Tuple,
     TupleStruct,
-    Enum,
     ;
 
     fun fmt(): String =
@@ -218,7 +215,6 @@ private enum class Unsupported {
             Sequence -> "a sequence"
             Tuple -> "a tuple"
             TupleStruct -> "a tuple struct"
-            Enum -> "an enum"
         }
 
     override fun toString(): String = fmt()
