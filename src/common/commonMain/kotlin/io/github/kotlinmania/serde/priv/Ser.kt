@@ -654,9 +654,9 @@ private class SerializeStruct(
         value: T,
     ): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            fields.add(key to value.serialize(ContentSerializer()).getOrThrow())
-        }.map { }
+        value.serialize(ContentSerializer()).map { contentValue ->
+            fields += key to contentValue
+        }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.Struct(name, fields))
 }
@@ -674,9 +674,9 @@ private class SerializeStructVariant(
         value: T,
     ): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            fields.add(key to value.serialize(ContentSerializer()).getOrThrow())
-        }.map { }
+        value.serialize(ContentSerializer()).map { contentValue ->
+            fields += key to contentValue
+        }
 
     override fun end(): SerdeResult<Content> = SerdeResult.success(Content.StructVariant(name, variantIndex, variant, fields))
 }
@@ -699,9 +699,9 @@ private class SerializeTupleVariantAsMapValue<Ok, M>(
 
     override fun <T> serializeField(value: T): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            fields.add(value.serialize(ContentSerializer()).getOrThrow())
-        }.map { }
+        value.serialize(ContentSerializer()).map { contentValue ->
+            fields += contentValue
+        }
 
     override fun end(): SerdeResult<Ok> =
         serdeCatching {
@@ -731,9 +731,9 @@ private class SerializeStructVariantAsMapValue<Ok, M>(
         value: T,
     ): SerdeResult<Unit>
         where T : Serialize =
-        serdeCatching {
-            fields.add(key to value.serialize(ContentSerializer()).getOrThrow())
-        }.map { }
+        value.serialize(ContentSerializer()).map { contentValue ->
+            fields += key to contentValue
+        }
 
     override fun end(): SerdeResult<Ok> =
         serdeCatching {
