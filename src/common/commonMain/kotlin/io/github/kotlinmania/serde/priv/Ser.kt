@@ -704,9 +704,8 @@ private class SerializeTupleVariantAsMapValue<Ok, M>(
         }
 
     override fun end(): SerdeResult<Ok> =
-        serdeCatching {
-            map.serializeValue(Content.TupleStruct(name, fields)).getOrThrow()
-            map.end().getOrThrow()
+        map.serializeValue(Content.TupleStruct(name, fields)).flatMap {
+            map.end()
         }
 }
 
@@ -736,9 +735,8 @@ private class SerializeStructVariantAsMapValue<Ok, M>(
         }
 
     override fun end(): SerdeResult<Ok> =
-        serdeCatching {
-            map.serializeValue(Content.Struct(name, fields)).getOrThrow()
-            map.end().getOrThrow()
+        map.serializeValue(Content.Struct(name, fields)).flatMap {
+            map.end()
         }
 }
 
