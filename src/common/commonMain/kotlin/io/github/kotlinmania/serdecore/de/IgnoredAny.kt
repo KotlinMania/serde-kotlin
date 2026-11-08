@@ -135,7 +135,7 @@ data object IgnoredAny : Visitor<IgnoredAny>, Deserialize<IgnoredAny>, Deseriali
     override fun <A> visitEnum(access: A): SerdeResult<IgnoredAny>
         where A : EnumAccess =
         access.variantSeed(IgnoredAny).flatMap { (_, variant) ->
-            variant.newtypeVariant(IgnoredAny)
+            variant.newtypeVariantSeed(IgnoredAny)
         }
 
     override fun <D> deserialize(deserializer: D): SerdeResult<IgnoredAny>

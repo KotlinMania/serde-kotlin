@@ -572,6 +572,17 @@ kotlin {
             }
     }
 
+    tasks
+        .withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>()
+        .matching { it.name.startsWith("compileSwiftExportMain") }
+        .configureEach {
+            // KGP's generated SwiftExport bridge files emit type-erased generic casts
+            // (dereferenceExternalRCRef(self) as GenericType<Any?>) without @Suppress("UNCHECKED_CAST").
+            // Disable UNCHECKED_CAST on KGP's generated bridge only while keeping
+            // allWarningsAsErrors = true for all source compilations and all other bridge diagnostics.
+            compilerOptions.freeCompilerArgs.add("-Xwarning-level=UNCHECKED_CAST:disabled")
+        }
+
     // Native FFI — Kotlin/Native cinterop + per-target static wrapper library
     if (nativeFfiEnabled) {
         val configuredNativeTargets = targets.withType<KotlinNativeTarget>().map { it.name }.toSet()

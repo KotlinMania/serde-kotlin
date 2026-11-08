@@ -1,4 +1,5 @@
 [versions]
+btree = "0.2.3"
 collectionsImmutable = "0.5.2"
 datetime = "0.8.0"
 serialization = "1.11.0"
@@ -14,7 +15,7 @@ syn = "0.5.0"
 quote = "0.3.1"
 procMacro2 = "0.1.8"
 numTraits = "0.2.15"
-kmIo = "0.2.0"
+kmIo = "0.4.0"
 libc = "0.1.11"
 serdeTest = "0.1.2"
 multi-release-toolchain = "17"
@@ -36,6 +37,7 @@ vanniktech = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 [libraries]
+btree-kotlin = { module = "io.github.kotlinmania:btree-kotlin", version.ref = "btree" }
 collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
@@ -65,6 +67,7 @@ serde-commonMain = [
   "num-traits-kotlin",
 ]
 serde-commonTest = [
+  "btree-kotlin",
   "km-io",
   "libc-kotlin",
   "serde-test-kotlin",

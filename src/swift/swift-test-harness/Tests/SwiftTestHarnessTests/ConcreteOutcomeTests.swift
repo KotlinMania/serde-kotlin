@@ -4,7 +4,7 @@ import Serde
 @Suite("Concrete Serde outcomes")
 struct ConcreteOutcomeTests {
     @Test func textHasConcreteSwiftType() {
-        let input = io.github.kotlinmania.serde.SerdeDecodeInput.companion.text(value: "hello")
+        let input = io.github.kotlinmania.serde.SerdeDecodeInput.Companion.shared.text(value: "hello")
         let result = io.github.kotlinmania.serde.SerdeDecoding.shared.text(input: input)
         let value: String? = result.value
         #expect(value == "hello")
@@ -13,11 +13,11 @@ struct ConcreteOutcomeTests {
 
     @Test func primitivesHaveConcreteSwiftTypes() {
         let number = io.github.kotlinmania.serde.SerdeDecoding.shared.signed(
-            input: io.github.kotlinmania.serde.SerdeDecodeInput.companion.signed(value: 0))
+            input: io.github.kotlinmania.serde.SerdeDecodeInput.Companion.shared.signed(value: 0))
         let value: Int64? = number.value
         #expect(value == 0)
         let boolean = io.github.kotlinmania.serde.SerdeDecoding.shared.boolean(
-            input: io.github.kotlinmania.serde.SerdeDecodeInput.companion.boolean(value: false))
+            input: io.github.kotlinmania.serde.SerdeDecodeInput.Companion.shared.boolean(value: false))
         let flag: Bool? = boolean.value
         #expect(flag == false)
         #expect(boolean.error == nil)
@@ -25,7 +25,7 @@ struct ConcreteOutcomeTests {
 
     @Test func failureRetainsOriginalDiagnostic() {
         let diagnostic = io.github.kotlinmania.serde.SerdeError(message: "original", source: nil)
-        let result = io.github.kotlinmania.serde.SerdeStringOutcome.companion.failure(error: diagnostic)
+        let result = io.github.kotlinmania.serde.SerdeStringOutcome.Companion.shared.failure(error: diagnostic)
         let value: String? = result.value
         let message: String? = result.error?.message
         #expect(value == nil)
@@ -35,7 +35,7 @@ struct ConcreteOutcomeTests {
 
     @Test func actualDecodeFailureIsTyped() {
         let result = io.github.kotlinmania.serde.SerdeDecoding.shared.signed(
-            input: io.github.kotlinmania.serde.SerdeDecodeInput.companion.text(value: "invalid"))
+            input: io.github.kotlinmania.serde.SerdeDecodeInput.Companion.shared.text(value: "invalid"))
         let value: Int64? = result.value
         let diagnostic: io.github.kotlinmania.serde.SerdeError? = result.error
         #expect(value == nil)

@@ -129,6 +129,30 @@ class MapEntryDefaultParityTest {
     }
 
     @Test
+    fun nullableKeyPreservesPresentPairAndConsumesValue() {
+        val access = Access()
+        assertEquals(Pair(null, 10), access.nextEntrySeed(NullSeed, ReadSeed).getOrThrow())
+        access.assertCounts(1, 1)
+        assertEquals(null, access.nextEntrySeed(NullSeed, ReadSeed).getOrThrow())
+        access.assertCounts(2, 1)
+    }
+
+    @Test
+    fun nullableKeyAndValuePreservePresentPair() {
+        val access = Access()
+        assertEquals(Pair(null, null), access.nextEntrySeed(NullSeed, NullSeed).getOrThrow())
+        access.assertCounts(1, 1)
+    }
+
+    @Test
+    fun nullableKeyStillPropagatesValueErrorIdentity() {
+        val access = Access()
+        val seed = ErrorSeed()
+        assertSame(seed.typedError, access.nextEntrySeed(NullSeed, seed).exceptionOrNull())
+        access.assertCounts(1, 1)
+    }
+
+    @Test
     fun nullableValuePreservesPresentPair() {
         val access = Access()
         assertEquals(Pair(1, null), access.nextEntrySeed(ReadSeed, NullSeed).getOrThrow())

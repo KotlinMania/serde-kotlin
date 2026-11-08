@@ -23,6 +23,15 @@ interface VariantAccess {
     fun <T> newtypeVariant(seed: DeserializeSeed<T>): SerdeResult<T> = newtypeVariantSeed(seed)
 
     /**
+     * Deserializes the single value using a stateless [Deserialize] implementation.
+     *
+     * This is the convenience form of [newtypeVariantSeed]. Implementations
+     * should not override its default behavior.
+     */
+    fun <T> newtypeVariant(deserialize: Deserialize<T>): SerdeResult<T> =
+        newtypeVariantSeed(seedFromDeserialize(deserialize))
+
+    /**
      * Called when deserializing a tuple-like variant.
      */
     fun <V> tupleVariant(

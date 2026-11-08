@@ -17,7 +17,6 @@ import io.github.kotlinmania.serdecore.de.Unexpected
 import io.github.kotlinmania.serdecore.de.UnitDeserialize
 import io.github.kotlinmania.serdecore.de.VariantAccess
 import io.github.kotlinmania.serdecore.de.Visitor
-import io.github.kotlinmania.serdecore.de.unwrapOrElse
 import io.github.kotlinmania.serdecore.de.value.BytesDeserializer
 import io.github.kotlinmania.serdecore.de.value.SeqAccessDeserializer
 import io.github.kotlinmania.serdecore.de.value.intoDeserializer
@@ -316,30 +315,37 @@ internal class ContentVisitor :
         deserialize(deserializer).map { newNewtypeContent(it) }
 
     override fun <A> visitSeq(access: A): SerdeResult<Content>
-        where A : SeqAccess =
-        serdeCatching {
-            val hint = access.sizeHint()
-            val values = newContentBuffer(hint)
-            while (true) {
-                when (val next = access.nextElementSeed(new()).getOrThrow()) {
-                    is SeqElement.Some -> values.add(next.value)
-                    SeqElement.None -> break
-                }
+        where A : SeqAccess {
+        val hint = access.sizeHint()
+        // Negative size hints are invalid.
+        if (hint != null && hint < 0) return SerdeResult.failure(SerdeError.custom("A Rust size hint cannot be negative"))
+        val values = newContentBuffer(hint)
+        while (true) {
+            val next = when (val result = access.nextElementSeed(new())) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
             }
-            takeSeqContent(values)
+            when (next) {
+                is SeqElement.Some -> values.add(next.value)
+                SeqElement.None -> return SerdeResult.success(takeSeqContent(values))
+            }
         }
+    }
 
     override fun <A> visitMap(access: A): SerdeResult<Content>
-        where A : MapAccess =
-        serdeCatching {
-            val hint = access.sizeHint()
-            val values = newContentPairBuffer(hint)
-            while (true) {
-                val next = access.nextEntrySeed(new(), new()).getOrThrow() ?: break
-                values.add(next)
-            }
-            takeMapContent(values)
+        where A : MapAccess {
+        val hint = access.sizeHint()
+        // Negative size hints are invalid.
+        if (hint != null && hint < 0) return SerdeResult.failure(SerdeError.custom("A Rust size hint cannot be negative"))
+        val values = newContentPairBuffer(hint)
+        while (true) {
+            val next = when (val result = access.nextEntrySeed(new(), new())) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
+            } ?: return SerdeResult.success(takeMapContent(values))
+            values.add(next)
         }
+    }
 
     override fun <A> visitEnum(access: A): SerdeResult<Content>
         where A : EnumAccess =
@@ -498,10 +504,9 @@ internal class TaggedContentVisitor<T>(
     private val tagName: String,
     private val expecting: String,
     private val deserializeTag: Deserialize<T>,
-) : Visitor<Pair<T, Content>>
-    where T : Any {
+) : Visitor<Pair<T, Content>> {
     companion object {
-        fun <T : Any> new(
+        fun <T> new(
             name: String,
             expecting: String,
             deserializeTag: Deserialize<T>,
@@ -512,61 +517,55 @@ internal class TaggedContentVisitor<T>(
 
     override fun <A> visitSeq(access: A): SerdeResult<Pair<T, Content>>
         where A : SeqAccess =
-        serdeCatching {
-            val tag =
-                access
-                    .nextElementSeed(
-                        object : DeserializeSeed<T> {
-                            override fun <D> deserialize(
-                                deserializer: D,
-                            ): SerdeResult<T>
-                            where D : Deserializer = deserializeTag.deserialize(deserializer)
-                        },
-                    ).getOrThrow()
-                    .unwrapOrElse { (SerdeError.missingField(tagName)).raise() }
-
-            val rest = SeqAccessDeserializer.new(access)
-            val content = ContentVisitor.new().deserialize(rest).getOrThrow()
-            tag to content
+        access.nextElementSeed(object : DeserializeSeed<T> {
+            override fun <D> deserialize(deserializer: D): SerdeResult<T>
+                where D : Deserializer = deserializeTag.deserialize(deserializer)
+        }).flatMap { tag ->
+            when (tag) {
+                SeqElement.None -> SerdeResult.failure(SerdeError.missingField(tagName))
+                is SeqElement.Some -> ContentVisitor.new()
+                    .deserialize(SeqAccessDeserializer.new(access)).map { tag.value to it }
+            }
         }
 
     override fun <A> visitMap(access: A): SerdeResult<Pair<T, Content>>
-        where A : MapAccess =
-        serdeCatching {
-            var tag: T? = null
-            val values = newContentPairBuffer(access.sizeHint())
-            while (true) {
-                val key = access.nextKeySeed(TagOrContentVisitor.new(tagName)).getOrThrow() ?: break
-                when (key) {
-                    TagOrContent.Tag -> {
-                        if (tag != null) {
-                            (SerdeError.duplicateField(tagName)).raise()
-                        }
-                        tag =
-                            access
-                                .nextValueSeed(
-                                    object : DeserializeSeed<T> {
-                                        override fun <D> deserialize(
-                                            deserializer: D,
-                                        ): SerdeResult<T>
-                                        where D : Deserializer =
-                                            deserializeTag.deserialize(deserializer)
-                                    },
-                                ).getOrThrow()
-                    }
-
-                    is TagOrContent.ContentValue -> {
-                        val value = access.nextValueSeed(ContentVisitor.new()).getOrThrow()
-                        values.add(key.value to value)
+        where A : MapAccess {
+        var tag: SeqElement<T> = SeqElement.None
+        val hint = access.sizeHint()
+        // Negative size hints are invalid.
+        if (hint != null && hint < 0) return SerdeResult.failure(SerdeError.custom("A Rust size hint cannot be negative"))
+        val values = newContentPairBuffer(hint)
+        while (true) {
+            val key = when (val result = access.nextKeySeed(TagOrContentVisitor.new(tagName))) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> result.value
+            } ?: break
+            when (key) {
+                TagOrContent.Tag -> {
+                    if (tag is SeqElement.Some) return SerdeResult.failure(SerdeError.duplicateField(tagName))
+                    val value = access.nextValueSeed(object : DeserializeSeed<T> {
+                        override fun <D> deserialize(deserializer: D): SerdeResult<T>
+                            where D : Deserializer = deserializeTag.deserialize(deserializer)
+                    })
+                    tag = when (value) {
+                        is SerdeResult.Failure -> return value
+                        is SerdeResult.Success -> SeqElement.Some(value.value)
                     }
                 }
-            }
-
-            when (val finalTag = tag) {
-                null -> (SerdeError.missingField(tagName)).raise()
-                else -> finalTag to takeMapContent(values)
+                is TagOrContent.ContentValue -> {
+                    val value = when (val result = access.nextValueSeed(ContentVisitor.new())) {
+                        is SerdeResult.Failure -> return result
+                        is SerdeResult.Success -> result.value
+                    }
+                    values.add(key.value to value)
+                }
             }
         }
+        return when (val finalTag = tag) {
+            SeqElement.None -> SerdeResult.failure(SerdeError.missingField(tagName))
+            is SeqElement.Some -> SerdeResult.success(finalTag.value to takeMapContent(values))
+        }
+    }
 }
 
 /**
@@ -896,42 +895,27 @@ internal class ContentDeserializer(
         name: String,
         variants: List<String>,
         visitor: Visitor<V>,
-    ): SerdeResult<V> =
-        serdeCatching {
-            val (variant, value) =
-                when (content) {
-                    is Content.Map -> {
-                        val iter = content.value.iterator()
-                        val first =
-                            iter.nextOrNull()
-                                ?: SerdeError
-                                    .invalidValue(
-                                        Unexpected.Map,
-                                        Expected { "map with a single key" },
-                                    ).raise()
-                        if (iter.hasNext()) {
-                            SerdeError
-                                .invalidValue(
-                                    Unexpected.Map,
-                                    Expected { "map with a single key" },
-                                ).raise()
-                        }
-                        // Enums are encoded in JSON as objects with a single key-value pair.
-                        first.key to first.value
-                    }
-
-                    is Content.String -> content to null
-                    is Content.Str -> content to null
-                    else ->
-                        SerdeError
-                            .invalidType(
-                                contentUnexpected(content),
-                                Expected { "string or map" },
-                            ).raise()
-                }
-
-            visitor.visitEnum(EnumDeserializer.new(variant, value)).getOrThrow()
+    ): SerdeResult<V> {
+        val (variant, value) = when (content) {
+            is Content.Map -> {
+                val iter = content.value.iterator()
+                val first = iter.nextOrNull() ?: return SerdeResult.failure(
+                    SerdeError.invalidValue(Unexpected.Map, Expected { "map with a single key" }),
+                )
+                if (iter.hasNext()) return SerdeResult.failure(
+                    SerdeError.invalidValue(Unexpected.Map, Expected { "map with a single key" }),
+                )
+                // Enums are encoded in JSON as objects with a single key-value pair.
+                first.key to first.value
+            }
+            is Content.String -> content to null
+            is Content.Str -> content to null
+            else -> return SerdeResult.failure(
+                SerdeError.invalidType(contentUnexpected(content), Expected { "string or map" }),
+            )
         }
+        return visitor.visitEnum(EnumDeserializer.new(variant, value))
+    }
 
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
@@ -950,24 +934,22 @@ internal class ContentDeserializer(
 private fun <V> visitContentSeq(
     content: List<Content>,
     visitor: Visitor<V>,
-): SerdeResult<V> =
-    serdeCatching {
-        val seqVisitor = SeqDeserializer.new(content)
-        val value = visitor.visitSeq(seqVisitor).getOrThrow()
-        seqVisitor.end().getOrThrow()
-        value
+): SerdeResult<V> {
+    val seqVisitor = SeqDeserializer.new(content)
+    return visitor.visitSeq(seqVisitor).flatMap { value ->
+        seqVisitor.end().map { value }
     }
+}
 
 private fun <V> visitContentMap(
     content: List<ContentMapEntry>,
     visitor: Visitor<V>,
-): SerdeResult<V> =
-    serdeCatching {
-        val mapVisitor = MapDeserializer.new(content)
-        val value = visitor.visitMap(mapVisitor).getOrThrow()
-        mapVisitor.end().getOrThrow()
-        value
+): SerdeResult<V> {
+    val mapVisitor = MapDeserializer.new(content)
+    return visitor.visitMap(mapVisitor).flatMap { value ->
+        mapVisitor.end().map { value }
     }
+}
 
 private class SeqDeserializer(
     private val iter: Iterator<Content>,
@@ -983,22 +965,19 @@ private class SeqDeserializer(
             }
     }
 
-    fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining != 0) {
-                // First argument is the number of elements in the data, second argument is the
-                // number of elements expected by the deserializer.
-                (SerdeError.invalidLength(count + remaining, ExpectedInSeq(count))).raise()
-            }
+    fun end(): SerdeResult<Unit> {
+        val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
+        return if (remaining == 0) {
+            SerdeResult.success(Unit)
+        } else {
+            // First argument is the number of elements in the data, second argument is the
+            // number of elements expected by the deserializer.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
         }
+    }
 
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = visitor.visitSeq(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
@@ -1077,17 +1056,13 @@ private class SeqDeserializer(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
-            val next = if (iter.hasNext()) iter.next() else null
-            if (next == null) {
-                SeqElement.None
-            } else {
-                count += 1
-                SeqElement.Some(seed.deserialize(ContentDeserializer.new(next)).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        if (!iter.hasNext()) return SerdeResult.success(SeqElement.None)
+        val next = iter.next()
+        remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
+        count += 1
+        return seed.deserialize(ContentDeserializer.new(next)).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? = remainingHint
 }
@@ -1117,15 +1092,16 @@ private class MapDeserializer(
             MapDeserializer(content.iterator()).also { it.remainingHint = content.size }
     }
 
-    fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining != 0) {
-                // First argument is the number of elements in the data, second argument is the
-                // number of elements expected by the deserializer.
-                (SerdeError.invalidLength(count + remaining, ExpectedInMap(count))).raise()
-            }
+    fun end(): SerdeResult<Unit> {
+        val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
+        return if (remaining == 0) {
+            SerdeResult.success(Unit)
+        } else {
+            // First argument is the number of elements in the data, second argument is the
+            // number of elements expected by the deserializer.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
         }
+    }
 
     private fun nextPair(): ContentMapEntry? =
         if (iter.hasNext()) {
@@ -1137,18 +1113,10 @@ private class MapDeserializer(
         }
 
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = visitor.visitMap(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitMap(this).flatMap { decoded -> end().map { decoded } }
 
     override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = visitor.visitSeq(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
 
     override fun <V> deserializeTuple(
         len: Int,
@@ -1225,16 +1193,11 @@ private class MapDeserializer(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> =
-        serdeCatching {
-            val pair = nextPair()
-            if (pair == null) {
-                null
-            } else {
-                value = pair.value
-                seed.deserialize(ContentDeserializer.new(pair.key)).getOrThrow()
-            }
-        }
+    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> {
+        val pair = nextPair() ?: return SerdeResult.success(null)
+        value = pair.value
+        return seed.deserialize(ContentDeserializer.new(pair.key))
+    }
 
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> {
         val pending = value
@@ -1248,27 +1211,19 @@ private class MapDeserializer(
     override fun <K, V> nextEntrySeed(
         keySeed: DeserializeSeed<K>,
         valueSeed: DeserializeSeed<V>,
-    ): SerdeResult<Pair<K, V>?> =
-        serdeCatching {
-            val pair = nextPair()
-            if (pair == null) {
-                null
-            } else {
-                val key = keySeed.deserialize(ContentDeserializer.new(pair.key)).getOrThrow()
-                val value = valueSeed.deserialize(ContentDeserializer.new(pair.value)).getOrThrow()
-                key to value
+    ): SerdeResult<Pair<K, V>?> {
+        val pair = nextPair() ?: return SerdeResult.success(null)
+        return keySeed.deserialize(ContentDeserializer.new(pair.key)).flatMap { key ->
+            valueSeed.deserialize(ContentDeserializer.new(pair.value)).map { entryValue ->
+                key to entryValue
             }
         }
+    }
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            val pair = nextPair()
-            if (pair == null) {
-                SeqElement.None
-            } else {
-                SeqElement.Some(seed.deserialize(PairDeserializer(pair.key, pair.value)).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        val pair = nextPair() ?: return SerdeResult.success(SeqElement.None)
+        return seed.deserialize(PairDeserializer(pair.key, pair.value)).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? = remainingHint
 }
@@ -1279,19 +1234,19 @@ private class PairDeserializer(
 ) : Deserializer {
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeSeq(visitor)
 
-    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val pairVisitor = PairVisitor(key, value)
-            val pair = visitor.visitSeq(pairVisitor).getOrThrow()
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> {
+        val pairVisitor = PairVisitor(key, value)
+        return visitor.visitSeq(pairVisitor).flatMap { pair ->
             if (!pairVisitor.hasRemaining()) {
-                pair
+                SerdeResult.success(pair)
             } else {
                 val remaining = pairVisitor.sizeHint() ?: 0
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                (SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining))).raise()
+                SerdeResult.failure(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
             }
         }
+    }
 
     override fun <V> deserializeTuple(
         len: Int,
@@ -1385,20 +1340,14 @@ private class PairVisitor(
 
     fun hasRemaining(): Boolean = keySlot != null || valueSlot != null
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            val next =
-                when {
-                    keySlot != null -> keySlot.also { keySlot = null }
-                    valueSlot != null -> valueSlot.also { valueSlot = null }
-                    else -> null
-                }
-            if (next == null) {
-                SeqElement.None
-            } else {
-                SeqElement.Some(seed.deserialize(ContentDeserializer.new(next)).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        val next = when {
+            keySlot != null -> keySlot.also { keySlot = null }
+            valueSlot != null -> valueSlot.also { valueSlot = null }
+            else -> null
+        } ?: return SerdeResult.success(SeqElement.None)
+        return seed.deserialize(ContentDeserializer.new(next)).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? =
         when {
@@ -1831,19 +1780,15 @@ internal class FlatMapDeserializer(
         name: String,
         variants: List<String>,
         visitor: Visitor<V>,
-    ): SerdeResult<V> =
-        serdeCatching {
-            for (index in 0 until buffer.size) {
-                val found = flatMapTakeEntry(buffer, index, variants)
-                if (found != null) {
-                    val key = found.key
-                    val value = found.value
-                    return@serdeCatching visitor.visitEnum(EnumDeserializer.new(key, value)).getOrThrow()
-                }
+    ): SerdeResult<V> {
+        for (index in 0 until buffer.size) {
+            val found = flatMapTakeEntry(buffer, index, variants)
+            if (found != null) {
+                return visitor.visitEnum(EnumDeserializer.new(found.key, found.value))
             }
-
-            (SerdeError.custom("no variant of enum $name found in flattened data")).raise()
         }
+        return SerdeResult.failure(SerdeError.custom("no variant of enum $name found in flattened data"))
+    }
 
     override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> =
         visitor.visitMap(
@@ -1941,26 +1886,25 @@ private class FlatMapAccess(
     private var currentIndex = 0
     private var pendingContent: Content? = null
 
-    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> =
-        serdeCatching {
-            while (currentIndex < buffer.size) {
-                val entry = buffer.get(currentIndex++) ?: continue
-                // Do not take(), instead borrow this entry. The internally tagged
-                // enum does its own buffering so we can't tell whether this entry
-                // is going to be consumed. Borrowing here leaves the entry
-                // available for later flattened fields.
-                pendingContent = entry.value
-                return@serdeCatching seed.deserialize(ContentRefDeserializer.new(entry.key)).getOrThrow()
-            }
-            null
+    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> {
+        while (currentIndex < buffer.size) {
+            val entry = buffer.get(currentIndex++) ?: continue
+            // Do not take(), instead borrow this entry. The internally tagged
+            // enum does its own buffering so we can't tell whether this entry
+            // is going to be consumed. Borrowing here leaves the entry
+            // available for later flattened fields.
+            pendingContent = entry.value
+            return seed.deserialize(ContentRefDeserializer.new(entry.key))
         }
+        return SerdeResult.success(null)
+    }
 
-    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = pendingContent ?: (SerdeError.custom("value is missing")).raise()
-            pendingContent = null
-            seed.deserialize(ContentRefDeserializer.new(value)).getOrThrow()
-        }
+    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> {
+        val value = pendingContent ?: return SerdeResult.failure(SerdeError.custom("value is missing"))
+        pendingContent = null
+        return seed.deserialize(ContentRefDeserializer.new(value))
+    }
+
 }
 
 private class FlatStructAccess(
@@ -1970,27 +1914,24 @@ private class FlatStructAccess(
     private var currentIndex = 0
     private var pendingContent: Content? = null
 
-    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> =
-        serdeCatching {
-            while (currentIndex < buffer.size) {
-                val index = currentIndex++
-                val found = flatMapTakeEntry(buffer, index, fields)
-                if (found != null) {
-                    val key = found.key
-                    val value = found.value
-                    pendingContent = value
-                    return@serdeCatching seed.deserialize(ContentDeserializer.new(key)).getOrThrow()
-                }
+    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> {
+        while (currentIndex < buffer.size) {
+            val index = currentIndex++
+            val found = flatMapTakeEntry(buffer, index, fields)
+            if (found != null) {
+                pendingContent = found.value
+                return seed.deserialize(ContentDeserializer.new(found.key))
             }
-            null
         }
+        return SerdeResult.success(null)
+    }
 
-    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = pendingContent ?: (SerdeError.custom("value is missing")).raise()
-            pendingContent = null
-            seed.deserialize(ContentDeserializer.new(value)).getOrThrow()
-        }
+    override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> {
+        val value = pendingContent ?: return SerdeResult.failure(SerdeError.custom("value is missing"))
+        pendingContent = null
+        return seed.deserialize(ContentDeserializer.new(value))
+    }
+
 }
 
 /**
@@ -2049,21 +1990,13 @@ internal class AdjacentlyTaggedEnumVariantVisitor<F>(
 
     override fun <A> visitEnum(access: A): SerdeResult<F>
         where A : EnumAccess =
-        serdeCatching {
-            val (variant, variantAccess) =
-                access
-                    .variantSeed(
-                        object : DeserializeSeed<F> {
-                            override fun <D> deserialize(
-                                deserializer: D,
-                            ): SerdeResult<F>
-                            where D : Deserializer =
-                                deserializeFieldsEnum.deserialize(deserializer)
-                        },
-                    ).getOrThrow()
-            variantAccess.unitVariant().getOrThrow()
-            variant
+        access.variantSeed(object : DeserializeSeed<F> {
+            override fun <D> deserialize(deserializer: D): SerdeResult<F>
+                where D : Deserializer = deserializeFieldsEnum.deserialize(deserializer)
+        }).flatMap { (variant, variantAccess) ->
+            variantAccess.unitVariant().map { variant }
         }
+
 }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -2256,42 +2189,27 @@ internal class ContentRefDeserializer(
         name: String,
         variants: List<String>,
         visitor: Visitor<V>,
-    ): SerdeResult<V> =
-        serdeCatching {
-            val (variant, value) =
-                when (content) {
-                    is Content.Map -> {
-                        val iter = content.value.iterator()
-                        val first =
-                            iter.nextOrNull()
-                                ?: SerdeError
-                                    .invalidValue(
-                                        Unexpected.Map,
-                                        Expected { "map with a single key" },
-                                    ).raise()
-                        if (iter.hasNext()) {
-                            SerdeError
-                                .invalidValue(
-                                    Unexpected.Map,
-                                    Expected { "map with a single key" },
-                                ).raise()
-                        }
-                        // Enums are encoded in JSON as objects with a single key-value pair.
-                        first.key to first.value
-                    }
-
-                    is Content.String -> content to null
-                    is Content.Str -> content to null
-                    else ->
-                        SerdeError
-                            .invalidType(
-                                contentUnexpected(content),
-                                Expected { "string or map" },
-                            ).raise()
-                }
-
-            visitor.visitEnum(EnumRefDeserializer(variant, value)).getOrThrow()
+    ): SerdeResult<V> {
+        val (variant, value) = when (content) {
+            is Content.Map -> {
+                val iter = content.value.iterator()
+                val first = iter.nextOrNull() ?: return SerdeResult.failure(
+                    SerdeError.invalidValue(Unexpected.Map, Expected { "map with a single key" }),
+                )
+                if (iter.hasNext()) return SerdeResult.failure(
+                    SerdeError.invalidValue(Unexpected.Map, Expected { "map with a single key" }),
+                )
+                // Enums are encoded in JSON as objects with a single key-value pair.
+                first.key to first.value
+            }
+            is Content.String -> content to null
+            is Content.Str -> content to null
+            else -> return SerdeResult.failure(
+                SerdeError.invalidType(contentUnexpected(content), Expected { "string or map" }),
+            )
         }
+        return visitor.visitEnum(EnumRefDeserializer(variant, value))
+    }
 
     override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> =
         when (content) {
@@ -2310,24 +2228,22 @@ internal class ContentRefDeserializer(
 private fun <V> visitContentSeqRef(
     content: List<Content>,
     visitor: Visitor<V>,
-): SerdeResult<V> =
-    serdeCatching {
-        val seqVisitor = SeqRefDeserializer.new(content)
-        val value = visitor.visitSeq(seqVisitor).getOrThrow()
-        seqVisitor.end().getOrThrow()
-        value
+): SerdeResult<V> {
+    val seqVisitor = SeqRefDeserializer.new(content)
+    return visitor.visitSeq(seqVisitor).flatMap { value ->
+        seqVisitor.end().map { value }
     }
+}
 
 private fun <V> visitContentMapRef(
     content: List<ContentMapEntry>,
     visitor: Visitor<V>,
-): SerdeResult<V> =
-    serdeCatching {
-        val mapVisitor = MapRefDeserializer.new(content)
-        val value = visitor.visitMap(mapVisitor).getOrThrow()
-        mapVisitor.end().getOrThrow()
-        value
+): SerdeResult<V> {
+    val mapVisitor = MapRefDeserializer.new(content)
+    return visitor.visitMap(mapVisitor).flatMap { value ->
+        mapVisitor.end().map { value }
     }
+}
 
 private class SeqRefDeserializer(
     private val iter: Iterator<Content>,
@@ -2343,22 +2259,19 @@ private class SeqRefDeserializer(
             }
     }
 
-    fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining != 0) {
-                // First argument is the number of elements in the data, second argument is the
-                // number of elements expected by the deserializer.
-                (SerdeError.invalidLength(count + remaining, ExpectedInSeq(count))).raise()
-            }
+    fun end(): SerdeResult<Unit> {
+        val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
+        return if (remaining == 0) {
+            SerdeResult.success(Unit)
+        } else {
+            // First argument is the number of elements in the data, second argument is the
+            // number of elements expected by the deserializer.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
         }
+    }
 
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = visitor.visitSeq(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
 
     override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
@@ -2437,17 +2350,13 @@ private class SeqRefDeserializer(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
-            val next = if (iter.hasNext()) iter.next() else null
-            if (next == null) {
-                SeqElement.None
-            } else {
-                count += 1
-                SeqElement.Some(seed.deserialize(ContentRefDeserializer.new(next)).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        if (!iter.hasNext()) return SerdeResult.success(SeqElement.None)
+        val next = iter.next()
+        remainingHint = remainingHint?.let { previousHint -> maxOf(0, previousHint - 1) }
+        count += 1
+        return seed.deserialize(ContentRefDeserializer.new(next)).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? = remainingHint
 }
@@ -2466,15 +2375,16 @@ private class MapRefDeserializer(
             MapRefDeserializer(content.iterator()).also { it.remainingHint = content.size }
     }
 
-    fun end(): SerdeResult<Unit> =
-        serdeCatching {
-            val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
-            if (remaining != 0) {
-                // First argument is the number of elements in the data, second argument is the
-                // number of elements expected by the deserializer.
-                (SerdeError.invalidLength(count + remaining, ExpectedInMap(count))).raise()
-            }
+    fun end(): SerdeResult<Unit> {
+        val remaining = if (iter.hasNext()) iter.asSequence().count() else 0
+        return if (remaining == 0) {
+            SerdeResult.success(Unit)
+        } else {
+            // First argument is the number of elements in the data, second argument is the
+            // number of elements expected by the deserializer.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
         }
+    }
 
     private fun nextPair(): ContentMapEntry? =
         if (iter.hasNext()) {
@@ -2486,18 +2396,10 @@ private class MapRefDeserializer(
         }
 
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = visitor.visitMap(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitMap(this).flatMap { decoded -> end().map { decoded } }
 
     override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val value = visitor.visitSeq(this).getOrThrow()
-            end().getOrThrow()
-            value
-        }
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
 
     override fun <V> deserializeTuple(
         len: Int,
@@ -2574,16 +2476,11 @@ private class MapRefDeserializer(
 
     override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
 
-    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> =
-        serdeCatching {
-            val pair = nextPair()
-            if (pair == null) {
-                null
-            } else {
-                value = pair.value
-                seed.deserialize(ContentRefDeserializer.new(pair.key)).getOrThrow()
-            }
-        }
+    override fun <K> nextKeySeed(seed: DeserializeSeed<K>): SerdeResult<K?> {
+        val pair = nextPair() ?: return SerdeResult.success(null)
+        value = pair.value
+        return seed.deserialize(ContentRefDeserializer.new(pair.key))
+    }
 
     override fun <V> nextValueSeed(seed: DeserializeSeed<V>): SerdeResult<V> {
         val pending = value
@@ -2597,27 +2494,19 @@ private class MapRefDeserializer(
     override fun <K, V> nextEntrySeed(
         keySeed: DeserializeSeed<K>,
         valueSeed: DeserializeSeed<V>,
-    ): SerdeResult<Pair<K, V>?> =
-        serdeCatching {
-            val pair = nextPair()
-            if (pair == null) {
-                null
-            } else {
-                val key = keySeed.deserialize(ContentRefDeserializer.new(pair.key)).getOrThrow()
-                val value = valueSeed.deserialize(ContentRefDeserializer.new(pair.value)).getOrThrow()
-                key to value
+    ): SerdeResult<Pair<K, V>?> {
+        val pair = nextPair() ?: return SerdeResult.success(null)
+        return keySeed.deserialize(ContentRefDeserializer.new(pair.key)).flatMap { key ->
+            valueSeed.deserialize(ContentRefDeserializer.new(pair.value)).map { entryValue ->
+                key to entryValue
             }
         }
+    }
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            val pair = nextPair()
-            if (pair == null) {
-                SeqElement.None
-            } else {
-                SeqElement.Some(seed.deserialize(PairRefDeserializer(pair.key, pair.value)).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        val pair = nextPair() ?: return SerdeResult.success(SeqElement.None)
+        return seed.deserialize(PairRefDeserializer(pair.key, pair.value)).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? = remainingHint
 }
@@ -2628,19 +2517,19 @@ private class PairRefDeserializer(
 ) : Deserializer {
     override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = deserializeSeq(visitor)
 
-    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> =
-        serdeCatching {
-            val pairVisitor = PairRefVisitor(key, value)
-            val pair = visitor.visitSeq(pairVisitor).getOrThrow()
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> {
+        val pairVisitor = PairRefVisitor(key, value)
+        return visitor.visitSeq(pairVisitor).flatMap { pair ->
             if (!pairVisitor.hasRemaining()) {
-                pair
+                SerdeResult.success(pair)
             } else {
                 val remaining = pairVisitor.sizeHint() ?: 0
                 // First argument is the number of elements in the data, second argument is the
                 // number of elements expected by the deserializer.
-                (SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining))).raise()
+                SerdeResult.failure(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
             }
         }
+    }
 
     override fun <V> deserializeTuple(
         len: Int,
@@ -2734,20 +2623,14 @@ private class PairRefVisitor(
 
     fun hasRemaining(): Boolean = keySlot != null || valueSlot != null
 
-    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> =
-        serdeCatching {
-            val next =
-                when {
-                    keySlot != null -> keySlot.also { keySlot = null }
-                    valueSlot != null -> valueSlot.also { valueSlot = null }
-                    else -> null
-                }
-            if (next == null) {
-                SeqElement.None
-            } else {
-                SeqElement.Some(seed.deserialize(ContentRefDeserializer.new(next)).getOrThrow())
-            }
-        }
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        val next = when {
+            keySlot != null -> keySlot.also { keySlot = null }
+            valueSlot != null -> valueSlot.also { valueSlot = null }
+            else -> null
+        } ?: return SerdeResult.success(SeqElement.None)
+        return seed.deserialize(ContentRefDeserializer.new(next)).map { SeqElement.Some(it) }
+    }
 
     override fun sizeHint(): Int? =
         when {
@@ -2856,12 +2739,16 @@ internal class InternallyTaggedUnitVisitor(
         where A : SeqAccess = SerdeResult.success(Unit)
 
     override fun <A> visitMap(access: A): SerdeResult<Unit>
-        where A : MapAccess =
-        serdeCatching {
-            while (access.nextEntrySeed(IgnoredAny, IgnoredAny).getOrThrow() != null) {
-                // discard entries
+        where A : MapAccess {
+        while (true) {
+            when (val result = access.nextEntrySeed(IgnoredAny, IgnoredAny)) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> if (result.value == null) return SerdeResult.success(Unit)
             }
+            // discard entries
         }
+    }
+
 }
 
 /**

@@ -227,7 +227,7 @@ class TestSerJvmTest {
     fun testEnum() = runDerivedSerRustTest("test_enum")
 
     // test_box: Rust Box ownership and transparent dereference serialization have no Kotlin counterpart.
-    // test_boxed_slice: Rust boxed dynamically sized slice ownership has no Kotlin counterpart.
+    // test_boxed_slice: the source uses Box<[i32; 3]> and Tuple tokens; its ownership adapter is not yet ported.
 
     @Test
     fun testDuration() {
@@ -299,9 +299,9 @@ class TestSerJvmTest {
         }
     }
 
-    // test_path: Rust Path preserves platform path semantics not represented by a Kotlin String.
-    // test_path_buf: Rust owned PathBuf semantics have no common Kotlin filesystem-path counterpart.
-    // test_cstring: Rust CString NUL-terminated byte ownership has no common Kotlin counterpart.
+    // testPath valid-text assertions run in common TestSerTest.
+    // testPathBuf valid-text assertions run in common TestSerTest.
+    // testCstring byte-serialization assertions run in common TestSerTest.
     // test_cstr: Rust borrowed CStr lifetime and NUL-terminated bytes have no common Kotlin counterpart.
     // test_rc: Rust single-threaded reference-counted ownership has no Kotlin counterpart.
     // test_rc_weak_some: Rust Rc weak-upgrade liveness semantics have no Kotlin counterpart.
@@ -397,7 +397,7 @@ class TestSerJvmTest {
         assertKotlinSerTokens(ipv6Tokens) { SocketAddressV6(ipv6, 1234u).compact().serialize(it) }
     }
 
-    // test_never_result: Rust never type inhabitation and Result<u8, !> have no Kotlin semantic equivalent.
+    // test_never_result now runs in common TestSerTest with ResultValue<UByte, Nothing> and typed serialization.
     // test_cannot_serialize_paths: Rust Unix paths can contain invalid UTF-8 bytes, while Kotlin String cannot.
     // test_cannot_serialize_mutably_borrowed_ref_cell: Rust RefCell runtime borrow failure has no Kotlin equivalent.
 

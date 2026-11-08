@@ -2,10 +2,11 @@
 package io.github.kotlinmania.serdecore.ser
 
 import io.github.kotlinmania.serde.SerdeError
-import io.github.kotlinmania.serde.SerdeException
 import io.github.kotlinmania.serde.SerdeResult
-import io.github.kotlinmania.serde.serdeCatching
 import io.github.kotlinmania.serdecore.de.BoundValue
+import io.github.kotlinmania.serdecore.de.CStringValue
+import io.github.kotlinmania.serdecore.de.PathValue
+import io.github.kotlinmania.serdecore.de.OsStringValue
 import io.github.kotlinmania.serdecore.de.IpAddress
 import io.github.kotlinmania.serdecore.de.Ipv4Address
 import io.github.kotlinmania.serdecore.de.Ipv6Address
@@ -17,6 +18,8 @@ import io.github.kotlinmania.serdecore.de.ResultValue
 import io.github.kotlinmania.serdecore.de.SocketAddress
 import io.github.kotlinmania.serdecore.de.SocketAddressV4
 import io.github.kotlinmania.serdecore.de.SocketAddressV6
+import io.github.kotlinmania.serdecore.priv.IteratorWithSizeHint
+import kotlin.text.CharacterCodingException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -61,6 +64,11 @@ class FormatArguments(
 
 fun <Ok> ByteArray.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeBytes(this)
 
+// Serialize for CString forwards the bytes without the C string terminator.
+internal fun <Ok> CStringValue.serializeCString(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serializer.serializeBytes(bytes)
+
+
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok> Unit.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializer.serializeUnit()
@@ -81,129 +89,160 @@ data object PhantomData : Serialize {
 // //////////////////////////////////////////////////////////////////////////////
 
 internal fun <Ok> serializeEmptyArray(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        serializer
-            .serializeTuple(0)
-            .getOrThrow()
-            .end()
-            .getOrThrow()
-    }
+    serializer.serializeTuple(0).flatMap { it.end() }
 
 fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        val tuple = serializer.serializeTuple(size).getOrThrow()
-        for (element in this) {
-            tuple.serializeElement(asSerialize(element)).getOrThrow()
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> Array<T>.serialize(serializer: Serializer<Ok>, elementSerializer: Serialize.For<T>): SerdeResult<Ok> =
+    serializer.serializeTuple(size).flatMap { tuple ->
+        for (value in this) {
+            val result = tuple.serializeElement(elementSerializer.bind(value))
+            if (result is SerdeResult.Failure) return@flatMap result
         }
-        tuple.end().getOrThrow()
+        tuple.end()
     }
 
 fun <Ok, T> Iterable<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serializer.collectSeq(this.map(::asSerialize))
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> Iterable<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+    serializer.collectSeq(mapForSerialization(this, element::bind))
 
 // //////////////////////////////////////////////////////////////////////////////
 
+fun <Ok, K, V> Map<K, V>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serialize(serializer, DynamicSerialize, DynamicSerialize)
+
 fun <Ok, K, V> Map<K, V>.serialize(
     serializer: Serializer<Ok>,
+    key: Serialize.For<K>,
+    value: Serialize.For<V>,
 ): SerdeResult<Ok> =
-    serializer.collectMap(this.entries.asIterable().map { asSerialize(it.key) to asSerialize(it.value) })
+    serializer.collectMap(mapForSerialization(entries) { key.bind(it.key) to value.bind(it.value) })
 
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        val state = serializer.serializeStruct("Range", 2).getOrThrow()
-        state.serializeField("start", asSerialize(start)).getOrThrow()
-        state.serializeField("end", asSerialize(end)).getOrThrow()
-        state.end().getOrThrow()
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+    serializer.serializeStruct("Range", 2).flatMap { state ->
+        state.serializeField("start", element.bind(start)).flatMap {
+            state.serializeField("end", element.bind(end))
+        }.flatMap { state.end() }
     }
 
 fun <Ok, T> RangeFromValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        val state = serializer.serializeStruct("RangeFrom", 1).getOrThrow()
-        state.serializeField("start", asSerialize(start)).getOrThrow()
-        state.end().getOrThrow()
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> RangeFromValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+    serializer.serializeStruct("RangeFrom", 1).flatMap { state ->
+        state.serializeField("start", element.bind(start)).flatMap { state.end() }
     }
 
 fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        val state = serializer.serializeStruct("RangeInclusive", 2).getOrThrow()
-        state.serializeField("start", asSerialize(start)).getOrThrow()
-        state.serializeField("end", asSerialize(end)).getOrThrow()
-        state.end().getOrThrow()
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+    serializer.serializeStruct("RangeInclusive", 2).flatMap { state ->
+        state.serializeField("start", element.bind(start)).flatMap {
+            state.serializeField("end", element.bind(end))
+        }.flatMap { state.end() }
     }
 
 fun <Ok, T> RangeToValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        val state = serializer.serializeStruct("RangeTo", 1).getOrThrow()
-        state.serializeField("end", asSerialize(end)).getOrThrow()
-        state.end().getOrThrow()
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> RangeToValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+    serializer.serializeStruct("RangeTo", 1).flatMap { state ->
+        state.serializeField("end", element.bind(end)).flatMap { state.end() }
     }
 
 fun <Ok, T> BoundValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serialize(serializer, DynamicSerialize)
+
+fun <Ok, T> BoundValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
     when (this) {
         BoundValue.Unbounded -> serializer.serializeUnitVariant("Bound", 0u, "Unbounded")
-        is BoundValue.Included -> serializer.serializeNewtypeVariant("Bound", 1u, "Included", asSerialize(value))
-        is BoundValue.Excluded -> serializer.serializeNewtypeVariant("Bound", 2u, "Excluded", asSerialize(value))
+        is BoundValue.Included -> serializer.serializeNewtypeVariant("Bound", 1u, "Included", element.bind(value))
+        is BoundValue.Excluded -> serializer.serializeNewtypeVariant("Bound", 2u, "Excluded", element.bind(value))
     }
 
 // //////////////////////////////////////////////////////////////////////////////
 
+fun <Ok, T0, T1> Pair<T0, T1>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serialize(serializer, DynamicSerialize, DynamicSerialize)
+
 fun <Ok, T0, T1> Pair<T0, T1>.serialize(
     serializer: Serializer<Ok>,
+    firstSerializer: Serialize.For<T0>,
+    secondSerializer: Serialize.For<T1>,
 ): SerdeResult<Ok> =
-    serdeCatching {
-        val tuple = serializer.serializeTuple(2).getOrThrow()
-        tuple.serializeElement(asSerialize(first)).getOrThrow()
-        tuple.serializeElement(asSerialize(second)).getOrThrow()
-        tuple.end().getOrThrow()
+    serializer.serializeTuple(2).flatMap { tuple ->
+        tuple.serializeElement(firstSerializer.bind(first)).flatMap {
+            tuple.serializeElement(secondSerializer.bind(second))
+        }.flatMap { tuple.end() }
     }
+
+fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serialize(serializer, DynamicSerialize, DynamicSerialize, DynamicSerialize)
 
 fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(
     serializer: Serializer<Ok>,
+    firstSerializer: Serialize.For<T0>,
+    secondSerializer: Serialize.For<T1>,
+    thirdSerializer: Serialize.For<T2>,
 ): SerdeResult<Ok> =
-    serdeCatching {
-        val tuple = serializer.serializeTuple(3).getOrThrow()
-        tuple.serializeElement(asSerialize(first)).getOrThrow()
-        tuple.serializeElement(asSerialize(second)).getOrThrow()
-        tuple.serializeElement(asSerialize(third)).getOrThrow()
-        tuple.end().getOrThrow()
+    serializer.serializeTuple(3).flatMap { tuple ->
+        tuple.serializeElement(firstSerializer.bind(first)).flatMap {
+            tuple.serializeElement(secondSerializer.bind(second)).flatMap {
+                tuple.serializeElement(thirdSerializer.bind(third))
+            }
+        }.flatMap { tuple.end() }
     }
 
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok, T, E> ResultValue<T, E>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    serialize(serializer, DynamicSerialize, DynamicSerialize)
+
+fun <Ok, T, E> ResultValue<T, E>.serialize(
+    serializer: Serializer<Ok>,
+    ok: Serialize.For<T>,
+    error: Serialize.For<E>,
+): SerdeResult<Ok> =
     when (this) {
-        is ResultValue.Ok -> serializer.serializeNewtypeVariant("Result", 0u, "Ok", asSerialize(value))
-        is ResultValue.Err -> serializer.serializeNewtypeVariant("Result", 1u, "Err", asSerialize(error))
+        is ResultValue.Ok -> serializer.serializeNewtypeVariant("Result", 0u, "Ok", ok.bind(value))
+        is ResultValue.Err -> serializer.serializeNewtypeVariant("Result", 1u, "Err", error.bind(this.error))
     }
 
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok> Duration.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        if (this < Duration.ZERO || this == Duration.INFINITE) {
-            throw SerdeException(SerdeError.custom("duration must be finite and non-negative"))
-        }
+    if (this < Duration.ZERO || this == Duration.INFINITE) {
+        SerdeResult.failure(SerdeError.custom("duration must be finite and non-negative"))
+    } else {
         val secs = inWholeSeconds
         val nanos = (this - secs.seconds).inWholeNanoseconds
-        val state = serializer.serializeStruct("Duration", 2).getOrThrow()
-        state.serializeField("secs", ULongSerialize(secs.toULong())).getOrThrow()
-        state.serializeField("nanos", UIntSerialize(nanos.toUInt())).getOrThrow()
-        state.end().getOrThrow()
+        serializer.serializeStruct("Duration", 2).flatMap { state ->
+            state.serializeField("secs", ULongSerialize(secs.toULong())).flatMap {
+                state.serializeField("nanos", UIntSerialize(nanos.toUInt()))
+            }.flatMap { state.end() }
+        }
     }
 
 // //////////////////////////////////////////////////////////////////////////////
 
 fun <Ok> Instant.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-    serdeCatching {
-        if (epochSeconds < 0) {
-            throw SerdeException(SerdeError.custom("SystemTime must be later than UNIX_EPOCH"))
+    if (epochSeconds < 0) {
+        SerdeResult.failure(SerdeError.custom("SystemTime must be later than UNIX_EPOCH"))
+    } else {
+        serializer.serializeStruct("SystemTime", 2).flatMap { state ->
+            state.serializeField("secs_since_epoch", ULongSerialize(epochSeconds.toULong())).flatMap {
+                state.serializeField("nanos_since_epoch", UIntSerialize(nanosecondsOfSecond.toUInt()))
+            }.flatMap { state.end() }
         }
-        val state = serializer.serializeStruct("SystemTime", 2).getOrThrow()
-        state.serializeField("secs_since_epoch", ULongSerialize(epochSeconds.toULong())).getOrThrow()
-        state.serializeField("nanos_since_epoch", UIntSerialize(nanosecondsOfSecond.toUInt())).getOrThrow()
-        state.end().getOrThrow()
     }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -306,12 +345,12 @@ private fun <Ok> serializeOctets(
     octets: List<UByte>,
     serializer: Serializer<Ok>,
 ): SerdeResult<Ok> =
-    serdeCatching {
-        val tuple = serializer.serializeTuple(octets.size).getOrThrow()
+    serializer.serializeTuple(octets.size).flatMap { tuple ->
         for (octet in octets) {
-            tuple.serializeElement(UByteSerialize(octet)).getOrThrow()
+            val result = tuple.serializeElement(UByteSerialize(octet))
+            if (result is SerdeResult.Failure) return@flatMap result
         }
-        tuple.end().getOrThrow()
+        tuple.end()
     }
 
 private fun <Ok> serializeSocketAddress(
@@ -319,11 +358,10 @@ private fun <Ok> serializeSocketAddress(
     port: UShort,
     serializer: Serializer<Ok>,
 ): SerdeResult<Ok> =
-    serdeCatching {
-        val tuple = serializer.serializeTuple(2).getOrThrow()
-        tuple.serializeElement(ip).getOrThrow()
-        tuple.serializeElement(UShortSerialize(port)).getOrThrow()
-        tuple.end().getOrThrow()
+    serializer.serializeTuple(2).flatMap { tuple ->
+        tuple.serializeElement(ip).flatMap {
+            tuple.serializeElement(UShortSerialize(port))
+        }.flatMap { tuple.end() }
     }
 
 private fun formatIpv6(octets: List<UByte>): String {
@@ -361,22 +399,55 @@ private fun formatIpv6(octets: List<UByte>): String {
 
 // //////////////////////////////////////////////////////////////////////////////
 
+internal fun <Ok> PathValue.serializePath(serializer: Serializer<Ok>): SerdeResult<Ok> {
+    val text = try {
+        value.encodeToByteArray(throwOnInvalidSequence = true)
+        value
+    } catch (error: CharacterCodingException) {
+        return SerdeResult.failure(SerdeError.custom("path contains invalid UTF-8 characters"))
+    }
+    return serializer.serializeStr(text)
+}
+
+internal fun <Ok> OsStringValue.serializeOsString(serializer: Serializer<Ok>): SerdeResult<Ok> =
+    when (this) {
+        is OsStringValue.Unix -> serializer.serializeNewtypeVariant("OsString", 0u, "Unix", object : Serialize {
+            override fun <Value> serialize(serializer: Serializer<Value>): SerdeResult<Value> =
+                bytes.serialize(serializer, Serialize.U8)
+        })
+        is OsStringValue.Windows -> serializer.serializeNewtypeVariant("OsString", 1u, "Windows", object : Serialize {
+            override fun <Value> serialize(serializer: Serializer<Value>): SerdeResult<Value> =
+                wide.serialize(serializer, Serialize.U16)
+        })
+    }
+
+// //////////////////////////////////////////////////////////////////////////////
+
 data class Wrapping<T>(
     val value: T,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = asSerialize(value).serialize(serializer)
+
+    fun <Ok> serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+        element.serialize(value, serializer)
 }
 
 data class Saturating<T>(
     val value: T,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = asSerialize(value).serialize(serializer)
+
+    fun <Ok> serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+        element.serialize(value, serializer)
 }
 
 data class Reverse<T>(
     val value: T,
 ) : Serialize {
     override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = asSerialize(value).serialize(serializer)
+
+    fun <Ok> serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
+        element.serialize(value, serializer)
 }
 
 private data class ULongSerialize(
@@ -442,5 +513,38 @@ private class AnySerialize(
         }
 }
 
+// Compatibility for callers that already erased their value type. This cannot
+// recover signed/float widths on JavaScript; generic ports must pass For<T>.
+private object DynamicSerialize : Serialize.For<Any?> {
+    override fun <Ok> serialize(value: Any?, serializer: Serializer<Ok>): SerdeResult<Ok> =
+        asSerialize(value).serialize(serializer)
+}
+
 private fun asSerialize(value: Any?): Serialize =
     if (value is Serialize) value else AnySerialize(value)
+
+// Rust's borrowed collection iterators adapt one item at a time. Creating the
+// serialization wrapper must not consume the input before collectSeq/collectMap
+// has obtained its iterator and asked the serializer to begin.
+private fun <T, R> mapForSerialization(source: Iterable<T>, transform: (T) -> R): Iterable<R> =
+    Iterable {
+        val iterator = source.iterator()
+        var remaining = if (iterator !is IteratorWithSizeHint<*> && source is Collection<*>) source.size.toULong() else null
+        object : IteratorWithSizeHint<R> {
+            override fun hasNext(): Boolean = iterator.hasNext()
+            override fun next(): R {
+                val value = iterator.next()
+                remaining = remaining?.minus(1uL)
+                return transform(value)
+            }
+            override fun sizeHint(): Pair<ULong, ULong?> =
+                if (iterator is IteratorWithSizeHint<*>) {
+                    iterator.sizeHint()
+                } else if (remaining != null) {
+                    val length = requireNotNull(remaining)
+                    length to length
+                } else {
+                    0uL to null
+                }
+        }
+    }

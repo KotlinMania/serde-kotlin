@@ -40,11 +40,14 @@ interface MapAccess {
         keySeed: DeserializeSeed<K>,
         valueSeed: DeserializeSeed<V>,
     ): SerdeResult<Pair<K, V>?> =
-        nextKeySeed(keySeed).flatMap { key ->
+        // Rust's Option<K> distinguishes a present nullable K from exhaustion.
+        // Keep that tag through the legacy nullable nextKeySeed boundary by
+        // asking the original key seed for a non-null wrapper around its result.
+        nextKeySeed(PresentMapKeySeed(keySeed)).flatMap { key ->
             if (key == null) {
                 SerdeResult.success(null)
             } else {
-                nextValueSeed(valueSeed).map { value -> key to value }
+                nextValueSeed(valueSeed).map { value -> key.value to value }
             }
         }
 
@@ -65,4 +68,11 @@ interface MapAccess {
      * Returns the number of entries remaining in the map, if known.
      */
     fun sizeHint(): Int? = null
+}
+
+private class PresentMapKey<K>(val value: K)
+
+private class PresentMapKeySeed<K>(private val seed: DeserializeSeed<K>) : DeserializeSeed<PresentMapKey<K>> {
+    override fun <D> deserialize(deserializer: D): SerdeResult<PresentMapKey<K>>
+        where D : Deserializer = seed.deserialize(deserializer).map { PresentMapKey(it) }
 }

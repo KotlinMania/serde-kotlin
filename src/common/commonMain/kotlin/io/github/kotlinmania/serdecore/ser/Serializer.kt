@@ -250,7 +250,7 @@ interface Serializer<Ok> {
         where T : Serialize {
         val iterator = iter.iterator()
         val serializer =
-            when (val result = serializeSeq(iteratorLenHint(iter))) {
+            when (val result = serializeSeq(iteratorLenHint(iterator, iter))) {
                 is SerdeResult.Failure -> return result
                 is SerdeResult.Success -> result.value
             }
@@ -270,7 +270,7 @@ interface Serializer<Ok> {
         where T : Serialize {
         val iterator = iter.iterator()
         val serializer =
-            when (val result = serializeSeq(iteratorLenHint(iter))) {
+            when (val result = serializeSeq(iteratorLenHint(iterator))) {
                 is SerdeResult.Failure -> return result
                 is SerdeResult.Success -> result.value
             }
@@ -303,7 +303,7 @@ interface Serializer<Ok> {
               V : Serialize {
         val iterator = iter.iterator()
         val serializer =
-            when (val result = serializeMap(iteratorLenHint(iter))) {
+            when (val result = serializeMap(iteratorLenHint(iterator, iter))) {
                 is SerdeResult.Failure -> return result
                 is SerdeResult.Success -> result.value
             }
@@ -325,7 +325,7 @@ interface Serializer<Ok> {
               V : Serialize {
         val iterator = iter.iterator()
         val serializer =
-            when (val result = serializeMap(iteratorLenHint(iter))) {
+            when (val result = serializeMap(iteratorLenHint(iterator))) {
                 is SerdeResult.Failure -> return result
                 is SerdeResult.Success -> result.value
             }

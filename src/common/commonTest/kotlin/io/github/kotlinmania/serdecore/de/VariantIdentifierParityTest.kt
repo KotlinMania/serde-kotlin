@@ -9,9 +9,13 @@ import io.github.kotlinmania.serdecore.de.value.StrDeserializer
 import io.github.kotlinmania.serdecore.de.value.U64Deserializer
 import io.github.kotlinmania.serdecore.de.value.UnitDeserializer
 import io.github.kotlinmania.serdecore.de.value.mapDeserializer
+import io.github.kotlinmania.serdetest.Token
+import io.github.kotlinmania.serdetest.assertDeTokens
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertSame
+import kotlin.test.assertFailsWith
 
 class VariantIdentifierParityTest {
     private class Payload(
@@ -132,5 +136,64 @@ class VariantIdentifierParityTest {
             assertEquals(expected, resultDeserialize(I32Deserialize, I32Deserialize).deserialize(input).getOrThrow())
             assertEquals(listOf("newtype"), input.trace)
         }
+    }
+
+    @Test
+    fun osStringAcceptsNumericVariantIndices() {
+        assertDeTokens(
+            OsStringValue.Unix(listOf(1u, 2u, 3u)), OsStringDeserialize,
+            listOf(Token.Enum("OsString"), Token.U64(0uL), Token.Seq(3), Token.U8(1u), Token.U8(2u), Token.U8(3u), Token.SeqEnd),
+        )
+        assertDeTokens(
+            OsStringValue.Windows(listOf(1u, 2u, 3u)), OsStringDeserialize,
+            listOf(Token.Enum("OsString"), Token.U64(1uL), Token.Seq(3), Token.U16(1u), Token.U16(2u), Token.U16(3u), Token.SeqEnd),
+        )
+    }
+
+    @Test
+    fun osStringRejectsUnknownVariantBeforePayload() {
+        for (identifier in listOf(StrDeserializer.new("Other"), BytesDeserializer.new("Other".encodeToByteArray()))) {
+            val input = Input(identifier)
+            val failure = assertIs<SerdeResult.Failure>(OsStringDeserialize.deserialize(input))
+            assertEquals("unknown variant `Other`, expected `Unix` or `Windows`", failure.error.message)
+            assertEquals(emptyList(), input.trace)
+        }
+    }
+
+    @Test
+    fun osStringRejectsUnknownIndexBeforePayload() {
+        val input = Input(U64Deserializer.new(2uL))
+        val failure = assertIs<SerdeResult.Failure>(OsStringDeserialize.deserialize(input))
+        assertEquals("invalid value: integer `2`, expected `Unix` or `Windows`", failure.error.message)
+        assertEquals(emptyList(), input.trace)
+    }
+
+    @Test
+    fun osStringRejectsInvalidUtf8VariantBeforePayload() {
+        val input = Input(BytesDeserializer.new(byteArrayOf(0xff.toByte())))
+        val failure = assertIs<SerdeResult.Failure>(OsStringDeserialize.deserialize(input))
+        assertEquals("invalid value: byte array, expected `Unix` or `Windows`", failure.error.message)
+        assertEquals(emptyList(), input.trace)
+    }
+
+    @Test
+    fun osStringIdentifierPanicPropagatesUnchanged() {
+        val panic = IllegalStateException("identifier panic")
+        val input = Input(object : Deserializer by UnitDeserializer.new() {
+            override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = throw panic
+        })
+        assertSame(panic, assertFailsWith<IllegalStateException> { OsStringDeserialize.deserialize(input) })
+        assertEquals(emptyList(), input.trace)
+    }
+
+    @Test
+    fun osStringIdentifierErrorPreservesIdentity() {
+        val error = SerdeError("identifier error")
+        val input = Input(object : Deserializer by UnitDeserializer.new() {
+            override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = SerdeResult.failure(error)
+        })
+        val failure = assertIs<SerdeResult.Failure>(OsStringDeserialize.deserialize(input))
+        assertSame(error, failure.error)
+        assertEquals(emptyList(), input.trace)
     }
 }

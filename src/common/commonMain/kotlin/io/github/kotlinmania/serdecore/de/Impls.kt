@@ -10,6 +10,9 @@ import io.github.kotlinmania.serdecore.priv.fromUtf8LossyNoAlloc
 import io.github.kotlinmania.serdecore.ser.Serialize
 import io.github.kotlinmania.serdecore.ser.Serializer
 import io.github.kotlinmania.serdecore.ser.serializeNetwork
+import io.github.kotlinmania.serdecore.ser.serializeCString
+import io.github.kotlinmania.serdecore.ser.serializePath
+import io.github.kotlinmania.serdecore.ser.serializeOsString
 import kotlin.text.CharacterCodingException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
@@ -595,7 +598,9 @@ data object BorrowedBytesDeserialize : Deserialize<ByteArray> {
 
 class CStringValue(
     val bytes: ByteArray,
-) {
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializeCString(serializer)
+
     override fun equals(other: Any?): Boolean = other is CStringValue && bytes.contentEquals(other.bytes)
 
     override fun hashCode(): Int = bytes.contentHashCode()
@@ -607,25 +612,31 @@ private data object CStringVisitor : Visitor<CStringValue> {
     override fun expecting(): String = "byte array"
 
     override fun <A> visitSeq(access: A): SerdeResult<CStringValue>
-        where A : SeqAccess =
-        serdeCatching {
-            val values = mutableListOf<Byte>()
-            while (true) {
-                when (val value = access.nextElementSeed(SeedFromDeserialize(U8Deserialize)).getOrThrow()) {
-                    is SeqElement.Some -> values += value.value.toByte()
-                    SeqElement.None -> break
+        where A : SeqAccess {
+        val hint = access.sizeHint()
+        if (hint != null && hint < 0) return SerdeResult.failure(SerdeError.custom("A Rust size hint cannot be negative"))
+        // Each element occupies one byte.
+        val capacity = io.github.kotlinmania.serdecore.priv.cautious(hint?.toULong(), 1uL).toInt()
+        val values = ArrayList<Byte>(capacity)
+        while (true) {
+            when (val result = access.nextElementSeed(SeedFromDeserialize(U8Deserialize))) {
+                is SerdeResult.Failure -> return result
+                is SerdeResult.Success -> when (val value = result.value) {
+                    is SeqElement.Some -> values.add(value.value.toByte())
+                    SeqElement.None -> return cStringFromBytes(values.toByteArray())
                 }
             }
-            cStringFromBytes(values.toByteArray())
         }
+    }
 
-    override fun visitBytes(v: ByteArray): SerdeResult<CStringValue> = serdeCatching { cStringFromBytes(v) }
+    override fun visitBytes(v: ByteArray): SerdeResult<CStringValue> = cStringFromBytes(v)
 
-    override fun visitByteBuf(v: ByteArray): SerdeResult<CStringValue> = visitBytes(v)
+    override fun visitByteBuf(v: ByteArray): SerdeResult<CStringValue> = cStringFromBytes(v)
 
-    override fun visitStr(v: String): SerdeResult<CStringValue> = serdeCatching { cStringFromBytes(v.encodeToByteArray()) }
+    override fun visitStr(v: String): SerdeResult<CStringValue> = cStringFromBytes(v.encodeToByteArray())
 
-    override fun visitString(v: String): SerdeResult<CStringValue> = visitStr(v)
+    override fun visitString(v: String): SerdeResult<CStringValue> = cStringFromBytes(v.encodeToByteArray())
+
 }
 
 data object CStringDeserialize : Deserialize<CStringValue> {
@@ -634,12 +645,13 @@ data object CStringDeserialize : Deserialize<CStringValue> {
         deserializer.deserializeByteBuf(CStringVisitor)
 }
 
-private fun cStringFromBytes(bytes: ByteArray): CStringValue {
+private fun cStringFromBytes(bytes: ByteArray): SerdeResult<CStringValue> {
     val nulIndex = bytes.indexOf(0)
-    if (nulIndex >= 0) {
-        throw SerdeException(SerdeError.custom("nul byte found in provided data at position: $nulIndex"))
+    return if (nulIndex >= 0) {
+        SerdeResult.failure(SerdeError.custom("nul byte found in provided data at position: $nulIndex"))
+    } else {
+        SerdeResult.success(CStringValue(bytes.copyOf()))
     }
-    return CStringValue(bytes.copyOf())
 }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -1398,11 +1410,13 @@ private fun instantFromEpochParts(
     nanos: UInt,
 ): Instant {
     checkUnsignedSecondOverflow(secs, nanos, "overflow deserializing SystemTime epoch offset")
-    if (!unsignedLessOrEqual(secs, Long.MAX_VALUE.toULong())) {
+    val normalizedSecs = secs + (nanos / 1_000_000_000u).toULong()
+    val normalizedNanos = (nanos % 1_000_000_000u).toInt()
+    if (!unsignedLessOrEqual(normalizedSecs, Long.MAX_VALUE.toULong())) {
         throw SerdeException(SerdeError.custom("overflow deserializing SystemTime"))
     }
     return try {
-        Instant.fromEpochSeconds(secs.toLong(), nanos.toInt())
+        Instant.fromEpochSeconds(normalizedSecs.toLong(), normalizedNanos)
     } catch (_: IllegalArgumentException) {
         throw SerdeException(SerdeError.custom("overflow deserializing SystemTime"))
     }
@@ -1896,7 +1910,9 @@ private data object SocketAddressVisitor : Visitor<SocketAddress> {
 
 data class PathValue(
     val value: String,
-)
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializePath(serializer)
+}
 
 private data object PathVisitor : Visitor<PathValue> {
     override fun expecting(): String = "a borrowed path"
@@ -1936,7 +1952,9 @@ data object PathBufDeserialize : Deserialize<PathValue> {
 
 data class BoxedPathValue(
     val path: PathValue,
-)
+) : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = path.serialize(serializer)
+}
 
 data object BoxedPathDeserialize : Deserialize<BoxedPathValue> {
     override fun <D> deserialize(deserializer: D): SerdeResult<BoxedPathValue>
@@ -1946,7 +1964,9 @@ data object BoxedPathDeserialize : Deserialize<BoxedPathValue> {
 
 // //////////////////////////////////////////////////////////////////////////////
 
-sealed class OsStringValue {
+sealed class OsStringValue : Serialize {
+    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = serializeOsString(serializer)
+
     data class Unix(
         val bytes: List<UByte>,
     ) : OsStringValue()
@@ -1970,28 +1990,22 @@ private data object OsStringVisitor : Visitor<OsStringValue> {
     override fun expecting(): String = "os string"
 
     override fun <A> visitEnum(access: A): SerdeResult<OsStringValue>
-        where A : EnumAccess =
-        serdeCatching {
-            val fieldSeed =
-                SeedFromDeserialize(
-                    fieldIdentifierDeserialize(
-                        expectingMessage = "`Unix` or `Windows`",
-                        fields = listOf("Unix", "Windows"),
-                    ),
-                )
-            val (field, variant) = access.variantSeed(fieldSeed).getOrThrow()
-            when (field) {
-                "Unix" ->
-                    OsStringValue.Unix(
-                        variant.newtypeVariant(SeedFromDeserialize(mutableListDeserialize(U8Deserialize))).getOrThrow(),
-                    )
-                "Windows" ->
-                    OsStringValue.Windows(
-                        variant.newtypeVariant(SeedFromDeserialize(mutableListDeserialize(U16Deserialize))).getOrThrow(),
-                    )
-                else -> throw SerdeException(SerdeError.unknownVariant(field, listOf("Unix", "Windows")))
+        where A : EnumAccess {
+        val variantSeed =
+            SeedFromDeserialize(
+                variantIdentifierDeserialize(
+                    expectingMessage = "`Unix` or `Windows`",
+                    variants = listOf("Unix", "Windows"),
+                ),
+            )
+        return access.variantSeed(variantSeed).flatMap { (kind, variant) ->
+            when (kind) {
+                "Unix" -> variant.newtypeVariant(mutableListDeserialize(U8Deserialize)).map(OsStringValue::Unix)
+                "Windows" -> variant.newtypeVariant(mutableListDeserialize(U16Deserialize)).map(OsStringValue::Windows)
+                else -> SerdeResult.failure(SerdeError.unknownVariant(kind, listOf("Unix", "Windows")))
             }
         }
+    }
 }
 
 // //////////////////////////////////////////////////////////////////////////////
