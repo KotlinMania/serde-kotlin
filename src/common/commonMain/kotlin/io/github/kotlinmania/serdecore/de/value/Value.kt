@@ -258,7 +258,6 @@ private class ExpectedInMap(
     override fun expecting(): String = if (expected == 1) "1 element in map" else "$expected elements in map"
 }
 
-
 fun Boolean.intoDeserializer(): BoolDeserializer = BoolDeserializer.new(this)
 
 class BoolDeserializer private constructor(

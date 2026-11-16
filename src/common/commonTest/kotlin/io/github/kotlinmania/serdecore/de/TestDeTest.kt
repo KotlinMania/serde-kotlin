@@ -9,11 +9,11 @@ import io.github.kotlinmania.serdecore.de.value.F32Deserializer
 import io.github.kotlinmania.serdecore.de.value.F64Deserializer
 import io.github.kotlinmania.serdetest.Token
 import io.github.kotlinmania.serdetest.assertDeTokens
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
 
 class TestDeTest {
     private fun <T> test(value: T, deserialize: Deserialize<T>, tokens: List<Token>) {
@@ -23,101 +23,121 @@ class TestDeTest {
         assertDeTokensIgnore(tokens)
     }
 
-    private data class IgnoreBase(var a: Int)
+    private data class IgnoreBase(
+        var a: Int,
+    )
 
     private enum class IgnoreField { Field0, Ignore }
 
     private object IgnoreFieldDeserialize : Deserialize<IgnoreField> {
         override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<IgnoreField> =
-            deserializer.deserializeIdentifier(object : Visitor<IgnoreField> {
-                override fun expecting(): String = "field identifier"
-                override fun visitU64(v: ULong): SerdeResult<IgnoreField> =
-                    SerdeResult.success(if (v == 0uL) IgnoreField.Field0 else IgnoreField.Ignore)
-                override fun visitStr(v: String): SerdeResult<IgnoreField> =
-                    SerdeResult.success(if (v == "a") IgnoreField.Field0 else IgnoreField.Ignore)
-                override fun visitBytes(v: ByteArray): SerdeResult<IgnoreField> =
-                    SerdeResult.success(if (v.contentEquals("a".encodeToByteArray())) IgnoreField.Field0 else IgnoreField.Ignore)
-            })
+            deserializer.deserializeIdentifier(
+                object : Visitor<IgnoreField> {
+                    override fun expecting(): String = "field identifier"
+                    override fun visitU64(v: ULong): SerdeResult<IgnoreField> =
+                        SerdeResult.success(if (v == 0uL) IgnoreField.Field0 else IgnoreField.Ignore)
+                    override fun visitStr(v: String): SerdeResult<IgnoreField> =
+                        SerdeResult.success(if (v == "a") IgnoreField.Field0 else IgnoreField.Ignore)
+                    override fun visitBytes(v: ByteArray): SerdeResult<IgnoreField> =
+                        SerdeResult.success(if (v.contentEquals("a".encodeToByteArray())) IgnoreField.Field0 else IgnoreField.Ignore)
+                },
+            )
     }
 
     private object IgnoreBaseDeserialize : Deserialize<IgnoreBase> {
         override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<IgnoreBase> =
-            deserializer.deserializeStruct("IgnoreBase", listOf("a"), object : Visitor<IgnoreBase> {
-                override fun expecting(): String = "struct IgnoreBase"
-                override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<IgnoreBase> {
-                    val field0 = when (val value = access.nextElement(I32Deserialize).getOrElse { return SerdeResult.failure(it) }) {
-                        is SeqElement.Some -> value.value
-                        SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(0, object : Expected { override fun expecting(): String = "struct IgnoreBase with 1 element" }))
-                    }
-                    return SerdeResult.success(IgnoreBase(field0))
-                }
-                override fun <A : MapAccess> visitMap(access: A): SerdeResult<IgnoreBase> {
-                    var field0: Int? = null
-                    while (true) {
-                        val key = access.nextKey(IgnoreFieldDeserialize).getOrElse { return SerdeResult.failure(it) } ?: break
-                        when (key) {
-                            IgnoreField.Field0 -> {
-                                if (field0 != null) return SerdeResult.failure(SerdeError.duplicateField("a"))
-                                field0 = access.nextValue(I32Deserialize).getOrElse { return SerdeResult.failure(it) }
+            deserializer.deserializeStruct(
+                "IgnoreBase",
+                listOf("a"),
+                object : Visitor<IgnoreBase> {
+                    override fun expecting(): String = "struct IgnoreBase"
+                    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<IgnoreBase> {
+                        val field0 =
+                            when (val value = access.nextElement(I32Deserialize).getOrElse { return SerdeResult.failure(it) }) {
+                                is SeqElement.Some -> value.value
+                                SeqElement.None -> return SerdeResult.failure(SerdeError.invalidLength(0, Expected { "struct IgnoreBase with 1 element" }))
                             }
-                            IgnoreField.Ignore -> access.nextValue(IgnoredAny).getOrElse { return SerdeResult.failure(it) }
-                        }
+                        return SerdeResult.success(IgnoreBase(field0))
                     }
-                    val value = field0 ?: missingField("a", I32Deserialize).getOrElse { return SerdeResult.failure(it) }
-                    return SerdeResult.success(IgnoreBase(value))
-                }
-            })
+                    override fun <A : MapAccess> visitMap(access: A): SerdeResult<IgnoreBase> {
+                        var field0: Int? = null
+                        while (true) {
+                            val key = access.nextKey(IgnoreFieldDeserialize).getOrElse { return SerdeResult.failure(it) } ?: break
+                            when (key) {
+                                IgnoreField.Field0 -> {
+                                    if (field0 != null) return SerdeResult.failure(SerdeError.duplicateField("a"))
+                                    field0 = access.nextValue(I32Deserialize).getOrElse { return SerdeResult.failure(it) }
+                                }
+                                IgnoreField.Ignore -> access.nextValue(IgnoredAny).getOrElse { return SerdeResult.failure(it) }
+                            }
+                        }
+                        val value = field0 ?: missingField("a", I32Deserialize).getOrElse { return SerdeResult.failure(it) }
+                        return SerdeResult.success(IgnoreBase(value))
+                    }
+                },
+            )
 
         override fun <D : Deserializer> deserializeInPlace(deserializer: D, place: MutablePlace<IgnoreBase>): SerdeResult<Unit> =
-            deserializer.deserializeStruct("IgnoreBase", listOf("a"), object : Visitor<Unit> {
-                private val fieldPlace = mutablePlace({ place.value.a }, { place.value.a = it })
-                private val fieldSeed = InPlaceSeed(fieldPlace) { input, slot -> I32Deserialize.deserializeInPlace(input, slot) }
-                override fun expecting(): String = "struct IgnoreBase"
-                override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Unit> {
-                    if (access.nextElementSeed(fieldSeed).getOrElse { return SerdeResult.failure(it) } == SeqElement.None) {
-                        return SerdeResult.failure(SerdeError.invalidLength(0, object : Expected { override fun expecting(): String = "struct IgnoreBase with 1 element" }))
-                    }
-                    return SerdeResult.success(Unit)
-                }
-                override fun <A : MapAccess> visitMap(access: A): SerdeResult<Unit> {
-                    var field0 = false
-                    while (true) {
-                        val key = access.nextKey(IgnoreFieldDeserialize).getOrElse { return SerdeResult.failure(it) } ?: break
-                        when (key) {
-                            IgnoreField.Field0 -> {
-                                if (field0) return SerdeResult.failure(SerdeError.duplicateField("a"))
-                                access.nextValueSeed(fieldSeed).getOrElse { return SerdeResult.failure(it) }
-                                field0 = true
-                            }
-                            IgnoreField.Ignore -> access.nextValue(IgnoredAny).getOrElse { return SerdeResult.failure(it) }
+            deserializer.deserializeStruct(
+                "IgnoreBase",
+                listOf("a"),
+                object : Visitor<Unit> {
+                    private val fieldPlace = mutablePlace({ place.value.a }, { place.value.a = it })
+                    private val fieldSeed = InPlaceSeed(fieldPlace) { input, slot -> I32Deserialize.deserializeInPlace(input, slot) }
+                    override fun expecting(): String = "struct IgnoreBase"
+                    override fun <A : SeqAccess> visitSeq(access: A): SerdeResult<Unit> {
+                        if (access.nextElementSeed(fieldSeed).getOrElse { return SerdeResult.failure(it) } == SeqElement.None) {
+                            return SerdeResult.failure(SerdeError.invalidLength(0, Expected { "struct IgnoreBase with 1 element" }))
                         }
+                        return SerdeResult.success(Unit)
                     }
-                    if (!field0) place.value.a = missingField("a", I32Deserialize).getOrElse { return SerdeResult.failure(it) }
-                    return SerdeResult.success(Unit)
-                }
-            })
+                    override fun <A : MapAccess> visitMap(access: A): SerdeResult<Unit> {
+                        var field0 = false
+                        while (true) {
+                            val key = access.nextKey(IgnoreFieldDeserialize).getOrElse { return SerdeResult.failure(it) } ?: break
+                            when (key) {
+                                IgnoreField.Field0 -> {
+                                    if (field0) return SerdeResult.failure(SerdeError.duplicateField("a"))
+                                    access.nextValueSeed(fieldSeed).getOrElse { return SerdeResult.failure(it) }
+                                    field0 = true
+                                }
+                                IgnoreField.Ignore -> access.nextValue(IgnoredAny).getOrElse { return SerdeResult.failure(it) }
+                            }
+                        }
+                        if (!field0) place.value.a = missingField("a", I32Deserialize).getOrElse { return SerdeResult.failure(it) }
+                        return SerdeResult.success(Unit)
+                    }
+                },
+            )
     }
 
     private fun assertDeTokensIgnore(ignorableTokens: List<Token>) {
         // Embed the tokens to be ignored in the normal token
         // stream for an IgnoreBase type
-        val concatedTokens = listOf(Token.Map(len = 2), Token.Str("a"), Token.I32(1), Token.Str("ignored")) +
-            ignorableTokens + Token.MapEnd
+        val concatedTokens =
+            listOf(Token.Map(len = 2), Token.Str("a"), Token.I32(1), Token.Str("ignored")) +
+                ignorableTokens + Token.MapEnd
         val expected = IgnoreBase(a = 1)
         assertDeTokens(expected, IgnoreBaseDeserialize, concatedTokens)
-        assertDeTokens(expected, object : Deserialize<IgnoreBase> {
-            override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<IgnoreBase> {
-                var actual = IgnoreBase(a = 0)
-                val original = actual
-                return IgnoreBaseDeserialize.deserializeInPlace(
-                    deserializer, mutablePlace({ actual }, { actual = it }),
-                ).map {
-                    assertEquals(expected, actual)
-                    assertSame(original, actual)
-                    actual
+        assertDeTokens(
+            expected,
+            object : Deserialize<IgnoreBase> {
+                override fun <D : Deserializer> deserialize(deserializer: D): SerdeResult<IgnoreBase> {
+                    var actual = IgnoreBase(a = 0)
+                    val original = actual
+                    return IgnoreBaseDeserialize
+                        .deserializeInPlace(
+                            deserializer,
+                            mutablePlace({ actual }, { actual = it }),
+                        ).map {
+                            assertEquals(expected, actual)
+                            assertSame(original, actual)
+                            actual
+                        }
                 }
-            }
-        }, concatedTokens)
+            },
+            concatedTokens,
+        )
     }
 
     @Test

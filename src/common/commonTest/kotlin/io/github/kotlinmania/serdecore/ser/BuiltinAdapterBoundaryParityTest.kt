@@ -21,19 +21,20 @@ class BuiltinAdapterBoundaryParityTest {
         private val returnedFailure: SerdeResult<Nothing>? = null,
     ) : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
         val events = mutableListOf<String>()
-        private val compound = object : SerializeTuple<Unit>, SerializeStruct<Unit> {
-            override fun <T> serializeElement(value: T): SerdeResult<Unit> where T : Serialize = element()
-            override fun <T> serializeField(key: String, value: T): SerdeResult<Unit> where T : Serialize = element()
-            private fun element(): SerdeResult<Unit> {
-                events.add("element")
-                callbackPanic?.let { throw it }
-                return returnedFailure ?: SerdeResult.success(Unit)
+        private val compound =
+            object : SerializeTuple<Unit>, SerializeStruct<Unit> {
+                override fun <T> serializeElement(value: T): SerdeResult<Unit> where T : Serialize = element()
+                override fun <T> serializeField(key: String, value: T): SerdeResult<Unit> where T : Serialize = element()
+                private fun element(): SerdeResult<Unit> {
+                    events.add("element")
+                    callbackPanic?.let { throw it }
+                    return returnedFailure ?: SerdeResult.success(Unit)
+                }
+                override fun end(): SerdeResult<Unit> {
+                    events.add("end")
+                    return SerdeResult.success(Unit)
+                }
             }
-            override fun end(): SerdeResult<Unit> {
-                events.add("end")
-                return SerdeResult.success(Unit)
-            }
-        }
         override fun serializeTuple(len: Int): SerdeResult<SerializeTuple<Unit>> {
             events.add("begin")
             beginPanic?.let { throw it }
@@ -46,17 +47,18 @@ class BuiltinAdapterBoundaryParityTest {
         }
     }
 
-    private fun adapters(): List<(Serializer<Unit>) -> SerdeResult<Unit>> = listOf(
-        { arrayOf(1, 2).serialize(it) },
-        { Pair(1, 2).serialize(it) },
-        { Triple(1, 2, 3).serialize(it) },
-        { RangeValue(1, 2).serialize(it) },
-        { RangeFromValue(1).serialize(it) },
-        { RangeInclusiveValue(1, 2).serialize(it) },
-        { RangeToValue(2).serialize(it) },
-        { 1.seconds.serialize(it) },
-        { Instant.fromEpochSeconds(1).serialize(it) },
-    )
+    private fun adapters(): List<(Serializer<Unit>) -> SerdeResult<Unit>> =
+        listOf(
+            { Array(2) { idx -> idx + 1 }.serialize(it) },
+            { Pair(1, 2).serialize(it) },
+            { Triple(1, 2, 3).serialize(it) },
+            { RangeValue(1, 2).serialize(it) },
+            { RangeFromValue(1).serialize(it) },
+            { RangeInclusiveValue(1, 2).serialize(it) },
+            { RangeToValue(2).serialize(it) },
+            { 1.seconds.serialize(it) },
+            { Instant.fromEpochSeconds(1).serialize(it) },
+        )
 
     @Test
     fun compoundAdaptersPropagateBeginAndCallbackPanicsUnchanged() {
@@ -85,20 +87,22 @@ class BuiltinAdapterBoundaryParityTest {
     fun iterableAdapterDoesNotReadItemsBeforeBeginFailure() {
         val events = mutableListOf<String>()
         val failure = SerdeResult.failure(SerdeError.custom("begin error"))
-        val input = Iterable {
-            events.add("factory")
-            object : Iterator<Int> {
-                override fun hasNext(): Boolean = error("must not read before begin")
-                override fun next(): Int = error("must not consume before begin")
+        val input =
+            Iterable {
+                events.add("factory")
+                object : Iterator<Int> {
+                    override fun hasNext(): Boolean = error("must not read before begin")
+                    override fun next(): Int = throw NoSuchElementException("must not consume before begin")
+                }
             }
-        }
-        val probe = object : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
-            override fun <T> collectSeq(iter: Iterable<T>): SerdeResult<Unit> where T : Serialize = super<Serializer>.collectSeq(iter)
-            override fun serializeSeq(len: Int?): SerdeResult<SerializeSeq<Unit>> {
-                events.add("begin:$len")
-                return failure
+        val probe =
+            object : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
+                override fun <T> collectSeq(iter: Iterable<T>): SerdeResult<Unit> where T : Serialize = super<Serializer>.collectSeq(iter)
+                override fun serializeSeq(len: Int?): SerdeResult<SerializeSeq<Unit>> {
+                    events.add("begin:$len")
+                    return failure
+                }
             }
-        }
         assertSame(failure, input.serialize(probe))
         assertEquals(listOf("factory", "begin:null"), events)
     }
@@ -107,25 +111,31 @@ class BuiltinAdapterBoundaryParityTest {
     fun mapAdapterDoesNotReadEntriesBeforeBeginFailure() {
         val events = mutableListOf<String>()
         val failure = SerdeResult.failure(SerdeError.custom("begin error"))
-        val input = object : AbstractMap<Int, Int>() {
-            override val entries: Set<Map.Entry<Int, Int>> = object : AbstractSet<Map.Entry<Int, Int>>() {
-                override val size: Int get() { events.add("hint"); return 2 }
-                override fun iterator(): Iterator<Map.Entry<Int, Int>> {
-                    events.add("factory")
-                    return object : Iterator<Map.Entry<Int, Int>> {
-                        override fun hasNext(): Boolean = error("must not read before begin")
-                        override fun next(): Map.Entry<Int, Int> = error("must not consume before begin")
+        val input =
+            object : AbstractMap<Int, Int>() {
+                override val entries: Set<Map.Entry<Int, Int>> =
+                    object : AbstractSet<Map.Entry<Int, Int>>() {
+                        override val size: Int get() {
+                            events.add("hint")
+                            return 2
+                        }
+                        override fun iterator(): Iterator<Map.Entry<Int, Int>> {
+                            events.add("factory")
+                            return object : Iterator<Map.Entry<Int, Int>> {
+                                override fun hasNext(): Boolean = error("must not read before begin")
+                                override fun next(): Map.Entry<Int, Int> = throw NoSuchElementException("must not consume before begin")
+                            }
+                        }
                     }
+            }
+        val probe =
+            object : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
+                override fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): SerdeResult<Unit> where K : Serialize, V : Serialize = super<Serializer>.collectMap(iter)
+                override fun serializeMap(len: Int?): SerdeResult<SerializeMap<Unit>> {
+                    events.add("begin:$len")
+                    return failure
                 }
             }
-        }
-        val probe = object : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
-            override fun <K, V> collectMap(iter: Iterable<Pair<K, V>>): SerdeResult<Unit> where K : Serialize, V : Serialize = super<Serializer>.collectMap(iter)
-            override fun serializeMap(len: Int?): SerdeResult<SerializeMap<Unit>> {
-                events.add("begin:$len")
-                return failure
-            }
-        }
         assertSame(failure, input.serialize(probe))
         assertEquals(listOf("factory", "hint", "begin:2"), events)
     }

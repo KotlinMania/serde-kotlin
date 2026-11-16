@@ -5,11 +5,11 @@ import io.github.kotlinmania.serde.SerdeError
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serdecore.de.BoundValue
 import io.github.kotlinmania.serdecore.de.CStringValue
-import io.github.kotlinmania.serdecore.de.PathValue
-import io.github.kotlinmania.serdecore.de.OsStringValue
 import io.github.kotlinmania.serdecore.de.IpAddress
 import io.github.kotlinmania.serdecore.de.Ipv4Address
 import io.github.kotlinmania.serdecore.de.Ipv6Address
+import io.github.kotlinmania.serdecore.de.OsStringValue
+import io.github.kotlinmania.serdecore.de.PathValue
 import io.github.kotlinmania.serdecore.de.RangeFromValue
 import io.github.kotlinmania.serdecore.de.RangeInclusiveValue
 import io.github.kotlinmania.serdecore.de.RangeToValue
@@ -67,7 +67,6 @@ fun <Ok> ByteArray.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = seri
 // Serialize for CString forwards the bytes without the C string terminator.
 internal fun <Ok> CStringValue.serializeCString(serializer: Serializer<Ok>): SerdeResult<Ok> =
     serializer.serializeBytes(bytes)
-
 
 // //////////////////////////////////////////////////////////////////////////////
 
@@ -128,9 +127,11 @@ fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok>
 
 fun <Ok, T> RangeValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
     serializer.serializeStruct("Range", 2).flatMap { state ->
-        state.serializeField("start", element.bind(start)).flatMap {
-            state.serializeField("end", element.bind(end))
-        }.flatMap { state.end() }
+        state
+            .serializeField("start", element.bind(start))
+            .flatMap {
+                state.serializeField("end", element.bind(end))
+            }.flatMap { state.end() }
     }
 
 fun <Ok, T> RangeFromValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
@@ -146,9 +147,11 @@ fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>): SerdeR
 
 fun <Ok, T> RangeInclusiveValue<T>.serialize(serializer: Serializer<Ok>, element: Serialize.For<T>): SerdeResult<Ok> =
     serializer.serializeStruct("RangeInclusive", 2).flatMap { state ->
-        state.serializeField("start", element.bind(start)).flatMap {
-            state.serializeField("end", element.bind(end))
-        }.flatMap { state.end() }
+        state
+            .serializeField("start", element.bind(start))
+            .flatMap {
+                state.serializeField("end", element.bind(end))
+            }.flatMap { state.end() }
     }
 
 fun <Ok, T> RangeToValue<T>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
@@ -180,9 +183,11 @@ fun <Ok, T0, T1> Pair<T0, T1>.serialize(
     secondSerializer: Serialize.For<T1>,
 ): SerdeResult<Ok> =
     serializer.serializeTuple(2).flatMap { tuple ->
-        tuple.serializeElement(firstSerializer.bind(first)).flatMap {
-            tuple.serializeElement(secondSerializer.bind(second))
-        }.flatMap { tuple.end() }
+        tuple
+            .serializeElement(firstSerializer.bind(first))
+            .flatMap {
+                tuple.serializeElement(secondSerializer.bind(second))
+            }.flatMap { tuple.end() }
     }
 
 fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
@@ -195,11 +200,13 @@ fun <Ok, T0, T1, T2> Triple<T0, T1, T2>.serialize(
     thirdSerializer: Serialize.For<T2>,
 ): SerdeResult<Ok> =
     serializer.serializeTuple(3).flatMap { tuple ->
-        tuple.serializeElement(firstSerializer.bind(first)).flatMap {
-            tuple.serializeElement(secondSerializer.bind(second)).flatMap {
-                tuple.serializeElement(thirdSerializer.bind(third))
-            }
-        }.flatMap { tuple.end() }
+        tuple
+            .serializeElement(firstSerializer.bind(first))
+            .flatMap {
+                tuple.serializeElement(secondSerializer.bind(second)).flatMap {
+                    tuple.serializeElement(thirdSerializer.bind(third))
+                }
+            }.flatMap { tuple.end() }
     }
 
 // //////////////////////////////////////////////////////////////////////////////
@@ -226,9 +233,11 @@ fun <Ok> Duration.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
         val secs = inWholeSeconds
         val nanos = (this - secs.seconds).inWholeNanoseconds
         serializer.serializeStruct("Duration", 2).flatMap { state ->
-            state.serializeField("secs", ULongSerialize(secs.toULong())).flatMap {
-                state.serializeField("nanos", UIntSerialize(nanos.toUInt()))
-            }.flatMap { state.end() }
+            state
+                .serializeField("secs", ULongSerialize(secs.toULong()))
+                .flatMap {
+                    state.serializeField("nanos", UIntSerialize(nanos.toUInt()))
+                }.flatMap { state.end() }
         }
     }
 
@@ -239,9 +248,11 @@ fun <Ok> Instant.serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
         SerdeResult.failure(SerdeError.custom("SystemTime must be later than UNIX_EPOCH"))
     } else {
         serializer.serializeStruct("SystemTime", 2).flatMap { state ->
-            state.serializeField("secs_since_epoch", ULongSerialize(epochSeconds.toULong())).flatMap {
-                state.serializeField("nanos_since_epoch", UIntSerialize(nanosecondsOfSecond.toUInt()))
-            }.flatMap { state.end() }
+            state
+                .serializeField("secs_since_epoch", ULongSerialize(epochSeconds.toULong()))
+                .flatMap {
+                    state.serializeField("nanos_since_epoch", UIntSerialize(nanosecondsOfSecond.toUInt()))
+                }.flatMap { state.end() }
         }
     }
 
@@ -359,9 +370,11 @@ private fun <Ok> serializeSocketAddress(
     serializer: Serializer<Ok>,
 ): SerdeResult<Ok> =
     serializer.serializeTuple(2).flatMap { tuple ->
-        tuple.serializeElement(ip).flatMap {
-            tuple.serializeElement(UShortSerialize(port))
-        }.flatMap { tuple.end() }
+        tuple
+            .serializeElement(ip)
+            .flatMap {
+                tuple.serializeElement(UShortSerialize(port))
+            }.flatMap { tuple.end() }
     }
 
 private fun formatIpv6(octets: List<UByte>): String {
@@ -400,25 +413,38 @@ private fun formatIpv6(octets: List<UByte>): String {
 // //////////////////////////////////////////////////////////////////////////////
 
 internal fun <Ok> PathValue.serializePath(serializer: Serializer<Ok>): SerdeResult<Ok> {
-    val text = try {
-        value.encodeToByteArray(throwOnInvalidSequence = true)
-        value
-    } catch (error: CharacterCodingException) {
-        return SerdeResult.failure(SerdeError.custom("path contains invalid UTF-8 characters"))
-    }
+    val text =
+        try {
+            value.encodeToByteArray(throwOnInvalidSequence = true)
+            value
+        } catch (error: CharacterCodingException) {
+            return SerdeResult.failure(SerdeError.custom("path contains invalid UTF-8 characters"))
+        }
     return serializer.serializeStr(text)
 }
 
 internal fun <Ok> OsStringValue.serializeOsString(serializer: Serializer<Ok>): SerdeResult<Ok> =
     when (this) {
-        is OsStringValue.Unix -> serializer.serializeNewtypeVariant("OsString", 0u, "Unix", object : Serialize {
-            override fun <Value> serialize(serializer: Serializer<Value>): SerdeResult<Value> =
-                bytes.serialize(serializer, Serialize.U8)
-        })
-        is OsStringValue.Windows -> serializer.serializeNewtypeVariant("OsString", 1u, "Windows", object : Serialize {
-            override fun <Value> serialize(serializer: Serializer<Value>): SerdeResult<Value> =
-                wide.serialize(serializer, Serialize.U16)
-        })
+        is OsStringValue.Unix ->
+            serializer.serializeNewtypeVariant(
+                "OsString",
+                0u,
+                "Unix",
+                object : Serialize {
+                    override fun <Value> serialize(serializer: Serializer<Value>): SerdeResult<Value> =
+                        bytes.serialize(serializer, Serialize.U8)
+                },
+            )
+        is OsStringValue.Windows ->
+            serializer.serializeNewtypeVariant(
+                "OsString",
+                1u,
+                "Windows",
+                object : Serialize {
+                    override fun <Value> serialize(serializer: Serializer<Value>): SerdeResult<Value> =
+                        wide.serialize(serializer, Serialize.U16)
+                },
+            )
     }
 
 // //////////////////////////////////////////////////////////////////////////////

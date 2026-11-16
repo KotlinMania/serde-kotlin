@@ -52,7 +52,10 @@ private class CStringSequenceAccess(
     var reads = 0
     var hints = 0
     private var index = 0
-    override fun sizeHint(): Int? { hints += 1; return hint }
+    override fun sizeHint(): Int? {
+        hints += 1
+        return hint
+    }
     override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
         reads += 1
         if (index == 1 && stop != null) return stop.invoke()
@@ -85,11 +88,25 @@ class StandardValueBoundaryParityTest {
     @Test
     fun osStringPreservesVariantAndUnsignedSequenceWidths() {
         val unix = OsStringValue.Unix(listOf(0u, 128u, 255u).map(UInt::toUByte))
-        val unixTokens = listOf(Token.NewtypeVariant(name = "OsString", variant = "Unix"),
-            Token.Seq(len = 3), Token.U8(0u), Token.U8(128u), Token.U8(255u), Token.SeqEnd)
+        val unixTokens =
+            listOf(
+                Token.NewtypeVariant(name = "OsString", variant = "Unix"),
+                Token.Seq(len = 3),
+                Token.U8(0u),
+                Token.U8(128u),
+                Token.U8(255u),
+                Token.SeqEnd,
+            )
         val windows = OsStringValue.Windows(listOf(0xd800u, 0u, 0xffffu).map(UInt::toUShort))
-        val windowsTokens = listOf(Token.NewtypeVariant(name = "OsString", variant = "Windows"),
-            Token.Seq(len = 3), Token.U16(0xd800u), Token.U16(0u), Token.U16(0xffffu), Token.SeqEnd)
+        val windowsTokens =
+            listOf(
+                Token.NewtypeVariant(name = "OsString", variant = "Windows"),
+                Token.Seq(len = 3),
+                Token.U16(0xd800u),
+                Token.U16(0u),
+                Token.U16(0xffffu),
+                Token.SeqEnd,
+            )
         assertSerTokens(unix, unixTokens)
         assertDeTokens(unix, OsStringDeserialize, unixTokens)
         assertSerTokens(windows, windowsTokens)
@@ -98,16 +115,25 @@ class StandardValueBoundaryParityTest {
 
     @Test
     fun standardCarriersParticipateInGenericCollectionSerialization() {
-        assertSerTokens(object : Serialize {
-            override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-                listOf(CStringValue("abc".encodeToByteArray()), CStringValue(byteArrayOf())).serialize(serializer)
-        }, listOf(Token.Seq(len = 2), Token.Bytes("abc".encodeToByteArray()), Token.Bytes(byteArrayOf()), Token.SeqEnd))
+        assertSerTokens(
+            object : Serialize {
+                override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+                    listOf(CStringValue("abc".encodeToByteArray()), CStringValue(byteArrayOf())).serialize(serializer)
+            },
+            listOf(Token.Seq(len = 2), Token.Bytes("abc".encodeToByteArray()), Token.Bytes(byteArrayOf()), Token.SeqEnd),
+        )
     }
 
     @Test
     fun serializerResultsAndCallbackPanicsRetainIdentity() {
-        val values: List<Serialize> = listOf(CStringValue("abc".encodeToByteArray()), PathValue("path"),
-            BoxedPathValue(PathValue("path")), OsStringValue.Unix(listOf(255u)), OsStringValue.Windows(listOf(65535u)))
+        val values: List<Serialize> =
+            listOf(
+                CStringValue("abc".encodeToByteArray()),
+                PathValue("path"),
+                BoxedPathValue(PathValue("path")),
+                OsStringValue.Unix(listOf(255u)),
+                OsStringValue.Windows(listOf(65535u)),
+            )
         for (value in values) {
             val success = SerdeResult.success(Unit)
             val successProbe = StandardValueProbe(success)
@@ -131,8 +157,11 @@ class StandardValueBoundaryParityTest {
             val panic = SerdeException(SerdeError.custom("sequence panic"))
             val access = CStringSequenceAccess(listOf(97u, 98u)) { if (throwPanic) throw panic else failure }
             val deserializer = cStringSequenceDeserializer(access)
-            if (throwPanic) assertSame(panic, assertFailsWith<SerdeException> { CStringDeserialize.deserialize(deserializer) })
-            else assertSame(failure, CStringDeserialize.deserialize(deserializer))
+            if (throwPanic) {
+                assertSame(panic, assertFailsWith<SerdeException> { CStringDeserialize.deserialize(deserializer) })
+            } else {
+                assertSame(failure, CStringDeserialize.deserialize(deserializer))
+            }
             assertEquals(2, access.reads)
             assertEquals(1, access.hints)
         }
@@ -165,10 +194,11 @@ class StandardValueBoundaryParityTest {
     @Test
     fun cStringSizeHintPanicEscapesWithoutReading() {
         val panic = SerdeException(SerdeError.custom("hint panic"))
-        val access = object : SeqAccess {
-            override fun sizeHint(): Int = throw panic
-            override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> = error("hint failed")
-        }
+        val access =
+            object : SeqAccess {
+                override fun sizeHint(): Int = throw panic
+                override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> = error("hint failed")
+            }
         assertSame(panic, assertFailsWith<SerdeException> { CStringDeserialize.deserialize(cStringSequenceDeserializer(access)) })
     }
 
@@ -179,8 +209,11 @@ class StandardValueBoundaryParityTest {
             val panic = SerdeException(SerdeError.custom("later callback panic"))
             val access = CStringSequenceAccess(listOf(0u, 99u)) { if (throwPanic) throw panic else failure }
             val deserializer = cStringSequenceDeserializer(access)
-            if (throwPanic) assertSame(panic, assertFailsWith<SerdeException> { CStringDeserialize.deserialize(deserializer) })
-            else assertSame(failure, CStringDeserialize.deserialize(deserializer))
+            if (throwPanic) {
+                assertSame(panic, assertFailsWith<SerdeException> { CStringDeserialize.deserialize(deserializer) })
+            } else {
+                assertSame(failure, CStringDeserialize.deserialize(deserializer))
+            }
             assertEquals(2, access.reads)
         }
     }
@@ -188,13 +221,14 @@ class StandardValueBoundaryParityTest {
     @Test
     fun osStringVariantIndicesMatchTheSourcePlatformBranches() {
         val variants = mutableListOf<Triple<String, UInt, String>>()
-        val probe = object : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
-            override fun <T> serializeNewtypeVariant(name: String, variantIndex: UInt, variant: String, value: T): SerdeResult<Unit>
+        val probe =
+            object : Serializer<Unit> by FormatterSerializer(StringBuilder()) {
+                override fun <T> serializeNewtypeVariant(name: String, variantIndex: UInt, variant: String, value: T): SerdeResult<Unit>
                 where T : Serialize {
-                variants.add(Triple(name, variantIndex, variant))
-                return SerdeResult.success(Unit)
+                    variants.add(Triple(name, variantIndex, variant))
+                    return SerdeResult.success(Unit)
+                }
             }
-        }
         OsStringValue.Unix(emptyList()).serialize(probe).getOrThrow()
         OsStringValue.Windows(emptyList()).serialize(probe).getOrThrow()
         assertEquals(listOf(Triple("OsString", 0u, "Unix"), Triple("OsString", 1u, "Windows")), variants)

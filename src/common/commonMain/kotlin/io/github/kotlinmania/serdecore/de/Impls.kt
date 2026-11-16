@@ -9,10 +9,10 @@ import io.github.kotlinmania.serdecore.priv.InPlaceSeed
 import io.github.kotlinmania.serdecore.priv.fromUtf8LossyNoAlloc
 import io.github.kotlinmania.serdecore.ser.Serialize
 import io.github.kotlinmania.serdecore.ser.Serializer
-import io.github.kotlinmania.serdecore.ser.serializeNetwork
 import io.github.kotlinmania.serdecore.ser.serializeCString
-import io.github.kotlinmania.serdecore.ser.serializePath
+import io.github.kotlinmania.serdecore.ser.serializeNetwork
 import io.github.kotlinmania.serdecore.ser.serializeOsString
+import io.github.kotlinmania.serdecore.ser.serializePath
 import kotlin.text.CharacterCodingException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
@@ -616,15 +616,19 @@ private data object CStringVisitor : Visitor<CStringValue> {
         val hint = access.sizeHint()
         if (hint != null && hint < 0) return SerdeResult.failure(SerdeError.custom("A Rust size hint cannot be negative"))
         // Each element occupies one byte.
-        val capacity = io.github.kotlinmania.serdecore.priv.cautious(hint?.toULong(), 1uL).toInt()
+        val capacity =
+            io.github.kotlinmania.serdecore.priv
+                .cautious(hint?.toULong(), 1uL)
+                .toInt()
         val values = ArrayList<Byte>(capacity)
         while (true) {
             when (val result = access.nextElementSeed(SeedFromDeserialize(U8Deserialize))) {
                 is SerdeResult.Failure -> return result
-                is SerdeResult.Success -> when (val value = result.value) {
-                    is SeqElement.Some -> values.add(value.value.toByte())
-                    SeqElement.None -> return cStringFromBytes(values.toByteArray())
-                }
+                is SerdeResult.Success ->
+                    when (val value = result.value) {
+                        is SeqElement.Some -> values.add(value.value.toByte())
+                        SeqElement.None -> return cStringFromBytes(values.toByteArray())
+                    }
             }
         }
     }
@@ -636,7 +640,6 @@ private data object CStringVisitor : Visitor<CStringValue> {
     override fun visitStr(v: String): SerdeResult<CStringValue> = cStringFromBytes(v.encodeToByteArray())
 
     override fun visitString(v: String): SerdeResult<CStringValue> = cStringFromBytes(v.encodeToByteArray())
-
 }
 
 data object CStringDeserialize : Deserialize<CStringValue> {

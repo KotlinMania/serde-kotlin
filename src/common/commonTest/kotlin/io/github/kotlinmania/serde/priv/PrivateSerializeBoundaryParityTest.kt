@@ -53,8 +53,15 @@ class PrivateSerializeBoundaryParityTest {
             step("structVariant:$name:$variantIndex:$variant:$len").map { compound }
     }
 
-    private class Compound(private val step: (String) -> SerdeResult<Unit>) : SerializeSeq<Unit>, SerializeTuple<Unit>, SerializeTupleStruct<Unit>,
-        SerializeTupleVariant<Unit>, SerializeMap<Unit>, SerializeStruct<Unit>, SerializeStructVariant<Unit> {
+    private class Compound(
+        private val step: (String) -> SerdeResult<Unit>,
+    ) : SerializeSeq<Unit>,
+        SerializeTuple<Unit>,
+        SerializeTupleStruct<Unit>,
+        SerializeTupleVariant<Unit>,
+        SerializeMap<Unit>,
+        SerializeStruct<Unit>,
+        SerializeStructVariant<Unit> {
         override fun <T : Serialize> serializeElement(value: T): SerdeResult<Unit> = step("element")
         override fun <T : Serialize> serializeField(value: T): SerdeResult<Unit> = step("field")
         override fun <T : Serialize> serializeField(key: String, value: T): SerdeResult<Unit> = step("field:$key")
@@ -69,10 +76,13 @@ class PrivateSerializeBoundaryParityTest {
         val values = listOf(Content.I32(7), Content.I32(8))
         val fields = listOf("first" to values[0], "second" to values[1])
         return listOf(
-            Content.Seq(values), Content.Tuple(values), Content.TupleStruct("T", values),
+            Content.Seq(values),
+            Content.Tuple(values),
+            Content.TupleStruct("T", values),
             Content.TupleVariant("E", 1u, "V", values),
             Content.Map(listOf(Content.String("first") to values[0], Content.String("second") to values[1])),
-            Content.Struct("S", fields), Content.StructVariant("E", 2u, "V", fields),
+            Content.Struct("S", fields),
+            Content.StructVariant("E", 2u, "V", fields),
         )
     }
 
@@ -98,10 +108,13 @@ class PrivateSerializeBoundaryParityTest {
 
     @Test
     fun taggedCompoundsPreserveFailuresAndPanicsAtEveryDelegateBoundary() {
-        val content = listOf(
-            Content.Unit, Content.UnitStruct("U"), Content.UnitVariant("E", 0u, "V"),
-            Content.NewtypeVariant("E", 1u, "V", Content.I32(7)),
-        ) + compoundContents().drop(3)
+        val content =
+            listOf(
+                Content.Unit,
+                Content.UnitStruct("U"),
+                Content.UnitVariant("E", 0u, "V"),
+                Content.NewtypeVariant("E", 1u, "V", Content.I32(7)),
+            ) + compoundContents().drop(3)
         for (value in content) {
             checkBoundaries { serializeTaggedNewtype(it, "Outer", "Variant", "tag", "name", value) }
         }
@@ -111,24 +124,26 @@ class PrivateSerializeBoundaryParityTest {
     fun taggedMapAndStructReturnTheOriginalDelegateStatesAndLengthHints() {
         for (len in listOf(null, 0, 2)) {
             val probe = Probe()
-            val value = object : Serialize {
-                override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-                    serializer.serializeMap(len).flatMap { state ->
-                        assertSame<Any>(probe.compound, state)
-                        state.end()
-                    }
-            }
+            val value =
+                object : Serialize {
+                    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+                        serializer.serializeMap(len).flatMap { state ->
+                            assertSame<Any>(probe.compound, state)
+                            state.end()
+                        }
+                }
             serializeTaggedNewtype(probe, "Outer", "Variant", "tag", "name", value).getOrThrow()
             assertEquals(listOf("map:${len?.plus(1)}", "entry", "end"), probe.events)
         }
         val probe = Probe()
-        val value = object : Serialize {
-            override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-                serializer.serializeStruct("S", 2).flatMap { state ->
-                    assertSame<Any>(probe.compound, state)
-                    state.end()
-                }
-        }
+        val value =
+            object : Serialize {
+                override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+                    serializer.serializeStruct("S", 2).flatMap { state ->
+                        assertSame<Any>(probe.compound, state)
+                        state.end()
+                    }
+            }
         serializeTaggedNewtype(probe, "Outer", "Variant", "tag", "name", value).getOrThrow()
         assertEquals(listOf("struct:S:3", "field:tag", "end"), probe.events)
     }
@@ -151,20 +166,28 @@ class PrivateSerializeBoundaryParityTest {
         return assertIs<Content.Seq>(map.values.single()).elements.single()
     }
 
-    private class FailureValue(private val failure: SerdeResult<Nothing>) : Serialize {
+    private class FailureValue(
+        private val failure: SerdeResult<Nothing>,
+    ) : Serialize {
         override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = failure
     }
 
-    private class PanicValue(private val panic: Throwable) : Serialize {
+    private class PanicValue(
+        private val panic: Throwable,
+    ) : Serialize {
         override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = throw panic
     }
 
-    private class Wrapper(private val kind: Int, private val value: Serialize) : Serialize {
-        override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> = when (kind) {
-            0 -> serializer.serializeSome(value)
-            1 -> serializer.serializeNewtypeStruct("N", value)
-            else -> serializer.serializeNewtypeVariant("E", 1u, "V", value)
-        }
+    private class Wrapper(
+        private val kind: Int,
+        private val value: Serialize,
+    ) : Serialize {
+        override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+            when (kind) {
+                0 -> serializer.serializeSome(value)
+                1 -> serializer.serializeNewtypeStruct("N", value)
+                else -> serializer.serializeNewtypeVariant("E", 1u, "V", value)
+            }
     }
 
     @Test
@@ -182,38 +205,46 @@ class PrivateSerializeBoundaryParityTest {
         }
     }
 
-    private class Buffer<Ok>(val add: (Serialize) -> SerdeResult<Unit>, val end: () -> SerdeResult<Ok>)
+    private class Buffer<Ok>(
+        val add: (Serialize) -> SerdeResult<Unit>,
+        val end: () -> SerdeResult<Ok>,
+    )
 
-    private fun <Ok> buffer(serializer: Serializer<Ok>, kind: Int): SerdeResult<Buffer<Ok>> = when (kind) {
-        0 -> serializer.serializeSeq(3).map { state -> Buffer({ state.serializeElement(it) }, { state.end() }) }
-        1 -> serializer.serializeTuple(3).map { state -> Buffer({ state.serializeElement(it) }, { state.end() }) }
-        2 -> serializer.serializeTupleStruct("T", 3).map { state -> Buffer({ state.serializeField(it) }, { state.end() }) }
-        3 -> serializer.serializeTupleVariant("E", 1u, "V", 3).map { state -> Buffer({ state.serializeField(it) }, { state.end() }) }
-        4 -> serializer.serializeMap(3).map { state -> Buffer({ state.serializeEntry(Content.String("key"), it) }, { state.end() }) }
-        5 -> serializer.serializeStruct("S", 3).map { state -> Buffer({ state.serializeField("key", it) }, { state.end() }) }
-        else -> serializer.serializeStructVariant("E", 1u, "V", 3).map { state -> Buffer({ state.serializeField("key", it) }, { state.end() }) }
-    }
+    private fun <Ok> buffer(serializer: Serializer<Ok>, kind: Int): SerdeResult<Buffer<Ok>> =
+        when (kind) {
+            0 -> serializer.serializeSeq(3).map { state -> Buffer({ state.serializeElement(it) }, { state.end() }) }
+            1 -> serializer.serializeTuple(3).map { state -> Buffer({ state.serializeElement(it) }, { state.end() }) }
+            2 -> serializer.serializeTupleStruct("T", 3).map { state -> Buffer({ state.serializeField(it) }, { state.end() }) }
+            3 -> serializer.serializeTupleVariant("E", 1u, "V", 3).map { state -> Buffer({ state.serializeField(it) }, { state.end() }) }
+            4 -> serializer.serializeMap(3).map { state -> Buffer({ state.serializeEntry(Content.String("key"), it) }, { state.end() }) }
+            5 -> serializer.serializeStruct("S", 3).map { state -> Buffer({ state.serializeField("key", it) }, { state.end() }) }
+            else -> serializer.serializeStructVariant("E", 1u, "V", 3).map { state -> Buffer({ state.serializeField("key", it) }, { state.end() }) }
+        }
 
     @Test
     fun allContentBuffersAppendOnlyAfterSuccessfulSerialization() {
-        val expected = listOf(
-            Content.Seq(listOf(Content.I32(7))), Content.Tuple(listOf(Content.I32(7))),
-            Content.TupleStruct("T", listOf(Content.I32(7))), Content.TupleVariant("E", 1u, "V", listOf(Content.I32(7))),
-            Content.Map(listOf(Content.String("key") to Content.I32(7))),
-            Content.Struct("S", listOf("key" to Content.I32(7))),
-            Content.StructVariant("E", 1u, "V", listOf("key" to Content.I32(7))),
-        )
+        val expected =
+            listOf(
+                Content.Seq(listOf(Content.I32(7))),
+                Content.Tuple(listOf(Content.I32(7))),
+                Content.TupleStruct("T", listOf(Content.I32(7))),
+                Content.TupleVariant("E", 1u, "V", listOf(Content.I32(7))),
+                Content.Map(listOf(Content.String("key") to Content.I32(7))),
+                Content.Struct("S", listOf("key" to Content.I32(7))),
+                Content.StructVariant("E", 1u, "V", listOf("key" to Content.I32(7))),
+            )
         for (kind in expected.indices) {
-            val value = object : Serialize {
-                override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-                    buffer(serializer, kind).flatMap { state ->
-                        val failure = SerdeResult.failure(SerdeError.custom("returned failure"))
-                        assertSame(failure, state.add(FailureValue(failure)))
-                        val panic = SerdeException(SerdeError.custom("thrown callback"))
-                        assertSame(panic, assertFailsWith<SerdeException> { state.add(PanicValue(panic)) })
-                        state.add(Content.I32(7)).flatMap { state.end() }
-                    }
-            }
+            val value =
+                object : Serialize {
+                    override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+                        buffer(serializer, kind).flatMap { state ->
+                            val failure = SerdeResult.failure(SerdeError.custom("returned failure"))
+                            assertSame(failure, state.add(FailureValue(failure)))
+                            val panic = SerdeException(SerdeError.custom("thrown callback"))
+                            assertSame(panic, assertFailsWith<SerdeException> { state.add(PanicValue(panic)) })
+                            state.add(Content.I32(7)).flatMap { state.end() }
+                        }
+                }
             assertEquals(expected[kind], capture(value))
         }
     }
@@ -221,13 +252,14 @@ class PrivateSerializeBoundaryParityTest {
     @Test
     fun contentByteBufferOwnsItsSnapshotBeforeCallerMutation() {
         val bytes = byteArrayOf(1, 2, 3)
-        val value = object : Serialize {
-            override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
-                serializer.serializeBytes(bytes).map { captured ->
-                    bytes[1] = 99
-                    captured
-                }
-        }
+        val value =
+            object : Serialize {
+                override fun <Ok> serialize(serializer: Serializer<Ok>): SerdeResult<Ok> =
+                    serializer.serializeBytes(bytes).map { captured ->
+                        bytes[1] = 99
+                        captured
+                    }
+            }
         val content = assertIs<Content.Bytes>(capture(value))
         assertContentEquals(byteArrayOf(1, 2, 3), content.value)
         assertContentEquals(byteArrayOf(1, 99, 3), bytes)

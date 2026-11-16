@@ -70,9 +70,13 @@ interface MapAccess {
     fun sizeHint(): Int? = null
 }
 
-private class PresentMapKey<K>(val value: K)
+private class PresentMapKey<K>(
+    val value: K,
+)
 
-private class PresentMapKeySeed<K>(private val seed: DeserializeSeed<K>) : DeserializeSeed<PresentMapKey<K>> {
+private class PresentMapKeySeed<K>(
+    private val seed: DeserializeSeed<K>,
+) : DeserializeSeed<PresentMapKey<K>> {
     override fun <D> deserialize(deserializer: D): SerdeResult<PresentMapKey<K>>
         where D : Deserializer = seed.deserialize(deserializer).map { PresentMapKey(it) }
 }

@@ -13,9 +13,9 @@ import io.github.kotlinmania.serdetest.Token
 import io.github.kotlinmania.serdetest.assertDeTokens
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertSame
-import kotlin.test.assertFailsWith
 
 class VariantIdentifierParityTest {
     private class Payload(
@@ -141,11 +141,13 @@ class VariantIdentifierParityTest {
     @Test
     fun osStringAcceptsNumericVariantIndices() {
         assertDeTokens(
-            OsStringValue.Unix(listOf(1u, 2u, 3u)), OsStringDeserialize,
+            OsStringValue.Unix(listOf(1u, 2u, 3u)),
+            OsStringDeserialize,
             listOf(Token.Enum("OsString"), Token.U64(0uL), Token.Seq(3), Token.U8(1u), Token.U8(2u), Token.U8(3u), Token.SeqEnd),
         )
         assertDeTokens(
-            OsStringValue.Windows(listOf(1u, 2u, 3u)), OsStringDeserialize,
+            OsStringValue.Windows(listOf(1u, 2u, 3u)),
+            OsStringDeserialize,
             listOf(Token.Enum("OsString"), Token.U64(1uL), Token.Seq(3), Token.U16(1u), Token.U16(2u), Token.U16(3u), Token.SeqEnd),
         )
     }
@@ -179,9 +181,12 @@ class VariantIdentifierParityTest {
     @Test
     fun osStringIdentifierPanicPropagatesUnchanged() {
         val panic = IllegalStateException("identifier panic")
-        val input = Input(object : Deserializer by UnitDeserializer.new() {
-            override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = throw panic
-        })
+        val input =
+            Input(
+                object : Deserializer by UnitDeserializer.new() {
+                    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = throw panic
+                },
+            )
         assertSame(panic, assertFailsWith<IllegalStateException> { OsStringDeserialize.deserialize(input) })
         assertEquals(emptyList(), input.trace)
     }
@@ -189,9 +194,12 @@ class VariantIdentifierParityTest {
     @Test
     fun osStringIdentifierErrorPreservesIdentity() {
         val error = SerdeError("identifier error")
-        val input = Input(object : Deserializer by UnitDeserializer.new() {
-            override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = SerdeResult.failure(error)
-        })
+        val input =
+            Input(
+                object : Deserializer by UnitDeserializer.new() {
+                    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = SerdeResult.failure(error)
+                },
+            )
         val failure = assertIs<SerdeResult.Failure>(OsStringDeserialize.deserialize(input))
         assertSame(error, failure.error)
         assertEquals(emptyList(), input.trace)

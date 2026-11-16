@@ -21,7 +21,9 @@ class EnumConvenienceParityTest {
         override fun <V> structVariant(fields: List<String>, visitor: Visitor<V>): SerdeResult<V> = error("unexpected struct variant")
     }
 
-    private class Enum(private val variant: Variant) : EnumAccess {
+    private class Enum(
+        private val variant: Variant,
+    ) : EnumAccess {
         var calls = 0
         override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> {
             calls++
@@ -44,9 +46,10 @@ class EnumConvenienceParityTest {
 
     @Test
     fun convenienceMethodsPreserveNullableValues() {
-        val codec = object : Deserialize<Int?> {
-            override fun <D> deserialize(deserializer: D): SerdeResult<Int?> where D : Deserializer = SerdeResult.success(null)
-        }
+        val codec =
+            object : Deserialize<Int?> {
+                override fun <D> deserialize(deserializer: D): SerdeResult<Int?> where D : Deserializer = SerdeResult.success(null)
+            }
         val variant = Variant()
         val access = Enum(variant)
         assertEquals(null, access.variant(codec).getOrThrow().first)
@@ -58,16 +61,18 @@ class EnumConvenienceParityTest {
     @Test
     fun failuresAndThrownExceptionsRetainIdentity() {
         val failure = SerdeResult.failure(SerdeError.custom("codec failure"))
-        val errorCodec = object : Deserialize<Int> {
-            override fun <D> deserialize(deserializer: D): SerdeResult<Int> where D : Deserializer = failure
-        }
+        val errorCodec =
+            object : Deserialize<Int> {
+                override fun <D> deserialize(deserializer: D): SerdeResult<Int> where D : Deserializer = failure
+            }
         val variant = Variant()
         assertSame(failure, Enum(variant).variant(errorCodec))
         assertSame(failure, variant.newtypeVariant(errorCodec))
         val panic = IllegalStateException("codec panic")
-        val panicCodec = object : Deserialize<Int> {
-            override fun <D> deserialize(deserializer: D): SerdeResult<Int> where D : Deserializer = throw panic
-        }
+        val panicCodec =
+            object : Deserialize<Int> {
+                override fun <D> deserialize(deserializer: D): SerdeResult<Int> where D : Deserializer = throw panic
+            }
         assertSame(panic, assertFailsWith<IllegalStateException> { Enum(variant).variant(panicCodec) })
         assertSame(panic, assertFailsWith<IllegalStateException> { variant.newtypeVariant(panicCodec) })
     }
