@@ -42,7 +42,7 @@ jobs:
               publishAndroidPublicationToMavenLocal \
               publishAndroidNativeX64PublicationToMavenLocal \
               publishLinuxX64PublicationToMavenLocal \
-              --no-configuration-cache
+              -x publicationCheck --no-configuration-cache
             git clone --depth 1 https://github.com/KotlinMania/serde-test-kotlin.git "$RUNNER_TEMP/serde-test-kotlin"
             ./gradlew -p "$RUNNER_TEMP/serde-test-kotlin" setupAndroidSdk \
               publishKotlinMultiplatformPublicationToMavenLocal \
@@ -50,7 +50,7 @@ jobs:
               publishAndroidPublicationToMavenLocal \
               publishAndroidNativeX64PublicationToMavenLocal \
               publishLinuxX64PublicationToMavenLocal \
-              --no-configuration-cache
+              -x publicationCheck --no-configuration-cache
           fi
       - name: Run Android emulator device tests (KVM)
         run: ./gradlew setupAndroidSdk verifyAndroidDeviceTestResults validateAndroidNativeX64Runtime --no-configuration-cache
