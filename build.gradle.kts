@@ -595,6 +595,9 @@ kotlin {
             // Disable UNCHECKED_CAST on KGP's generated bridge only while keeping
             // allWarningsAsErrors = true for all source compilations and all other bridge diagnostics.
             compilerOptions.freeCompilerArgs.add("-Xwarning-level=UNCHECKED_CAST:disabled")
+            // 2.4.20-km.4 omits @Suppress("DEPRECATION") on generated forward-bridge calls (t_018a1da0);
+            // keep allWarningsAsErrors = true and DEPRECATION enforced on all source/test compilations.
+            compilerOptions.freeCompilerArgs.add("-Xwarning-level=DEPRECATION:disabled")
         }
 
     // Native FFI — Kotlin/Native cinterop + per-target static wrapper library
