@@ -54,7 +54,7 @@ val Content.Newtype.value: Content get() = __rtkField0
 fun newSeqContent(value: List<Content>): Content.Seq = Content.Seq(value.toMutableList())
 
 /** Transfers a capture buffer; the caller must stop mutating it after this call. */
-fun takeSeqContent(value: MutableList<Content>): Content.Seq = Content.Seq(value)
+internal fun takeSeqContent(value: MutableList<Content>): Content.Seq = Content.Seq(value)
 val Content.Seq.value: List<Content> get() = __rtkField0
 class ContentMapEntry(
     val key: Content,
@@ -63,7 +63,7 @@ class ContentMapEntry(
 fun newMapContent(value: List<ContentMapEntry>): Content.Map = Content.Map(value.map { it.key to it.value }.toMutableList())
 
 /** Transfers a capture buffer without replacing its selected allocation policy. */
-fun takeMapContent(value: MutableList<Pair<Content, Content>>): Content.Map = Content.Map(value)
+internal fun takeMapContent(value: MutableList<Pair<Content, Content>>): Content.Map = Content.Map(value)
 val Content.Map.value: List<ContentMapEntry> get() = __rtkField0.map { ContentMapEntry(it.first, it.second) }
 
 /** Legacy values are copied into owned storage; borrowed arrays retain their selected storage. */
@@ -94,5 +94,5 @@ fun LegacyContent.toGeneratedContent(): Content =
     }
 
 fun unexpectedChar(codePoint: Int): Unexpected = if (codePoint <= 0xffff) Unexpected.CharValue(codePoint.toChar()) else UnexpectedScalarChar(codePoint)
-fun newContentBuffer(hint: Int?): MutableList<Content> = generatedContentCapacity(hint, false)
-fun newContentPairBuffer(hint: Int?): MutableList<Pair<Content, Content>> = generatedContentCapacity(hint, true)
+internal fun newContentBuffer(hint: Int?): MutableList<Content> = generatedContentCapacity(hint, false)
+internal fun newContentPairBuffer(hint: Int?): MutableList<Pair<Content, Content>> = generatedContentCapacity(hint, true)

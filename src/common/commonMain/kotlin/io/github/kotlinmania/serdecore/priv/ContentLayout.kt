@@ -20,11 +20,11 @@ private fun contentCapacity(hint: Int?, rustElementSizeBytes: ULong): Int {
  * preallocate using the exact generated bound. Else use ordinary Kotlin list
  * growth: no Rust element size or equivalent capacity is implied for that target.
  */
-fun newContentBuffer(hint: Int?): MutableList<Content> =
+internal fun newContentBuffer(hint: Int?): MutableList<Content> =
     contentBuffer(hint, verifiedRustContentSizes(rustContentLayoutTarget())?.first)
 
 /** Kotlin allocation adapter for the source's (Content, Content) sequence. */
-fun newContentMapBuffer(hint: Int?): MutableList<ContentMapEntry> =
+internal fun newContentMapBuffer(hint: Int?): MutableList<ContentMapEntry> =
     contentBuffer(hint, verifiedRustContentSizes(rustContentLayoutTarget())?.second)
 
 internal fun <T> contentBuffer(hint: Int?, rustElementSizeBytes: ULong?): ArrayList<T> {
