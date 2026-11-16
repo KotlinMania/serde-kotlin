@@ -17,8 +17,55 @@ permissions:
   contents: read
 
 jobs:
+  bootstrap-serde-test:
+    name: Bootstrap serde-test-kotlin 0.1.2 for CI
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          check-latest: true
+      - name: Set up Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+      - name: Build serde-test-kotlin 0.1.2 mavenLocal archive if not yet on Maven Central
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: |
+          mkdir -p build/bootstrap-m2
+          if ! curl -sfI https://repo1.maven.org/maven2/io/github/kotlinmania/serde-test-kotlin/0.1.2/serde-test-kotlin-0.1.2.pom >/dev/null; then
+            ./gradlew setupAndroidSdk publishToMavenLocal -x publicationCheck --no-configuration-cache
+            git clone --depth 1 https://github.com/KotlinMania/serde-test-kotlin.git "$RUNNER_TEMP/serde-test-kotlin"
+            ./gradlew -p "$RUNNER_TEMP/serde-test-kotlin" setupAndroidSdk publishToMavenLocal -x publicationCheck --no-configuration-cache
+            (cd ~/.m2/repository && tar -czf "$OLDPWD/build/bootstrap-m2/serde-test-m2.tar.gz" io/github/kotlinmania/serde-test-kotlin*)
+          else
+            touch build/bootstrap-m2/already-published.marker
+          fi
+      - name: Upload bootstrap serde-test-kotlin mavenLocal archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootstrap-serde-test-m2
+          path: build/bootstrap-m2/
+          retention-days: 1
+          if-no-files-found: error
+
   android-device-test:
     name: Verify Android Emulator Device Tests
+    needs: [bootstrap-serde-test]
     if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
     runs-on: ubuntu-26.04
     permissions:
@@ -33,13 +80,16 @@ jobs:
           java-version: '21'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.4.0
-      - name: Bootstrap serde-test-kotlin 0.1.2 into mavenLocal if not yet on Maven Central
+      - name: Download bootstrap serde-test-kotlin mavenLocal archive
+        uses: actions/download-artifact@v8
+        with:
+          name: bootstrap-serde-test-m2
+          path: ${{ runner.temp }}/bootstrap-m2
+      - name: Extract bootstrap serde-test-kotlin into mavenLocal
         run: |
-          if ! curl -sfI https://repo1.maven.org/maven2/io/github/kotlinmania/serde-test-kotlin/0.1.2/serde-test-kotlin-0.1.2.pom >/dev/null; then
-            ./gradlew setupAndroidSdk publishKotlinMultiplatformPublicationToMavenLocal publishAndroidPublicationToMavenLocal publishJvmPublicationToMavenLocal publishAndroidNativeX64PublicationToMavenLocal publishAndroidNativeArm64PublicationToMavenLocal -x publicationCheck --no-configuration-cache
-            git clone --depth 1 https://github.com/KotlinMania/serde-test-kotlin.git "$RUNNER_TEMP/serde-test-kotlin"
-            ./gradlew -p "$RUNNER_TEMP/serde-test-kotlin" setupAndroidSdk publishKotlinMultiplatformPublicationToMavenLocal publishAndroidPublicationToMavenLocal publishJvmPublicationToMavenLocal publishAndroidNativeX64PublicationToMavenLocal publishAndroidNativeArm64PublicationToMavenLocal -x publicationCheck --no-configuration-cache
-            rm -rf ~/.m2/repository/io/github/kotlinmania/serde-kotlin* "$RUNNER_TEMP/serde-test-kotlin"
+          if [ -f "$RUNNER_TEMP/bootstrap-m2/serde-test-m2.tar.gz" ]; then
+            mkdir -p ~/.m2/repository
+            tar -xzf "$RUNNER_TEMP/bootstrap-m2/serde-test-m2.tar.gz" -C ~/.m2/repository
           fi
       - name: Run Android emulator device tests (KVM)
         run: ./gradlew setupAndroidSdk verifyAndroidDeviceTestResults validateAndroidNativeX64Runtime --no-configuration-cache
@@ -53,8 +103,8 @@ jobs:
 
   publish:
     name: Publish to Maven Central
-    needs: [android-device-test]
-    if: ${{ always() && (needs.android-device-test.result == 'success' || needs.android-device-test.result == 'skipped') }}
+    needs: [bootstrap-serde-test, android-device-test]
+    if: ${{ always() && (needs.bootstrap-serde-test.result == 'success' || needs.bootstrap-serde-test.result == 'skipped') && (needs.android-device-test.result == 'success' || needs.android-device-test.result == 'skipped') }}
     runs-on: macos-latest
 
     permissions:
@@ -97,16 +147,19 @@ jobs:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: ./gradlew setupAndroidSdk androidPublicationBundle --no-configuration-cache
 
-      - name: Bootstrap serde-test-kotlin 0.1.2 into mavenLocal if not yet on Maven Central
+      - name: Download bootstrap serde-test-kotlin mavenLocal archive
         if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
-        env:
-          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        uses: actions/download-artifact@v8
+        with:
+          name: bootstrap-serde-test-m2
+          path: ${{ runner.temp }}/bootstrap-m2
+
+      - name: Extract bootstrap serde-test-kotlin into mavenLocal
+        if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
         run: |
-          if ! curl -sfI https://repo1.maven.org/maven2/io/github/kotlinmania/serde-test-kotlin/0.1.2/serde-test-kotlin-0.1.2.pom >/dev/null; then
-            ./gradlew setupAndroidSdk publishToMavenLocal -x publicationCheck --no-configuration-cache
-            git clone --depth 1 https://github.com/KotlinMania/serde-test-kotlin.git "$RUNNER_TEMP/serde-test-kotlin"
-            ./gradlew -p "$RUNNER_TEMP/serde-test-kotlin" setupAndroidSdk publishToMavenLocal -x publicationCheck --no-configuration-cache
-            rm -rf ~/.m2/repository/io/github/kotlinmania/serde-kotlin* "$RUNNER_TEMP/serde-test-kotlin"
+          if [ -f "$RUNNER_TEMP/bootstrap-m2/serde-test-m2.tar.gz" ]; then
+            mkdir -p ~/.m2/repository
+            tar -xzf "$RUNNER_TEMP/bootstrap-m2/serde-test-m2.tar.gz" -C ~/.m2/repository
           fi
 
       - name: Download verified Android device test results
