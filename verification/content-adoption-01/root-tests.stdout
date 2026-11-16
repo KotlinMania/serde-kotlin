@@ -1,0 +1,61 @@
+[==========] Running 19 tests from 6 test cases.
+[----------] Global test environment set-up.
+[----------] 2 tests from io.github.kotlinmania.serde.UntaggedContentTest
+[ RUN      ] io.github.kotlinmania.serde.UntaggedContentTest.failedAttemptDoesNotConsumeTheNextAttempt
+[       OK ] io.github.kotlinmania.serde.UntaggedContentTest.failedAttemptDoesNotConsumeTheNextAttempt (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.UntaggedContentTest.nullableElementsAreValuesRatherThanEndOfSequence
+[       OK ] io.github.kotlinmania.serde.UntaggedContentTest.nullableElementsAreValuesRatherThanEndOfSequence (0 ms)
+[----------] 2 tests from io.github.kotlinmania.serde.UntaggedContentTest (0 ms total)
+
+[----------] 6 tests from io.github.kotlinmania.serde.priv.GeneratedContentReplayTest
+[ RUN      ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureReplaysCompleteScalarsAcrossIndependentAttempts
+[       OK ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureReplaysCompleteScalarsAcrossIndependentAttempts (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureAndBothReplayModesRetainBorrowedRegions
+[       OK ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureAndBothReplayModesRetainBorrowedRegions (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.legacyInputsRemainUsableAndAreCopiedAtTheOwnedBoundary
+[       OK ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.legacyInputsRemainUsableAndAreCopiedAtTheOwnedBoundary (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.replayPreservesOwnedAndBorrowedVisitorDispatch
+[       OK ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.replayPreservesOwnedAndBorrowedVisitorDispatch (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.taggedCaptureUsesExactRangeAndPreservesScalarVariant
+[       OK ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.taggedCaptureUsesExactRangeAndPreservesScalarVariant (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.invalidUtf8AndScalarDiagnosticsMatchTheActualValue
+[       OK ] io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.invalidUtf8AndScalarDiagnosticsMatchTheActualValue (0 ms)
+[----------] 6 tests from io.github.kotlinmania.serde.priv.GeneratedContentReplayTest (0 ms total)
+
+[----------] 4 tests from io.github.kotlinmania.serde.priv.NullableContentSequenceTest
+[ RUN      ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentRetainsNullableSequenceElements
+[       OK ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentRetainsNullableSequenceElements (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentRetainsNullableSequenceElements
+[       OK ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentRetainsNullableSequenceElements (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentMapSequenceRetainsNullablePairFields
+[       OK ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentMapSequenceRetainsNullablePairFields (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentMapSequenceRetainsNullablePairFields
+[       OK ] io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentMapSequenceRetainsNullablePairFields (0 ms)
+[----------] 4 tests from io.github.kotlinmania.serde.priv.NullableContentSequenceTest (0 ms total)
+
+[----------] 1 tests from io.github.kotlinmania.serde.priv.TestIgnoredAnyTest
+[ RUN      ] io.github.kotlinmania.serde.priv.TestIgnoredAnyTest.testDeserializeEnum
+[       OK ] io.github.kotlinmania.serde.priv.TestIgnoredAnyTest.testDeserializeEnum (0 ms)
+[----------] 1 tests from io.github.kotlinmania.serde.priv.TestIgnoredAnyTest (0 ms total)
+
+[----------] 3 tests from io.github.kotlinmania.serde.priv.TestValueTest
+[ RUN      ] io.github.kotlinmania.serde.priv.TestValueTest.testU32ToEnum
+[       OK ] io.github.kotlinmania.serde.priv.TestValueTest.testU32ToEnum (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.TestValueTest.testInteger128
+[       OK ] io.github.kotlinmania.serde.priv.TestValueTest.testInteger128 (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.TestValueTest.testMapAccessToEnum
+[       OK ] io.github.kotlinmania.serde.priv.TestValueTest.testMapAccessToEnum (0 ms)
+[----------] 3 tests from io.github.kotlinmania.serde.priv.TestValueTest (0 ms total)
+
+[----------] 3 tests from io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest
+[ RUN      ] io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.sequenceCallerRejectsANegativeRustHintBeforeReading
+[       OK ] io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.sequenceCallerRejectsANegativeRustHintBeforeReading (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.mapCallerRejectsANegativeRustHintBeforeReading
+[       OK ] io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.mapCallerRejectsANegativeRustHintBeforeReading (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.taggedMapCallerRejectsANegativeRustHintBeforeReading
+[       OK ] io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.taggedMapCallerRejectsANegativeRustHintBeforeReading (0 ms)
+[----------] 3 tests from io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 6 test cases ran. (0 ms total)
+[  PASSED  ] 19 tests.

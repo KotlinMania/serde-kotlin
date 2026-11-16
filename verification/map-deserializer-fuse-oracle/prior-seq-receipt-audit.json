@@ -1,0 +1,103 @@
+{
+  "commit": "c276793",
+  "testedHashes": [
+    {
+      "path": "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/value/Value.kt",
+      "sha256": "4a5d82e8ed23bd52fcf7e17b5072456ed0b80c86b808109b6b7decf9bf7dc475",
+      "matchesFinalTestedReceipt": true
+    },
+    {
+      "path": "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/SeqDeserializerFuseParityTest.kt",
+      "sha256": "42cdd49f814eafcbbf761ba04afc112d56e12814b10b239aff8c04cf4b11c121",
+      "matchesFinalTestedReceipt": true
+    },
+    {
+      "path": "tmp/serde/serde_core/src/de/value.rs",
+      "sha256": "fb6fef6d23d95d516c6e1d6b5cefd8b98ba3881214a82a8a7e0a8ffbb0a12083",
+      "matchesFinalTestedReceipt": true
+    },
+    {
+      "path": "verification/seq-deserializer-fuse-oracle/src/lib.rs",
+      "sha256": "d94f596189264d0df1bfd6d6bd50a4b840d2ad4bcc7aea448b00bea4e7f52181",
+      "matchesFinalTestedReceipt": true
+    }
+  ],
+  "correctedIteratorGuardPresent": true,
+  "runtime": {
+    "jvmTest": {
+      "tests": 417,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T17:32:09.140Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 185,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T17:33:49.609Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ]
+    }
+  },
+  "staticEOFAttributionCorrection": [
+    {
+      "path": "src/commonMain/kotlin/io/github/kotlinmania/serderive/internals/Check.kt",
+      "byteIdenticalToBaseline": true,
+      "sha256": "eae1956a51a245937c732f6a135ab8e34987d057e8935d9ca79e2a2b1499cfa3",
+      "physicalLineCount": 413,
+      "EOFDiagnostics": [
+        {
+          "line": "414",
+          "column": "1",
+          "severity": "error",
+          "message": "Needless blank line(s)",
+          "source": "standard:no-consecutive-blank-lines"
+        }
+      ],
+      "oldAttribution": "flagged outside equal-line ranges",
+      "correctedAttribution": "unchanged EOF in byte-identical file"
+    },
+    {
+      "path": "src/commonMain/kotlin/io/github/kotlinmania/serderive/internals/Internals.kt",
+      "byteIdenticalToBaseline": true,
+      "sha256": "b88b208fe889d9df0cee09052d0d5cf4d6ff37a8eea07ecc1f32df09b9e8326a",
+      "physicalLineCount": 18,
+      "EOFDiagnostics": [
+        {
+          "line": "19",
+          "column": "1",
+          "severity": "error",
+          "message": "Needless blank line(s)",
+          "source": "standard:no-consecutive-blank-lines"
+        }
+      ],
+      "oldAttribution": "flagged outside equal-line ranges",
+      "correctedAttribution": "unchanged EOF in byte-identical file"
+    }
+  ],
+  "historicalFormatReportsExcluded": true
+}

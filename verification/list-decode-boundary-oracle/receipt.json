@@ -1,0 +1,263 @@
+{
+  "baseline": "89aa3ca",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "89aa3ca",
+    "0ba0d3f",
+    "a8f39bf",
+    "b94fab6",
+    "adfcae0",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "recordedAtUTC": "2026-11-02T23:18:52.638143+00:00",
+  "translatorReuse": {
+    "input": "tmp/serde/serde_core/src/de/impls.rs",
+    "sha256": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "matchesPriorSuccessfulTranslation": true,
+    "output": "build/rust-kotlin-string-in-place/ImplsReview.kt",
+    "outputSha256": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "macroSourceIndependentlyReviewed": [
+      "variant_identifier",
+      "deserialize_enum",
+      "IpAddr",
+      "SocketAddr"
+    ],
+    "newTranslatorProcessStarted": false,
+    "comparison": "Generated VecVisitor lines 3713-3732 uses direct sizeHint/nextElement result loop, no programming-exception catch; manual Kotlin adaptation retains canonical SeqElement/SerdeResult.",
+    "allocationLimit": "Existing Kotlin capacity policy unchanged; no Rust generic element-layout/cautious-capacity equivalence claimed."
+  },
+  "productionScope": "Only fresh mutableListDeserialize anonymous visitor, no allocation policy, in-place or public API change. Prior MapAccess and Value sources unchanged.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "rustOracle": {
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "command": "cargo test --offline --manifest-path verification/list-decode-boundary-oracle/Cargo.toml --target-dir build/rust-kotlin-list-decode-boundary/rust-target"
+  },
+  "red": {
+    "suite": {
+      "name": "ListDecodeBoundaryParityTest[jvm]",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "4",
+      "errors": "0",
+      "timestamp": "2026-11-02T23:15:51.847Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.033"
+    },
+    "failures": [
+      {
+        "case": "accessPanicPrecedesCodec[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(access panic)>."
+      },
+      {
+        "case": "firstCodecPanicStopsInput[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(codec panic)>."
+      },
+      {
+        "case": "secondCodecPanicStopsInput[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(codec panic)>."
+      },
+      {
+        "case": "hintPanicPrecedesAccess[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(hint panic)>."
+      }
+    ]
+  },
+  "finalCommand": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 520,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "ListDecodeBoundaryParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:16:34.689Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.033"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:16:34.914Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:16:34.900Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:16:34.893Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:16:34.897Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 288,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.ListDecodeBoundaryParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:18:34.731Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:18:34.738Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:18:34.732Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:18:34.729Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:18:34.731Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "limits": [
+    "Rust cautious generic allocation not implemented; existing capacity expression unchanged",
+    "Allocator/OOM and Drop parity not established",
+    "Other exception boundaries remain",
+    "Nullable map key versus absence unresolved",
+    "Borrow/ownership and generic error/trait/usize specialization",
+    "Other element types/platforms/downstream untested",
+    "Kotlin typed error identity is a binding-specific observation"
+  ],
+  "hashes": {
+    "build/rust-kotlin-list-decode-boundary/attribution.log": "ac3b5949685b3ee012bd3d3aab3563ea1141ff6605b9c4bbc0612d807dcd1691",
+    "build/rust-kotlin-list-decode-boundary/final-check.log": "99ea7749009cd832df73ffea07d517cc63a0a31310d11fc67e3d87d11a723342",
+    "build/rust-kotlin-list-decode-boundary/final-source-sha256.txt": "ef8e3a5a30ed3425bc969527fe6eba3fb5e81d08f214d7b08f56c97c409296d4",
+    "build/rust-kotlin-list-decode-boundary/final-validation.json": "29b21bce845c239b37a24a161713834add842c9160b1832d1f0f918dfc631b65",
+    "build/rust-kotlin-list-decode-boundary/new-test-before-fix.sha256": "950f689670cb8ca685597d1b023643da47be98fcdebec741e19c14925fd15f0b",
+    "build/rust-kotlin-list-decode-boundary/production-change.json": "4b3da853f54261b2ce95f60ed16146c7b49fbbe66d43a7fb516d301c4918386d",
+    "build/rust-kotlin-list-decode-boundary/red-jvm.log": "e4fa87090e2679f7e6890c6b2c566cc67d9ff585fbc7fdb6699a2d3ee3bb1ac5",
+    "build/rust-kotlin-list-decode-boundary/red-suite.xml": "8133fc1c874a8f5f8e8752197a90ec3789fce6ba58e9f8ba4704d2488e6547e4",
+    "build/rust-kotlin-list-decode-boundary/red-validation.json": "d404a31e49eb2dbff3f22fc374e79a32b66d9d3b35163b6284c9d278a3b7c6d7",
+    "build/rust-kotlin-list-decode-boundary/rust-oracle.log": "29a2fe2f08cbf31f7595a98fd7f23b69ac552393c9287fa6d7ee77a58cb96e9c",
+    "build/rust-kotlin-list-decode-boundary/translator-reuse.json": "67277ea449b8246305fe3ac1288288f264694a3601e61475f07749b6edf6d1f5",
+    "build/rust-kotlin-list-decode-boundary/verify_final.py": "0ac60a2f48a4678f00383c41fb806b50d563b138a400e54ac6e6344b1e92d1f1",
+    "build/rust-kotlin-list-decode-boundary/write_receipt.py": "892cbb336194bd3e34d73433c35c7369d4b0177cca013d9f3220996be0a833c0",
+    "build/rust-kotlin-string-in-place/ImplsReview.kt": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.value.ListDecodeBoundaryParityTest.xml": "ed40e952bf37f1e5820ea4272d87bd56a43101b0ec69e8192a0c35c8ca4c63d8",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.value.ListDecodeBoundaryParityTest.xml": "40431f2d75c947bcf3cbc0e85d1cc5f8b65834001707107b0a7b0fc0568a3b72",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Impls.kt": "03d252971b6672be113835d3dcaee7a1377b4af440c6d35d2860d7999fd31f98",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MapAccess.kt": "5b5e89218c6eca66cad31beedd5d6cc9f4b98bcff9c44c9175b93ac88144fbfc",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/value/Value.kt": "e396b6da2ff81de009d41ded842f1d5e6773ffdc9068510cbb01aafb11222378",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/MutablePlaceTest.kt": "159fd968256d0391ce7156be349524274a7ae079a615375530adc205f98952e0",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/ListDecodeBoundaryParityTest.kt": "f169334348f06e104d5c82d56014ebe952b77a167b698411d83e4ea5e7269a25",
+    "tmp/serde/serde_core/src/de/impls.rs": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "verification/inplace-panic-characterization/receipt.json": "22c38b06c2ba559cf87149d05e646c834ab991a2f25c66d5f0290ad528161b57",
+    "verification/list-decode-boundary-oracle/Cargo.lock": "d67782057e757e83cda9c0759af87ab6147ffa8495674efec3f4f2e719b5816a",
+    "verification/list-decode-boundary-oracle/Cargo.toml": "79a0af5a9380d9aab1576454d386e5b15ed5bc3d5422651e655e6b168cc0b8a9",
+    "verification/list-decode-boundary-oracle/README.md": "cd6e4bcab60f0e1e7b674196b8a00ed32a053fcc412ef90224bbc1e7af515454",
+    "verification/list-decode-boundary-oracle/src/lib.rs": "fffe443bfcb52a84a478ccc4c4da06828d075a9d5817705c95c0ca4c10e8ab0c",
+    "verification/map-entry-default-oracle/receipt.json": "4dc789bc0064522eb77830920df726629a516ff04d4b55323a291782ad54966d",
+    "verification/map-enum-seed-oracle/receipt.json": "7695ecafd585829c6555dc4f76e031582c891b79416ce6785e9b54ae68f33d7c",
+    "verification/map-unit-variant-oracle/receipt.json": "0457b1ddcdd6168f3135076101cb9d731c40010d22d62ddfe9d0353a37e095c0",
+    "verification/visitor-end-boundary-oracle/receipt.json": "3a855c1b6ee7c1d4369b4a56d6563202b737ed72f7fff8fbde1a339b1b70af9c"
+  }
+}

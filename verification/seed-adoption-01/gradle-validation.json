@@ -1,0 +1,204 @@
+{
+  "status": "passed",
+  "target": "macos_arm64",
+  "new_adopted_files": 1,
+  "modules": {
+    "serde-core": {
+      "tests": 93,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.ConcreteOutcomeTest.xml",
+          "sha256": "cef0eaa3ebbac2fd9bef1401b5cad8c0bf7c4b6d6a9c66346039e6e3254d2d86",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.ImplsErrorTest.xml",
+          "sha256": "8fdface8465a83f64b94b1b97052519e32a7d9cac92401cd64bb90d34f870f11",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.ImplsTest.xml",
+          "sha256": "10e885a7ae1a4f7db9d0b42eee0d32d4628c14989e8e635b3c89a11b94500627",
+          "tests": 32,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.MutablePlaceTest.xml",
+          "sha256": "114cbd57979ca260f626fa93e4c22aa5d5fbbe678cb20d3d6cf1670361b9a8b1",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.NullableSequenceTest.xml",
+          "sha256": "c9ab823a41231ee837999f6b0cba1a07d5e83434662b3eb09a58fb36677a59ae",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.xml",
+          "sha256": "cfe010acda15c865f4b944451d87a7d9517869e2fd4a89d03c51595374e195b4",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.xml",
+          "sha256": "d7a099cae4d7f815cf4b93e8409e11cbfb740ea4cc8c4e7ea5417b33a34006d3",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest.xml",
+          "sha256": "143866b96fb06c15e029c2e17878dac51ea6db5fdf4a49c9c00351cef9f9ba3c",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.xml",
+          "sha256": "a815742fca01a794b9bc8ccdbd7f027cde08c3677155f618bc1c08486980934e",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.xml",
+          "sha256": "7b97b530979dace9f0163da88c617a24b3521b9d5fde58d5654413fd6d415bbe",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.xml",
+          "sha256": "5e2abf1fccf0533c78f63b8d1f0fac4cbb6652b33032d7751b945d6a03a360f1",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.priv.GeneratedSeedAdoptionTest.xml",
+          "sha256": "346352315bb5adc987ccec26415336b5379bbc8ccd0fbf36df66ca4496274051",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest.xml",
+          "sha256": "11f97e2d2d7a921d19621dc46c5fef17993ef48c148cf229caf44d919c5bfe27",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "serde_core/build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest.xml",
+          "sha256": "640636726886ed5ad256dad7aac84c68e378a9045f50f62cfa3e6236b2a865b3",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    "serde": {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.TestRoundtripTest.xml",
+          "sha256": "46b1d2b064e65da9f072cf233ff337366e98abdaa3ee292d9cfe1d79e4605054",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.UntaggedContentTest.xml",
+          "sha256": "e40c7e942ac9eb79b12436acc0e0f91dec13b9895c549b8bd2946efa2e2e851f",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.xml",
+          "sha256": "d9553e89618094207452fc9b00e37db6ccf3b7e88eab4014c6720f99b53f3a66",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.xml",
+          "sha256": "aafdc8f0b3c63d8295559f3d49e24a9da704390f38ec8b6388f2794552f9579e",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.NullableContentSequenceTest.xml",
+          "sha256": "81a2a654b37f4e6a347f3ae129c9a0e7c2e2dbc1989cd8a6259327f633e51234",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.TestIgnoredAnyTest.xml",
+          "sha256": "ac4ff2683d6da104c0a4307ce70cb44d5756e76170d44f21338190bcbfacb7d0",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serde.priv.TestValueTest.xml",
+          "sha256": "cd1c7cbbd5ceebcc3cca33b3993e5636a0e18b5dee6f0585237fbf071113368c",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  },
+  "command": "./gradlew --offline --no-daemon -Pproject.repositories.mavenLocal=true -Dmaven.repo.local=/Users/sydney/.m2/repository :serde-core:macosArm64Test :macosArm64Test",
+  "logs": {
+    "gradle-01": {
+      "raw_sha256": "d3f9127048456842f1d91e56b7c02f803e3dc6622f51dd04c06a9e5d2cc8f33a",
+      "saved_sha256": "0f06e5c0ee23283e300b3d09a645007d8e86a32e1a1fc55b3992884607574c7e"
+    },
+    "gradle-02": {
+      "raw_sha256": "62f0ff7dfef07e67d5bba1735302c4d6c5a30cb2c19100fa9f3014ae172d0387",
+      "saved_sha256": "1b327f0942d5a20546ac28bfe6a7136291f1b64548448e63efec188eda86a057"
+    }
+  },
+  "foreign_work_preserved": true,
+  "exclusions": []
+}

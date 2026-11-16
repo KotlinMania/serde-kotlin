@@ -1,0 +1,295 @@
+{
+  "baseline": "6b6b804",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "6b6b804",
+    "9ccc543",
+    "a34f78d",
+    "0ab54d7",
+    "9551a45",
+    "89aa3ca",
+    "0ba0d3f",
+    "a8f39bf",
+    "b94fab6",
+    "adfcae0",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "recordedAtUTC": "2026-11-02T23:55:32.621672+00:00",
+  "translatorReuse": {
+    "input": "tmp/serde/serde_core/src/de/impls.rs",
+    "sha256": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "matchesPriorSuccessfulTranslation": true,
+    "output": "build/rust-kotlin-string-in-place/ImplsReview.kt",
+    "outputSha256": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "macroSourceIndependentlyReviewed": [
+      "variant_identifier",
+      "deserialize_enum",
+      "IpAddr",
+      "SocketAddr"
+    ],
+    "newTranslatorProcessStarted": false,
+    "comparison": "Generated socket v4/v6 deserialize paths and FromStrVisitor delegate to Rust FromStr. Installed standard-library read_port/read_decimal and whole-input checks reviewed independently of IPv4 octet grammar."
+  },
+  "installedRustStdlib": {
+    "path": "/opt/homebrew/Cellar/rust/1.99.0_1/lib/rustlib/src/rust/library/core/src/net/parser.rs",
+    "sha256": "e6f6b332a3cf5860c5e193f3496435ed0f1971e6ce0932df15ecd16688b61c3e",
+    "rustcVersion": "rustc 1.99.0 (b940084d7 2026-09-28) (Homebrew)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.2\n",
+    "reviewed": "read_port; read_decimal checked u16 arithmetic, arbitrary zero prefixes; parse_with full input; SocketAddrV4/V6 call sites and AddrParseError messages"
+  },
+  "productionScope": "Only port checked-decimal parsing, first-colon IPv4 socket split and direct SocketV4/SocketV6 error constants. IPv4 grammar, IPv6 host parser, public models, binary paths and prior visitors/policies unchanged.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "newTestLayout": "Red source and exact loop-brace/chain-layout replacements retained; final test hash recorded before production. No assertion/input edits.",
+  "callerImpact": {
+    "direct": "parseSocketAddressV4 and parseSocketAddressV6 call parsePort; typed human-readable codecs use them",
+    "indirect": "generic SocketAddress parser",
+    "checked": "All v4 ports, v6 boundaries, valid-host invalid/leading-zero port acceptance and owned string",
+    "remaining": "Invalid-host and generic wrapper diagnostics, IPv6 scopes/flow info and broader downstream compatibility unverified"
+  },
+  "rustOracle": {
+    "testGroups": 9,
+    "passed": 9,
+    "failed": 0,
+    "v4PortValues": 65536,
+    "command": "cargo test --offline --manifest-path verification/socket-port-syntax-oracle/Cargo.toml --target-dir build/rust-kotlin-socket-port-syntax/rust-target"
+  },
+  "red": {
+    "suite": {
+      "name": "SocketPortSyntaxParityTest[jvm]",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "6",
+      "errors": "0",
+      "timestamp": "2026-11-02T23:51:17.541Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.075"
+    },
+    "failures": [
+      {
+        "case": "ownedStringUsesPortRules[jvm]",
+        "message": "java.lang.AssertionError: expected:<invalid IPv4 socket address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsNonAsciiDigits[jvm]",
+        "message": "java.lang.AssertionError: \u0668\u0660 expected:<invalid IPv4 socket address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsSigns[jvm]",
+        "message": "java.lang.AssertionError: +0 expected:<invalid IPv4 socket address syntax> but was:<null>"
+      },
+      {
+        "case": "rejectsOverflow[jvm]",
+        "message": "org.junit.ComparisonFailure: 65536 expected:<... IPv4 socket address[ syntax]> but was:<... IPv4 socket address[]>"
+      },
+      {
+        "case": "rejectsMalformedPorts[jvm]",
+        "message": "org.junit.ComparisonFailure: expected:<... IPv4 socket address[ syntax]> but was:<... IPv4 socket address[]>"
+      },
+      {
+        "case": "genericSocketCallerUsesPortRules[jvm]",
+        "message": "java.lang.AssertionError: 127.0.0.1:+80"
+      }
+    ]
+  },
+  "finalCommand": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 567,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "SocketPortSyntaxParityTest[jvm]",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:53:23.363Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.071"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:53:23.648Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:53:23.629Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:53:23.610Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:53:23.614Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 335,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SocketPortSyntaxParityTest",
+          "tests": "9",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:55:16.994Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:55:16.993Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:55:16.988Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:55:16.984Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-02T23:55:16.986Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "limits": [
+    "Invalid-host/generic socket diagnostic normalization remains",
+    "IPv6 host grammar/scopes/flow info not expanded",
+    "Generic allocation/hashing/ownership/platform limitations unchanged",
+    "Nullable-key, other exception and generic/usize binding limits remain",
+    "Broader downstream integration untested",
+    "No security or full-networking-parity claim"
+  ],
+  "hashes": {
+    "/opt/homebrew/Cellar/rust/1.99.0_1/lib/rustlib/src/rust/library/core/src/net/parser.rs": "e6f6b332a3cf5860c5e193f3496435ed0f1971e6ce0932df15ecd16688b61c3e",
+    "build/rust-kotlin-socket-port-syntax/attribution.log": "602e82cffb868c739add13e0473dfeea42ae3bea777a0d9179ae6c9d36d5a668",
+    "build/rust-kotlin-socket-port-syntax/caller-impact.txt": "2bb4554b9df676bdcec0930d41b0aeda3ee615f8dbf347e3e099536b35a89f54",
+    "build/rust-kotlin-socket-port-syntax/final-check.log": "5c6938e87f7dadf79d72885261c7e642b0edec70011f5487f597f83f7f970fd4",
+    "build/rust-kotlin-socket-port-syntax/final-source-sha256.txt": "4c5c0172dcc73aa5218754b59f93d4ad9b10e27259f98c184900b93c133aaadb",
+    "build/rust-kotlin-socket-port-syntax/final-validation.json": "c2b8f5ef7c4ddd7889098fd8db3e39303661a4376711673b47067311edcc6fa7",
+    "build/rust-kotlin-socket-port-syntax/new-test-before-fix.sha256": "eaf75940f833cf54cdd492261e45b63dea6cf773863ac31a1f9325aaa2f5fa6e",
+    "build/rust-kotlin-socket-port-syntax/production-change.json": "79232b65166e2c160870c67d49719f2b2c3abc02fc6022a46f3ecf3b9695d0d7",
+    "build/rust-kotlin-socket-port-syntax/red-jvm.log": "d588b7f3365be0de04eebd387eb39df64405b20cc7c5a8c3a518832a5993fe14",
+    "build/rust-kotlin-socket-port-syntax/red-suite.xml": "310e038b69e168e16f2c7a330b0bf65e11d934cb3071b82569f2955e8eb3d6c4",
+    "build/rust-kotlin-socket-port-syntax/red-test-source.kt": "55af962262f4f6f66756514633f6e4821040ea303e96dd1db5798231e674d946",
+    "build/rust-kotlin-socket-port-syntax/red-validation.json": "cdcd528cab68dbf96ed8c5613975af12c5b9c99738f402a6c440edbf1980c2a0",
+    "build/rust-kotlin-socket-port-syntax/rust-oracle.log": "c5bd64e7c396d63440e532f91bf3b8d1037833916d0de19ba655e08900ea7946",
+    "build/rust-kotlin-socket-port-syntax/stdlib-source.json": "2b951f7a7eca20e2f2a938fd10b84a3de2bda8c624fcda1dba1db94e0adb7f9b",
+    "build/rust-kotlin-socket-port-syntax/test-layout-change.json": "965e68e6c55fe97bfa7477116d8ca481c35ad4e08c42744f1d44383655bf1179",
+    "build/rust-kotlin-socket-port-syntax/translator-reuse.json": "19a215541823071bbc8ba8a06bc1e68b668b8c4ff3337da215a9303a8d68aab2",
+    "build/rust-kotlin-socket-port-syntax/verify_final.py": "5eb49e3a5d7978c73482ef55235ef7e89df29a2f1d6226d91cff68e86ad89c01",
+    "build/rust-kotlin-socket-port-syntax/write_receipt.py": "cb7404285afe3a16403fff302d8afa4824fe4e6cb92f6ef32da3b933a62e5922",
+    "build/rust-kotlin-string-in-place/ImplsReview.kt": "e1642d91695815742ee92b24c2095a9acc7e4085b95558db6821b53f1982e173",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.de.value.SocketPortSyntaxParityTest.xml": "28258794af1cea5031bfb4bc386ac41e4d3e49f61b98cbbfef68cf9ac235cf0f",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.de.value.SocketPortSyntaxParityTest.xml": "a2dd3f6fd72b47a1186fd148234eca5284163f9faff50695711e4f3ccfa798fb",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Impls.kt": "6f647caf314c2d7ddb91d097521ded5299042c9d58a6d7f1cbaf6b80a702fc3e",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MapAccess.kt": "5b5e89218c6eca66cad31beedd5d6cc9f4b98bcff9c44c9175b93ac88144fbfc",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/value/Value.kt": "e396b6da2ff81de009d41ded842f1d5e6773ffdc9068510cbb01aafb11222378",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/NetworkVariantParityTest.kt": "d275d3f60d37f0c51df34e5ecd648dee75e14873f998355578e20a40bb7660f5",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/Ipv4SyntaxParityTest.kt": "0ab4e70c7e2c35319968d8d27b5826c09aa2a8bb5117ae5ec2d7ee37fd1fa266",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/de/value/SocketPortSyntaxParityTest.kt": "990ca165748895a9d4d12b7360932e7c6076dbd63d20a552fdd7bcbf8a7c3dab",
+    "tmp/serde/serde_core/src/de/impls.rs": "9fb7a0322af51971fe1fa8f5b56c7ca3716622a6e9127b86bddfc0742c11383c",
+    "verification/inplace-panic-characterization/receipt.json": "22c38b06c2ba559cf87149d05e646c834ab991a2f25c66d5f0290ad528161b57",
+    "verification/ipv4-syntax-oracle/receipt.json": "508f23edb4e437be9c89521c8d9f4bf7fb5d842bac601ae123c174f29a2068fb",
+    "verification/map-decode-boundary-oracle/receipt.json": "e98a9b2e52a21bf93330d76e905e42fa7c9fad5a1ca57707a1f53ba0b20ee185",
+    "verification/result-visitor-boundary-oracle/receipt.json": "295b837457f267ed0ec7e11a2d55f518641159a2b03392e1ba068dbe5a48dd26",
+    "verification/set-decode-boundary-oracle/receipt.json": "3181d0b0c798d698bb530d4934f5fdd234ff7dc055ac4c4d7dd8ac5e266922fd",
+    "verification/socket-port-syntax-oracle/Cargo.lock": "14bacc82670f19ca097fac42174214e1344e815df927cdf38d27f5828870932b",
+    "verification/socket-port-syntax-oracle/Cargo.toml": "f6c3103ad2753194bcfbfc62743e254234fb9bd0884a006d41e95d0a5cc227d0",
+    "verification/socket-port-syntax-oracle/README.md": "aaae29d8a68f0f37b99604e205d9e5798bbf260dff6baece75dbdf01a9bf728f",
+    "verification/socket-port-syntax-oracle/src/lib.rs": "1d476f5f63bfbb428dd3dde801458cb8dbad44574a2271e71662180fe2568b76",
+    "verification/visitor-end-boundary-oracle/receipt.json": "3a855c1b6ee7c1d4369b4a56d6563202b737ed72f7fff8fbde1a339b1b70af9c"
+  }
+}

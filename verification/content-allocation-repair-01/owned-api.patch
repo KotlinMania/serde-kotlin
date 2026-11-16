@@ -1,0 +1,15 @@
+--- a/serde_core/api/android/serde-core.api
++++ b/serde_core/api/android/serde-core.api
+@@ -2176,0 +2177,2 @@
++	public static final fun newContentBuffer (Ljava/lang/Integer;)Ljava/util/ArrayList;
++	public static final fun newContentMapBuffer (Ljava/lang/Integer;)Ljava/util/ArrayList;
+--- a/serde_core/api/jvm/serde-core.api
++++ b/serde_core/api/jvm/serde-core.api
+@@ -2010,0 +2011,2 @@
++	public static final fun newContentBuffer (Ljava/lang/Integer;)Ljava/util/ArrayList;
++	public static final fun newContentMapBuffer (Ljava/lang/Integer;)Ljava/util/ArrayList;
+--- a/serde_core/api/serde-core.klib.api
++++ b/serde_core/api/serde-core.klib.api
+@@ -2320,0 +2321,2 @@
++final fun io.github.kotlinmania.serdecore.priv/newContentBuffer(kotlin/Int?): kotlin.collections/ArrayList<io.github.kotlinmania.serdecore.priv/Content> // io.github.kotlinmania.serdecore.priv/newContentBuffer|newContentBuffer(kotlin.Int?){}[0]
++final fun io.github.kotlinmania.serdecore.priv/newContentMapBuffer(kotlin/Int?): kotlin.collections/ArrayList<io.github.kotlinmania.serdecore.priv/ContentMapEntry> // io.github.kotlinmania.serdecore.priv/newContentMapBuffer|newContentMapBuffer(kotlin.Int?){}[0]

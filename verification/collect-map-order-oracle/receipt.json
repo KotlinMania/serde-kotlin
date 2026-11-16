@@ -1,0 +1,321 @@
+{
+  "baseline": "0ddf2b1",
+  "preExistingDirtyWorkIncluded": false,
+  "priorCheckpointsSeparate": [
+    "0ddf2b1",
+    "2fdf0e5",
+    "17a7ca3",
+    "47c81f6",
+    "6b6b804",
+    "9ccc543",
+    "a34f78d",
+    "0ab54d7",
+    "9551a45",
+    "89aa3ca",
+    "b94fab6",
+    "adfcae0",
+    "26fb96e",
+    "7c6c87a"
+  ],
+  "recordedAtUTC": "2026-11-03T00:52:53.800428+00:00",
+  "translatorEvidence": {
+    "priorAttempt": {
+      "command": [
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/../rust-kotlin/build/bin/nativeMacos/releaseExecutable/rust-kotlin.kexe",
+        "translate",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde_core/src/ser/mod.rs",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/rust-kotlin-collect-seq-order/SerializerReview.kt"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "rust-kotlin: expected curly braces\n",
+      "timedOut": false,
+      "sourceSha256": "ec097d92c8545356961e977a4c9650361cadd1d3a243d805ae7b0e0e589ae803",
+      "cliSha256": "027d237f2844e0291cf2b9e06ab4bd73e828abccce02db65db992fb3478396c4",
+      "outputExists": false,
+      "guardBypassed": false,
+      "distinctInputFromPriorDeModFailure": true
+    },
+    "priorAttemptPath": "build/rust-kotlin-collect-seq-order/translator-attempt.json",
+    "priorAttemptSha256": "881c3ef40f3bbbfb3a8b6737827b00f16bce0d7276fc86fb2c180009dc24b495",
+    "recordedFailureReused": true,
+    "newTranslatorProcessStarted": false,
+    "comparison": "Actual collect_map lines 1333-1345 and default SerializeMap.serialize_entry lines 1855-1861 independently reviewed; no generated output available."
+  },
+  "provenance": "Exact same-input recorded parse failure reused, no CLI retry/bypass/generated output; actual upstream collect_map/serialize_entry source and Rust defaults tested.",
+  "productionScope": "Only both default collectMap bodies and inherited SerializeMap.serializeEntry plus unused imports. All collectSeq bodies, hint adapters, network/decode/collection/allocation policies unchanged.",
+  "publicSignaturesChanged": false,
+  "existingTestsOrAssertionsChanged": false,
+  "newTestLayout": "Trace list and type-constraint layout only before production; exact red source/replacements and fixed pre-production hash retained.",
+  "rustOracle": {
+    "groups": 10,
+    "scenarios": 25,
+    "passed": 10,
+    "failed": 0,
+    "actualCollectorAndEntryDefaultsInvoked": true,
+    "command": "cargo test --offline --manifest-path verification/collect-map-order-oracle/Cargo.toml --target-dir build/rust-kotlin-collect-map-order/rust-target"
+  },
+  "fixtureReceiverProof": "Rust overrides neither collect_map nor serialize_entry. Kotlin default-super collector calls and compound without entry override exercise actual production defaults; complete key/value/scalar/protocol traces enforced.",
+  "red": {
+    "suite": {
+      "name": "CollectMapOrderParityTest[jvm]",
+      "tests": "10",
+      "skipped": "0",
+      "failures": "10",
+      "errors": "0",
+      "timestamp": "2026-11-03T00:46:44.111Z",
+      "hostname": "EmberHarmony.local",
+      "time": "0.036"
+    },
+    "failures": [
+      {
+        "case": "beginErrorCreatesIteratorWithoutReading[jvm]",
+        "message": "java.lang.AssertionError: expected:<[factory, begin:2]> but was:<[begin:2]>"
+      },
+      {
+        "case": "factoryAndHintPanicsPrecedeBegin[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(factory panic)>."
+      },
+      {
+        "case": "emptyOrder[jvm]",
+        "message": "java.lang.AssertionError: expected:<[factory, begin:0, eof, end]> but was:<[begin:0, factory, eof, end]>"
+      },
+      {
+        "case": "successOrder[jvm]",
+        "message": "java.lang.AssertionError: expected:<[factory, begin:2, yield:1:10, key, i32:1, value, i32:10, yield:2:20, key, i32:2, value, i32:20, eof, end]> but was:<[begin:2, factory, yield:1:10, key, i32:1, value, i32:10, yield:2:20, key, i32:2, value, i32:20, eof, end]>"
+      },
+      {
+        "case": "beginPanicCreatesIteratorWithoutReading[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(begin panic)>."
+      },
+      {
+        "case": "endErrorIsReturned[jvm]",
+        "message": "java.lang.AssertionError: expected:<[factory, begin:1, yield:1:10, key, i32:1, value, i32:10, eof, end]> but was:<[begin:1, factory, yield:1:10, key, i32:1, value, i32:10, eof, end]>"
+      },
+      {
+        "case": "nextPanicSkipsEntriesAndEnd[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(next panic)>."
+      },
+      {
+        "case": "endPanicPropagates[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(end panic)>."
+      },
+      {
+        "case": "keyOrValuePanicStopsSuffixAndEnd[jvm]",
+        "message": "java.lang.AssertionError: Expected an exception of class java.lang.IllegalStateException to be thrown, but was completed successfully with the result: <SerdeResult.Failure(item panic)>."
+      },
+      {
+        "case": "keyOrValueErrorStopsSuffixAndEnd[jvm]",
+        "message": "java.lang.AssertionError: expected:<[factory, begin:2, yield:-1:10, key, i32:-1]> but was:<[begin:2, factory, yield:-1:10, key, i32:-1]>"
+      }
+    ]
+  },
+  "redCoverageLimit": "Fail-fast groups do not prove baseline execution of later input forms/key-value branches; final passing loops execute all 25 scenarios.",
+  "hintRepresentationLimit": {
+    "rustSizeHintCallbacksAfterFactory": 1,
+    "kotlinCollectionSizeCallbacks": 1,
+    "kotlinSequenceHintCallbacks": 0,
+    "note": "Sequence helper still evaluates to null without external callback. Counts are asserted explicitly; no full metadata equivalence claimed."
+  },
+  "traceScope": "Construction/begin/yields/key/value/scalar/logical EOF/end, not total Rust next versus Kotlin hasNext/next polling equivalence.",
+  "finalCommand": "./gradlew jvmTest macosArm64Test detekt ktlintCheck --continue --console=plain",
+  "finalValidation": {
+    "jvmTest": {
+      "tests": 606,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "CollectMapOrderParityTest[jvm]",
+          "tests": "10",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:49:06.784Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.033"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "SeqDeserializerFuseParityTest[jvm]",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:49:07.031Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "MapDeserializerFuseParityTest[jvm]",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:49:07.013Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "StringInPlaceByteBoundaryTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:49:06.986Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "VariantIdentifierParityTest[jvm]",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:49:06.989Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ]
+    },
+    "macosArm64Test": {
+      "tests": 374,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failureCases": [],
+      "newSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.ser.CollectMapOrderParityTest",
+          "tests": "10",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:51:00.240Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ],
+      "preservedSeqSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.SeqDeserializerFuseParityTest",
+          "tests": "5",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:51:00.234Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedMapSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.value.MapDeserializerFuseParityTest",
+          "tests": "7",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:51:00.227Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.0"
+        }
+      ],
+      "preservedStringSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.StringInPlaceByteBoundaryTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:51:00.219Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.002"
+        }
+      ],
+      "preservedVariantSuite": [
+        {
+          "name": "macosArm64Test.io.github.kotlinmania.serdecore.de.VariantIdentifierParityTest",
+          "tests": "8",
+          "skipped": "0",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-11-03T00:51:00.222Z",
+          "hostname": "EmberHarmony.local",
+          "time": "0.001"
+        }
+      ]
+    },
+    "ktlintAndroidMainSourceSetCheck": 0,
+    "ktlintCommonMainSourceSetCheck": 2590,
+    "ktlintCommonTestSourceSetCheck": 240,
+    "ktlintJsMainSourceSetCheck": 0,
+    "ktlintJvmMainSourceSetCheck": 0,
+    "ktlintJvmTestSourceSetCheck": 3726,
+    "ktlintKotlinScriptCheck": 5,
+    "ktlintMacosArm64TestSourceSetCheck": 6,
+    "ktlintNativeMainSourceSetCheck": 0,
+    "ktlintWasmJsMainSourceSetCheck": 0,
+    "ktlintWasmWasiMainSourceSetCheck": 0,
+    "authoredKtlint": [],
+    "externalKtlint": [],
+    "detektFindings": 50,
+    "authoredDetekt": []
+  },
+  "limits": [
+    "Arbitrary/dynamic/min-max size hints not modeled; adapters unchanged",
+    "Consuming serializer/iterator ownership and Drop/GC not equivalent",
+    "usize/Int and full iterator protocol equivalence not established",
+    "Scoped sockets, outer FromStringVisitor, hashing/allocation/nullable-key/platform limits unchanged",
+    "Other formats/types and downstream integration untested"
+  ],
+  "hashes": {
+    "build/rust-kotlin-collect-map-order/attribution.log": "e24633cca53c5f96944cc5cd1f25c6b70de562ad92d6affb27c257f1a72fefbc",
+    "build/rust-kotlin-collect-map-order/final-check.log": "4cf4b34ca2b8b7d1e842ae5fd4eebb079657de9c12505a88a8464a76924bd33a",
+    "build/rust-kotlin-collect-map-order/final-source-sha256.txt": "4c0532268786d6fbc5f388956dece64dddcfe1809a2ce893fcad92c9632e3ea3",
+    "build/rust-kotlin-collect-map-order/final-validation.json": "80b588cda88d8249bc8b510f04248b702b17783dff0a36f4a4d263ccc1e3bdef",
+    "build/rust-kotlin-collect-map-order/new-test-before-fix.sha256": "ba4dd0a182b42a6172ea5c5fbc3302b3cfeb73ccda79e508d753ca4d2dc44ff7",
+    "build/rust-kotlin-collect-map-order/production-change.json": "29172cbe4270741d8fc660eea2c7629a4a1ffd569b03d64071c7e9a6b3e7375e",
+    "build/rust-kotlin-collect-map-order/red-jvm.log": "f1ebb1b3309c8a3f3b2c10dd12e20f261530cca8f93c8308cd64d098fd315ecd",
+    "build/rust-kotlin-collect-map-order/red-suite.xml": "1465ef94e7be029fbcc4db8dcf15d6baafb6a89f21e823c9742b4a9797b0b647",
+    "build/rust-kotlin-collect-map-order/red-test-source.kt": "a475a19757d137e932c1e0ad0416f0ec8f3e2af240d7e5d69b470a934ebe31ee",
+    "build/rust-kotlin-collect-map-order/red-validation.json": "69c303ddd93462aa64aab2d946b52044b84e4cdede9ce56839569932b1b8f90b",
+    "build/rust-kotlin-collect-map-order/rust-oracle.log": "1d1bb45b3174d1bc61c16dcbbb1a4c7685f4bbd72e091fa55d401f6314bce5bc",
+    "build/rust-kotlin-collect-map-order/test-layout-change.json": "25c0e7d1dce0ff33a850237e178e2ecec1da60f9de7dc4cc9b819cac91936990",
+    "build/rust-kotlin-collect-map-order/translator-evidence.json": "0de61959898bb2e8ca9849ea7acab65bf5589ed348dbd3358c2c1c7fd211ed95",
+    "build/rust-kotlin-collect-map-order/verify_final.py": "14bf84ff4b9cdf2de3e5cc64a5b5589575d9a3a57e1ada0206bc5bcb6dd5057d",
+    "build/test-results/jvmTest/TEST-io.github.kotlinmania.serdecore.ser.CollectMapOrderParityTest.xml": "b7ff3d0d27bcea11af95a8eebc79c97cd64cdb58392d5d823b0af4fbfb45a432",
+    "build/test-results/macosArm64Test/TEST-macosArm64Test.io.github.kotlinmania.serdecore.ser.CollectMapOrderParityTest.xml": "cd5dc7438ef8397bdd6e6ee2ddcd7acfab6cdb2919eb8073c60b3b44c6f15da9",
+    "src/commonMain/kotlin/io/github/kotlinmania/serde/SerdeResult.kt": "e155012e9ebd2c2fcb9baafa8012826b7f817aef54e07eead657e77e58cde654",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Impls.kt": "d7a3eaf2db7eb58524d215b53a0f6bb36878789470f33e9e556596a24aad636a",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/MapAccess.kt": "5b5e89218c6eca66cad31beedd5d6cc9f4b98bcff9c44c9175b93ac88144fbfc",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/value/Value.kt": "e396b6da2ff81de009d41ded842f1d5e6773ffdc9068510cbb01aafb11222378",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/ser/Fmt.kt": "c6690e2f69c4f6949e7b845de3cb032562aa4822eb503ad076cf2c6e9f786d50",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/ser/IteratorLenHint.kt": "554864ccea8f2fa5c2b0b1ffcafa82ffbf175e229b799ee7d069a6b78ec8ae4a",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/ser/SerializeMap.kt": "db5b4825c1ca85bd2256564407bddff686c7ec8bedb14c03943226a97b787757",
+    "src/commonMain/kotlin/io/github/kotlinmania/serdecore/ser/Serializer.kt": "1e7b5c3e017985ec9c5c82f96a37f1755cf61c00b1e7b3aefceabf0ed23fee4d",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/ser/CollectMapOrderParityTest.kt": "aea37439758da5c387d892ae4b892499de70be39909499b0933f3a5355905774",
+    "src/commonTest/kotlin/io/github/kotlinmania/serdecore/ser/CollectSeqOrderParityTest.kt": "b3e566b8f074e719d8509e799bca9aef80bbb177f768c0e1494a964a66027671",
+    "tmp/serde/serde_core/src/de/value.rs": "fb6fef6d23d95d516c6e1d6b5cefd8b98ba3881214a82a8a7e0a8ffbb0a12083",
+    "tmp/serde/serde_core/src/ser/impossible.rs": "283f628d5107aa030d2e96eeb1dee187f0ac18c24d517edeb51738ab15dfb871",
+    "tmp/serde/serde_core/src/ser/mod.rs": "ec097d92c8545356961e977a4c9650361cadd1d3a243d805ae7b0e0e589ae803",
+    "verification/collect-map-order-oracle/Cargo.lock": "eb33d6a241b1bb0ee7ca84e2e1084586e4e132d774a9bd2c74a2defb8670b1e2",
+    "verification/collect-map-order-oracle/Cargo.toml": "a2214228b60a720c8a4a638f027cdd2791fe9e1579a6a5f9f9ede4885871349e",
+    "verification/collect-map-order-oracle/README.md": "df357bb5942f3bab3f1470951e6fbe99c21f225875364b6564120535185d84ee",
+    "verification/collect-map-order-oracle/src/lib.rs": "0eab1f6c2e0d3b16c950ca82eec3046af7c234583397c85b5cce59aa7f703dff",
+    "verification/collect-seq-order-oracle/receipt.json": "aa48f89bc7c644b8005c62b6d0e2c0b1216492c1e32559fdc5451522f54063af",
+    "verification/inplace-panic-characterization/receipt.json": "22c38b06c2ba559cf87149d05e646c834ab991a2f25c66d5f0290ad528161b57",
+    "verification/ipv6-embedded-tail-oracle/receipt.json": "7ef6a655f93b111096424a073e92317d4d4575a0e739e2da27762d1184b6e36d",
+    "verification/network-wrapper-error-oracle/receipt.json": "726ef88f2c65acf6f23712ae8330d090b250fdf510942d344066843de40d8bb2",
+    "verification/socket-port-syntax-oracle/receipt.json": "ee4a91939dc644a708967994dca4622a536cf81a1babfe256d468463a1859e4b",
+    "verification/visitor-end-boundary-oracle/receipt.json": "3a855c1b6ee7c1d4369b4a56d6563202b737ed72f7fff8fbde1a339b1b70af9c"
+  }
+}

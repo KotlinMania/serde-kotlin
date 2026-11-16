@@ -1,0 +1,157 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :build-logic:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:generateExternalPluginSpecBuilders UP-TO-DATE
+> Task :build-logic:extractPrecompiledScriptPluginPlugins UP-TO-DATE
+> Task :build-logic:compilePluginsBlocks UP-TO-DATE
+> Task :build-logic:generatePrecompiledScriptPluginAccessors UP-TO-DATE
+> Task :build-logic:generateScriptPluginAdapters UP-TO-DATE
+> Task :build-logic:compileKotlin UP-TO-DATE
+> Task :build-logic:compileJava NO-SOURCE
+> Task :build-logic:pluginDescriptors UP-TO-DATE
+> Task :build-logic:processResources UP-TO-DATE
+> Task :build-logic:classes UP-TO-DATE
+> Task :build-logic:jar UP-TO-DATE
+> Task :serde-core:kmpPartiallyResolvedDependenciesChecker
+> Task :serde-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :serde-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :serde-core:compileKotlinMacosArm64
+> Task :serde-core:macosArm64ProcessResources NO-SOURCE
+> Task :serde-core:macosArm64MainKlibrary
+> Task :serde-core:compileTestKotlinMacosArm64
+> Task :serde-core:validateLocalSwiftPMDependencies
+> Task :serde-core:computeLocalPackageDependencyInputFiles UP-TO-DATE
+> Task :serde-core:fingerprintSyntheticPackage UP-TO-DATE
+> Task :serde-core:generateSyntheticLinkageSwiftPMImportProjectForCinteropsAndLdDump SKIPPED
+> Task :serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :serde-core:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :serde-derive:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :generateUmbrellaPackageIdentifierBasedResolutionForDefault SKIPPED
+> Task :fetchUmbrellaPackageIdentifierForDefault SKIPPED
+> Task :serde-core:syncPersistedPackageResolvedToSynthetic SKIPPED
+> Task :serde-core:fetchSyntheticImportProjectPackages SKIPPED
+> Task :serde-core:fingerprintXcodebuildMacosx UP-TO-DATE
+> Task :serde-core:dumpXcodebuildArgsMacosx SKIPPED
+> Task :serde-core:convertSyntheticImportProjectIntoDefFileMacosx UP-TO-DATE
+> Task :serde-core:linkDebugTestMacosArm64
+> Task :serde-core:macosArm64Test
+> Task :kmpPartiallyResolvedDependenciesChecker
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :downloadKotlinNativeDistribution UP-TO-DATE
+> Task :serde-core:exportCrossCompilationMetadataForMacosArm64ApiElements UP-TO-DATE
+> Task :serde-derive:kmpPartiallyResolvedDependenciesChecker
+> Task :serde-derive:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :serde-derive:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :serde-derive:compileKotlinMacosArm64
+> Task :serde-derive:exportCrossCompilationMetadataForMacosArm64ApiElements UP-TO-DATE
+> Task :compileKotlinMacosArm64
+> Task :macosArm64ProcessResources NO-SOURCE
+> Task :macosArm64MainKlibrary
+> Task :compileTestKotlinMacosArm64
+> Task :validateLocalSwiftPMDependencies
+> Task :computeLocalPackageDependencyInputFiles UP-TO-DATE
+> Task :fingerprintSyntheticPackage UP-TO-DATE
+> Task :generateSyntheticLinkageSwiftPMImportProjectForCinteropsAndLdDump SKIPPED
+> Task :syncPersistedPackageResolvedToSynthetic SKIPPED
+> Task :fetchSyntheticImportProjectPackages SKIPPED
+> Task :fingerprintXcodebuildMacosx UP-TO-DATE
+> Task :dumpXcodebuildArgsMacosx SKIPPED
+> Task :convertSyntheticImportProjectIntoDefFileMacosx UP-TO-DATE
+> Task :linkDebugTestMacosArm64
+
+io.github.kotlinmania.serde.TestRoundtripTest.ipAddrRoundtrip[macosArm64] STARTED
+
+io.github.kotlinmania.serde.TestRoundtripTest.ipAddrRoundtrip[macosArm64] PASSED
+
+io.github.kotlinmania.serde.TestRoundtripTest.socketAddrRoundtrip[macosArm64] STARTED
+
+io.github.kotlinmania.serde.TestRoundtripTest.socketAddrRoundtrip[macosArm64] PASSED
+
+io.github.kotlinmania.serde.UntaggedContentTest.failedAttemptDoesNotConsumeTheNextAttempt[macosArm64] STARTED
+
+io.github.kotlinmania.serde.UntaggedContentTest.failedAttemptDoesNotConsumeTheNextAttempt[macosArm64] PASSED
+
+io.github.kotlinmania.serde.UntaggedContentTest.nullableElementsAreValuesRatherThanEndOfSequence[macosArm64] STARTED
+
+io.github.kotlinmania.serde.UntaggedContentTest.nullableElementsAreValuesRatherThanEndOfSequence[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureReplaysCompleteScalarsAcrossIndependentAttempts[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureReplaysCompleteScalarsAcrossIndependentAttempts[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureAndBothReplayModesRetainBorrowedRegions[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.publicCaptureAndBothReplayModesRetainBorrowedRegions[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.legacyInputsRemainUsableAndAreCopiedAtTheOwnedBoundary[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.legacyInputsRemainUsableAndAreCopiedAtTheOwnedBoundary[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.replayPreservesOwnedAndBorrowedVisitorDispatch[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.replayPreservesOwnedAndBorrowedVisitorDispatch[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.taggedCaptureUsesExactRangeAndPreservesScalarVariant[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.taggedCaptureUsesExactRangeAndPreservesScalarVariant[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.invalidUtf8AndScalarDiagnosticsMatchTheActualValue[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.GeneratedContentReplayTest.invalidUtf8AndScalarDiagnosticsMatchTheActualValue[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentRetainsNullableSequenceElements[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentRetainsNullableSequenceElements[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentRetainsNullableSequenceElements[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentRetainsNullableSequenceElements[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentMapSequenceRetainsNullablePairFields[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.ownedContentMapSequenceRetainsNullablePairFields[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentMapSequenceRetainsNullablePairFields[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.NullableContentSequenceTest.borrowedContentMapSequenceRetainsNullablePairFields[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.TestIgnoredAnyTest.testDeserializeEnum[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.TestIgnoredAnyTest.testDeserializeEnum[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.TestValueTest.testU32ToEnum[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.TestValueTest.testU32ToEnum[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.TestValueTest.testInteger128[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.TestValueTest.testInteger128[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.TestValueTest.testMapAccessToEnum[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.TestValueTest.testMapAccessToEnum[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.sequenceCallerRejectsANegativeRustHintBeforeReading[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.sequenceCallerRejectsANegativeRustHintBeforeReading[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.mapCallerRejectsANegativeRustHintBeforeReading[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.mapCallerRejectsANegativeRustHintBeforeReading[macosArm64] PASSED
+
+io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.taggedMapCallerRejectsANegativeRustHintBeforeReading[macosArm64] STARTED
+
+io.github.kotlinmania.serde.priv.ContentLayoutAdoptionTest.taggedMapCallerRejectsANegativeRustHintBeforeReading[macosArm64] PASSED
+> Task :macosArm64Test
+Kotlin build report is written to file:///Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/reports/kotlin-build/serde-kotlin-build-2026-10-25-16-44-21-0.txt
+
+[Incubating] Problems report is available at: file:///Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 32s
+39 actionable tasks: 14 executed, 25 up-to-date

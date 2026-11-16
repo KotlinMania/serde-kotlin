@@ -1,0 +1,47 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :build-logic:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:generateExternalPluginSpecBuilders UP-TO-DATE
+> Task :build-logic:extractPrecompiledScriptPluginPlugins UP-TO-DATE
+> Task :build-logic:compilePluginsBlocks UP-TO-DATE
+> Task :build-logic:generatePrecompiledScriptPluginAccessors UP-TO-DATE
+> Task :build-logic:generateScriptPluginAdapters UP-TO-DATE
+> Task :build-logic:compileKotlin UP-TO-DATE
+> Task :build-logic:compileJava NO-SOURCE
+> Task :build-logic:pluginDescriptors UP-TO-DATE
+> Task :build-logic:processResources UP-TO-DATE
+> Task :build-logic:classes UP-TO-DATE
+> Task :build-logic:jar UP-TO-DATE
+> Task :serde-core:kmpPartiallyResolvedDependenciesChecker
+> Task :serde-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :serde-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :serde-core:compileKotlinMacosArm64 FAILED
+Kotlin build report is written to file:///Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/reports/kotlin-build/serde-kotlin-build-2026-10-25-16-24-59-0.txt
+
+[Incubating] Problems report is available at: file:///Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':serde-core:compileKotlinMacosArm64' (registered by plugin 'kotlinx-io-multiplatform').
+> Could not resolve all files for configuration ':serde-core:macosArm64CompileKlibraries'.
+   > Could not resolve io.github.kotlinmania:num-traits-kotlin:0.2.15.
+     Required by:
+         project ':serde-core'
+      > No cached version of io.github.kotlinmania:num-traits-kotlin:0.2.15 available for offline mode.
+      > No cached version of io.github.kotlinmania:num-traits-kotlin:0.2.15 available for offline mode.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 9s
+12 actionable tasks: 2 executed, 10 up-to-date

@@ -1,0 +1,207 @@
+[==========] Running 83 tests from 12 test cases.
+[----------] Global test environment set-up.
+[----------] 6 tests from io.github.kotlinmania.serde.ConcreteOutcomeTest
+[ RUN      ] io.github.kotlinmania.serde.ConcreteOutcomeTest.textDecodingRetainsConcreteValue
+[       OK ] io.github.kotlinmania.serde.ConcreteOutcomeTest.textDecodingRetainsConcreteValue (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.ConcreteOutcomeTest.falseZeroAndEmptyAreSuccessfulValues
+[       OK ] io.github.kotlinmania.serde.ConcreteOutcomeTest.falseZeroAndEmptyAreSuccessfulValues (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.ConcreteOutcomeTest.unitHasExplicitCompletion
+[       OK ] io.github.kotlinmania.serde.ConcreteOutcomeTest.unitHasExplicitCompletion (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.ConcreteOutcomeTest.concreteDecodingPreservesOriginalDiagnostic
+[       OK ] io.github.kotlinmania.serde.ConcreteOutcomeTest.concreteDecodingPreservesOriginalDiagnostic (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.ConcreteOutcomeTest.failureFactoriesRetainCauseIdentity
+[       OK ] io.github.kotlinmania.serde.ConcreteOutcomeTest.failureFactoriesRetainCauseIdentity (0 ms)
+[ RUN      ] io.github.kotlinmania.serde.ConcreteOutcomeTest.throwingBoundaryPreservesOriginalDiagnostic
+[       OK ] io.github.kotlinmania.serde.ConcreteOutcomeTest.throwingBoundaryPreservesOriginalDiagnostic (0 ms)
+[----------] 6 tests from io.github.kotlinmania.serde.ConcreteOutcomeTest (0 ms total)
+
+[----------] 9 tests from io.github.kotlinmania.serdecore.de.ImplsErrorTest
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.cStringInternalNullReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.cStringInternalNullReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.cStringInternalNullEndReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.cStringInternalNullEndReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.zeroArrayFromUnitReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.zeroArrayFromUnitReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.zeroArrayFromUnitStructReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.zeroArrayFromUnitStructReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.durationOverflowSeqReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.durationOverflowSeqReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.durationOverflowStructReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.durationOverflowStructReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.systemTimeEpochOffsetOverflowSeqReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.systemTimeEpochOffsetOverflowSeqReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.systemTimeEpochOffsetOverflowStructReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.systemTimeEpochOffsetOverflowStructReportsUpstreamError (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.systemTimeOverflowReportsUpstreamError
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsErrorTest.systemTimeOverflowReportsUpstreamError (0 ms)
+[----------] 9 tests from io.github.kotlinmania.serdecore.de.ImplsErrorTest (0 ms total)
+
+[----------] 32 tests from io.github.kotlinmania.serdecore.de.ImplsTest
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.boolDeserializesFromBool
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.boolDeserializesFromBool (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.unitDeserializesFromUnitAndInPlace
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.unitDeserializesFromUnitAndInPlace (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.stringDeserializesFromStringStrAndChar
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.stringDeserializesFromStringStrAndChar (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.charDeserializesFromCharStrAndString
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.charDeserializesFromCharStrAndString (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.stringDeserializeInPlaceUsesStringVisitor
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.stringDeserializeInPlaceUsesStringVisitor (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.stringFromUnitFailsWithStringExpectation
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.stringFromUnitFailsWithStringExpectation (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.stringFromBorrowedStrDeserializesOwnedValue
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.stringFromBorrowedStrDeserializesOwnedValue (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.optionDeserializesUnitNoneAndSome
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.optionDeserializesUnitNoneAndSome (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.untaggedOptionMapsFailedValueToNone
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.untaggedOptionMapsFailedValueToNone (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.resultDeserializesOkAndErrNewtypeVariants
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.resultDeserializesOkAndErrNewtypeVariants (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.boundDeserializesUnitAndNewtypeVariants
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.boundDeserializesUnitAndNewtypeVariants (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.pathDeserializesBorrowedStringAndBytes
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.pathDeserializesBorrowedStringAndBytes (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.pathBufDeserializesStringAndBytes
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.pathBufDeserializesStringAndBytes (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.boxedPathDeserializesStringAndBytes
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.boxedPathDeserializesStringAndBytes (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.cStringDeserializesBytesStringAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.cStringDeserializesBytesStringAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeDeserializesFromStructAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeDeserializesFromStructAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeInclusiveDeserializesFromStructAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeInclusiveDeserializesFromStructAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeFromDeserializesFromStructAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeFromDeserializesFromStructAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeToDeserializesFromStructAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.rangeToDeserializesFromStructAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.durationDeserializesFromStructAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.durationDeserializesFromStructAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.systemTimeDeserializesFromStructAndSequence
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.systemTimeDeserializesFromStructAndSequence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.ignoredAnyDeserializesStringSequenceAndEnum
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.ignoredAnyDeserializesStringSequenceAndEnum (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.netIpv4AddressDeserializesReadableAndCompact
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.netIpv4AddressDeserializesReadableAndCompact (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.netIpv6AddressDeserializesReadableAndCompact
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.netIpv6AddressDeserializesReadableAndCompact (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.netIpAddressDeserializesReadableAndCompact
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.netIpAddressDeserializesReadableAndCompact (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.netSocketAddressDeserializesReadableAndCompact
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.netSocketAddressDeserializesReadableAndCompact (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.osStringDeserializesUnixAndWindowsVariants
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.osStringDeserializesUnixAndWindowsVariants (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.vecDeserializesNestedSequences
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.vecDeserializesNestedSequences (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.fixedArrayDeserializesEmptyNestedAndTupleStructForms
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.fixedArrayDeserializesEmptyNestedAndTupleStructForms (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.setDeserializesSequenceAndDeduplicatesInEncounterOrder
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.setDeserializesSequenceAndDeduplicatesInEncounterOrder (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.setDeserializesNestedSequences
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.setDeserializesNestedSequences (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.ImplsTest.mapDeserializesNestedMaps
+[       OK ] io.github.kotlinmania.serdecore.de.ImplsTest.mapDeserializesNestedMaps (0 ms)
+[----------] 32 tests from io.github.kotlinmania.serdecore.de.ImplsTest (0 ms total)
+
+[----------] 15 tests from io.github.kotlinmania.serdecore.de.NullableSequenceTest
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.standaloneNullableUnitRemainsNull
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.standaloneNullableUnitRemainsNull (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.singleNullableUnitIsAnElement
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.singleNullableUnitIsAnElement (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.emptySequenceRemainsEmpty
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.emptySequenceRemainsEmpty (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableListRetainsLeadingMiddleAndTrailingNulls
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableListRetainsLeadingMiddleAndTrailingNulls (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableListDoesNotNeedASizeHint
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableListDoesNotNeedASizeHint (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableSetRetainsNullAndFollowingValues
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableSetRetainsNullAndFollowingValues (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableTupleFieldsArePresent
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableTupleFieldsArePresent (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableArrayElementsArePresent
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableArrayElementsArePresent (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.missingTupleAndArrayElementsStillFail
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.missingTupleAndArrayElementsStillFail (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableRangeFieldsArePresent
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.nullableRangeFieldsArePresent (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.sequenceOverloadsDistinguishPresentNullFromEnd
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.sequenceOverloadsDistinguishPresentNullFromEnd (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.exhaustedSequenceDoesNotInvokeSeedAndFailureIsPreserved
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.exhaustedSequenceDoesNotInvokeSeedAndFailureIsPreserved (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.mapAsSequencePreservesNullablePairFields
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.mapAsSequencePreservesNullablePairFields (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.mapAsSequencePreservesNullableSeedResults
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.mapAsSequencePreservesNullableSeedResults (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.ignoredSequenceConsumesAllNullableValues
+[       OK ] io.github.kotlinmania.serdecore.de.NullableSequenceTest.ignoredSequenceConsumesAllNullableValues (0 ms)
+[----------] 15 tests from io.github.kotlinmania.serdecore.de.NullableSequenceTest (0 ms total)
+
+[----------] 3 tests from io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest
+[ RUN      ] io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.dataVariantsUseRustDisplayInsteadOfGeneratedDataClassText
+[       OK ] io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.dataVariantsUseRustDisplayInsteadOfGeneratedDataClassText (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.unitVariantsRetainTheirRustDisplayLabels
+[       OK ] io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.unitVariantsRetainTheirRustDisplayLabels (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.errorConstructorsUseTheSameDisplay
+[       OK ] io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest.errorConstructorsUseTheSameDisplay (0 ms)
+[----------] 3 tests from io.github.kotlinmania.serdecore.de.UnexpectedDisplayTest (0 ms total)
+
+[----------] 3 tests from io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.unavailableLayoutUsesGrowingStorageWithoutGuessingCapacity
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.unavailableLayoutUsesGrowingStorageWithoutGuessingCapacity (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.captureAcceptsUnknownZeroAndLargePositiveHintsOnTheCurrentTarget
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.captureAcceptsUnknownZeroAndLargePositiveHintsOnTheCurrentTarget (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.invalidHintsStillRejectBeforeAnyElementRead
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest.invalidHintsStillRejectBeforeAnyElementRead (0 ms)
+[----------] 3 tests from io.github.kotlinmania.serdecore.priv.ContentAllocationPortabilityTest (0 ms total)
+
+[----------] 2 tests from io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest.borrowedCaptureAndRecursiveCloneRetainStorage
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest.borrowedCaptureAndRecursiveCloneRetainStorage (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest.temporaryBytesAndOwnedCloneStillCopyStorage
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest.temporaryBytesAndOwnedCloneStillCopyStorage (0 ms)
+[----------] 2 tests from io.github.kotlinmania.serdecore.priv.ContentBorrowIdentityTest (0 ms total)
+
+[----------] 4 tests from io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.capturesEveryScalarWithoutNarrowingAndRejectsInvalidScalars
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.capturesEveryScalarWithoutNarrowingAndRejectsInvalidScalars (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.borrowedRangesSurviveCaptureAndRecursiveClone
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.borrowedRangesSurviveCaptureAndRecursiveClone (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.ownedContainersAreIndependentAndBorrowedTextStaysBorrowed
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.ownedContainersAreIndependentAndBorrowedTextStaysBorrowed (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.byteTextConversionUsesOnlyTheRegionAndStrictUtf8
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest.byteTextConversionUsesOnlyTheRegionAndStrictUtf8 (0 ms)
+[----------] 4 tests from io.github.kotlinmania.serdecore.priv.GeneratedContentCaptureTest (0 ms total)
+
+[----------] 4 tests from io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.unsignedHintsAndZeroSizedElementsRetainRustSemantics
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.unsignedHintsAndZeroSizedElementsRetainRustSemantics (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.openTypesAndUnmeasuredTargetsRequireEvidence
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.openTypesAndUnmeasuredTargetsRequireEvidence (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.validUtf8RetainsTheSelectedBorrowAndTextCompatibility
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.validUtf8RetainsTheSelectedBorrowAndTextCompatibility (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.invalidUtf8OwnsRepairedBytesAndPreservesNoAllocFallback
+[       OK ] io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest.invalidUtf8OwnsRepairedBytesAndPreservesNoAllocFallback (0 ms)
+[----------] 4 tests from io.github.kotlinmania.serdecore.priv.GeneratedPrivateAdoptionTest (0 ms total)
+
+[----------] 1 tests from io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest
+[ RUN      ] io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest.testFormatU8
+[       OK ] io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest.testFormatU8 (0 ms)
+[----------] 1 tests from io.github.kotlinmania.serdecore.ser.SerdeCoreImplsSourceTest (0 ms total)
+
+[----------] 1 tests from io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest
+[ RUN      ] io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest.testFormatU8
+[       OK ] io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest.testFormatU8 (0 ms)
+[----------] 1 tests from io.github.kotlinmania.serdecore.ser.SerdeImplsSourceTest (0 ms total)
+
+[----------] 3 tests from io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.sequenceCallerRejectsANegativeRustHintBeforeReading
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.sequenceCallerRejectsANegativeRustHintBeforeReading (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.mapCallerRejectsANegativeRustHintBeforeReading
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.mapCallerRejectsANegativeRustHintBeforeReading (0 ms)
+[ RUN      ] io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.hostSelectsOnlyTheMeasuredRustProfile
+[       OK ] io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest.hostSelectsOnlyTheMeasuredRustProfile (0 ms)
+[----------] 3 tests from io.github.kotlinmania.serdecore.priv.ContentLayoutAdoptionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 83 tests from 12 test cases ran. (2 ms total)
+[  PASSED  ] 83 tests.

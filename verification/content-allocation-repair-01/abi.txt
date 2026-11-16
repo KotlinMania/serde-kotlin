@@ -1,0 +1,85 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :build-logic:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:generateExternalPluginSpecBuilders UP-TO-DATE
+> Task :build-logic:extractPrecompiledScriptPluginPlugins UP-TO-DATE
+> Task :build-logic:compilePluginsBlocks UP-TO-DATE
+> Task :build-logic:generatePrecompiledScriptPluginAccessors UP-TO-DATE
+> Task :build-logic:generateScriptPluginAdapters UP-TO-DATE
+> Task :build-logic:compileKotlin UP-TO-DATE
+> Task :build-logic:compileJava NO-SOURCE
+> Task :build-logic:pluginDescriptors UP-TO-DATE
+> Task :build-logic:processResources UP-TO-DATE
+> Task :build-logic:classes UP-TO-DATE
+> Task :build-logic:jar UP-TO-DATE
+> Task :serde-core:androidNativeArm64ProcessResources NO-SOURCE
+> Task :serde-core:kmpPartiallyResolvedDependenciesChecker
+> Task :serde-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :serde-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :serde-core:compileKotlinAndroidNativeArm64
+> Task :serde-core:androidNativeArm64MainKlibrary
+> Task :serde-core:androidNativeX64ProcessResources NO-SOURCE
+> Task :serde-core:compileKotlinAndroidNativeX64
+> Task :serde-core:androidNativeX64MainKlibrary
+> Task :serde-core:compileKotlinJvm UP-TO-DATE
+> Task :serde-core:compileJvmMainJava NO-SOURCE
+> Task :serde-core:compileKotlinIosArm64
+> Task :serde-core:compileKotlinIosSimulatorArm64
+> Task :serde-core:compileKotlinLinuxArm64
+> Task :serde-core:compileKotlinLinuxX64
+> Task :serde-core:compileKotlinMacosArm64 UP-TO-DATE
+> Task :serde-core:compileKotlinMingwX64
+> Task :serde-core:compileKotlinJs
+> Task :serde-core:compileKotlinTvosArm64
+> Task :serde-core:compileAndroidMain
+> Task :serde-core:compileKotlinTvosSimulatorArm64
+> Task :serde-core:compileKotlinWatchosDeviceArm64
+> Task :serde-core:compileKotlinWatchosSimulatorArm64
+> Task :serde-core:iosArm64ProcessResources NO-SOURCE
+> Task :serde-core:iosArm64MainKlibrary
+> Task :serde-core:iosSimulatorArm64ProcessResources NO-SOURCE
+> Task :serde-core:iosSimulatorArm64MainKlibrary
+> Task :serde-core:jsProcessResources NO-SOURCE
+> Task :serde-core:jsMainClasses
+> Task :serde-core:jvmProcessResources NO-SOURCE
+> Task :serde-core:processJvmMainResources SKIPPED
+> Task :serde-core:jvmMainClasses UP-TO-DATE
+> Task :serde-core:linuxArm64ProcessResources NO-SOURCE
+> Task :serde-core:linuxArm64MainKlibrary
+> Task :serde-core:linuxX64ProcessResources NO-SOURCE
+> Task :serde-core:linuxX64MainKlibrary
+> Task :serde-core:macosArm64ProcessResources NO-SOURCE
+> Task :serde-core:macosArm64MainKlibrary UP-TO-DATE
+> Task :serde-core:mingwX64ProcessResources NO-SOURCE
+> Task :serde-core:mingwX64MainKlibrary
+> Task :serde-core:tvosArm64ProcessResources NO-SOURCE
+> Task :serde-core:tvosArm64MainKlibrary
+> Task :serde-core:tvosSimulatorArm64ProcessResources NO-SOURCE
+> Task :serde-core:tvosSimulatorArm64MainKlibrary
+> Task :serde-core:wasmJsProcessResources NO-SOURCE
+> Task :serde-core:wasmWasiProcessResources NO-SOURCE
+> Task :serde-core:watchosDeviceArm64ProcessResources NO-SOURCE
+> Task :serde-core:watchosDeviceArm64MainKlibrary
+> Task :serde-core:watchosSimulatorArm64ProcessResources NO-SOURCE
+> Task :serde-core:watchosSimulatorArm64MainKlibrary
+> Task :serde-core:compileKotlinWasmWasi
+> Task :serde-core:wasmWasiMainClasses
+> Task :serde-core:compileKotlinWasmJs
+> Task :serde-core:wasmJsMainClasses
+> Task :serde-core:internalDumpKotlinAbi
+> Task :serde-core:updateKotlinAbi
+
+> Task :serde-core:updateLegacyAbi
+Task :serde-core:updateLegacyAbi is deprecated, use :serde-core:updateKotlinAbi instead
+Kotlin build report is written to file:///Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/reports/kotlin-build/serde-kotlin-build-2026-10-25-14-33-06-0.txt
+
+[Incubating] Problems report is available at: file:///Volumes/stuff/Projects/kotlinmania/serde-kotlin/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 38s
+31 actionable tasks: 19 executed, 12 up-to-date

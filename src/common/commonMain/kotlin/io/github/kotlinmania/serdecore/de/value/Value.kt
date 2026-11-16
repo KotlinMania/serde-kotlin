@@ -1,0 +1,3302 @@
+// port-lint: source de/value.rs
+package io.github.kotlinmania.serdecore.de.value
+
+import io.github.kotlinmania.serde.SerdeError
+import io.github.kotlinmania.serde.SerdeResult
+import io.github.kotlinmania.serdecore.de.*
+
+/**
+ * Building blocks for deserializing basic values using the `IntoDeserializer` interface.
+ *
+ * ```kotlin
+ * // Upstream uses derive support and string parsing. In Kotlin, the same shape is a
+ * // `deserialize` call driven by a value deserializer.
+ * //
+ * // enum class Setting { On, Off }
+ * //
+ * // fun parseSetting(s: String): SerdeResult<Setting> =
+ * //     Setting.deserialize(s.intoDeserializer())
+ * ```
+ */
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A minimal representation of all possible errors that can occur using the `IntoDeserializer`
+ * interface.
+ *
+ * Not a `Throwable` subclass — avoids Swift export's Class Stdlib hazard
+ * (unchecked-cast bridge on `Throwable.getStackTrace()`).
+ */
+class ValueError private constructor(
+    private val err: String,
+) {
+    fun fmt(): String = err
+
+    fun description(): String = err
+
+    override fun toString(): String = fmt()
+
+    override fun equals(other: Any?): Boolean = other is ValueError && other.err == err
+
+    override fun hashCode(): Int = err.hashCode()
+
+    companion object {
+        fun custom(msg: String): ValueError = ValueError(msg)
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+fun Unit.intoDeserializer(): UnitDeserializer = UnitDeserializer.new()
+
+/**
+ * A deserializer holding a `Unit`.
+ */
+class UnitDeserializer private constructor() :
+    Deserializer,
+    IntoDeserializer {
+        companion object {
+            fun new(): UnitDeserializer = UnitDeserializer()
+        }
+
+        override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitUnit()
+
+        override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeUnitStruct(
+            name: String,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeNewtypeStruct(
+            name: String,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeTuple(
+            len: Int,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeTupleStruct(
+            name: String,
+            len: Int,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeStruct(
+            name: String,
+            fields: List<String>,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeEnum(
+            name: String,
+            variants: List<String>,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+        override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = visitor.visitNone()
+
+        override fun intoDeserializer(): Deserializer = this
+    }
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer that cannot be instantiated.
+ *
+ * Available only when the upstream `unstable` feature is enabled. The `never` field has type
+ * [Nothing], so this class has no constructible values.
+ */
+class NeverDeserializer private constructor(
+    private val never: Nothing,
+) : Deserializer,
+    IntoDeserializer {
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = never
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+private class ExpectedInSeq(
+    private val expected: Int,
+) : Expected {
+    override fun expecting(): String = if (expected == 1) "1 element in sequence" else "$expected elements in sequence"
+}
+
+private class ExpectedInMap(
+    private val expected: Int,
+) : Expected {
+    override fun expecting(): String = if (expected == 1) "1 element in map" else "$expected elements in map"
+}
+
+fun Boolean.intoDeserializer(): BoolDeserializer = BoolDeserializer.new(this)
+
+class BoolDeserializer private constructor(
+    private val value: Boolean,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Boolean): BoolDeserializer = BoolDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBool(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Byte.intoDeserializer(): I8Deserializer = I8Deserializer.new(this)
+
+class I8Deserializer private constructor(
+    private val value: Byte,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Byte): I8Deserializer = I8Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI8(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Short.intoDeserializer(): I16Deserializer = I16Deserializer.new(this)
+
+class I16Deserializer private constructor(
+    private val value: Short,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Short): I16Deserializer = I16Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI16(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Int.intoDeserializer(): I32Deserializer = I32Deserializer.new(this)
+
+class I32Deserializer private constructor(
+    private val value: Int,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Int): I32Deserializer = I32Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI32(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Long.intoDeserializer(): I64Deserializer = I64Deserializer.new(this)
+
+class I64Deserializer private constructor(
+    private val value: Long,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Long): I64Deserializer = I64Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI64(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun String.intoI128Deserializer(): I128Deserializer = I128Deserializer.new(this)
+
+/**
+ * A deserializer holding a 128-bit signed integer.
+ */
+class I128Deserializer private constructor(
+    private val value: String,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: String): I128Deserializer = I128Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI128(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Long.intoIsizeDeserializer(): IsizeDeserializer = IsizeDeserializer.new(this)
+
+/**
+ * A deserializer holding a platform-sized signed integer.
+ */
+class IsizeDeserializer private constructor(
+    private val value: Long,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Long): IsizeDeserializer = IsizeDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitI64(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun UByte.intoDeserializer(): U8Deserializer = U8Deserializer.new(this)
+
+class U8Deserializer private constructor(
+    private val value: UByte,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: UByte): U8Deserializer = U8Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU8(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun UShort.intoDeserializer(): U16Deserializer = U16Deserializer.new(this)
+
+class U16Deserializer private constructor(
+    private val value: UShort,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: UShort): U16Deserializer = U16Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU16(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun UInt.intoDeserializer(): U32Deserializer = U32Deserializer.new(this)
+
+/**
+ * A deserializer holding a `UInt`.
+ *
+ * This deserializer also implements `EnumAccess`, matching the upstream behavior of allowing a
+ * `u32` to serve as an enum discriminant.
+ */
+class U32Deserializer private constructor(
+    private val value: UInt,
+) : Deserializer,
+    EnumAccess,
+    IntoDeserializer {
+    companion object {
+        fun new(value: UInt): U32Deserializer = U32Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU32(value)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(this)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(this).map(::unitOnly)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun ULong.intoDeserializer(): U64Deserializer = U64Deserializer.new(this)
+
+class U64Deserializer private constructor(
+    private val value: ULong,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: ULong): U64Deserializer = U64Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU64(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun String.intoU128Deserializer(): U128Deserializer = U128Deserializer.new(this)
+
+/**
+ * A deserializer holding a 128-bit unsigned integer.
+ */
+class U128Deserializer private constructor(
+    private val value: String,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: String): U128Deserializer = U128Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU128(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun ULong.intoUsizeDeserializer(): UsizeDeserializer = UsizeDeserializer.new(this)
+
+/**
+ * A deserializer holding a platform-sized unsigned integer.
+ */
+class UsizeDeserializer private constructor(
+    private val value: ULong,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: ULong): UsizeDeserializer = UsizeDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitU64(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Float.intoDeserializer(): F32Deserializer = F32Deserializer.new(this)
+
+class F32Deserializer private constructor(
+    private val value: Float,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Float): F32Deserializer = F32Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitF32(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Double.intoDeserializer(): F64Deserializer = F64Deserializer.new(this)
+
+class F64Deserializer private constructor(
+    private val value: Double,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Double): F64Deserializer = F64Deserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitF64(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun Char.intoDeserializer(): CharDeserializer = CharDeserializer.new(this)
+
+class CharDeserializer private constructor(
+    private val value: Char,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: Char): CharDeserializer = CharDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitChar(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding a string slice.
+ */
+class StrDeserializer private constructor(
+    private val value: String,
+) : Deserializer,
+    EnumAccess,
+    IntoDeserializer {
+    companion object {
+        fun new(value: String): StrDeserializer = StrDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitStr(value)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(this)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(this).map(::unitOnly)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding a string borrowed from another deserializer.
+ */
+class BorrowedStrDeserializer private constructor(
+    private val value: String,
+) : Deserializer,
+    EnumAccess,
+    IntoDeserializer {
+    companion object {
+        fun new(value: String): BorrowedStrDeserializer = BorrowedStrDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBorrowedStr(value)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(this)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(this).map(::unitOnly)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+fun String.intoDeserializer(): StringDeserializer = StringDeserializer.new(this)
+
+/**
+ * A deserializer holding a `String`.
+ */
+class StringDeserializer private constructor(
+    private val value: String,
+) : Deserializer,
+    EnumAccess,
+    IntoDeserializer {
+    companion object {
+        fun new(value: String): StringDeserializer = StringDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitString(value)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(this)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(this).map(::unitOnly)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding a string that may be borrowed or owned.
+ */
+class CowStrDeserializer private constructor(
+    private val value: String,
+    private val owned: Boolean,
+) : Deserializer,
+    EnumAccess,
+    IntoDeserializer {
+    companion object {
+        fun new(
+            value: String,
+            owned: Boolean = false,
+        ): CowStrDeserializer = CowStrDeserializer(value, owned)
+
+        fun borrowed(value: String): CowStrDeserializer = CowStrDeserializer(value, false)
+
+        fun owned(value: String): CowStrDeserializer = CowStrDeserializer(value, true)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
+        if (owned) {
+            visitor.visitString(value)
+        } else {
+            visitor.visitStr(value)
+        }
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(this)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        seed.deserialize(this).map(::unitOnly)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+fun ByteArray.intoDeserializer(): BytesDeserializer = BytesDeserializer.new(this)
+
+/**
+ * A deserializer holding a `ByteArray`. Always calls `Visitor.visitBytes`.
+ */
+class BytesDeserializer private constructor(
+    private val value: ByteArray,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: ByteArray): BytesDeserializer = BytesDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBytes(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding a byte array borrowed from another deserializer. Always calls
+ * `Visitor.visitBorrowedBytes`.
+ */
+class BorrowedBytesDeserializer private constructor(
+    private val value: ByteArray,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun new(value: ByteArray): BorrowedBytesDeserializer = BorrowedBytesDeserializer(value)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitBorrowedBytes(value)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer that iterates over a sequence.
+ */
+class SeqDeserializer<T : IntoDeserializer> internal constructor(
+    private val iter: Iterator<T>,
+    private val len: Int? = null,
+) : Deserializer,
+    SeqAccess,
+    IntoDeserializer {
+    private var count: Int = 0
+    private var exhausted: Boolean = false
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> =
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
+
+    fun end(): SerdeResult<Unit> {
+        var remaining = 0
+        if (!exhausted) {
+            while (iter.hasNext()) {
+                iter.next()
+                remaining += 1
+            }
+            exhausted = true
+        }
+        return if (remaining != 0) {
+            // First argument is the number of elements in the data, second
+            // argument is the number of elements expected by the Deserialize.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInSeq(count)))
+        } else {
+            SerdeResult.success(Unit)
+        }
+    }
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <R> nextElementSeed(seed: DeserializeSeed<R>): SerdeResult<SeqElement<R>> {
+        if (exhausted || !iter.hasNext()) {
+            exhausted = true
+            return SerdeResult.success(SeqElement.None)
+        }
+        val next = iter.next()
+        count += 1
+        return seed.deserialize(next.intoDeserializer()).map { SeqElement.Some(it) }
+    }
+
+    override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun <T : IntoDeserializer> Iterable<T>.intoDeserializer(): SeqDeserializer<T> =
+    SeqDeserializer(iterator(), (this as? Collection<*>)?.size)
+
+/**
+ * Creates a [SeqDeserializer] from an iterator of values that can be converted
+ * to deserializers. Use this instead of the constructor when constructing from
+ * Swift or other interop boundaries.
+ */
+fun <T : IntoDeserializer> seqDeserializer(iter: Iterator<T>): SeqDeserializer<T> = SeqDeserializer(iter)
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding a `SeqAccess`.
+ */
+class SeqAccessDeserializer<A : SeqAccess>(
+    private val seq: A,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun <A : SeqAccess> new(seq: A): SeqAccessDeserializer<A> = SeqAccessDeserializer(seq)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitSeq(seq)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): SeqAccessDeserializer<A> = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A key-value entry carried by [MapDeserializer]. Replaces a raw [Pair] in the
+ * public constructor so the Swift Export bridge can express the generic
+ * constraint without type-erasing to `Any?`.
+ */
+data class MapEntry<K, V>(
+    val key: K,
+    val value: V,
+)
+
+private fun <K, V> split(entry: MapEntry<K, V>): Pair<K, V> = entry.key to entry.value
+
+/**
+ * A deserializer that iterates over a map.
+ */
+class MapDeserializer<K, V> internal constructor(
+    private val iter: Iterator<MapEntry<K, V>>,
+    private val len: Int? = null,
+) : Deserializer,
+    MapAccess,
+    SeqAccess,
+    IntoDeserializer
+    where K : IntoDeserializer, V : IntoDeserializer {
+    private var pendingValue: V? = null
+    private var count: Int = 0
+    private var exhausted: Boolean = false
+
+    private fun nextPair(): Pair<K, V>? {
+        if (exhausted || !iter.hasNext()) {
+            exhausted = true
+            return null
+        }
+        val next = iter.next()
+        count += 1
+        return split(next)
+    }
+
+    override fun <T> nextKeySeed(seed: DeserializeSeed<T>): SerdeResult<T?> {
+        val next = nextPair() ?: return SerdeResult.success(null)
+        val (key, value) = next
+        pendingValue = value
+        return seed.deserialize(key.intoDeserializer())
+    }
+
+    override fun <T> nextValueSeed(seed: DeserializeSeed<T>): SerdeResult<T> {
+        val value = pendingValue
+        pendingValue = null
+        // Panic because this indicates a bug in the program rather than an
+        // expected failure.
+        checkNotNull(value) { "MapAccess::next_value called before next_key" }
+        return seed.deserialize(value.intoDeserializer())
+    }
+
+    override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+        val next = nextPair() ?: return SerdeResult.success(SeqElement.None)
+        val (key, value) = next
+        return seed.deserialize(PairDeserializer(key, value)).map { SeqElement.Some(it) }
+    }
+
+    override fun <K1, V1> nextEntrySeed(
+        keySeed: DeserializeSeed<K1>,
+        valueSeed: DeserializeSeed<V1>,
+    ): SerdeResult<Pair<K1, V1>?> {
+        val next = nextPair() ?: return SerdeResult.success(null)
+        val (rawKey, rawValue) = next
+        return keySeed.deserialize(rawKey.intoDeserializer()).flatMap { key ->
+            valueSeed.deserialize(rawValue.intoDeserializer()).map { value -> key to value }
+        }
+    }
+
+    override fun sizeHint(): Int? = if (exhausted) 0 else len?.let { (it - count).coerceAtLeast(0) }
+
+    override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> =
+        visitor.visitMap(this).flatMap { value -> end().map { value } }
+
+    override fun <R> deserializeSeq(visitor: Visitor<R>): SerdeResult<R> =
+        visitor.visitSeq(this).flatMap { value -> end().map { value } }
+
+    override fun <R> deserializeTuple(
+        len: Int,
+        visitor: Visitor<R>,
+    ): SerdeResult<R> = deserializeSeq(visitor)
+
+    fun end(): SerdeResult<Unit> {
+        var remaining = 0
+        if (!exhausted) {
+            while (iter.hasNext()) {
+                iter.next()
+                remaining += 1
+            }
+            exhausted = true
+        }
+        return if (remaining != 0) {
+            // First argument is the number of elements in the data, second
+            // argument is the number of elements expected by the Deserialize.
+            SerdeResult.failure(SerdeError.invalidLength(count + remaining, ExpectedInMap(count)))
+        } else {
+            SerdeResult.success(Unit)
+        }
+    }
+
+    override fun <R> deserializeBool(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeI8(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeI16(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeI32(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeI64(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeI128(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeU8(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeU16(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeU32(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeU64(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeU128(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeF32(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeF64(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeChar(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeStr(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeString(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeBytes(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeByteBuf(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeOption(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeUnit(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<R>,
+    ): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<R>,
+    ): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<R>,
+    ): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeMap(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<R>,
+    ): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<R>,
+    ): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeIdentifier(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    override fun <R> deserializeIgnoredAny(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+    private class PairDeserializer<K, V>(
+        private val key: K,
+        private val value: V,
+    ) : Deserializer
+        where K : IntoDeserializer, V : IntoDeserializer {
+        override fun <R> deserializeAny(visitor: Visitor<R>): SerdeResult<R> = deserializeSeq(visitor)
+
+        override fun <R> deserializeSeq(visitor: Visitor<R>): SerdeResult<R> {
+            val pairVisitor = PairVisitor(key, value)
+            return visitor.visitSeq(pairVisitor).flatMap { pair ->
+                if (pairVisitor.hasRemaining()) {
+                    val remaining = checkNotNull(pairVisitor.sizeHint())
+                    SerdeResult.failure(SerdeError.invalidLength(2, ExpectedInSeq(2 - remaining)))
+                } else {
+                    SerdeResult.success(pair)
+                }
+            }
+        }
+
+        override fun <R> deserializeTuple(
+            len: Int,
+            visitor: Visitor<R>,
+        ): SerdeResult<R> =
+            if (len == 2) {
+                deserializeSeq(visitor)
+            } else {
+                SerdeResult.failure(SerdeError.invalidLength(2, ExpectedInSeq(len)))
+            }
+
+        override fun <R> deserializeBool(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeI8(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeI16(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeI32(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeI64(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeI128(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeU8(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeU16(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeU32(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeU64(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeU128(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeF32(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeF64(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeChar(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeStr(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeString(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeBytes(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeByteBuf(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeOption(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeUnit(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeUnitStruct(
+            name: String,
+            visitor: Visitor<R>,
+        ): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeNewtypeStruct(
+            name: String,
+            visitor: Visitor<R>,
+        ): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeTupleStruct(
+            name: String,
+            len: Int,
+            visitor: Visitor<R>,
+        ): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeMap(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeStruct(
+            name: String,
+            fields: List<String>,
+            visitor: Visitor<R>,
+        ): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeEnum(
+            name: String,
+            variants: List<String>,
+            visitor: Visitor<R>,
+        ): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeIdentifier(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+
+        override fun <R> deserializeIgnoredAny(visitor: Visitor<R>): SerdeResult<R> = deserializeAny(visitor)
+    }
+
+    private class PairVisitor<K, V>(
+        key: K,
+        value: V,
+    ) : SeqAccess
+        where K : IntoDeserializer, V : IntoDeserializer {
+        private var key: K? = key
+        private var value: V? = value
+
+        override fun <T> nextElementSeed(seed: DeserializeSeed<T>): SerdeResult<SeqElement<T>> {
+            val k = key
+            if (k != null) {
+                key = null
+                return seed.deserialize(k.intoDeserializer()).map { SeqElement.Some(it) }
+            }
+            val v = value
+            if (v != null) {
+                value = null
+                return seed.deserialize(v.intoDeserializer()).map { SeqElement.Some(it) }
+            }
+            return SerdeResult.success(SeqElement.None)
+        }
+
+        fun hasRemaining(): Boolean = key != null || value != null
+
+        override fun sizeHint(): Int? =
+            when {
+                key != null -> 2
+                value != null -> 1
+                else -> 0
+            }
+    }
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+fun <K : IntoDeserializer, V : IntoDeserializer> Map<K, V>.intoDeserializer(): MapDeserializer<K, V> =
+    MapDeserializer(entries.map { MapEntry(it.key, it.value) }.iterator(), size)
+
+/**
+ * Creates a [MapDeserializer] from an iterator of entries. Use this instead of
+ * the constructor when constructing from Swift or other interop boundaries.
+ */
+fun <K : IntoDeserializer, V : IntoDeserializer> mapDeserializer(
+    iter: Iterator<MapEntry<K, V>>,
+): MapDeserializer<K, V> = MapDeserializer(iter)
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding a `MapAccess`.
+ */
+class MapAccessDeserializer<A : MapAccess>(
+    private val map: A,
+) : Deserializer,
+    EnumAccess,
+    IntoDeserializer {
+    companion object {
+        fun <A : MapAccess> new(map: A): MapAccessDeserializer<A> = MapAccessDeserializer(map)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitMap(map)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = visitor.visitEnum(this)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+
+    override fun <V> variantSeed(seed: DeserializeSeed<V>): SerdeResult<Pair<V, VariantAccess>> =
+        map.nextKeySeed(seed).flatMap { key ->
+            if (key != null) {
+                SerdeResult.success(key to mapAsEnum(map))
+            } else {
+                SerdeResult.failure(
+                    SerdeError.invalidType(
+                        Unexpected.Map,
+                        Expected { "enum" },
+                    ),
+                )
+            }
+        }
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A deserializer holding an `EnumAccess`.
+ */
+class EnumAccessDeserializer<A : EnumAccess>(
+    private val access: A,
+) : Deserializer,
+    IntoDeserializer {
+    companion object {
+        fun <A : EnumAccess> new(access: A): EnumAccessDeserializer<A> = EnumAccessDeserializer(access)
+    }
+
+    override fun <V> deserializeAny(visitor: Visitor<V>): SerdeResult<V> = visitor.visitEnum(access)
+
+    override fun <V> deserializeBool(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeI128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU8(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU16(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeU128(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF32(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeF64(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeChar(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStr(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeString(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeBytes(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeByteBuf(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeOption(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnit(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeUnitStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeNewtypeStruct(
+        name: String,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeSeq(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTuple(
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeTupleStruct(
+        name: String,
+        len: Int,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeMap(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeStruct(
+        name: String,
+        fields: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeEnum(
+        name: String,
+        variants: List<String>,
+        visitor: Visitor<V>,
+    ): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIdentifier(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun <V> deserializeIgnoredAny(visitor: Visitor<V>): SerdeResult<V> = deserializeAny(visitor)
+
+    override fun intoDeserializer(): Deserializer = this
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+
+private fun <T> unitOnly(value: T): Pair<T, VariantAccess> = value to Private.UnitOnly
+
+private fun <A : MapAccess> mapAsEnum(map: A): VariantAccess = Private.MapAsEnum(map)
+
+private object Private {
+    object UnitOnly : VariantAccess {
+        override fun unitVariant(): SerdeResult<Unit> = SerdeResult.success(Unit)
+
+        override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> =
+            SerdeResult.failure(
+                SerdeError.invalidType(
+                    Unexpected.UnitVariant,
+                    Expected { "newtype variant" },
+                ),
+            )
+
+        override fun <V> tupleVariant(
+            len: Int,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> =
+            SerdeResult.failure(
+                SerdeError.invalidType(
+                    Unexpected.UnitVariant,
+                    Expected { "tuple variant" },
+                ),
+            )
+
+        override fun <V> structVariant(
+            fields: List<String>,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> =
+            SerdeResult.failure(
+                SerdeError.invalidType(
+                    Unexpected.UnitVariant,
+                    Expected { "struct variant" },
+                ),
+            )
+    }
+
+    class MapAsEnum<A : MapAccess>(
+        private val map: A,
+    ) : VariantAccess {
+        override fun unitVariant(): SerdeResult<Unit> = map.nextValue(UnitDeserialize)
+
+        override fun <T> newtypeVariantSeed(seed: DeserializeSeed<T>): SerdeResult<T> = map.nextValueSeed(seed)
+
+        override fun <V> tupleVariant(
+            len: Int,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = map.nextValueSeed(SeedTupleVariant(len, visitor))
+
+        override fun <V> structVariant(
+            fields: List<String>,
+            visitor: Visitor<V>,
+        ): SerdeResult<V> = map.nextValueSeed(SeedStructVariant(visitor))
+    }
+
+    private class SeedTupleVariant<V>(
+        private val len: Int,
+        private val visitor: Visitor<V>,
+    ) : DeserializeSeed<V> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<V>
+            where D : Deserializer =
+            deserializer.deserializeTuple(len, visitor)
+    }
+
+    private class SeedStructVariant<V>(
+        private val visitor: Visitor<V>,
+    ) : DeserializeSeed<V> {
+        override fun <D> deserialize(deserializer: D): SerdeResult<V>
+            where D : Deserializer =
+            deserializer.deserializeMap(visitor)
+    }
+}

@@ -1,0 +1,7 @@
+{
+  "kotlin-js-store/yarn.lock": "765ece929590132ed06d8cd916fa4ad8dccc2fc7a523f42c03e1d16af09939be",
+  "serde_core/api/android/serde-core.api": "4857ab6dda4a5fb0e4a8ce27d02b300e15317dfccc76edc75ffc77e184732e48",
+  "serde_core/api/jvm/serde-core.api": "b485fe002babf07d2f1f2db607eb15c700da2519e3990dfef4027edba6f11f49",
+  "serde_core/api/serde-core.klib.api": "d265fa2d01c63d501f47802876a561afa2048cfbfd94d64c045d23702a0c0976",
+  "serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Unexpected.kt": "6d04abfe2d45f3abf47853261c28861f4114b36b6027d912b5a187bf3c2ae85d"
+}

@@ -1,0 +1,10 @@
+borrow:0:true:true:true
+owned:0:true:true:true
+borrow:1:true:true:true
+owned:1:true:true:true
+borrow:4:true:true:true
+owned:4:true:true:true
+borrow:257:true:true:true
+owned:257:true:true:true
+borrow:512:true:true:true
+owned:512:true:true:true

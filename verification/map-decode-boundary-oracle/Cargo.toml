@@ -1,0 +1,8 @@
+[package]
+name = "serde-map-decode-boundary-oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde_core = { path = "../../tmp/serde/serde_core" }

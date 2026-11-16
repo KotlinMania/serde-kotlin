@@ -1,0 +1,205 @@
+{
+  "status": "passed",
+  "new_translated_files": 0,
+  "commands": [
+    {
+      "label": "rust-version",
+      "argv": [
+        "/Volumes/stuff/Projects/kotlinmania/automation-artifacts/rust-jvm-j2k-experiment-20261024-task5/rustup-home/toolchains/nightly-2026-10-23-aarch64-apple-darwin/bin/rustc",
+        "-Vv"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "rust-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--quiet",
+        "--manifest-path",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/verification/content-borrow-01/Cargo.toml",
+        "--target",
+        "aarch64-apple-darwin",
+        "--target-dir",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/content-borrow-01/oracle-01/cargo-target"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "rust",
+      "argv": [
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/content-borrow-01/oracle-01/cargo-target/aarch64-apple-darwin/debug/serde-content-borrow-oracle"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "native-compile",
+      "argv": [
+        "/Users/sydney/.konan/kotlin-native-prebuilt-macos-aarch64-2.4.21/bin/konanc",
+        "-target",
+        "macos_arm64",
+        "-Werror",
+        "-Xoverride-konan-properties=airplaneMode=true",
+        "-Xbackend-threads=1",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/verification/content-borrow-01/Oracle.kt",
+        "-friend-modules",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/serde_core/build/classes/kotlin/macosArm64/main/klib/serde-core",
+        "-library",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/serde_core/build/classes/kotlin/macosArm64/main/klib/serde-core",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/io.github.kotlinmania/num-traits-kotlin-macosarm64/0.2.15/ea8d7d3d6bcd5c528a08a1abf72d01b99293dd02/num-traits-kotlin-macosArm64Main-0.2.15.klib",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-macosarm64/1.11.0/baededf132ba29f88ec444a7209692951f6bc020/kotlinx-coroutines-core-macosArm64Main-1.11.0.klib",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-datetime-macosarm64/0.8.0/35281d8b2dad073b4ede91fc70a699c0baeab910/kotlinx-datetime-macosArm64Main-0.8.0.klib",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-collections-immutable-macosarm64/0.5.2/b09976aca9970c8c0a3808a4a6664000ec045c4a/kotlinx-collections-immutable-macosArm64Main-0.5.2.klib",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/atomicfu-macosarm64/0.32.1/4a274f829f780c332d10ba8adaf076c5b251ca1/atomicfu-macosArm64Main-0.32.1.klib",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/atomicfu-macosarm64/0.32.1/a6d990b552bf9396503f8318ae1188aa961de542/atomicfu-macosArm64Cinterop-interopMain-0.32.1.klib",
+        "-library",
+        "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-macosarm64/1.6.2/9b73a3c99322130d2aba72d7a382879546251058/kotlinx-serialization-core.klib",
+        "-o",
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/content-borrow-01/oracle-01/native"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "native",
+      "argv": [
+        "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/content-borrow-01/oracle-01/native.kexe"
+      ],
+      "exit": 0
+    }
+  ],
+  "compiler_environment": {
+    "RUSTC": "/Volumes/stuff/Projects/kotlinmania/automation-artifacts/rust-jvm-j2k-experiment-20261024-task5/rustup-home/toolchains/nightly-2026-10-23-aarch64-apple-darwin/bin/rustc",
+    "RUSTFLAGS": "--cfg feature=\"std\" --cfg feature=\"alloc\" --check-cfg=cfg(feature,values(\"std\",\"alloc\")) -C overflow-checks=on -C debug-assertions=yes -C panic=unwind -Dwarnings"
+  },
+  "sources": {
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde/src/private/de.rs": "68ee17774d3bbc693d9f19803747fa2c3afdb7046482e6d94ac6cf7db5a4fe20",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/tmp/serde/serde/src/core/private/content.rs": "5fdfb2bb95ecc80375507acb813a4c640496385e56fc99ab448f6b19e01fcc01",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/ContentVisitor.kt": "7ac53b2bda43084e8978da58c5f81b7b18c7001a92cb1f0ed789142ee0865911",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/verification/content-borrow-01/Oracle.rs": "26127006a3595db153566623eafee9c4d8edd6480b60aadd9c46075631b6d803",
+    "/Volumes/stuff/Projects/kotlinmania/serde-kotlin/verification/content-borrow-01/Oracle.kt": "9a17664002b9ae7cc44a015724f9e96eb76c7fd56c1a711ff0cc49532dee9cf5"
+  },
+  "production_klib": {
+    "default/manifest": "2393a19fc2f076b6d9b498a786c0e032a7d1568d650bc49cce4702f8e71225c4",
+    "default/ir/files.knf": "e55f05ca86d1fa8ffa02d4a864cc8b655c8104752f759306da9e018804aa47d2",
+    "default/ir/bodies.knb": "60948c729d2fdde83033b208b37275dfa6093780c65d4e51980acc53def3b80a",
+    "default/ir/signatures.knt": "f098e961c435d8333380148999a666bd36c36235edc7672908ec91ae8dbd7002",
+    "default/ir/types.knt": "e9ec9ac4f564550f0454bca8952b47512b62c6b03a3e63ca899b7e74c55a3cb7",
+    "default/ir/fileEntries.knf": "48b819b9718e57dd3ccb36fdc5c500bf52633b791d7fe0611b4b606a751191d7",
+    "default/ir/debugInfo.knd": "58eaf3b14d17311f782951890cf5e12325e26d27c43a4411e81db8e87bc34e36",
+    "default/ir/strings.knt": "0da94be795e7add6832e57c32ce207ea6f05fde094a35b1b7a5072831998934f",
+    "default/ir/irDeclarations.knd": "1567420e7a252e73e6729232143459a88503f917f6895b7d18e045fcd4fc5ea6",
+    "default/ir_inlinable_functions/files.knf": "d790234f9d53ed189496ddfd5e3452de327dd81c881fb5ab5300c5b88d799704",
+    "default/ir_inlinable_functions/bodies.knb": "0cad1db4474e735e213a6c1c6f394d00ab52141edf2a33c36cc3ace4d459965a",
+    "default/ir_inlinable_functions/signatures.knt": "38c145fcddc19a78ec17d2885d7da49a8fcec2d314cfda0b6bec86bd05d67a17",
+    "default/ir_inlinable_functions/types.knt": "359cee36ae767a552afd158af4cd4612b7a3131c7c66598d892abbc8d01aa3c6",
+    "default/ir_inlinable_functions/fileEntries.knf": "ab98d64caeeaa2323841a2be49b5504a7bd586869a9ed15b0ad032d0954298f1",
+    "default/ir_inlinable_functions/debugInfo.knd": "e950c4d3fa63ed2d151be5bc3a897dca80e3cc7160340205d59ef3059e9c5df0",
+    "default/ir_inlinable_functions/strings.knt": "a32bc50f76e248c9107fdbb6fc5c7c72b34e1f1594f43689b1cdec8ce412746a",
+    "default/ir_inlinable_functions/irDeclarations.knd": "b45821c96a48d63dd6c7490a0ea7691162152bd9d19b3c053c8fadc33cb67373",
+    "default/linkdata/module": "8f96e3e7ba070199476823f2185cb09c67e7f04d3b5c6740f383182201a08d32",
+    "default/linkdata/package_org.rustlang.core.str/0_str.knm": "7cf81e8e7dc13805c3e85d31259fb18f09fe1cf772ca8ef88c8902469f096084",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de.value/0_value.knm": "c8941df4bf9a9ad441d0e66c25b396537b1bd7a25ea05670f887f9ee85419e88",
+    "default/linkdata/package_io.github.kotlinmania.serde/03_serde.knm": "9c8176571ae3e58dfd5185d36f1e25d6e9dc67cf2f5e5d2cc8cc7245dd7c8b9c",
+    "default/linkdata/package_io.github.kotlinmania.serde/08_serde.knm": "12aefd38bc4498c4c24260c86ac283e2ed021c1770826d77b42af4bbb9ce4f3a",
+    "default/linkdata/package_io.github.kotlinmania.serde/05_serde.knm": "1d37a44b3f40d54d457e91e3f87e62c3619cc7660eab4e9c3417a1489f1d2127",
+    "default/linkdata/package_io.github.kotlinmania.serde/02_serde.knm": "eefee5910cd5904e0eeaee61d3ca4d69fc3b434cc20a329b592aa8eb81fc67ea",
+    "default/linkdata/package_io.github.kotlinmania.serde/09_serde.knm": "64b88337bfec8fc148335faece156ef433d0a6be4a6103ada1746e2e47b737b9",
+    "default/linkdata/package_io.github.kotlinmania.serde/04_serde.knm": "a66c62a7a88ec6d2a2fef060bef7654786b575e0fd828f10817fc1aa4127560c",
+    "default/linkdata/package_io.github.kotlinmania.serde/01_serde.knm": "1564057f074cb31827cbd5fa808d8018d952f92596b6f55ffa46bc5810232c9e",
+    "default/linkdata/package_io.github.kotlinmania.serde/07_serde.knm": "54eb588fb0578511233710af53e089a3b4317183afe13794f6f96d0b7ea57e93",
+    "default/linkdata/package_io.github.kotlinmania.serde/00_serde.knm": "f1f16e89ea5fdbcf01bc6d4d0f747d0dc289b915dab4d182a02c6d1420885725",
+    "default/linkdata/package_io.github.kotlinmania.serde/06_serde.knm": "8c41be425d20e0487d0488fb7cddf2aadf5d238e823bef56c8fc3463941f9656",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/08_ser.knm": "18238cc1df8c729d739d9ae391591c57b73adbfa53f804a8d15c8009f0b53c95",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/01_ser.knm": "4fa49166fe65838c718ee3da68a0f71b05fb9a5aa1e30e2b4f0ffacfee657ed5",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/11_ser.knm": "2d8a7af368120f66ec936ef8c0744de627a9b4edb69c3dd00f4827eeb12e9a62",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/10_ser.knm": "893a2e27f57c5714156b048345fe5bc0ce9fa5b30b0a6c857b695925c62124f6",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/00_ser.knm": "cd9b471674353e3d376754161217121638afa0be429c72cc7aa17fdc06e5752b",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/09_ser.knm": "addc04802038731850d5707564894fbe33439117bd2d09f72683977cdc0591c6",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/02_ser.knm": "84b25bd8d66d00db14f36b6a61e3776598fdfcf9852c0ce075a2ae56f69c7948",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/12_ser.knm": "edbfc822b1176f3fcc87029ada5000e48bd9ee921ba8dc179203015f31f35569",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/03_ser.knm": "8dbaa090d74a249994c81b45f718f668479d8b06c4115bcd730bcbd6dc55478f",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/06_ser.knm": "c1690b5e73ab0679bd71b84598f8b62bdcafe2fc1fc1d6ee2da26b1ac8ef0cd0",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/07_ser.knm": "2ba50bc41bec75b8054c0a813b8165a541aa1cf61e70e0d480ccfb48a0e928c3",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/05_ser.knm": "a4cdcd3e8305451c20ef792cfb71afee1ac429c4f5b1dba21a4950b00578ccd3",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.ser/04_ser.knm": "7983aa3b33fff9980f9fc2e7adfb4bc5e3d4c99444c4ed59aba79de35d2d468f",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv.generated.sizehint/0_sizehint.knm": "abe3b6784ea02fb03352c7f159df02d2fd6af6dbf9b43384fbe799a472217080",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/02_de.knm": "97a1438de19832849c8d3c2477947ef89a182c64be032ec816d3ba60dc0b4ca3",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/10_de.knm": "087d96ce055d96220907f3b946ddf1192ec6a5eb1d7889d539cb2315eb89cef8",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/12_de.knm": "a62fd5904a3e7d40aa4dc2ceb23c6800977ac13ae7a84de169027529d6a3e553",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/00_de.knm": "284168a438e56ef7633d978efbfef91004fffdc79d7144fd444b0c83540498b7",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/04_de.knm": "483b55e87948eab42934b5206af6e4e95e145fbb7929fea5bda52562d5c19f6e",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/16_de.knm": "3338999f578f483f508db466076929c359f1c0dd147247cb1430d344f7bf10d2",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/08_de.knm": "03f9653e087971941917c4becc9f919a6b722d4cc79fa023880ca82df9a67c5b",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/14_de.knm": "5efa111106bd4f2fddcbba1f0e471ac396fa0f4dab62eab7efd6f5f44e2acade",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/06_de.knm": "adeb7e8897eb82cfbd67d85459b38807f43e9c5888d2f0709b3fe8fa14745595",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/03_de.knm": "7cf2c92c284343f87d28596d2f27751ea113ccdacb2578525d293670ac9d1fd1",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/11_de.knm": "0b302fb7cf9de854c8dea3998a3b011154e4f7ecba0c148dbd840c7d6b9e92ce",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/13_de.knm": "74f6a10087527eab1c7add0da5cd2a9975a6a48981897eeda4aaa976a87449c4",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/01_de.knm": "281a3d5beb5e265f8638381dca15a3dc0e843c42e16f2cb411feb38a8b624f5b",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/05_de.knm": "b68fc3c82708357db9c2ea0a57b245269c7b7c5186354275a91269e2eb138910",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/09_de.knm": "063bb3c64515a7f31b1b784136467823bfe6d0d4d8a851edcda737b866f740b2",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/15_de.knm": "a67fab0134cbb924ae37c26d109a9b3313ebeb2d8995cdb3ef8520107015edd0",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.de/07_de.knm": "1b6473441a739a6cd179855e4c050a7748433e44c2268468bce2f9092bc6418e",
+    "default/linkdata/package_io.github.kotlinmania.serdecore/2_serdecore.knm": "d39e5ec2713a9dfa478fcdb3009aca9fa009eb99ecc34907b5f8fd0fd78023f6",
+    "default/linkdata/package_io.github.kotlinmania.serdecore/1_serdecore.knm": "ed6e9582a8150096370a469e8de27a88b29ef3800aa057dcf97daed9867fdda2",
+    "default/linkdata/package_io.github.kotlinmania.serdecore/0_serdecore.knm": "5f767486d3e723c7321df5e00c9e9219aae8e1dd344b71cc3c658b356b6d335f",
+    "default/linkdata/package_io.github.kotlinmania.serdecore/3_serdecore.knm": "ef500ec3c4f51e472187e8dabe3750b91a4cf8274e992b44ea119748a7086b9f",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv.generated.string/0_string.knm": "0a846d94426fc2f4353cd33ce0806d620cec9a7c261b461652b3bd647ca9d0b0",
+    "default/linkdata/package_org.rustlang.core.slice/0_slice.knm": "a0af8d2a00e9700e628df3ec205693e46f19fb7ab75ece37f9ba8cd775748a48",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/0_priv.knm": "d63013948cd960684f56334a91fce9e9474cf909cf1a58bc11536d2a4504209a",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/1_priv.knm": "60baebe3dfd2c3f051a0c7793f971ee62d8ed9db75d66e4896ce9699cf99464f",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/7_priv.knm": "5423824f67f68694a76d8fc0a2ff90d90347115011ba41f5da939b267cffb052",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/6_priv.knm": "4fcf2f8eb5821ee1fcda7dbbe8ecc70c1dcbac20eb180edbbacc15995634c3f8",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/3_priv.knm": "60e93262b96678bcbad9cdd80dad218919fe6d08ffd36227e2c457228fc5f310",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/2_priv.knm": "fb1ecd255ec97c58d5bb75e3eb4bfb7ee79068eed18796048d19f7c1a67f609c",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/4_priv.knm": "d4b8a1dee6d3999a385b042d7650370c3fa19245bdb8a256a66b2ae9f92dd01a",
+    "default/linkdata/package_io.github.kotlinmania.serdecore.priv/5_priv.knm": "320785b4f99b02d7e59065925b653eddaf6bbd6a86d4fa104be9054703ac88c5",
+    "default/linkdata/package_org.rustlang.alloc.borrow/0_borrow.knm": "1209a7bf3a50ef94773d6dff28fd44dd3406421809dc4962c26ced5be5b1cd9f"
+  },
+  "libraries": {
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/io.github.kotlinmania/num-traits-kotlin-macosarm64/0.2.15/ea8d7d3d6bcd5c528a08a1abf72d01b99293dd02/num-traits-kotlin-macosArm64Main-0.2.15.klib": "1282b482f6b4608fdefc9e6e7540cba00fb95408bcd42c20e4c543c4fa0e3fb9",
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-macosarm64/1.11.0/baededf132ba29f88ec444a7209692951f6bc020/kotlinx-coroutines-core-macosArm64Main-1.11.0.klib": "782a837c8593af70135378fb90b999cf0cb9880dc746619f64d6c5c224d014d0",
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-datetime-macosarm64/0.8.0/35281d8b2dad073b4ede91fc70a699c0baeab910/kotlinx-datetime-macosArm64Main-0.8.0.klib": "175a07fd9150e167722ddd371e9eedd07411f9d40d884ddf12291d9477a23938",
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-collections-immutable-macosarm64/0.5.2/b09976aca9970c8c0a3808a4a6664000ec045c4a/kotlinx-collections-immutable-macosArm64Main-0.5.2.klib": "1792a1d25ff77dc7452e5685e3b56621fe65a61980d9f2e98d51e28aff2626e8",
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/atomicfu-macosarm64/0.32.1/4a274f829f780c332d10ba8adaf076c5b251ca1/atomicfu-macosArm64Main-0.32.1.klib": "368865987bfa5da765e40b15b4df60fd12f257688ed65a96ca71ebf2cf1a5261",
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/atomicfu-macosarm64/0.32.1/a6d990b552bf9396503f8318ae1188aa961de542/atomicfu-macosArm64Cinterop-interopMain-0.32.1.klib": "165c584c77f7c716cdc5a083093ef235c9bacfeabad6ed32ca9f7b928acbe292",
+    "/Users/sydney/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-macosarm64/1.6.2/9b73a3c99322130d2aba72d7a382879546251058/kotlinx-serialization-core.klib": "bb82ae3289c3c8c2189062736cf6d8a857e23e1a2190be02acff687ba8c79696"
+  },
+  "observations": 10,
+  "target": "macos_arm64",
+  "rust_target": "aarch64-apple-darwin",
+  "scope": "Actual Rust ContentVisitor + ContentRefDeserializer clone versus actual production serde-core KLIB; whole ByteArray borrowing only",
+  "tests": {
+    "core_jvm": {
+      "tests": 76,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "root_jvm": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core_native": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "root_native": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+}

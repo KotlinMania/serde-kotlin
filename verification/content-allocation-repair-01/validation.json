@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "repair_only_new_translated_files": 0,
+  "commands": [
+    "./gradlew --offline --no-daemon -Pproject.repositories.mavenLocal=true -Dmaven.repo.local=/Users/sydney/.m2/repository :serde-core:jvmTest :jvmTest :serde-core:macosArm64Test :macosArm64Test",
+    "./gradlew --offline --no-daemon -Pproject.repositories.mavenLocal=true -Dmaven.repo.local=/Users/sydney/.m2/repository :serde-core:updateLegacyAbi"
+  ],
+  "tests": {
+    "core_jvm": {
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "root_jvm": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core_native": {
+      "tests": 77,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "root_native": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "fixed_regressions": [
+    "io.github.kotlinmania.serde.UntaggedContentTest.failedAttemptDoesNotConsumeTheNextAttempt",
+    "io.github.kotlinmania.serde.UntaggedContentTest.nullableElementsAreValuesRatherThanEndOfSequence"
+  ],
+  "raw_bodies": {
+    "serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/generated/sizehint/SizeHint.kt": {
+      "sha256": "e46f3a76ac6712e5a24e977ba07e247ef63a51e9c6d736707c9ca56d221f7106",
+      "unchanged": true
+    },
+    "serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/generated/string/String.kt": {
+      "sha256": "6303a9cd9c96dfac8099b3feddab6b3ee76ff36ccbff9eb143dd7404e038876e",
+      "unchanged": true
+    }
+  },
+  "foreign_preservation": {
+    "kotlin-js-store/yarn.lock": {
+      "sha256_excluding_owned_api_additions": "765ece929590132ed06d8cd916fa4ad8dccc2fc7a523f42c03e1d16af09939be",
+      "preserved": true
+    },
+    "serde_core/api/android/serde-core.api": {
+      "sha256_excluding_owned_api_additions": "4857ab6dda4a5fb0e4a8ce27d02b300e15317dfccc76edc75ffc77e184732e48",
+      "preserved": true
+    },
+    "serde_core/api/jvm/serde-core.api": {
+      "sha256_excluding_owned_api_additions": "b485fe002babf07d2f1f2db607eb15c700da2519e3990dfef4027edba6f11f49",
+      "preserved": true
+    },
+    "serde_core/api/serde-core.klib.api": {
+      "sha256_excluding_owned_api_additions": "d265fa2d01c63d501f47802876a561afa2048cfbfd94d64c045d23702a0c0976",
+      "preserved": true
+    },
+    "serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/de/Unexpected.kt": {
+      "sha256_excluding_owned_api_additions": "6d04abfe2d45f3abf47853261c28861f4114b36b6027d912b5a187bf3c2ae85d",
+      "preserved": true
+    }
+  },
+  "abi": {
+    "status": "passed",
+    "new_functions": [
+      "newContentBuffer",
+      "newContentMapBuffer"
+    ],
+    "other_worktree_changes_preserved": true
+  },
+  "boundaries": [
+    "Rust allocation bound measured only for aarch64-apple-darwin at revision 7189d39d9ce936881b8132c6addeaf3e295cd455",
+    "No measured layout means ordinary Kotlin ArrayList growth, no equivalent reservation or allocation-failure claim",
+    "Strict layout/size witness APIs still reject absent evidence",
+    "Only JVM and macOS ARM64 runtime suites run; no Swift ABI compatibility claim"
+  ],
+  "log_rendering": "Trailing whitespace removed in tracked text receipts; original command logs retained locally.",
+  "original_log_sha256": {
+    "tests-attempt-01.log": "adc21b0fad8310d9eb9b0516ba50772cad769f81415ae108b89ad118237a5a50",
+    "abi-attempt-01.log": "ebab994d90619b719b956daa75a42d3031d0a39812ef95482b9dee65498892c1"
+  }
+}

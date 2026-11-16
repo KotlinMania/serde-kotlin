@@ -1,66 +1,76 @@
 [versions]
-kotlin = "2.4.20"
-coroutines = "1.11.0"
-serialization = "1.11.0"
-datetime = "0.8.0"
+btree = "0.2.4"
 collectionsImmutable = "0.5.2"
+datetime = "0.8.0"
+serialization = "1.11.0"
+coroutines = "1.11.0"
+kotlin = "2.4.21"
 androidKmp = "9.4.1"
-vanniktech = "0.37.0"
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.6"
 ktlint = "14.2.0"
+ktlintEngine = "1.8.0"
 kotlinxBenchmark = "0.5.0"
-# Sibling KotlinMania ports consumed by :serde-derive (the serde_derive analogue)
-syn = "0.3.11"
-quote = "0.2.5"
-procMacro2 = "0.1.6"
-# build-logic convention-plugin toolchain + plugin deps (mirrors km-io)
+vanniktech = "0.37.0"
+syn = "0.5.0"
+quote = "0.3.1"
+procMacro2 = "0.1.8"
+numTraits = "0.1.0"
+kmIo = "0.4.0"
+libc = "0.1.11"
+serdeTest = "0.1.2"
 multi-release-toolchain = "17"
 dokka = "2.2.0"
 animalsniffer = "2.0.1"
 kover = "0.9.9"
+androidxTestRunner = "1.7.0"
 
 [plugins]
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidKmp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kmp = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidKmp" }
-vanniktech = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmark" }
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+vanniktech = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 [libraries]
-# build-logic convention-plugin dependencies (mirrors km-io build-logic)
+btree-kotlin = { module = "io.github.kotlinmania:btree-kotlin", version.ref = "btree" }
+collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 dokka-gradle-plugin = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version.ref = "dokka" }
 power-assert-plugin = { group = "org.jetbrains.kotlin.plugin.power-assert", name = "org.jetbrains.kotlin.plugin.power-assert.gradle.plugin", version.ref = "kotlin" }
 animalsniffer-gradle-plugin = { group = "ru.vyarus", name = "gradle-animalsniffer-plugin", version.ref = "animalsniffer" }
 android-kmp-library-gradle-plugin = { group = "com.android.kotlin.multiplatform.library", name = "com.android.kotlin.multiplatform.library.gradle.plugin", version.ref = "androidKmp" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
-kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
 maven-publish-gradle-plugin = { group = "com.vanniktech", name = "gradle-maven-publish-plugin", version.ref = "vanniktech" }
-# Sibling KotlinMania ports — published Maven artifacts consumed by :serde-derive only
 syn-kotlin = { module = "io.github.kotlinmania:syn-kotlin", version.ref = "syn" }
 quote-kotlin = { module = "io.github.kotlinmania:quote-kotlin", version.ref = "quote" }
 proc-macro2-kotlin = { module = "io.github.kotlinmania:proc-macro2-kotlin", version.ref = "procMacro2" }
+num-traits-kotlin = { module = "io.github.kotlinmania:num-traits-kotlin", version.ref = "numTraits" }
+km-io = { module = "io.github.kotlinmania:km-io", version.ref = "kmIo" }
+libc-kotlin = { module = "io.github.kotlinmania:libc-kotlin", version.ref = "libc" }
+serde-test-kotlin = { module = "io.github.kotlinmania:serde-test-kotlin", version.ref = "serdeTest" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
 [bundles]
-# :serde-core (serde_core analogue) — the runtime data-model deps
 serde-commonMain = [
-  "kotlinx-coroutines-core",
-  "kotlinx-serialization-core",
-  "kotlinx-serialization-json",
-  "kotlinx-datetime",
-  "collections-immutable",
-]
-# :serde-derive (serde_derive analogue) — the proc-macro toolchain ports
-serde-derive-commonMain = [
   "syn-kotlin",
   "quote-kotlin",
   "proc-macro2-kotlin",
+  "num-traits-kotlin",
 ]
+serde-commonTest = [
+  "btree-kotlin",
+  "km-io",
+  "libc-kotlin",
+  "serde-test-kotlin",
+]
+
+serde-commonMainApi = ["proc-macro2-kotlin"]

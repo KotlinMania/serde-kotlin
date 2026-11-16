@@ -1,0 +1,9 @@
+empty|state=|trace=|result=ok
+truncate|state=10|trace=in:1:10|result=ok
+equal|state=10,20|trace=in:1:10;in:2:20|result=ok
+append|state=10,20,30|trace=in:1:10;new:20;new:30|result=ok
+empty-append|state=10,20|trace=new:10;new:20|result=ok
+error-existing|state=10,700,3|trace=in:1:10;in:2:-1|result=error:rejected
+error-append|state=10|trace=in:1:10;new:-1|result=error:rejected
+panic-existing|state=10,800,3|trace=in:1:10;in:2:-2|result=panic
+panic-append|state=10|trace=in:1:10;new:-2|result=panic

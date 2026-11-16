@@ -1,0 +1,60 @@
+{
+  "target": "aarch64-apple-darwin",
+  "rust_revision": "7189d39d9ce936881b8132c6addeaf3e295cd455",
+  "facts": [
+    {
+      "type": "u8",
+      "size_bytes": 1,
+      "alignment": 1,
+      "actual_caller": true
+    },
+    {
+      "type": "Content",
+      "size_bytes": 32,
+      "alignment": 8,
+      "actual_caller": true
+    },
+    {
+      "type": "ContentPair",
+      "size_bytes": 64,
+      "alignment": 8,
+      "actual_caller": true
+    },
+    {
+      "type": "unit",
+      "size_bytes": 0,
+      "alignment": 1,
+      "actual_caller": false
+    },
+    {
+      "type": "u8_array0",
+      "size_bytes": 0,
+      "alignment": 1,
+      "actual_caller": false
+    },
+    {
+      "type": "u8_array32",
+      "size_bytes": 32,
+      "alignment": 1,
+      "actual_caller": false
+    },
+    {
+      "type": "u8_u64_tuple",
+      "size_bytes": 16,
+      "alignment": 8,
+      "actual_caller": false
+    },
+    {
+      "type": "repr_c_padded",
+      "size_bytes": 16,
+      "alignment": 8,
+      "actual_caller": false
+    },
+    {
+      "type": "over_cap_array",
+      "size_bytes": 1048577,
+      "alignment": 1,
+      "actual_caller": false
+    }
+  ]
+}

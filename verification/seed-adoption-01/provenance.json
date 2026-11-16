@@ -1,0 +1,9 @@
+{
+  "raw_source": "../rust-kotlin/verification/foundation-batch-04/seed-01/generated/generated.kt",
+  "raw_sha256": "53ca4518e8e60cd801b1250ac6bbc40282fb353b552fbbf2f9c6682c6aa84d34",
+  "rust_source_sha256": "3f6e098c5bd314788370dcaf3ab0152fcd7feb6bcf36a9c51808938cd58071eb",
+  "destination": "serde_core/src/commonMain/kotlin/io/github/kotlinmania/serdecore/priv/Seed.kt",
+  "packaging": "Source header and package only; complete generated body unchanged",
+  "generator_commit": "b5d855c33f874d88257123d83a61c5c332856643",
+  "handoff_commit": "01369fd"
+}
