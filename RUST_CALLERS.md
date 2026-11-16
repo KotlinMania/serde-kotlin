@@ -16,20 +16,20 @@ For every Rust crate this repo owns (under `tmp/`), this file lists every **cros
 
 | package | module | inbound use sites | distinct caller crates | distinct caller repos | codex sites |
 |---|---|---:|---:|---:|---:|
-| `serde` | `serde` | 1759 | 118 | 51 | 438 |
-| `serde_core` | `serde_core` | 171 | 10 | 10 | 0 |
-| `serde_derive` | `serde_derive` | 41 | 10 | 10 | 0 |
+| `serde` | `serde` | 2266 | 159 | 73 | 438 |
+| `serde_core` | `serde_core` | 179 | 11 | 11 | 0 |
+| `serde_derive` | `serde_derive` | 216 | 15 | 13 | 0 |
 | `serde_derive_internals` | `serde_derive_internals` | 0 | 0 | 0 | 0 |
 | `serde_derive_tests_no_std` | `serde_derive_tests_no_std` | 0 | 0 | 0 | 0 |
 | `serde_test_suite` | `serde_test_suite` | 0 | 0 | 0 | 0 |
 
 ## `serde`
 
-### Inbound symbols (46 distinct, 1759 total `use` sites)
+### Inbound symbols (53 distinct, 2266 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `serde`.
 
-#### `serde::Serialize` — 453 site(s) (196 codex, 257 other, 97 caller crates)
+#### `serde::Serialize` — 572 site(s) (196 codex, 376 other, 130 caller crates)
 
 - ✅ `codex-kotlin/codex-agent-graph-store` `src/types.rs:2` — `use serde::Serialize`
 - ✅ `codex-kotlin/codex-agent-identity` `src/lib.rs:28` — `use serde::Serialize`
@@ -43,9 +43,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/protocol/common.rs:14` — `use serde::Serialize`
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/protocol/serde_helpers.rs:3` — `use serde::Serialize`
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/protocol/v1.rs:21` — `use serde::Serialize`
-- _… and 441 more site(s)._
+- _… and 560 more site(s)._
 
-#### `serde::Deserialize` — 404 site(s) (190 codex, 214 other, 93 caller crates)
+#### `serde::Deserialize` — 593 site(s) (190 codex, 403 other, 130 caller crates)
 
 - ✅ `codex-kotlin/codex-agent-graph-store` `src/types.rs:1` — `use serde::Deserialize`
 - ✅ `codex-kotlin/codex-agent-identity` `src/lib.rs:27` — `use serde::Deserialize`
@@ -59,9 +59,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-api` `src/sse/responses.rs:15` — `use serde::Deserialize`
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/jsonrpc_lite.rs:6` — `use serde::Deserialize`
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/protocol/common.rs:13` — `use serde::Deserialize`
-- _… and 392 more site(s)._
+- _… and 581 more site(s)._
 
-#### `serde::de::DeserializeOwned` — 54 site(s) (22 codex, 32 other, 30 caller crates)
+#### `serde::de::DeserializeOwned` — 64 site(s) (22 codex, 42 other, 38 caller crates)
 
 - ✅ `codex-kotlin/app_test_support` `lib.rs:46` — `use serde::de::DeserializeOwned`
 - ✅ `codex-kotlin/codex-agent-identity` `src/lib.rs:29` — `use serde::de::DeserializeOwned`
@@ -75,9 +75,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-chatgpt` `src/chatgpt_client.rs:6` — `use serde::de::DeserializeOwned`
 - ✅ `codex-kotlin/codex-config` `src/diagnostics.rs:9` — `use serde::de::DeserializeOwned`
 - ✅ `codex-kotlin/codex-core` `src/config_lock.rs:9` — `use serde::de::DeserializeOwned`
-- _… and 42 more site(s)._
+- _… and 52 more site(s)._
 
-#### `serde::Deserializer` — 38 site(s) (11 codex, 27 other, 26 caller crates)
+#### `serde::Deserializer` — 65 site(s) (11 codex, 54 other, 37 caller crates)
 
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/protocol/serde_helpers.rs:2` — `use serde::Deserializer`
 - ✅ `codex-kotlin/codex-config` `src/config_toml.rs:58` — `use serde::Deserializer`
@@ -91,9 +91,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - ✅ `codex-kotlin/codex-protocol` `src/protocol.rs:191` — `use serde::Deserializer`
 - ✅ `codex-kotlin/codex-utils-absolute-path` `src/lib.rs:4` — `use serde::Deserializer`
 - `arc-swap-kotlin/arc-swap` `src/serde.rs:2` — `use serde::Deserializer`
-- _… and 26 more site(s)._
+- _… and 53 more site(s)._
 
-#### `serde::Serializer` — 40 site(s) (6 codex, 34 other, 30 caller crates)
+#### `serde::Serializer` — 58 site(s) (6 codex, 52 other, 38 caller crates)
 
 - ✅ `codex-kotlin/codex-app-server-protocol` `src/protocol/serde_helpers.rs:4` — `use serde::Serializer`
 - ✅ `codex-kotlin/codex-config` `src/mcp_types.rs:397` — `use serde::Serializer`
@@ -107,9 +107,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `ed25519-dalek-kotlin/ed25519-dalek` `src/signing.rs:21` — `use serde::Serializer`
 - `ed25519-dalek-kotlin/ed25519-dalek` `src/verifying.rs:30` — `use serde::Serializer`
 - `either-kotlin/either` `src/serde_untagged.rs:1` — `use serde::Serializer`
-- _… and 28 more site(s)._
+- _… and 46 more site(s)._
 
-#### `serde::de::Error` — 31 site(s) (5 codex, 26 other, 17 caller crates)
+#### `serde::de::Error` — 39 site(s) (5 codex, 34 other, 22 caller crates)
 
 - ✅ `codex-kotlin/codex-config` `src/config_requirements.rs:9` — `use serde::de::Error as _`
 - ✅ `codex-kotlin/codex-config` `src/mcp_types.rs:12` — `use serde::de::Error as SerdeError`
@@ -119,32 +119,35 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `chrono-kotlin/chrono` `src/time_delta.rs:671` — `use serde::de::Error`
 - `ed25519-dalek-kotlin/ed25519-dalek` `tests/validation_criteria.rs:3` — `use serde::de::Error as SError`
 - `globset-kotlin/globset` `src/serde_impl.rs:1` — `use serde::de::Error`
+- `hf-hub-kotlin/hf-hub` `src/repository/mod.rs:184` — `use serde::de::Error`
+- `num-bigint-kotlin/num-bigint` `src/bigint/serde.rs:5` — `use serde::de::Error`
 - `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::Error`
 - `quick-xml-kotlin/quick-xml` `src/serde_helpers.rs:239` — `use serde::de::Error`
-- `quick-xml-kotlin/quick-xml` `src/utils.rs:14` — `use serde::de::Error`
-- `rama-http-kotlin/rama-http` `src/layer/har/spec.rs:34` — `use serde::de::Error`
-- _… and 19 more site(s)._
+- _… and 27 more site(s)._
 
-#### `serde::de` — 51 site(s) (2 codex, 49 other, 14 caller crates)
+#### `serde::de` — 78 site(s) (2 codex, 76 other, 24 caller crates)
 
 - ✅ `codex-kotlin/codex-execpolicy-legacy` `src/main.rs:12` — `use serde::de`
 - ✅ `codex-kotlin/codex-login` `src/device_code_auth.rs:5` — `use serde::de`
 - `bytes-kotlin/bytes` `src/serde.rs:5` — `use serde::de`
+- `candle-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de`
+- `candle-transformers-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de`
+- `candle-ug-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:2` — `use serde::de`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:152` — `use serde::de`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:292` — `use serde::de`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:440` — `use serde::de`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:573` — `use serde::de`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:710` — `use serde::de`
-- `chrono-kotlin/chrono` `src/datetime/serde.rs:840` — `use serde::de`
-- `chrono-kotlin/chrono` `src/datetime/serde.rs:985` — `use serde::de`
-- `chrono-kotlin/chrono` `src/datetime/serde.rs:1103` — `use serde::de`
-- _… and 39 more site(s)._
+- _… and 66 more site(s)._
 
-#### `serde::de::Deserializer` — 25 site(s) (2 codex, 23 other, 11 caller crates)
+#### `serde::de::Deserializer` — 36 site(s) (2 codex, 34 other, 16 caller crates)
 
 - ✅ `codex-kotlin/codex-backend-client` `src/types.rs:12` — `use serde::de::Deserializer`
 - ✅ `codex-kotlin/codex-login` `src/device_code_auth.rs:4` — `use serde::de::Deserializer`
+- `candle-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de::Deserializer`
+- `candle-transformers-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de::Deserializer`
+- `candle-ug-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de::Deserializer`
 - `icu-provider-kotlin/icu_provider` `src/serde_borrow_de_utils.rs:6` — `use serde::de::Deserializer`
 - `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::Deserializer`
 - `quick-xml-kotlin/quick-xml` `src/de/key.rs:7` — `use serde::de::Deserializer`
@@ -152,12 +155,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::Deserializer`
 - `quick-xml-kotlin/quick-xml` `src/de/text.rs:7` — `use serde::de::Deserializer`
 - `quick-xml-kotlin/quick-xml` `src/de/var.rs:10` — `use serde::de::Deserializer as _`
-- `quick-xml-kotlin/quick-xml` `src/utils.rs:14` — `use serde::de::Deserializer`
-- `runfiles-kotlin/cargo-bazel` `src/config.rs:17` — `use serde::de::Deserializer`
-- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:5` — `use serde::de::Deserializer`
-- _… and 13 more site(s)._
+- _… and 24 more site(s)._
 
-#### `serde::ser::SerializeStruct` — 268 site(s) (1 codex, 267 other, 9 caller crates)
+#### `serde::ser::SerializeStruct` — 274 site(s) (1 codex, 273 other, 11 caller crates)
 
 - ✅ `codex-kotlin/codex-utils-string` `src/json.rs:63` — `use serde::ser::SerializeStruct`
 - `insta-kotlin/insta` `src/content/serialization.rs:181` — `use serde::ser::SerializeStruct`
@@ -171,9 +171,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `libwebrtc-kotlin/livekit-protocol` `src/livekit.serde.rs:1661` — `use serde::ser::SerializeStruct`
 - `libwebrtc-kotlin/livekit-protocol` `src/livekit.serde.rs:1811` — `use serde::ser::SerializeStruct`
 - `libwebrtc-kotlin/livekit-protocol` `src/livekit.serde.rs:1985` — `use serde::ser::SerializeStruct`
-- _… and 256 more site(s)._
+- _… and 262 more site(s)._
 
-#### `serde::ser::Serializer` — 28 site(s) (1 codex, 27 other, 9 caller crates)
+#### `serde::ser::Serializer` — 31 site(s) (1 codex, 30 other, 11 caller crates)
 
 - ✅ `codex-kotlin/codex-protocol` `src/models.rs:11` — `use serde::ser::Serializer`
 - `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::Serializer`
@@ -187,14 +187,15 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_dict.rs:3` — `use serde::ser::Serializer`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_list.rs:3` — `use serde::ser::Serializer`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_scalar.rs:3` — `use serde::ser::Serializer`
-- _… and 16 more site(s)._
+- _… and 19 more site(s)._
 
-#### `serde::de::value::Error` — 4 site(s) (1 codex, 3 other, 3 caller crates)
+#### `serde::de::value::Error` — 5 site(s) (1 codex, 4 other, 4 caller crates)
 
 - ✅ `codex-kotlin/codex-config` `src/config_requirements.rs:10` — `use serde::de::value::Error as ValueDeserializerError`
 - `insta-kotlin/insta` `src/serialization.rs:1` — `use serde::de::value::Error as ValueError`
 - `insta-kotlin/insta` `src/settings.rs:3` — `use serde::de::value::Error as ValueError`
 - `serde-with-kotlin/serde_with` `tests/derives/deserialize_fromstr.rs:44` — `use serde::de::value::Error`
+- `serderive-kotlin/serde_test_suite` `tests/test_ignored_any.rs:2` — `use serde::de::value::Error`
 
 #### `serde::de::value::StrDeserializer` — 4 site(s) (1 codex, 3 other, 2 caller crates)
 
@@ -203,23 +204,39 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:4` — `use serde::de::value::StrDeserializer`
 - `serde-yaml-kotlin/serde_yaml` `src/value/tagged.rs:4` — `use serde::de::value::StrDeserializer`
 
-#### `serde::de::Visitor` — 37 site(s) (0 codex, 37 other, 15 caller crates)
+#### `serde::de::Visitor` — 54 site(s) (0 codex, 54 other, 24 caller crates)
 
+- `candle-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de::Visitor`
+- `candle-transformers-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de::Visitor`
+- `candle-ug-kotlin/candle-transformers` `src/models/glm4.rs:10` — `use serde::de::Visitor`
 - `encoding-rs-kotlin/encoding_rs` `src/lib.rs:796` — `use serde::de::Visitor`
 - `globset-kotlin/globset` `src/serde_impl.rs:1` — `use serde::de::Visitor`
+- `num-bigint-kotlin/num-bigint` `src/biguint/serde.rs:8` — `use serde::de::Visitor`
 - `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::Visitor`
 - `quick-xml-kotlin/quick-xml` `src/de/key.rs:7` — `use serde::de::Visitor`
 - `quick-xml-kotlin/quick-xml` `src/de/map.rs:16` — `use serde::de::Visitor`
 - `quick-xml-kotlin/quick-xml` `src/de/mod.rs:2107` — `use serde::de::Visitor`
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::Visitor`
 - `quick-xml-kotlin/quick-xml` `src/de/text.rs:7` — `use serde::de::Visitor`
-- `quick-xml-kotlin/quick-xml` `src/de/var.rs:10` — `use serde::de::Visitor`
-- `quick-xml-kotlin/quick-xml` `src/serde_helpers.rs:239` — `use serde::de::Visitor`
-- `quick-xml-kotlin/quick-xml` `src/utils.rs:14` — `use serde::de::Visitor`
-- `rama-http-kotlin/rama-http` `src/matcher/path/de.rs:1` — `use serde::de::Visitor`
-- _… and 25 more site(s)._
+- _… and 42 more site(s)._
 
-#### `serde::ser` — 35 site(s) (0 codex, 35 other, 7 caller crates)
+#### `serde::de::Deserialize` — 39 site(s) (0 codex, 39 other, 16 caller crates)
+
+- `icu-provider-kotlin/icu_provider` `src/buf/serde.rs:19` — `use serde::de::Deserialize`
+- `quick-xml-kotlin/quick-xml` `src/de/mod.rs:2107` — `use serde::de::Deserialize`
+- `quick-xml-kotlin/quick-xml` `src/utils.rs:14` — `use serde::de::Deserialize`
+- `ratatui-kotlin/ratatui-core` `src/style/color.rs:522` — `use serde::de::Deserialize`
+- `rmp-serde-kotlin/rmp-serde` `src/decode.rs:14` — `use serde::de::Deserialize`
+- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:5` — `use serde::de::Deserialize`
+- `schemars-kotlin/schemars` `tests/integration/default.rs:44` — `use serde::de::Deserialize`
+- `schemars-kotlin/schemars` `tests/integration/enums.rs:224` — `use serde::de::Deserialize`
+- `schemars-kotlin/schemars` `tests/integration/enums.rs:242` — `use serde::de::Deserialize`
+- `schemars-kotlin/schemars` `tests/integration/enums_ref_variants.rs:217` — `use serde::de::Deserialize`
+- `schemars-kotlin/schemars` `tests/integration/enums_ref_variants.rs:235` — `use serde::de::Deserialize`
+- `semver-kotlin/semver` `src/serde.rs:3` — `use serde::de::Deserialize`
+- _… and 27 more site(s)._
+
+#### `serde::ser` — 38 site(s) (0 codex, 38 other, 9 caller crates)
 
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:2` — `use serde::ser`
 - `chrono-kotlin/chrono` `src/datetime/serde.rs:152` — `use serde::ser`
@@ -233,25 +250,9 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `chrono-kotlin/chrono` `src/month.rs:302` — `use serde::ser`
 - `chrono-kotlin/chrono` `src/naive/date/mod.rs:2488` — `use serde::ser`
 - `chrono-kotlin/chrono` `src/naive/datetime/serde.rs:2` — `use serde::ser`
-- _… and 23 more site(s)._
+- _… and 26 more site(s)._
 
-#### `serde::de::Deserialize` — 29 site(s) (0 codex, 29 other, 13 caller crates)
-
-- `icu-provider-kotlin/icu_provider` `src/buf/serde.rs:19` — `use serde::de::Deserialize`
-- `quick-xml-kotlin/quick-xml` `src/de/mod.rs:2107` — `use serde::de::Deserialize`
-- `quick-xml-kotlin/quick-xml` `src/utils.rs:14` — `use serde::de::Deserialize`
-- `ratatui-kotlin/ratatui-core` `src/style/color.rs:522` — `use serde::de::Deserialize`
-- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:5` — `use serde::de::Deserialize`
-- `schemars-kotlin/schemars` `tests/integration/default.rs:44` — `use serde::de::Deserialize`
-- `schemars-kotlin/schemars` `tests/integration/enums.rs:224` — `use serde::de::Deserialize`
-- `schemars-kotlin/schemars` `tests/integration/enums.rs:242` — `use serde::de::Deserialize`
-- `schemars-kotlin/schemars` `tests/integration/enums_ref_variants.rs:217` — `use serde::de::Deserialize`
-- `schemars-kotlin/schemars` `tests/integration/enums_ref_variants.rs:235` — `use serde::de::Deserialize`
-- `semver-kotlin/semver` `src/serde.rs:3` — `use serde::de::Deserialize`
-- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::Deserialize`
-- _… and 17 more site(s)._
-
-#### `serde::ser::Serialize` — 26 site(s) (0 codex, 26 other, 9 caller crates)
+#### `serde::ser::Serialize` — 29 site(s) (0 codex, 29 other, 10 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::Serialize`
 - `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::Serialize`
@@ -265,25 +266,41 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `semver-kotlin/semver` `src/serde.rs:4` — `use serde::ser::Serialize`
 - `serde-json-kotlin/serde_json` `src/raw.rs:13` — `use serde::ser::Serialize`
 - `serde-json-kotlin/serde_json` `src/ser.rs:13` — `use serde::ser::Serialize`
-- _… and 14 more site(s)._
+- _… and 17 more site(s)._
 
-#### `serde::ser::SerializeMap` — 20 site(s) (0 codex, 20 other, 9 caller crates)
+#### `serde::de::MapAccess` — 24 site(s) (0 codex, 24 other, 10 caller crates)
+
+- `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::MapAccess`
+- `quick-xml-kotlin/quick-xml` `src/de/map.rs:16` — `use serde::de::MapAccess`
+- `quick-xml-kotlin/quick-xml` `src/serde_helpers.rs:239` — `use serde::de::MapAccess`
+- `rama-http-kotlin/rama-http` `src/matcher/path/de.rs:1` — `use serde::de::MapAccess`
+- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:5` — `use serde::de::MapAccess`
+- `rust-lang-kotlin/stdarch-gen-arm` `src/assert_instr.rs:3` — `use serde::de::MapAccess`
+- `rust-lang-kotlin/stdarch-gen-arm` `src/expression.rs:5` — `use serde::de::MapAccess`
+- `seccompiler-kotlin/seccompiler` `src/frontend/json.rs:28` — `use serde::de::MapAccess`
+- `serde-json-kotlin/serde_json` `src/number.rs:14` — `use serde::de::MapAccess`
+- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::MapAccess`
+- `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::MapAccess`
+- `serde-json-kotlin/serde_json` `tests/regression/issue795.rs:2` — `use serde::de::MapAccess`
+- _… and 12 more site(s)._
+
+#### `serde::ser::SerializeMap` — 22 site(s) (0 codex, 22 other, 11 caller crates)
 
 - `insta-kotlin/insta` `src/content/serialization.rs:173` — `use serde::ser::SerializeMap`
 - `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeMap`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:11` — `use serde::ser::SerializeMap`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_dict.rs:3` — `use serde::ser::SerializeMap`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_list.rs:3` — `use serde::ser::SerializeMap`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_scalar.rs:3` — `use serde::ser::SerializeMap`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_set.rs:3` — `use serde::ser::SerializeMap`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/target_compatible_with.rs:2` — `use serde::ser::SerializeMap`
+- `safetensors-kotlin/safetensors` `src/tensor.rs:6` — `use serde::ser::SerializeMap`
 - `schemars-kotlin/schemars` `src/schema.rs:483` — `use serde::ser::SerializeMap`
 - `serde-json-kotlin/serde_json` `src/map.rs:497` — `use serde::ser::SerializeMap`
 - `serde-json-kotlin/serde_json` `src/value/ser.rs:25` — `use serde::ser::SerializeMap`
-- `serde-json-kotlin/serde_json` `tests/test.rs:27` — `use serde::ser::SerializeMap`
-- `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeMap`
-- _… and 8 more site(s)._
+- _… and 10 more site(s)._
 
-#### `serde::de::DeserializeSeed` — 18 site(s) (0 codex, 18 other, 6 caller crates)
+#### `serde::de::DeserializeSeed` — 20 site(s) (0 codex, 20 other, 8 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::DeserializeSeed`
 - `quick-xml-kotlin/quick-xml` `src/de/key.rs:7` — `use serde::de::DeserializeSeed`
@@ -293,15 +310,32 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `quick-xml-kotlin/quick-xml` `src/de/text.rs:7` — `use serde::de::DeserializeSeed`
 - `quick-xml-kotlin/quick-xml` `src/de/var.rs:10` — `use serde::de::DeserializeSeed`
 - `rama-http-kotlin/rama-http` `src/matcher/path/de.rs:1` — `use serde::de::DeserializeSeed`
+- `rmp-serde-kotlin/rmp-serde` `src/decode.rs:14` — `use serde::de::DeserializeSeed`
 - `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::DeserializeSeed`
 - `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::DeserializeSeed`
 - `serde-path-to-error-kotlin/serde_path_to_error` `src/de.rs:7` — `use serde::de::DeserializeSeed`
-- `serde-test-kotlin/serde_test` `src/configure.rs:1` — `use serde::de::DeserializeSeed`
+- _… and 8 more site(s)._
+
+#### `serde::de::IntoDeserializer` — 18 site(s) (0 codex, 18 other, 8 caller crates)
+
+- `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::IntoDeserializer`
+- `quick-xml-kotlin/quick-xml` `src/de/mod.rs:2107` — `use serde::de::IntoDeserializer`
+- `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::IntoDeserializer`
+- `ratatui-kotlin/ratatui-core` `src/style/color.rs:522` — `use serde::de::IntoDeserializer`
+- `serde-json-kotlin/serde_json` `src/number.rs:14` — `use serde::de::IntoDeserializer`
+- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::IntoDeserializer`
+- `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::IntoDeserializer`
+- `serde-json-kotlin/serde_json` `tests/test.rs:26` — `use serde::de::IntoDeserializer`
+- `serde-plain-kotlin/serde_plain` `src/de.rs:1` — `use serde::de::IntoDeserializer`
+- `serde-test-kotlin/serde_test` `src/de.rs:4` — `use serde::de::IntoDeserializer`
+- `serde-with-kotlin/serde_with` `tests/serde_as/lib.rs:1330` — `use serde::de::IntoDeserializer`
+- `serde-yaml-kotlin/serde_yaml` `src/value/mod.rs:12` — `use serde::de::IntoDeserializer`
 - _… and 6 more site(s)._
 
-#### `serde::de::SeqAccess` — 16 site(s) (0 codex, 16 other, 10 caller crates)
+#### `serde::de::SeqAccess` — 18 site(s) (0 codex, 18 other, 12 caller crates)
 
 - `globset-kotlin/globset` `src/serde_impl.rs:1` — `use serde::de::SeqAccess`
+- `num-bigint-kotlin/num-bigint` `src/biguint/serde.rs:8` — `use serde::de::SeqAccess`
 - `quick-xml-kotlin/quick-xml` `src/de/map.rs:16` — `use serde::de::SeqAccess`
 - `quick-xml-kotlin/quick-xml` `src/de/mod.rs:2107` — `use serde::de::SeqAccess`
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::SeqAccess`
@@ -312,26 +346,41 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `serde-test-kotlin/serde_test` `src/configure.rs:1` — `use serde::de::SeqAccess`
 - `serde-test-kotlin/serde_test` `src/de.rs:4` — `use serde::de::SeqAccess`
 - `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:5` — `use serde::de::SeqAccess`
-- `serde-yaml-kotlin/serde_yaml` `src/with.rs:937` — `use serde::de::SeqAccess`
+- _… and 6 more site(s)._
+
+#### `serde::ser::SerializeSeq` — 16 site(s) (0 codex, 16 other, 14 caller crates)
+
+- `num-bigint-kotlin/num-bigint` `src/biguint/serde.rs:39` — `use serde::ser::SerializeSeq`
+- `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::SerializeSeq`
+- `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeSeq`
+- `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::SerializeSeq`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:11` — `use serde::ser::SerializeSeq`
+- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/serialize.rs:1` — `use serde::ser::SerializeSeq`
+- `rust-lang-kotlin/stdarch-gen-arm` `src/assert_instr.rs:4` — `use serde::ser::SerializeSeq`
+- `schemars-kotlin/schemars` `src/schema.rs:483` — `use serde::ser::SerializeSeq`
+- `serde-json-kotlin/serde_json` `tests/test.rs:27` — `use serde::ser::SerializeSeq`
+- `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeSeq`
+- `serde-with-kotlin/serde_with` `tests/serde_as/map_tuple_list.rs:360` — `use serde::ser::SerializeSeq`
+- `serde-yaml-kotlin/serde_yaml` `src/with.rs:941` — `use serde::ser::SerializeSeq`
 - _… and 4 more site(s)._
 
-#### `serde::de::MapAccess` — 15 site(s) (0 codex, 15 other, 7 caller crates)
+#### `serde::de::Unexpected` — 14 site(s) (0 codex, 14 other, 7 caller crates)
 
-- `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::MapAccess`
-- `quick-xml-kotlin/quick-xml` `src/de/map.rs:16` — `use serde::de::MapAccess`
-- `quick-xml-kotlin/quick-xml` `src/serde_helpers.rs:239` — `use serde::de::MapAccess`
-- `rama-http-kotlin/rama-http` `src/matcher/path/de.rs:1` — `use serde::de::MapAccess`
-- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:5` — `use serde::de::MapAccess`
-- `seccompiler-kotlin/seccompiler` `src/frontend/json.rs:28` — `use serde::de::MapAccess`
-- `serde-json-kotlin/serde_json` `src/number.rs:14` — `use serde::de::MapAccess`
-- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::MapAccess`
-- `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::MapAccess`
-- `serde-json-kotlin/serde_json` `tests/regression/issue795.rs:2` — `use serde::de::MapAccess`
-- `serde-test-kotlin/serde_test` `src/configure.rs:1` — `use serde::de::MapAccess`
-- `serde-test-kotlin/serde_test` `src/de.rs:4` — `use serde::de::MapAccess`
-- _… and 3 more site(s)._
+- `num-bigint-kotlin/num-bigint` `src/bigint/serde.rs:5` — `use serde::de::Unexpected`
+- `rmp-serde-kotlin/rmp-serde` `src/decode.rs:14` — `use serde::de::Unexpected`
+- `runfiles-kotlin/cargo-bazel` `src/config.rs:17` — `use serde::de::Unexpected`
+- `schemars-kotlin/schemars` `src/schema.rs:386` — `use serde::de::Unexpected`
+- `serde-json-kotlin/serde_json` `src/de.rs:16` — `use serde::de::Unexpected`
+- `serde-json-kotlin/serde_json` `src/number.rs:12` — `use serde::de::Unexpected`
+- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::Unexpected`
+- `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::Unexpected`
+- `serde-yaml-kotlin/serde_yaml` `src/de.rs:8` — `use serde::de::Unexpected`
+- `serde-yaml-kotlin/serde_yaml` `src/number.rs:3` — `use serde::de::Unexpected`
+- `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:5` — `use serde::de::Unexpected`
+- `serde-yaml-kotlin/serde_yaml` `src/with.rs:77` — `use serde::de::Unexpected`
+- _… and 2 more site(s)._
 
-#### `serde::de::EnumAccess` — 12 site(s) (0 codex, 12 other, 5 caller crates)
+#### `serde::de::EnumAccess` — 13 site(s) (0 codex, 13 other, 6 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/de/key.rs:7` — `use serde::de::EnumAccess`
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::EnumAccess`
@@ -345,52 +394,25 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `serde-yaml-kotlin/serde_yaml` `src/value/tagged.rs:5` — `use serde::de::EnumAccess`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:77` — `use serde::de::EnumAccess`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:937` — `use serde::de::EnumAccess`
+- _… and 1 more site(s)._
 
-#### `serde::de::IntoDeserializer` — 12 site(s) (0 codex, 12 other, 6 caller crates)
+#### `serde::forward_to_deserialize_any` — 13 site(s) (0 codex, 13 other, 7 caller crates)
 
-- `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:4` — `use serde::de::IntoDeserializer`
-- `quick-xml-kotlin/quick-xml` `src/de/mod.rs:2107` — `use serde::de::IntoDeserializer`
-- `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::IntoDeserializer`
-- `ratatui-kotlin/ratatui-core` `src/style/color.rs:522` — `use serde::de::IntoDeserializer`
-- `serde-json-kotlin/serde_json` `src/number.rs:14` — `use serde::de::IntoDeserializer`
-- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::IntoDeserializer`
-- `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::IntoDeserializer`
-- `serde-json-kotlin/serde_json` `tests/test.rs:26` — `use serde::de::IntoDeserializer`
-- `serde-test-kotlin/serde_test` `src/de.rs:4` — `use serde::de::IntoDeserializer`
-- `serde-with-kotlin/serde_with` `tests/serde_as/lib.rs:1330` — `use serde::de::IntoDeserializer`
-- `serde-yaml-kotlin/serde_yaml` `src/value/mod.rs:12` — `use serde::de::IntoDeserializer`
-- `serde-yaml-kotlin/serde_yaml` `tests/test_value.rs:8` — `use serde::de::IntoDeserializer`
+- `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:6` — `use serde::forward_to_deserialize_any`
+- `quick-xml-kotlin/quick-xml` `src/de/key.rs:8` — `use serde::forward_to_deserialize_any`
+- `rama-http-kotlin/rama-http` `src/matcher/path/de.rs:1` — `use serde::forward_to_deserialize_any`
+- `rmp-serde-kotlin/rmp-serde` `src/decode.rs:15` — `use serde::forward_to_deserialize_any`
+- `serde-json-kotlin/serde_json` `src/de.rs:17` — `use serde::forward_to_deserialize_any`
+- `serde-json-kotlin/serde_json` `src/number.rs:15` — `use serde::forward_to_deserialize_any`
+- `serde-json-kotlin/serde_json` `src/raw.rs:12` — `use serde::forward_to_deserialize_any`
+- `serde-json-kotlin/serde_json` `src/value/de.rs:17` — `use serde::forward_to_deserialize_any`
+- `serde-test-kotlin/serde_test` `src/de.rs:8` — `use serde::forward_to_deserialize_any`
+- `serde-yaml-kotlin/serde_yaml` `src/number.rs:4` — `use serde::forward_to_deserialize_any`
+- `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:9` — `use serde::forward_to_deserialize_any`
+- `serde-yaml-kotlin/serde_yaml` `src/value/tagged.rs:8` — `use serde::forward_to_deserialize_any`
+- _… and 1 more site(s)._
 
-#### `serde::ser::SerializeSeq` — 12 site(s) (0 codex, 12 other, 10 caller crates)
-
-- `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::SerializeSeq`
-- `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeSeq`
-- `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::SerializeSeq`
-- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/serialize.rs:1` — `use serde::ser::SerializeSeq`
-- `schemars-kotlin/schemars` `src/schema.rs:483` — `use serde::ser::SerializeSeq`
-- `serde-json-kotlin/serde_json` `tests/test.rs:27` — `use serde::ser::SerializeSeq`
-- `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeSeq`
-- `serde-with-kotlin/serde_with` `tests/serde_as/map_tuple_list.rs:360` — `use serde::ser::SerializeSeq`
-- `serde-yaml-kotlin/serde_yaml` `src/with.rs:941` — `use serde::ser::SerializeSeq`
-- `starlark-kotlin/starlark_map` `src/vec2.rs:30` — `use serde::ser::SerializeSeq`
-- `starlarkmap-kotlin/starlark_map` `src/vec2.rs:30` — `use serde::ser::SerializeSeq`
-- `tracing-subscriber-kotlin/tracing-subscriber` `src/fmt/format/json.rs:133` — `use serde::ser::SerializeSeq`
-
-#### `serde::de::Unexpected` — 11 site(s) (0 codex, 11 other, 4 caller crates)
-
-- `runfiles-kotlin/cargo-bazel` `src/config.rs:17` — `use serde::de::Unexpected`
-- `schemars-kotlin/schemars` `src/schema.rs:386` — `use serde::de::Unexpected`
-- `serde-json-kotlin/serde_json` `src/de.rs:16` — `use serde::de::Unexpected`
-- `serde-json-kotlin/serde_json` `src/number.rs:12` — `use serde::de::Unexpected`
-- `serde-json-kotlin/serde_json` `src/raw.rs:8` — `use serde::de::Unexpected`
-- `serde-json-kotlin/serde_json` `src/value/de.rs:13` — `use serde::de::Unexpected`
-- `serde-yaml-kotlin/serde_yaml` `src/de.rs:8` — `use serde::de::Unexpected`
-- `serde-yaml-kotlin/serde_yaml` `src/number.rs:3` — `use serde::de::Unexpected`
-- `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:5` — `use serde::de::Unexpected`
-- `serde-yaml-kotlin/serde_yaml` `src/with.rs:77` — `use serde::de::Unexpected`
-- `serde-yaml-kotlin/serde_yaml` `src/with.rs:937` — `use serde::de::Unexpected`
-
-#### `serde::de::VariantAccess` — 11 site(s) (0 codex, 11 other, 5 caller crates)
+#### `serde::de::VariantAccess` — 12 site(s) (0 codex, 12 other, 6 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:13` — `use serde::de::VariantAccess`
 - `quick-xml-kotlin/quick-xml` `src/de/text.rs:7` — `use serde::de::VariantAccess`
@@ -403,27 +425,15 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `serde-yaml-kotlin/serde_yaml` `src/value/tagged.rs:5` — `use serde::de::VariantAccess`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:77` — `use serde::de::VariantAccess`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:937` — `use serde::de::VariantAccess`
+- `serderive-kotlin/serde_test_suite` `tests/test_ignored_any.rs:4` — `use serde::de::VariantAccess`
 
-#### `serde::forward_to_deserialize_any` — 11 site(s) (0 codex, 11 other, 5 caller crates)
-
-- `quick-xml-kotlin/quick-xml` `src/de/attributes.rs:6` — `use serde::forward_to_deserialize_any`
-- `quick-xml-kotlin/quick-xml` `src/de/key.rs:8` — `use serde::forward_to_deserialize_any`
-- `rama-http-kotlin/rama-http` `src/matcher/path/de.rs:1` — `use serde::forward_to_deserialize_any`
-- `serde-json-kotlin/serde_json` `src/de.rs:17` — `use serde::forward_to_deserialize_any`
-- `serde-json-kotlin/serde_json` `src/number.rs:15` — `use serde::forward_to_deserialize_any`
-- `serde-json-kotlin/serde_json` `src/raw.rs:12` — `use serde::forward_to_deserialize_any`
-- `serde-json-kotlin/serde_json` `src/value/de.rs:17` — `use serde::forward_to_deserialize_any`
-- `serde-test-kotlin/serde_test` `src/de.rs:8` — `use serde::forward_to_deserialize_any`
-- `serde-yaml-kotlin/serde_yaml` `src/number.rs:4` — `use serde::forward_to_deserialize_any`
-- `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:9` — `use serde::forward_to_deserialize_any`
-- `serde-yaml-kotlin/serde_yaml` `src/value/tagged.rs:8` — `use serde::forward_to_deserialize_any`
-
-#### `serde::ser::SerializeTupleStruct` — 11 site(s) (0 codex, 11 other, 6 caller crates)
+#### `serde::ser::SerializeTupleStruct` — 12 site(s) (0 codex, 12 other, 7 caller crates)
 
 - `insta-kotlin/insta` `src/content/serialization.rs:157` — `use serde::ser::SerializeTupleStruct`
 - `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::SerializeTupleStruct`
 - `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeTupleStruct`
 - `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::SerializeTupleStruct`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:11` — `use serde::ser::SerializeTupleStruct`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_list.rs:3` — `use serde::ser::SerializeTupleStruct`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/select_set.rs:3` — `use serde::ser::SerializeTupleStruct`
 - `runfiles-kotlin/cargo-bazel` `src/utils/starlark/serialize.rs:1` — `use serde::ser::SerializeTupleStruct`
@@ -446,41 +456,20 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:13` — `use serde::serde_if_integer128`
 - `quick-xml-kotlin/quick-xml` `src/se/text.rs:7` — `use serde::serde_if_integer128`
 
-#### `serde::ser::SerializeTuple` — 9 site(s) (0 codex, 9 other, 7 caller crates)
+#### `serde::ser::SerializeTuple` — 10 site(s) (0 codex, 10 other, 8 caller crates)
 
 - `insta-kotlin/insta` `src/content/serialization.rs:149` — `use serde::ser::SerializeTuple`
 - `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::SerializeTuple`
 - `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeTuple`
 - `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::SerializeTuple`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:11` — `use serde::ser::SerializeTuple`
 - `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeTuple`
 - `serde-with-kotlin/serde_with` `tests/serde_as/map_tuple_list.rs:360` — `use serde::ser::SerializeTuple`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:941` — `use serde::ser::SerializeTuple`
 - `sha1-kotlin/generic-array` `src/impl_serde.rs:6` — `use serde::ser::SerializeTuple`
 - `starlark-kotlin/starlark` `src/values/types/tuple/value.rs:13` — `use serde::ser::SerializeTuple`
 
-#### `serde::ser::Impossible` — 8 site(s) (0 codex, 8 other, 3 caller crates)
-
-- `oauth2-kotlin/oauth2` `src/helpers.rs:2` — `use serde::ser::Impossible`
-- `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::Impossible`
-- `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::Impossible`
-- `quick-xml-kotlin/quick-xml` `src/se/key.rs:2` — `use serde::ser::Impossible`
-- `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::Impossible`
-- `quick-xml-kotlin/quick-xml` `src/se/text.rs:6` — `use serde::ser::Impossible`
-- `serde-json-kotlin/serde_json` `src/ser.rs:13` — `use serde::ser::Impossible`
-- `serde-json-kotlin/serde_json` `src/value/ser.rs:9` — `use serde::ser::Impossible`
-
-#### `serde::ser::SerializeTupleVariant` — 8 site(s) (0 codex, 8 other, 6 caller crates)
-
-- `insta-kotlin/insta` `src/content/serialization.rs:165` — `use serde::ser::SerializeTupleVariant`
-- `oauth2-kotlin/oauth2` `src/helpers.rs:2` — `use serde::ser::SerializeTupleVariant`
-- `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeTupleVariant`
-- `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::SerializeTupleVariant`
-- `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeTupleVariant`
-- `serde-with-kotlin/serde_with` `tests/serde_as/map_tuple_list.rs:360` — `use serde::ser::SerializeTupleVariant`
-- `serde-yaml-kotlin/serde_yaml` `src/with.rs:81` — `use serde::ser::SerializeTupleVariant`
-- `serde-yaml-kotlin/serde_yaml` `src/with.rs:941` — `use serde::ser::SerializeTupleVariant`
-
-#### `serde::de::IgnoredAny` — 7 site(s) (0 codex, 7 other, 3 caller crates)
+#### `serde::de::IgnoredAny` — 9 site(s) (0 codex, 9 other, 4 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/de/key.rs:269` — `use serde::de::IgnoredAny`
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:790` — `use serde::de::IgnoredAny`
@@ -489,8 +478,34 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `serde-yaml-kotlin/serde_yaml` `src/de.rs:8` — `use serde::de::IgnoredAny`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:77` — `use serde::de::IgnoredAny`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:937` — `use serde::de::IgnoredAny`
+- `serderive-kotlin/serde_test_suite` `tests/test_annotations.rs:12` — `use serde::de::IgnoredAny`
+- `serderive-kotlin/serde_test_suite` `tests/test_ignored_any.rs:4` — `use serde::de::IgnoredAny`
 
-#### `serde::de::value::BorrowedStrDeserializer` — 7 site(s) (0 codex, 7 other, 4 caller crates)
+#### `serde::ser::Impossible` — 9 site(s) (0 codex, 9 other, 4 caller crates)
+
+- `oauth2-kotlin/oauth2` `src/helpers.rs:2` — `use serde::ser::Impossible`
+- `quick-xml-kotlin/quick-xml` `src/se/content.rs:7` — `use serde::ser::Impossible`
+- `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::Impossible`
+- `quick-xml-kotlin/quick-xml` `src/se/key.rs:2` — `use serde::ser::Impossible`
+- `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::Impossible`
+- `quick-xml-kotlin/quick-xml` `src/se/text.rs:6` — `use serde::ser::Impossible`
+- `rmp-serde-kotlin/rmp-serde` `src/bytes.rs:1` — `use serde::ser::Impossible`
+- `serde-json-kotlin/serde_json` `src/ser.rs:13` — `use serde::ser::Impossible`
+- `serde-json-kotlin/serde_json` `src/value/ser.rs:9` — `use serde::ser::Impossible`
+
+#### `serde::ser::SerializeTupleVariant` — 9 site(s) (0 codex, 9 other, 7 caller crates)
+
+- `insta-kotlin/insta` `src/content/serialization.rs:165` — `use serde::ser::SerializeTupleVariant`
+- `oauth2-kotlin/oauth2` `src/helpers.rs:2` — `use serde::ser::SerializeTupleVariant`
+- `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeTupleVariant`
+- `quick-xml-kotlin/quick-xml` `src/se/simple_type.rs:9` — `use serde::ser::SerializeTupleVariant`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:11` — `use serde::ser::SerializeTupleVariant`
+- `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeTupleVariant`
+- `serde-with-kotlin/serde_with` `tests/serde_as/map_tuple_list.rs:360` — `use serde::ser::SerializeTupleVariant`
+- `serde-yaml-kotlin/serde_yaml` `src/with.rs:81` — `use serde::ser::SerializeTupleVariant`
+- `serde-yaml-kotlin/serde_yaml` `src/with.rs:941` — `use serde::ser::SerializeTupleVariant`
+
+#### `serde::de::value::BorrowedStrDeserializer` — 8 site(s) (0 codex, 8 other, 5 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/de/map.rs:15` — `use serde::de::value::BorrowedStrDeserializer`
 - `quick-xml-kotlin/quick-xml` `src/de/text.rs:6` — `use serde::de::value::BorrowedStrDeserializer`
@@ -499,16 +514,26 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `serde-with-kotlin/serde_with` `tests/serde_as/lib.rs:1330` — `use serde::de::value::BorrowedStrDeserializer`
 - `serde-yaml-kotlin/serde_yaml` `src/value/de.rs:4` — `use serde::de::value::BorrowedStrDeserializer`
 - `serde-yaml-kotlin/serde_yaml` `src/value/tagged.rs:4` — `use serde::de::value::BorrowedStrDeserializer`
+- `serderive-kotlin/serde_test_suite` `tests/test_borrow.rs:9` — `use serde::de::value::BorrowedStrDeserializer`
 
-#### `serde::ser::SerializeStructVariant` — 7 site(s) (0 codex, 7 other, 6 caller crates)
+#### `serde::ser::SerializeStructVariant` — 8 site(s) (0 codex, 8 other, 7 caller crates)
 
 - `insta-kotlin/insta` `src/content/serialization.rs:189` — `use serde::ser::SerializeStructVariant`
 - `oauth2-kotlin/oauth2` `src/helpers.rs:2` — `use serde::ser::SerializeStructVariant`
 - `quick-xml-kotlin/quick-xml` `src/se/element.rs:9` — `use serde::ser::SerializeStructVariant`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:11` — `use serde::ser::SerializeStructVariant`
 - `serde-test-kotlin/serde_test` `src/configure.rs:5` — `use serde::ser::SerializeStructVariant`
 - `serde-with-kotlin/serde_with` `tests/serde_as/map_tuple_list.rs:360` — `use serde::ser::SerializeStructVariant`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:81` — `use serde::ser::SerializeStructVariant`
 - `serde-yaml-kotlin/serde_yaml` `src/with.rs:941` — `use serde::ser::SerializeStructVariant`
+
+#### `serde` — 5 site(s) (0 codex, 5 other, 4 caller crates)
+
+- `rmcp-kotlin/rmcp` `src/lib.rs:49` — `pub_use serde`
+- `rmp-serde-kotlin/rmp-serde` `src/decode.rs:11` — `use serde`
+- `rmp-serde-kotlin/rmp-serde` `src/encode.rs:9` — `use serde`
+- `starlark-kotlin/pagable` `src/lib.rs:43` — `pub_use serde`
+- `tokenizers-kotlin/tokenizers` `src/tokenizer/serialization.rs:2` — `use serde`
 
 #### `serde::de::Expected` — 5 site(s) (0 codex, 5 other, 3 caller crates)
 
@@ -531,6 +556,18 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `starlark-kotlin/pagable` `src/impls/std.rs:4` — `use ::serde::Deserialize`
 - `time-kotlin/time` `tests/integration/serde/macros.rs:2` — `use ::serde::Deserialize`
 
+#### `serde::de::value::MapAccessDeserializer` — 3 site(s) (0 codex, 3 other, 3 caller crates)
+
+- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:3` — `use serde::de::value::MapAccessDeserializer`
+- `serde-test-kotlin/serde_test` `src/de.rs:3` — `use serde::de::value::MapAccessDeserializer`
+- `serderive-kotlin/serde_test_suite` `tests/test_value.rs:2` — `use serde::de::value::MapAccessDeserializer`
+
+#### `serde::de::value::MapDeserializer` — 3 site(s) (0 codex, 3 other, 2 caller crates)
+
+- `serde-with-kotlin/serde_with` `tests/serde_as/lib.rs:1330` — `use serde::de::value::MapDeserializer`
+- `serderive-kotlin/serde_test_suite` `tests/test_borrow.rs:9` — `use serde::de::value::MapDeserializer`
+- `serderive-kotlin/serde_test_suite` `tests/test_ignored_any.rs:2` — `use serde::de::value::MapDeserializer`
+
 #### `serde::ser::Error` — 3 site(s) (0 codex, 3 other, 3 caller crates)
 
 - `rama-net-kotlin/rama-net` `src/http/uri/match_replace/rule.rs:5` — `use serde::ser::Error as _`
@@ -542,27 +579,43 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `starlark-kotlin/pagable` `src/impls.rs:37` — `use ::serde::Serialize`
 - `time-kotlin/time` `tests/integration/serde/macros.rs:2` — `use ::serde::Serialize`
 
-#### `serde` — 2 site(s) (0 codex, 2 other, 2 caller crates)
+#### `serde::de::*` — 2 site(s) (0 codex, 2 other, 1 caller crates)
 
-- `rmcp-kotlin/rmcp` `src/lib.rs:49` — `pub_use serde`
-- `starlark-kotlin/pagable` `src/lib.rs:43` — `pub_use serde`
+- `bincode-kotlin/bincode` `src/features/serde/de_borrowed.rs:8` — `use serde::de::*`
+- `bincode-kotlin/bincode` `src/features/serde/de_owned.rs:7` — `use serde::de::*`
 
-#### `serde::de::value::MapAccessDeserializer` — 2 site(s) (0 codex, 2 other, 2 caller crates)
+#### `serde::de::value::SeqDeserializer` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
-- `runfiles-kotlin/cargo-bazel` `src/utils/starlark/glob.rs:3` — `use serde::de::value::MapAccessDeserializer`
-- `serde-test-kotlin/serde_test` `src/de.rs:3` — `use serde::de::value::MapAccessDeserializer`
+- `rmp-serde-kotlin/rmp-serde` `src/decode.rs:13` — `use serde::de::value::SeqDeserializer`
+- `serderive-kotlin/serde_test_suite` `tests/test_ignored_any.rs:2` — `use serde::de::value::SeqDeserializer`
 
 #### `::serde::ser::Serialize` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `starlark-kotlin/pagable` `src/impls/std.rs:6` — `use ::serde::ser::Serialize`
 
-#### `serde::de::value::MapDeserializer` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+#### `serde::*` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
-- `serde-with-kotlin/serde_with` `tests/serde_as/lib.rs:1330` — `use serde::de::value::MapDeserializer`
+- `serderive-kotlin/serde_test_suite` `tests/test_serde_path.rs:23` — `pub_use serde::*`
+
+#### `serde::de::value` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `serderive-kotlin/serde_test_suite` `tests/test_value.rs:2` — `use serde::de::value`
+
+#### `serde::de::value::F32Deserializer` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `serderive-kotlin/serde_test_suite` `tests/test_de.rs:12` — `use serde::de::value::F32Deserializer`
+
+#### `serde::de::value::F64Deserializer` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `serderive-kotlin/serde_test_suite` `tests/test_de.rs:12` — `use serde::de::value::F64Deserializer`
 
 #### `serde::de::value::UnitDeserializer` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `quick-xml-kotlin/quick-xml` `src/de/simple_type.rs:12` — `use serde::de::value::UnitDeserializer`
+
+#### `serde::ser::*` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `bincode-kotlin/bincode` `src/features/serde/ser.rs:9` — `use serde::ser::*`
 
 #### `serde::ser::StdError` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
@@ -574,31 +627,32 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 ## `serde_core`
 
-### Inbound symbols (36 distinct, 171 total `use` sites)
+### Inbound symbols (37 distinct, 179 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `serde_core`.
 
-#### `serde_core::Serialize` — 16 site(s) (0 codex, 16 other, 7 caller crates)
+#### `serde_core::Serialize` — 17 site(s) (0 codex, 17 other, 8 caller crates)
 
 - `axum-kotlin/axum` `src/form.rs:7` — `use serde_core::Serialize`
 - `axum-kotlin/axum` `src/json.rs:10` — `use serde_core::Serialize`
 - `bitflags-kotlin/bitflags` `src/external/serde.rs:8` — `use serde_core::Serialize`
 - `csv-kotlin/csv` `src/writer.rs:2` — `use serde_core::Serialize`
 - `log-kotlin/log` `src/kv/key.rs:138` — `use serde_core::Serialize`
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::Serialize`
 - `time-kotlin/time` `src/serde/iso8601.rs:16` — `use serde_core::Serialize`
 - `time-kotlin/time` `src/serde/mod.rs:31` — `use serde_core::Serialize`
 - `time-kotlin/time` `src/serde/rfc2822.rs:16` — `use serde_core::Serialize`
 - `time-kotlin/time` `src/serde/rfc3339.rs:16` — `use serde_core::Serialize`
 - `time-kotlin/time` `src/serde/timestamp/microseconds.rs:1` — `use serde_core::Serialize`
 - `time-kotlin/time` `src/serde/timestamp/milliseconds.rs:1` — `use serde_core::Serialize`
-- `time-kotlin/time` `src/serde/timestamp/milliseconds_i64.rs:12` — `use serde_core::Serialize`
-- _… and 4 more site(s)._
+- _… and 5 more site(s)._
 
-#### `serde_core::Deserializer` — 14 site(s) (0 codex, 14 other, 5 caller crates)
+#### `serde_core::Deserializer` — 15 site(s) (0 codex, 15 other, 6 caller crates)
 
 - `axum-kotlin/axum` `src/extract/path/de.rs:3` — `use serde_core::Deserializer`
 - `bitflags-kotlin/bitflags` `src/external/serde.rs:8` — `use serde_core::Deserializer`
 - `csv-kotlin/csv` `src/lib.rs:6` — `use serde_core::Deserializer`
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::Deserializer`
 - `time-kotlin/time` `src/serde/iso8601.rs:12` — `use serde_core::Deserializer`
 - `time-kotlin/time` `src/serde/mod.rs:31` — `use serde_core::Deserializer`
 - `time-kotlin/time` `src/serde/rfc2822.rs:12` — `use serde_core::Deserializer`
@@ -607,13 +661,13 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `time-kotlin/time` `src/serde/timestamp/milliseconds.rs:1` — `use serde_core::Deserializer`
 - `time-kotlin/time` `src/serde/timestamp/milliseconds_i64.rs:12` — `use serde_core::Deserializer`
 - `time-kotlin/time` `src/serde/timestamp/mod.rs:14` — `use serde_core::Deserializer`
-- `time-kotlin/time` `src/serde/timestamp/nanoseconds.rs:1` — `use serde_core::Deserializer`
-- _… and 2 more site(s)._
+- _… and 3 more site(s)._
 
-#### `serde_core::Serializer` — 12 site(s) (0 codex, 12 other, 4 caller crates)
+#### `serde_core::Serializer` — 13 site(s) (0 codex, 13 other, 5 caller crates)
 
 - `bitflags-kotlin/bitflags` `src/external/serde.rs:8` — `use serde_core::Serializer`
 - `log-kotlin/log` `src/kv/key.rs:138` — `use serde_core::Serializer`
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::Serializer`
 - `time-kotlin/time` `src/serde/iso8601.rs:16` — `use serde_core::Serializer`
 - `time-kotlin/time` `src/serde/mod.rs:31` — `use serde_core::Serializer`
 - `time-kotlin/time` `src/serde/rfc2822.rs:16` — `use serde_core::Serializer`
@@ -623,7 +677,21 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `time-kotlin/time` `src/serde/timestamp/milliseconds_i64.rs:12` — `use serde_core::Serializer`
 - `time-kotlin/time` `src/serde/timestamp/mod.rs:14` — `use serde_core::Serializer`
 - `time-kotlin/time` `src/serde/timestamp/nanoseconds.rs:1` — `use serde_core::Serializer`
-- `uuid-kotlin/uuid` `src/external/serde_support.rs:21` — `use serde_core::Serializer`
+- _… and 1 more site(s)._
+
+#### `serde_core::Deserialize` — 11 site(s) (0 codex, 11 other, 6 caller crates)
+
+- `bitflags-kotlin/bitflags` `src/external/serde.rs:8` — `use serde_core::Deserialize`
+- `csv-kotlin/csv` `src/lib.rs:6` — `use serde_core::Deserialize`
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::Deserialize`
+- `time-kotlin/time` `src/serde/mod.rs:31` — `use serde_core::Deserialize`
+- `time-kotlin/time` `src/serde/timestamp/microseconds.rs:1` — `use serde_core::Deserialize`
+- `time-kotlin/time` `src/serde/timestamp/milliseconds.rs:1` — `use serde_core::Deserialize`
+- `time-kotlin/time` `src/serde/timestamp/milliseconds_i64.rs:12` — `use serde_core::Deserialize`
+- `time-kotlin/time` `src/serde/timestamp/mod.rs:14` — `use serde_core::Deserialize`
+- `time-kotlin/time` `src/serde/timestamp/nanoseconds.rs:1` — `use serde_core::Deserialize`
+- `toml-kotlin/toml` `src/value.rs:398` — `use serde_core::Deserialize as _`
+- `uuid-kotlin/uuid` `src/external/serde_support.rs:21` — `use serde_core::Deserialize`
 
 #### `serde_core::de::IntoDeserializer` — 11 site(s) (0 codex, 11 other, 5 caller crates)
 
@@ -638,19 +706,6 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `toml-kotlin/toml` `src/de/deserializer/value.rs:1` — `use serde_core::de::IntoDeserializer as _`
 - `toml-kotlin/toml` `src/macros.rs:1` — `pub_use serde_core::de::IntoDeserializer`
 - `toml-kotlin/toml` `src/value.rs:13` — `use serde_core::de::IntoDeserializer`
-
-#### `serde_core::Deserialize` — 10 site(s) (0 codex, 10 other, 5 caller crates)
-
-- `bitflags-kotlin/bitflags` `src/external/serde.rs:8` — `use serde_core::Deserialize`
-- `csv-kotlin/csv` `src/lib.rs:6` — `use serde_core::Deserialize`
-- `time-kotlin/time` `src/serde/mod.rs:31` — `use serde_core::Deserialize`
-- `time-kotlin/time` `src/serde/timestamp/microseconds.rs:1` — `use serde_core::Deserialize`
-- `time-kotlin/time` `src/serde/timestamp/milliseconds.rs:1` — `use serde_core::Deserialize`
-- `time-kotlin/time` `src/serde/timestamp/milliseconds_i64.rs:12` — `use serde_core::Deserialize`
-- `time-kotlin/time` `src/serde/timestamp/mod.rs:14` — `use serde_core::Deserialize`
-- `time-kotlin/time` `src/serde/timestamp/nanoseconds.rs:1` — `use serde_core::Deserialize`
-- `toml-kotlin/toml` `src/value.rs:398` — `use serde_core::Deserialize as _`
-- `uuid-kotlin/uuid` `src/external/serde_support.rs:21` — `use serde_core::Deserialize`
 
 #### `serde_core::de::Deserialize` — 8 site(s) (0 codex, 8 other, 5 caller crates)
 
@@ -713,9 +768,10 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `toml-edit-kotlin/toml_edit` `src/ser/value.rs:143` — `use serde_core::ser::Serialize`
 - `toml-kotlin/toml` `src/ser/value/mod.rs:190` — `use serde_core::ser::Serialize`
 
-#### `serde_core::de` — 5 site(s) (0 codex, 5 other, 4 caller crates)
+#### `serde_core::de` — 6 site(s) (0 codex, 6 other, 5 caller crates)
 
 - `axum-kotlin/axum` `src/extract/path/de.rs:3` — `use serde_core::de`
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::de`
 - `time-kotlin/time` `src/serde/visitor.rs:8` — `use serde_core::de`
 - `toml-kotlin/toml` `src/table.rs:1` — `use serde_core::de`
 - `toml-kotlin/toml` `src/value.rs:11` — `use serde_core::de`
@@ -779,21 +835,23 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 - `log-kotlin/log` `src/serde.rs:2` — `use serde_core::de::Unexpected`
 - `serde-with-kotlin/serde_with` `src/lib.rs:408` — `pub_use serde_core::de::Unexpected`
 
+#### `serde_core::forward_to_deserialize_any` — 3 site(s) (0 codex, 3 other, 3 caller crates)
+
+- `axum-kotlin/axum` `src/extract/path/de.rs:3` — `use serde_core::forward_to_deserialize_any`
+- `serde-with-kotlin/serde_with` `src/lib.rs:408` — `pub_use serde_core::forward_to_deserialize_any`
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::forward_to_deserialize_any`
+
+#### `serde_core::ser` — 3 site(s) (0 codex, 3 other, 2 caller crates)
+
+- `serderive-kotlin/serde` `src/lib.rs:249` — `pub_use serde_core::ser`
+- `toml-kotlin/toml` `src/table.rs:2` — `use serde_core::ser`
+- `toml-kotlin/toml` `src/value.rs:14` — `use serde_core::ser`
+
 #### `serde_core::ser::SerializeMap` — 3 site(s) (0 codex, 3 other, 3 caller crates)
 
 - `csv-kotlin/csv` `src/serializer.rs:2` — `use serde_core::ser::SerializeMap`
 - `serde-with-kotlin/serde_with` `src/lib.rs:408` — `pub_use serde_core::ser::SerializeMap`
 - `toml-kotlin/toml` `src/table.rs:65` — `use serde_core::ser::SerializeMap`
-
-#### `serde_core::forward_to_deserialize_any` — 2 site(s) (0 codex, 2 other, 2 caller crates)
-
-- `axum-kotlin/axum` `src/extract/path/de.rs:3` — `use serde_core::forward_to_deserialize_any`
-- `serde-with-kotlin/serde_with` `src/lib.rs:408` — `pub_use serde_core::forward_to_deserialize_any`
-
-#### `serde_core::ser` — 2 site(s) (0 codex, 2 other, 1 caller crates)
-
-- `toml-kotlin/toml` `src/table.rs:2` — `use serde_core::ser`
-- `toml-kotlin/toml` `src/value.rs:14` — `use serde_core::ser`
 
 #### `serde_core::ser::SerializeSeq` — 2 site(s) (0 codex, 2 other, 2 caller crates)
 
@@ -829,6 +887,10 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 - `bitflags-kotlin/bitflags` `src/external.rs:7` — `pub_use serde_core as serde`
 
+#### `serde_core::__private$$` — 1 site(s) (0 codex, 1 other, 1 caller crates)
+
+- `serderive-kotlin/serde` `build.rs:13` — `use serde_core::__private$$ as serde_core_private`
+
 #### `serde_core::de::Expected` — 1 site(s) (0 codex, 1 other, 1 caller crates)
 
 - `serde-with-kotlin/serde_with` `src/lib.rs:408` — `pub_use serde_core::de::Expected`
@@ -855,41 +917,41 @@ Sorted by codex demand, then total demand. The first symbols are the priority qu
 
 ## `serde_derive`
 
-### Inbound symbols (3 distinct, 41 total `use` sites)
+### Inbound symbols (3 distinct, 216 total `use` sites)
 
 Sorted by codex demand, then total demand. The first symbols are the priority queue for porting `serde_derive`.
 
-#### `serde_derive::Deserialize` — 20 site(s) (0 codex, 20 other, 8 caller crates)
+#### `serde_derive::Serialize` — 110 site(s) (0 codex, 110 other, 13 caller crates)
+
+- `arc-swap-kotlin/arc-swap` `src/serde.rs:27` — `use serde_derive::Serialize`
+- `bincode-kotlin/bincode` `tests/serde.rs:4` — `use serde_derive::Serialize`
+- `bincode-kotlin/bincode` `tests/serde.rs:150` — `use serde_derive::Serialize`
+- `chrono-kotlin/chrono` `src/naive/datetime/serde.rs:1135` — `use serde_derive::Serialize`
+- `serde-json-kotlin/serde_json` `tests/regression/issue520.rs:2` — `use serde_derive::Serialize`
+- `serde-path-to-error-kotlin/serde_path_to_error` `tests/serialize.rs:2` — `use serde_derive::Serialize`
+- `serde-plain-kotlin/serde_plain` `src/macros.rs:249` — `use serde_derive::Serialize`
+- `serde-plain-kotlin/serde_plain` `src/macros.rs:255` — `use serde_derive::Serialize`
+- `serde-yaml-kotlin/serde_yaml` `tests/test_error.rs:7` — `use serde_derive::Serialize`
+- `serde-yaml-kotlin/serde_yaml` `tests/test_serde.rs:10` — `use serde_derive::Serialize`
+- `serde-yaml-kotlin/serde_yaml` `tests/test_value.rs:10` — `use serde_derive::Serialize`
+- `serderive-kotlin/serde` `src/lib.rs:279` — `pub_use serde_derive::Serialize`
+- _… and 98 more site(s)._
+
+#### `serde_derive::Deserialize` — 103 site(s) (0 codex, 103 other, 13 caller crates)
 
 - `arc-swap-kotlin/arc-swap` `src/serde.rs:27` — `use serde_derive::Deserialize`
+- `bincode-kotlin/bincode` `tests/serde.rs:4` — `use serde_derive::Deserialize`
+- `bincode-kotlin/bincode` `tests/serde.rs:150` — `use serde_derive::Deserialize`
 - `chrono-kotlin/chrono` `src/naive/datetime/serde.rs:1135` — `use serde_derive::Deserialize`
 - `serde-json-kotlin/serde_json` `tests/regression/issue520.rs:2` — `use serde_derive::Deserialize`
 - `serde-path-to-error-kotlin/serde_path_to_error` `tests/deserialize.rs:4` — `use serde_derive::Deserialize`
+- `serde-plain-kotlin/serde_plain` `src/macros.rs:270` — `use serde_derive::Deserialize`
+- `serde-plain-kotlin/serde_plain` `src/macros.rs:282` — `use serde_derive::Deserialize`
 - `serde-yaml-kotlin/serde_yaml` `tests/test_de.rs:10` — `use serde_derive::Deserialize`
 - `serde-yaml-kotlin/serde_yaml` `tests/test_error.rs:7` — `use serde_derive::Deserialize`
 - `serde-yaml-kotlin/serde_yaml` `tests/test_serde.rs:10` — `use serde_derive::Deserialize`
 - `serde-yaml-kotlin/serde_yaml` `tests/test_value.rs:10` — `use serde_derive::Deserialize`
-- `syntect-kotlin/syntect` `src/highlighting/selector.rs:4` — `use serde_derive::Deserialize`
-- `syntect-kotlin/syntect` `src/highlighting/style.rs:1` — `use serde_derive::Deserialize`
-- `syntect-kotlin/syntect` `src/highlighting/theme.rs:5` — `use serde_derive::Deserialize`
-- `syntect-kotlin/syntect` `src/highlighting/theme_set.rs:5` — `use serde_derive::Deserialize`
-- _… and 8 more site(s)._
-
-#### `serde_derive::Serialize` — 18 site(s) (0 codex, 18 other, 8 caller crates)
-
-- `arc-swap-kotlin/arc-swap` `src/serde.rs:27` — `use serde_derive::Serialize`
-- `chrono-kotlin/chrono` `src/naive/datetime/serde.rs:1135` — `use serde_derive::Serialize`
-- `serde-json-kotlin/serde_json` `tests/regression/issue520.rs:2` — `use serde_derive::Serialize`
-- `serde-path-to-error-kotlin/serde_path_to_error` `tests/serialize.rs:2` — `use serde_derive::Serialize`
-- `serde-yaml-kotlin/serde_yaml` `tests/test_error.rs:7` — `use serde_derive::Serialize`
-- `serde-yaml-kotlin/serde_yaml` `tests/test_serde.rs:10` — `use serde_derive::Serialize`
-- `serde-yaml-kotlin/serde_yaml` `tests/test_value.rs:10` — `use serde_derive::Serialize`
-- `syntect-kotlin/syntect` `src/highlighting/selector.rs:4` — `use serde_derive::Serialize`
-- `syntect-kotlin/syntect` `src/highlighting/style.rs:1` — `use serde_derive::Serialize`
-- `syntect-kotlin/syntect` `src/highlighting/theme.rs:5` — `use serde_derive::Serialize`
-- `syntect-kotlin/syntect` `src/highlighting/theme_set.rs:5` — `use serde_derive::Serialize`
-- `syntect-kotlin/syntect` `src/parsing/metadata.rs:12` — `use serde_derive::Serialize`
-- _… and 6 more site(s)._
+- _… and 91 more site(s)._
 
 #### `serde_derive::*` — 3 site(s) (0 codex, 3 other, 2 caller crates)
 
