@@ -15,8 +15,6 @@ syn = "0.5.0"
 quote = "0.3.1"
 procMacro2 = "0.1.8"
 numTraits = "0.1.0"
-kmIo = "0.4.0"
-libc = "0.1.11"
 serdeTest = "0.1.2"
 multi-release-toolchain = "17"
 dokka = "2.2.0"
@@ -54,8 +52,6 @@ syn-kotlin = { module = "io.github.kotlinmania:syn-kotlin", version.ref = "syn" 
 quote-kotlin = { module = "io.github.kotlinmania:quote-kotlin", version.ref = "quote" }
 proc-macro2-kotlin = { module = "io.github.kotlinmania:proc-macro2-kotlin", version.ref = "procMacro2" }
 num-traits-kotlin = { module = "io.github.kotlinmania:num-traits-kotlin", version.ref = "numTraits" }
-km-io = { module = "io.github.kotlinmania:km-io", version.ref = "kmIo" }
-libc-kotlin = { module = "io.github.kotlinmania:libc-kotlin", version.ref = "libc" }
 serde-test-kotlin = { module = "io.github.kotlinmania:serde-test-kotlin", version.ref = "serdeTest" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
@@ -68,8 +64,6 @@ serde-commonMain = [
 ]
 serde-commonTest = [
   "btree-kotlin",
-  "km-io",
-  "libc-kotlin",
   "serde-test-kotlin",
 ]
 

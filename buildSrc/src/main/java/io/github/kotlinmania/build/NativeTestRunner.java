@@ -38,6 +38,7 @@ public final class NativeTestRunner {
             "androidNativeArm64", "androidNativeX64", "linuxArm64", "linuxX64", "mingwX64");
     private static final Set<String> LINUX_GUESTS = Set.of(
             "ubuntu", "debian", "fedora", "linux", "centos", "rhel", "redhat", "opensuse", "kali");
+    private static final Set<String> USABLE_GUEST_TOOLS_STATES = Set.of("installed", "outdated");
     private static final Pattern RAN = Pattern.compile("\\[==========\\] (\\d+) tests? from .* ran\\.");
     private static final Pattern PASSED = Pattern.compile("\\[  PASSED  \\] (\\d+) tests?\\.");
     private static final Pattern DISALLOWED = Pattern.compile(
@@ -99,9 +100,11 @@ public final class NativeTestRunner {
             boolean matchesOperatingSystem = target.equals("mingwX64")
                     ? operatingSystem.startsWith("win") : LINUX_GUESTS.contains(operatingSystem);
             Object tools = guest.get("GuestTools");
+            String toolsState = tools instanceof Map<?, ?> toolState
+                    ? String.valueOf(toolState.get("state")).toLowerCase(Locale.ROOT)
+                    : "";
             if (!"running".equals(guest.get("State"))
-                    || !(tools instanceof Map<?, ?> toolState)
-                    || !"installed".equals(toolState.get("state"))
+                    || !USABLE_GUEST_TOOLS_STATES.contains(toolsState)
                     || !matchesOperatingSystem) {
                 continue;
             }
