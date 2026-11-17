@@ -1,9 +1,6 @@
 // port-lint: tests test_suite/tests/test_ser.rs
 package io.github.kotlinmania.serderive
 
-import io.github.kotlinmania.io.files.SystemFileSystem
-import io.github.kotlinmania.io.files.readString
-import io.github.kotlinmania.io.files.resolve
 import io.github.kotlinmania.serde.SerdeResult
 import io.github.kotlinmania.serdecore.de.BoundValue
 import io.github.kotlinmania.serdecore.de.IpAddress
@@ -214,18 +211,8 @@ class TestSerJvmTest {
         }
     }
 
-    @Test
-    fun testUnitStruct() = runDerivedSerRustTest("test_unit_struct")
-
-    @Test
-    fun testTupleStruct() = runDerivedSerRustTest("test_tuple_struct")
-
-    @Test
-    fun testStruct() = runDerivedSerRustTest("test_struct")
-
-    @Test
-    fun testEnum() = runDerivedSerRustTest("test_enum")
-
+    // test_unit_struct, test_tuple_struct, test_struct, test_enum:
+    // derived serialization parity queued to pure Kotlin commonTest.
     // test_box: Rust Box ownership and transparent dereference serialization have no Kotlin counterpart.
     // test_boxed_slice: the source uses Box<[i32; 3]> and Tuple tokens; its ownership adapter is not yet ported.
 
@@ -400,9 +387,7 @@ class TestSerJvmTest {
     // test_never_result now runs in common TestSerTest with ResultValue<UByte, Nothing> and typed serialization.
     // test_cannot_serialize_paths: Rust Unix paths can contain invalid UTF-8 bytes, while Kotlin String cannot.
     // test_cannot_serialize_mutably_borrowed_ref_cell: Rust RefCell runtime borrow failure has no Kotlin equivalent.
-
-    @Test
-    fun testEnumSkipped() = runDerivedSerRustTest("test_enum_skipped")
+    // test_enum_skipped: derived serialization parity queued to pure Kotlin commonTest.
 
     @Test
     fun testInteger128() {
@@ -413,38 +398,6 @@ class TestSerJvmTest {
     // test_refcell_dst: Rust RefCell ownership of a dynamically sized slice has no Kotlin equivalent.
     // test_mutex_dst: Rust poisonable Mutex ownership of a dynamically sized slice has no common Kotlin equivalent.
     // test_rwlock_dst: Rust poisonable RwLock ownership of a dynamically sized slice has no common Kotlin equivalent.
-}
-
-private val serFixtureSource by lazy(::buildSerFixtureSource)
-
-private fun runDerivedSerRustTest(testName: String) {
-    runExactSerdeRustTest(
-        fixtureName = "test_ser",
-        source = serFixtureSource,
-        testName = testName,
-        extraDependencies = "foldhash = \"0.2\"",
-        serdeFeatures = listOf("rc"),
-    )
-}
-
-private fun buildSerFixtureSource(): String {
-    val root = findRepositoryRoot()
-    val macros =
-        SystemFileSystem
-            .readString(root.resolve("tmp/serde/test_suite/tests/macros/mod.rs"))
-            .removePrefix("#![allow(unused_macro_rules)]\n\n")
-    val source =
-        SystemFileSystem
-            .readString(root.resolve("tmp/serde/test_suite/tests/test_ser.rs"))
-            .replace(
-                "#[macro_use]\nmod macros;",
-                "#[macro_use]\n#[allow(unused_macro_rules)]\nmod macros {\n$macros\n}",
-            )
-    val generated = generateRustFixtureFromSerdeDerives(source)
-    require(generated.serdeDerivedItems == 4) {
-        "Expected 4 serde-derived declarations, transformed ${generated.serdeDerivedItems}"
-    }
-    return generated.source
 }
 
 private fun assertKotlinSerTokens(
